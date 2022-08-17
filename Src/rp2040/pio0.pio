@@ -1,0 +1,211 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program ws2812
+.side_set 1
+
+.define public T1 2
+.define public T2 5
+.define public T3 3
+
+.wrap_target
+bitloop:
+    out x, 1       side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
+    jmp !x do_zero side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
+do_one:
+    jmp  bitloop   side 1 [T2 - 1] ; Continue driving high, for a long pulse
+do_zero:
+    nop            side 0 [T2 - 1] ; Or drive low, for a short pulse
+.wrap
+
+
+.program frametimer
+    pull            ;get counter limit from fifo
+    out x,32        ;put whole word from shift register to x
+.wrap_target
+    mov y,x         ; copy x to y (y will be modified)
+    looppt:
+    jmp y--, looppt ; repeat instruction as long as y is not zero, decrease y for each iteration
+    irq 1           ; assert interrupt (1 was chosen since this program is planned to run on state machine 1)
+.wrap
+
+
+.program square_oscillator
+.side_set 1
+square_osc_loop:
+nop side 1
+jmp square_osc_loop side 0
+
+
+.program ds18b20read
+
+.define N 1
+.define M 2
+
+; use with autopush and a push threshhold of 8bit
+; for a bit-wise reading
+ds18b20_read:
+set x,7
+r_loop:;richie ist cool
+set pins, 0 ; pull low
+set pindirs, 1 [1]; set as output
+set pindirs, 0 [2-2] ; define pin as input,wait 2us 
+in pins, 1 [13-1] ; sample pin, wait another 13us
+nop [30-1]
+nop [15-2]
+jmp x--, r_loop ; 
+push
+irq wait 5
+
+
+; run with disinct prescaler resulting in a period of 30us
+; disable autopush and autopull
+.program ds18b20reset
+ds18b20_reset:
+set x,8 ; set number of samples to scratch x
+set pins, 1
+set pindirs, 1  ; set as output
+set pins, 0 [15]  ; pull low, wait 480 us
+set pindirs, 0 ; set as input
+dr_loop:
+in pins, 1 ; sample input pin
+jmp x--, dr_loop
+push
+irq wait 4
+
+.program ds18b20write
+.side_set 1
+ds18b20_write:
+;set pindirs, 1 side 1; set as output
+.wrap_target
+dw_loop:
+out x, 1 side 1 [1-1]
+jmp !x, write_zero side 0  ; 4 us
+jmp dw_loop side 1 [13]
+write_zero:
+nop side 0 [13]
+.wrap
+
+
+; put the same byte three times into the tx buffer
+; set limit to 24 bit, fill in three times the same command
+; one wait cycle should be 222us
+.program remoteswitch
+.side_set 1
+.wrap_target
+nop side 1 [1]
+progstart:
+pull block side 0 
+set y,24 side 0 [8]
+bitloop:
+out x, 1 side 1
+jmp !x,do_zero side 1 
+nop side 1 [2]
+jmp y-- bitloop side 0 [1]
+jmp progstart side 1 [1]
+do_zero:
+jmp y-- bitloop side 0 [4]
+.wrap
+
+
+
+.program i2s_duplex
+; full duplex mode, rp2040 is the 
+; one out pin, two sideset pins, one input pin
+; pio program runs at 8* the speed of the bit clock 8*(samplingrate*2*16)
+; shift out to the left, in from the right
+.side_set 2 ; uses two sideset pins, pin 1 is the word clock and pin 0 the data clock
+;set x,0 side 0 ; put default value of 0 into x for the case the software buffer stalls
+.wrap_target
+i2s_duplex_loop_l:
+out pins,1 side 2 [4-1]
+in pins, 1 side 3 [1-1]
+jmp y-- i2s_duplex_loop_l side 3 [3-1] 
+out pins, 1 side 0 [4-1]
+in pins, 1 side 1 [1-1]
+set y,14 side 1 [3-1]
+i2s_duplex_loop_r:
+out pins,1 side 0 [4-1]
+in pins,1 side 1 [1-1]
+jmp y-- i2s_duplex_loop_r side 1 [3-1] 
+out pins,1 side 2 [4-1]
+in pins,1 side 3 [1-1]
+set y,14 side 3 [3-1]
+.wrap
+public is2_duplex_start:
+set y,14 side 3 
+jmp i2s_duplex_loop_l side 3
+
+; full duplex mode operating as slave, the pins data_in, lrclock, and bck must be consecutive pins
+
+.program i2s_duplex_slave
+i2s_duplex_slave_start:
+wait 1 pin 1
+wait 0 pin 1 
+i2s_d_s_proc_right_last:
+wait 0 pin 2
+out pins,1
+pull noblock
+wait 1 pin 2 
+in pins,1
+push noblock
+i2s_d_s_proc_left:
+wait 0 pin 2
+jmp pin i2s_d_s_last_left ; jump to last left when 1
+; last left
+out pins,1
+wait 1 pin 2 
+in pins,1
+jmp i2s_d_s_proc_left
+i2s_d_s_last_left:
+out pins,1
+wait 1 pin 2 
+in pins,1
+;jmp i2s_d_s_proc_right
+i2s_d_s_proc_right:
+wait 0 pin 2
+jmp pin i2s_d_s_cont_right; continue to read right when 1
+jmp i2s_d_s_proc_right_last
+i2s_d_s_cont_right:
+out pins,1
+wait 1 pin 2 
+in pins,1
+jmp i2s_d_s_proc_right
+
+
+
+.program i2s_write_2
+; one out pin, two sideset pins
+; pio program runs at the speed of the bit clock (samplingrate*2*16)
+; preferably chain the tx fifo, shift out to the left, the words muste be shifted one bit to the right since the lrclock is always off by one bit 
+.side_set 2 ; uses two sideset pins, pin 1 is the word clock and pin 0 the data clock
+;set x,0 side 0 ; put default value of 0 into x for the case the software buffer stalls
+.wrap_target
+i2s_write_loop_l:
+out pins,1 side 2 
+jmp y-- i2s_write_loop_l side 3 
+out pins, 1 side 0 
+set y,14 side 1 
+i2s_write_loop_r:
+out pins,1 side 0 
+jmp y-- i2s_write_loop_r side 1 
+out pins,1 side 2 
+set y,14 side 3 
+.wrap
+public is2_write_start:
+set y,14 side 3 
+jmp i2s_write_loop_l side 3
+
+; run with autopush and start synchronous to i2s_write_2
+; and push threshold set to 32 
+.program i2s_read_2
+.side_set 1 
+nop side 0
+nop side 1
+.wrap_target
+nop side 0 
+in pins,1 side 1 
+.wrap
