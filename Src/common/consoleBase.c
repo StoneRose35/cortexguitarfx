@@ -32,7 +32,7 @@ void printf(const char* data)
 			    sc_res = sendCharAsyncUsb();
 				while (sc_res == 0)
 				{
-					sc_res = sendCharAsyncBt();
+					sc_res = sendCharAsyncUsb();
 				}
 				//while((*DMA_CH1_CTRL_TRIG & (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)) == (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB));
 			}

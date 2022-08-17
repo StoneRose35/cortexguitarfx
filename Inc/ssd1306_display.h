@@ -2,12 +2,6 @@
 #define _SSD1036_DISPLAY_H_
 #include <stdint.h>
 
-#include "hardware/regs/addressmap.h"
-#include "hardware/regs/spi.h"
-#include "hardware/regs/resets.h"
-#include "hardware/regs/io_bank0.h"
-#include "hardware/regs/pads_bank0.h"
-#include "hardware/regs/sio.h"
 
 void initSsd1306Display();
 

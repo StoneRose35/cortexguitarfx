@@ -40,11 +40,12 @@ void cliApiTask(uint32_t task)
 
         task &= ~(1 << TASK_BT_CONSOLE_RX);
     }*/
-    if ((task & (1 << TASK_USB_CONSOLE_TX))==(1 << TASK_USB_CONSOLE_TX))
-    {
-        if (sendCharAsyncUsb()==1) // only disable the task when a new dma transfer has been instantiated
-        {
-            task &= ~(1 << TASK_BT_CONSOLE_TX);
-        }
-    }
+    sendCharAsyncUsb();
+    //if ((task & (1 << TASK_USB_CONSOLE_TX))==(1 << TASK_USB_CONSOLE_TX))
+    //{
+    //    if (sendCharAsyncUsb()==1) // only disable the task when a new dma transfer has been instantiated
+    //    {
+    //        task &= ~(1 << TASK_USB_CONSOLE_TX);
+    //    }
+    //}
 }

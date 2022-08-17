@@ -1,10 +1,7 @@
 #ifndef _TIMER_H_
 #define _TIMER_H_
 #include <stdint.h>
-#include "hardware/regs/addressmap.h"
-#include "hardware/regs/timer.h"
-#include "hardware/regs/resets.h"
-#include "hardware/regs/watchdog.h"
+
 
 
 /**

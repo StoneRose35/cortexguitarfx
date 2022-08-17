@@ -13,8 +13,7 @@
 
 
 #include <stdint.h>
-#include "hardware/regs/uart.h"
-#include "hardware/regs/addressmap.h"
+
 
 #define BAUD_RATE 57600
 

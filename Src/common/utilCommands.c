@@ -12,6 +12,7 @@
 #include "uart.h"
 #include "datetimeClock.h"
 #include "consoleBase.h"
+#include "gen/compilationInfo.h"
 /**
  * @brief prints a brief overview of the commands
  * 
@@ -76,6 +77,7 @@ void sysInfoCommand(char * cmd,void*context)
 	char nrbfr[32];
 	heapInfo = mallinfo();
 	nticks = getTickValue();
+	printf(COMPILATIONINFO);
 	printf("\r\n\r\nTicks since Start: ");
 	UInt32ToChar(nticks,nrbfr);
 	printf(nrbfr);

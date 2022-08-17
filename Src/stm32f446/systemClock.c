@@ -17,7 +17,7 @@ void setupClock()
     while ((RCC->CFGR & (RCC_CFGR_SWS_HSE)) == 0);
 
     // configure and enable pll for 180 MHz systemclock
-    RCC->PLLCFGR = (4 << RCC_PLLCFGR_PLLM_Pos) | (180 << RCC_PLLCFGR_PLLN_Pos) | (2 << RCC_PLLCFGR_PLLP_Pos) | (1 << RCC_PLLCFGR_PLLSRC_HSE_Pos);
+    RCC->PLLCFGR = (4 << RCC_PLLCFGR_PLLM_Pos) | (180 << RCC_PLLCFGR_PLLN_Pos) | (2 << RCC_PLLCFGR_PLLP_Pos) | (1 << RCC_PLLCFGR_PLLSRC_Pos);
     RCC->CR |= (1 << RCC_CR_PLLON_Pos);
     while ((RCC->CR & RCC_CR_PLLRDY) == 0);
 
@@ -34,8 +34,8 @@ void setupClock()
     cfgr = RCC->CFGR;
     cfgr &= ~(3 << RCC_CFGR_SW_Pos);
     cfgr |= (2 << RCC_CFGR_SW_Pos);
-    RCC->CFGR = cfgr;
-    while ((RCC->CFGR & (RCC_CFGR_SWS_PLL)) == 0);
+    //RCC->CFGR = cfgr;
+    //while ((RCC->CFGR & (RCC_CFGR_SWS_PLL)) == 0);
 
 
 }

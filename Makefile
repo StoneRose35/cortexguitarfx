@@ -53,13 +53,19 @@ clean: clean_objs
 Inc/gen:
 	mkdir ./Inc/gen
 
+Inc/gen/compilationInfo.h: Inc/gen
+	echo "const char * COMPILATIONINFO=\"compiled on " `date` " using \\\\r\\\\n " `arm-none-eabi-gcc --version | sed -z 's/\n/\\\\\\\\r\\\\\\\\n/g'` "\";" > Inc/gen/compilationInfo.h
 
 # generate the startup file
 out/stm32f446_startup.o: Startup/startup_stm32f446zetx.s
 	$(CC) $(CARGS) -c  $< -o ./out/stm32f446_startup.o
 
+# stm32f446-specific libraries
+out/%.o: Src/stm32f446/%.c $(ASSET_IMAGES) 
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
 # common libs
-out/%.o: Src/common/%.c $(ASSET_IMAGES) 
+out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/compilationInfo.h
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio libs
@@ -103,9 +109,8 @@ Inc/images/%.h: Assets/%.png
 	./tools/helper_scripts.py -convertImg $^
 
 # main linking and generating flashable content
-$(PROJECT).elf: out/stm32f446_startup.o all_stm32f446 all_common  all_audio all_graphics  $(ASSET_IMAGES)
+$(PROJECT).elf: out/stm32f446_startup.o all_stm32f446 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
-#~/pico/pico-libs/rp2_common/pico_stdio/stdio.c.obj ~/pico/pico-libs/common/pico_sync/mutex.c.obj ~/pico/pico-libs/rp2_common/hardware_timer/timer.c.obj ~/pico/pico-libs/common/pico_time/time.c.obj
 
 $(PROJECT).bin: $(PROJECT).elf
 	@$(OBJCPY) $(CPYARGS) ./out/$(PROJECT).elf ./out/$(PROJECT).bin
@@ -140,3 +145,5 @@ testout/%.o: Src/mock/%.c
 
 testout/%.o: Tests/%.c
 	$(CC_TEST) -o $@ -c $^
+
+.PHONY: Inc/gen/compilationInfo.h
