@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "c on linux",
+            "intelliSenseMode": "clang-arm",
+            "includePath": [
+                "Inc/RpiPico",
+                "Inc"
+            ],
+            "defines": [
+                "RP2040_FEATHER", "ITSYBITSY", "I2S_INPUT"
+            ],
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "compileCommands": ".vscode/compile_commands.json",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}
