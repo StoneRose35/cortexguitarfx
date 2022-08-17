@@ -223,9 +223,8 @@ int main(void)
 	 * Initialize Hardware components
 	 * 
 	 * */
-	#ifdef STM32
 	enableFpu();
-	#endif
+
     setupClock();
 	initUsbPll();
 	initSystickTimer();
