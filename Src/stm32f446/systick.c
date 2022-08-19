@@ -3,7 +3,7 @@
 #include "system.h"
 #include "stm32f446/stm32f446xx.h"
 volatile static uint32_t ticks=0;
-#define AHB_CLOCK 90000000
+#define AHB_CLOCK 180000000
 
 void SysTick_Handler()
 {
@@ -20,7 +20,7 @@ void initSystickTimer()
 
     SysTick->LOAD = (AHB_CLOCK>>3)/100;
     SysTick->VAL = (AHB_CLOCK>>3)/100;
-    SysTick->CTRL = (1 << SysTick_CTRL_ENABLE_Pos) | (1 << SysTick_CTRL_CLKSOURCE_Pos) | (1 << SysTick_CTRL_TICKINT_Pos);
+    SysTick->CTRL = (1 << SysTick_CTRL_ENABLE_Pos) | (1 << SysTick_CTRL_TICKINT_Pos);
 
 }
 
