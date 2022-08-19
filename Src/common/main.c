@@ -73,11 +73,10 @@ const uint8_t switchesPins[2]={22,20};
 
 void TIM2_IRQHandler()
 {
-	if ((TIM2->SR & (1 << TIM_SR_CC1IF_Pos))==(1 << TIM_SR_CC1IF_Pos))
+	if ((TIM2->SR & (1 << TIM_SR_UIF_Pos))==(1 << TIM_SR_UIF_Pos))
 	{
-		TIM2->CNT=0;
 		GPIOB->ODR ^= (1 << LD1);
-		TIM2->SR &= ~(1 << TIM_SR_CC1IF_Pos);
+		TIM2->SR &= ~(1 << TIM_SR_UIF_Pos);
 	}
 }
 
@@ -110,8 +109,9 @@ int main(void)
 	// use time 2 along with the debug led to check is sysclock is correct
 	RCC->APB1ENR |= (1 << RCC_APB1ENR_TIM2EN_Pos);
 	RCC->AHB1ENR |= (1 << RCC_AHB1ENR_GPIOBEN_Pos);
-	TIM2->DIER |= (1 << TIM_DIER_CC1IE_Pos);
-	TIM2->CCR1 = 45000000;
+	TIM2->DIER |= (1 << TIM_DIER_UIE_Pos);
+	TIM2->PSC=45000-1;
+	TIM2->ARR=1000;
 	TIM2->CR1=(1 << TIM_CR1_CEN_Pos);
 	GPIOB->MODER |= (1 << LD1*2);
 	// no pullups or pulldowns
@@ -137,7 +137,7 @@ int main(void)
      * Initialize Background Services
      *
 	 */
-
+	initCliApi();
 	//initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
 	printf("Microsys v1.0 running\r\n");
