@@ -1,0 +1,33 @@
+{
+    "cortex-debug.registerUseNaturalFormat": false,
+    "files.associations": {
+        "stdio.h": "c",
+        "taskmanagerutils.h": "c",
+        "xosc.h": "c",
+        "io_bank0.h": "c",
+        "uart.h": "c",
+        "pio.h": "c",
+        "addressmap.h": "c",
+        "system.h": "c",
+        "malloc.h": "c",
+        "stdint.h": "c",
+        "memoryaccess.h": "c",
+        "stdlib.h": "c",
+        "clocks.h": "c",
+        "m0plus.h": "c",
+        "bufferedinputhandler.h": "c",
+        "imgdisplay.h": "c",
+        "random": "c",
+        "voidapp.h": "c",
+        "uistack.h": "c",
+        "rotaryencoder.h": "c",
+        "remoteswitch.h": "c",
+        "fatlib.h": "c",
+        "datetimeclock.h": "c",
+        "stringfunctions.h": "c",
+        "triopsbreederservice.h": "c",
+        "ds18b20.h": "c"
+    },
+    "cmake.configureOnOpen": false,
+    "cortex-debug.variableUseNaturalFormat": true
+}

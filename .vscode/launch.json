@@ -1,0 +1,84 @@
+{
+    "configurations": [
+        {
+            "name": "Python: Aktuelle Datei",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [],
+            "cwd": "${fileDirname}"
+        },
+        {
+            "name": "Debug Tests",
+            "type": "cppdbg",
+            "preLaunchTask": "Build tests",
+            "request": "launch",
+            "program": "${workspaceFolder}/testout/pico_lamp",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "cwd": "${workspaceRoot}",
+            "name": "Launch via Picoprobe",
+            "preLaunchTask": "Build using make",
+            "executable": "./out/pico_lamp.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "gdbPath": "gdb-multiarch",
+            "device": "RP2040",
+            "configFiles": [
+                "interface/picoprobe.cfg",
+                "target/rp2040.cfg"
+            ],
+            "svdFile": "/home/philipp/pico/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
+            "runToEntryPoint": "main",
+            "searchDir": [
+                "/home/philipp/pico/openocd/tcl"
+            ]
+        },
+        {
+            "name": "gcc-9 - Aktive Datei erstellen und debuggen",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "C/C++: gcc-9 Aktive Datei kompilieren",
+            "miDebuggerPath": "/usr/bin/gdb"
+        }
+    ]
+}

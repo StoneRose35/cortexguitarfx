@@ -25,3 +25,4 @@
 /Src/common/fatLib
 /tools/fattestsmall.img
 **/.idea
+/.vscode/*.log

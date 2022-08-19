@@ -1,0 +1,5 @@
+[
+    { "directory": "${workspaceFolder}",
+      "command": "arm-none-eabi-gcc -nostdlib -g -DRPI_PICO -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -I./Inc/RpiPico ",
+      "file": "file.cc" }
+  ]
