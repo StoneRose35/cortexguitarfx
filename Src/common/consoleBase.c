@@ -27,7 +27,7 @@ void printf(const char* data)
 			usbCommBuffer.outputBufferReadCnt++;
 			usbCommBuffer.outputBufferReadCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
 
-			if (usbCommBuffer.outputBufferReadCnt==usbCommBuffer.outputBufferWriteCnt-1) // ring buffer full
+			if (usbCommBuffer.outputBufferReadCnt==((usbCommBuffer.outputBufferWriteCnt-1)& ((1 << OUTPUT_BUFFER_SIZE)-1))) // ring buffer full
 			{
 			    sc_res = sendCharAsyncUsb();
 				while (sc_res == 0)
