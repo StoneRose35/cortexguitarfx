@@ -5,17 +5,33 @@ uint8_t initDatetimeClock()
 {
     RCC->APB1ENR |= (1 << RCC_APB1ENR_PWREN_Pos);
     PWR->CR |= (1 << PWR_CR_DBP_Pos);
+    __asm__("nop");
+    __asm__("nop");
+    __asm__("nop");
+    __asm__("nop");    
     RCC->BDCR = (3 << RCC_BDCR_RTCSEL_Pos) | (1 << RCC_BDCR_RTCEN_Pos); // set hse divided by the prescaler and enable the rtc
     // disable write-protection
     //1. Write ‘0xCA’ into the RTC_WPR register.
     //2. Write ‘0x53’ into the RTC_WPR register.
+    __asm__("nop");
+    __asm__("nop");
+    __asm__("nop");
+    __asm__("nop"); 
     RTC->WPR = 0xCA;
     RTC->WPR = 0x53;
 
     RTC->ISR |= (1 << RTC_ISR_INIT_Pos);
     while ((RTC->ISR & RTC_ISR_INITF)==0);
 
-    RTC->DR = (2 << RTC_DR_YT_Pos) | (2 << RTC_DR_YU_Pos) | (1 << RTC_DR_MU_Pos) | (1 << RTC_DR_DU) | (6 << RTC_DR_WDU_Pos);
+    RTC->PRER = (9999 << RTC_PRER_PREDIV_S_Pos) | (99 << RTC_PRER_PREDIV_A_Pos);
+    RTC->PRER = (9999 << RTC_PRER_PREDIV_S_Pos) | (99 << RTC_PRER_PREDIV_A_Pos);
+
+
+    RTC->DR = (2 << RTC_DR_YT_Pos) | (2 << RTC_DR_YU_Pos) | (1 << RTC_DR_MU_Pos) | (1 << RTC_DR_DU_Pos) | (6 << RTC_DR_WDU_Pos);
+
+
+    RTC->TR = 0; 
+
 
     RTC->ISR &= ~(1 << RTC_ISR_INIT_Pos);
 
@@ -27,7 +43,10 @@ uint8_t setHour(uint8_t h)
     uint8_t ht, hu;
     uint32_t regbfr;
     ht = h/10;
-    hu =h - ht;
+    hu =h - ht*10;
+
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
 
     RTC->ISR |= (1 << RTC_ISR_INIT_Pos);
     while ((RTC->ISR & RTC_ISR_INITF)==0);
@@ -44,7 +63,10 @@ uint8_t setMinute(uint8_t m)
     uint8_t mt, mu;
     uint32_t regbfr;
     mt = m/10;
-    mu =m - mt;
+    mu =m - mt*10;
+
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
 
     RTC->ISR |= (1 << RTC_ISR_INIT_Pos);
     while ((RTC->ISR & RTC_ISR_INITF)==0);
@@ -61,7 +83,10 @@ uint8_t setSecond(uint8_t s)
     uint8_t st, su;
     uint32_t regbfr;
     st = s/10;
-    su =s - st;
+    su =s - st*10;
+
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
 
     RTC->ISR |= (1 << RTC_ISR_INIT_Pos);
     while ((RTC->ISR & RTC_ISR_INITF)==0);
@@ -84,7 +109,10 @@ uint8_t setYear(uint16_t y)
     }
     yb = y - 2000;
     yt = yb/10;
-    yu =yb - yt;
+    yu =yb - yt*10;
+
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
 
     RTC->ISR |= (1 << RTC_ISR_INIT_Pos);
     while ((RTC->ISR & RTC_ISR_INITF)==0);
@@ -102,7 +130,10 @@ uint8_t setMonth(uint8_t m)
     uint8_t mt, mu;
     uint32_t regbfr;
     mt = m/10;
-    mu =m - mt;
+    mu =m - mt*10;
+
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
 
     RTC->ISR |= (1 << RTC_ISR_INIT_Pos);
     while ((RTC->ISR & RTC_ISR_INITF)==0);
@@ -120,13 +151,16 @@ uint8_t setDay(uint8_t d)
     uint8_t dt, du;
     uint32_t regbfr;
     dt = d/10;
-    du =d - dt;
+    du =d - dt*10;
+
+    RTC->WPR = 0xCA;
+    RTC->WPR = 0x53;
 
     RTC->ISR |= (1 << RTC_ISR_INIT_Pos);
     while ((RTC->ISR & RTC_ISR_INITF)==0);
     regbfr = RTC->DR;
     regbfr &= ~((RTC_DR_DT_Msk) | (RTC_DR_DU_Msk));
-    regbfr |= (dt << RTC_DR_MT_Pos) | (du << RTC_DR_MU_Pos);
+    regbfr |= (dt << RTC_DR_DT_Pos) | (du << RTC_DR_DU_Pos);
     RTC->DR = regbfr;
     RTC->ISR &= ~(1 << RTC_ISR_INIT_Pos);
 
