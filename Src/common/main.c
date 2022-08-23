@@ -165,6 +165,7 @@
 #include "timer.h"
 #include "gpio.h"
 #include "ssd1306_display.h"
+#include "wm8731.h"
 #include "debugLed.h"
 #include "consoleHandler.h"
 #include "apiHandler.h"
@@ -234,7 +235,9 @@ int main(void)
 	initGpio();
 	initTimer();
 	initAdc();
-	//initI2c(50);
+	#ifdef WM8731
+	initI2c(26);
+	#endif
 	
 
 
@@ -243,8 +246,15 @@ int main(void)
 	 * Initialise Component-specific drivers
 	 * 
 	 * */
+	#ifdef WM8731
+	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
+	#endif
 	initSsd1306Display();
+	#ifdef WM8731
+	initI2SSlave();
+	#else
 	initI2S();
+	#endif
 	initDebugLed();
 	initRotaryEncoder(switchesPins,2);
 

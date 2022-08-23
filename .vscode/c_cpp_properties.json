@@ -8,7 +8,7 @@
                 "Inc"
             ],
             "defines": [
-                "RP2040_FEATHER", "ITSYBITSY"
+                "RP2040_FEATHER", "I2S_INPUT", "WM8731"
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "cStandard": "c11",

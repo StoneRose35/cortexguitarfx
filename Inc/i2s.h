@@ -10,6 +10,7 @@
 #define AUDIO_STATE_ON 0
 
 void initI2S();
+void initI2SSlave();
 void enableAudioEngine();
 void disableAudioEngine();
 void toggleAudioBuffer();
