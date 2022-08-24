@@ -8,6 +8,7 @@
 
 //#include <neopixelDriver.h>
 #include "stm32f446/stm32f446xx.h"
+#include "stm32f446/stm32f446_cfg_pins.h"
 
 #include "system.h"
 #include "core.h"
@@ -61,12 +62,11 @@ uint16_t* audioBufferInputPtr;
 int16_t* audioBufferInputPtr;
 #endif
 int16_t inputSample, inputSampleOther;
-uint32_t core1Handshake;
 volatile int16_t avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
 uint16_t bufferCnt=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
-const uint8_t switchesPins[2]={22,20};
+const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
@@ -129,7 +129,7 @@ int main(void)
 	//initSsd1306Display();
 	//initI2S();
 	//initDebugLed();
-	//initRotaryEncoder(switchesPins,2);
+	initRotaryEncoder(switchesPins,2);
 
 
 	/*
