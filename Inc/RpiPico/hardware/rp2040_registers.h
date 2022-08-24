@@ -40,7 +40,8 @@
 // rotary encoder combined with a push switch
 #define ENCODER_1 7
 #define ENCODER_2 6
-#define SWITCH 22
+#define ENTER_SWITCH 22
+#define EXIT_SWITCH 20
 
 // backlight for lcd display
 #define BACKLIGHT 8
