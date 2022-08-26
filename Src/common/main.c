@@ -71,6 +71,7 @@ const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define AVERAGING_LOWPASS_CUTOFF 10
 
 
+/*
 void TIM2_IRQHandler()
 {
 	if ((TIM2->SR & (1 << TIM_SR_UIF_Pos))==(1 << TIM_SR_UIF_Pos))
@@ -79,6 +80,7 @@ void TIM2_IRQHandler()
 		TIM2->SR &= ~(1 << TIM_SR_UIF_Pos);
 	}
 }
+*/
 
 /**
  * @brief the main entry point, should never exit
@@ -101,12 +103,13 @@ int main(void)
 	initSystickTimer();
 	initDatetimeClock();
 	initUart(57600);
-	//initDMA();
+	initDMA();
 	//initTimer();
-	//initAdc();
+	initAdc();
 	//initI2c(50);
 	
 	// use time 2 along with the debug led to check is sysclock is correct
+	/*
 	RCC->APB1ENR |= (1 << RCC_APB1ENR_TIM2EN_Pos);
 	RCC->AHB1ENR |= (1 << RCC_AHB1ENR_GPIOBEN_Pos);
 	TIM2->DIER |= (1 << TIM_DIER_UIE_Pos);
@@ -120,6 +123,7 @@ int main(void)
 	// enable led1
 	GPIOB->BSRR |= ((1 << LD1));
 	__NVIC_EnableIRQ(TIM2_IRQn);
+	*/
 
 	/*
 	 *
@@ -138,7 +142,7 @@ int main(void)
      *
 	 */
 	initCliApi();
-	//initRoundRobinReading(); // internal adc for reading parameters
+	initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
 	printf("Microsys v1.0 running\r\n");
 	//piPicoFxUiSetup();
