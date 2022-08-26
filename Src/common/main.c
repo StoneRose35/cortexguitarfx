@@ -70,7 +70,10 @@ const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
-
+uint32_t encoderVal;
+uint8_t enterSwitchVal;
+uint8_t exitSwitchVal;
+char displayData[128];
 /*
 void TIM2_IRQHandler()
 {
@@ -103,9 +106,9 @@ int main(void)
 	initSystickTimer();
 	initDatetimeClock();
 	initUart(57600);
-	initDMA();
+	//initDMA();
 	//initTimer();
-	initAdc();
+	//initAdc();
 	//initI2c(50);
 	
 	// use time 2 along with the debug led to check is sysclock is correct
@@ -142,7 +145,7 @@ int main(void)
      *
 	 */
 	initCliApi();
-	initRoundRobinReading(); // internal adc for reading parameters
+	//initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
 	printf("Microsys v1.0 running\r\n");
 	//piPicoFxUiSetup();
@@ -231,7 +234,30 @@ int main(void)
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
-		
+		if (getEncoderValue() != encoderVal)
+		{
+			printf("new encoder value ");
+			encoderVal = getEncoderValue();
+			UInt32ToChar(encoderVal,displayData);
+			printf(displayData);
+			printf("\r\n");
+		}
+		if (getSwitchValue(0) != enterSwitchVal)
+		{
+			printf("new enter switch value ");
+			enterSwitchVal = getSwitchValue(0);
+			UInt8ToChar(enterSwitchVal,displayData);
+			printf(displayData);
+			printf("\r\n");
+		}
+		if (getSwitchValue(1) != exitSwitchVal)
+		{
+			printf("new exit switch value ");
+			exitSwitchVal = getSwitchValue(1);
+			UInt8ToChar(exitSwitchVal,displayData);
+			printf(displayData);
+			printf("\r\n");
+		}
 	}
 }
 #endif

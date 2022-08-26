@@ -55,7 +55,10 @@ void initUart(uint16_t baudrate)
     GPIOD->MODER = regbfr;
 
     GPIOD->PUPDR &= ~((3 << (8*2)) | (3 << (9*2)));
-    GPIOD->AFR[1] = (7 << 0) | (7 << 4); // define alternate funtion 7 for pin 8 and 9 
+    regbfr = GPIOD->AFR[1];
+    regbfr &= ~((0xF << 0) | (0xF << 4));
+    regbfr |= ((7 << 0) | (7 << 4));
+    GPIOD->AFR[1] = regbfr; // define alternate funtion 7 for pin 8 and 9 
 }
 
 void initBTUart(uint16_t baudrate)
