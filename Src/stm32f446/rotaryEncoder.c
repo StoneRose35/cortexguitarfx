@@ -259,7 +259,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     RCC->APB1ENR |= (1 << RCC_APB1ENR_TIM3EN_Pos);
     TIM3->SMCR |= (3 << TIM_SMCR_SMS_Pos); // encoder mode 3
     TIM3->CCMR1 |= (1 << TIM_CCMR1_CC1S_Pos) | (1 << TIM_CCMR1_CC2S_Pos) | 
-                   (0 << TIM_CCMR1_IC1F_Pos) | (0 << TIM_CCMR1_IC2F_Pos)  ; 
+                   (7 << TIM_CCMR1_IC1F_Pos) | (7 << TIM_CCMR1_IC2F_Pos)  ; 
                    // channel 1 to TI1, channel 2 to TI2, apply filtering
     TIM3->CCER |= (0 << TIM_CCER_CC1NP_Pos) | (0 << TIM_CCER_CC1P_Pos) | (0 << TIM_CCER_CC1E_Pos) |
                 (0 << TIM_CCER_CC2NP_Pos) | (0 << TIM_CCER_CC2P_Pos) | (0 << TIM_CCER_CC2E_Pos);

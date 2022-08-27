@@ -70,7 +70,7 @@ const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
-uint32_t encoderVal;
+uint32_t encoderVal,encoderCntr,encNew;
 uint8_t enterSwitchVal;
 uint8_t exitSwitchVal;
 char displayData[128];
@@ -234,11 +234,22 @@ int main(void)
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
-		if (getEncoderValue() != encoderVal)
+		encNew=getEncoderValue();
+		if (encNew < encoderVal-2)
 		{
 			printf("new encoder value ");
-			encoderVal = getEncoderValue();
-			UInt32ToChar(encoderVal,displayData);
+			encoderVal = encNew;
+			encoderCntr--;
+			UInt32ToChar(encoderCntr,displayData);
+			printf(displayData);
+			printf("\r\n");
+		}
+		else if (getEncoderValue() > encoderVal+2)
+		{
+			printf("new encoder value ");
+			encoderVal = encNew;
+			encoderCntr++;
+			UInt32ToChar(encoderCntr,displayData);
 			printf(displayData);
 			printf("\r\n");
 		}
