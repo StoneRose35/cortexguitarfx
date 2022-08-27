@@ -224,6 +224,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     // set as input with pullup enabled
     regbfr = gpio->MODER;
     regbfr &= ~(3 << ((ENCODER_1 & 0xF)<<1));
+    regbfr |= (2 << ((ENCODER_1 & 0xF)<<1));
     gpio->MODER=regbfr;    
     regbfr = gpio->PUPDR;
     regbfr &= ~(3 << ((ENCODER_1 & 0xF)<< 1));
@@ -242,6 +243,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     // set as input with pullup enabled
     regbfr = gpio->MODER;
     regbfr &= ~(3 << ((ENCODER_2 & 0xF)<<1));
+    regbfr |= (2 << ((ENCODER_2 & 0xF)<<1));
     gpio->MODER=regbfr;    
     regbfr = gpio->PUPDR;
     regbfr &= ~(3 << ((ENCODER_2 & 0xF)<<1));
