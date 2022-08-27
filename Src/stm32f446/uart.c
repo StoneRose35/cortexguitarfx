@@ -81,7 +81,7 @@ uint8_t sendCharAsyncUsb()
 		USART3->DR = *(usbCommBuffer.outputBuffer+usbCommBuffer.outputBufferWriteCnt);
 		usbCommBuffer.outputBufferWriteCnt++;
 	}
-	if (usbCommBuffer.outputBufferWriteCnt == usbCommBuffer.outputBufferReadCnt)
+	if (usbCommBuffer.outputBufferWriteCnt >= usbCommBuffer.outputBufferReadCnt)
 	{
 		usbCommBuffer.outputBufferWriteCnt=0;
 		usbCommBuffer.outputBufferReadCnt=0;
