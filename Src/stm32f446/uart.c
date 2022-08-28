@@ -76,21 +76,18 @@ void initBTUart(uint16_t baudrate)
  */
 uint8_t sendCharAsyncUsb()
 {
-	if (usbCommBuffer.outputBufferWriteCnt < usbCommBuffer.outputBufferReadCnt && ((USART3->SR & USART_SR_TXE)== USART_SR_TXE))
+	if (usbCommBuffer.outputBufferWriteCnt != usbCommBuffer.outputBufferReadCnt && ((USART3->SR & USART_SR_TXE)== USART_SR_TXE))
 	{
 		USART3->DR = *(usbCommBuffer.outputBuffer+usbCommBuffer.outputBufferWriteCnt);
 		usbCommBuffer.outputBufferWriteCnt++;
+        usbCommBuffer.outputBufferWriteCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
+        return 0;
 	}
-	if (usbCommBuffer.outputBufferWriteCnt >= usbCommBuffer.outputBufferReadCnt)
+	if (usbCommBuffer.outputBufferWriteCnt == usbCommBuffer.outputBufferReadCnt)
 	{
-		usbCommBuffer.outputBufferWriteCnt=0;
-		usbCommBuffer.outputBufferReadCnt=0;
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+    return 0;
 }
 
 uint8_t sendCharAsyncBt()

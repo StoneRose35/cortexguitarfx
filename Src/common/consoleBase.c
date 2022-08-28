@@ -20,9 +20,6 @@ void printf(const char* data)
 	{
 		if ((context & (1 << CONTEXT_USB)) == (1 << CONTEXT_USB))
 		{
-			 //while ( 
-			//(*DMA_CH1_CTRL_TRIG & (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)) == (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)
-			//);
 			*(usbCommBuffer.outputBuffer+usbCommBuffer.outputBufferReadCnt) = *(data + cnt);
 			usbCommBuffer.outputBufferReadCnt++;
 			usbCommBuffer.outputBufferReadCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
@@ -34,7 +31,6 @@ void printf(const char* data)
 				{
 					sc_res = sendCharAsyncUsb();
 				}
-				//while((*DMA_CH1_CTRL_TRIG & (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)) == (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB));
 			}
 		}
 		if ((context & (1 << CONTEXT_BT)) == (1 << CONTEXT_BT))
@@ -43,7 +39,7 @@ void printf(const char* data)
 			btCommBuffer.outputBufferReadCnt++;
 			btCommBuffer.outputBufferReadCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
 
-			if (btCommBuffer.outputBufferReadCnt==((1 << OUTPUT_BUFFER_SIZE)-1))
+			if (btCommBuffer.outputBufferReadCnt==((btCommBuffer.outputBufferWriteCnt-1)& ((1 << OUTPUT_BUFFER_SIZE)-1))) // ring buffer full
 			{
 				sc_res = sendCharAsyncBt();
 				while (sc_res == 0)
@@ -55,5 +51,4 @@ void printf(const char* data)
 		cnt++;
 		cur_data = *(data + cnt);
 	}
-	//sendCharAsyncUsb();
 }
