@@ -265,7 +265,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
                 (0 << TIM_CCER_CC2NP_Pos) | (0 << TIM_CCER_CC2P_Pos) | (0 << TIM_CCER_CC2E_Pos);
     //TIM3->CNT = 0x7FFF;
     TIM3->ARR = 0xFFFF;
-
+    TIM3->CNT = 0x7FFF;
     TIM3->CR1 |= (1 << TIM_CR1_CEN_Pos);
     #endif
 

@@ -12,9 +12,9 @@
 
 // adc pins used by the three potentiometer, refer to the datasheet for a list of possible options
 // 
-#define POT1 0 
-#define POT2 1
-#define POT3 2
+#define POT1 3 // PA3
+#define POT2 (2*16+0) // PC0
+#define POT3 (2*16+3) // PC3
 
 
 
@@ -22,6 +22,6 @@
 // * additional device-specific settings *
 // ***************************************
 
-#define POT1_CHANNEL 0
-#define POT2_CHANNEL 1
-#define POT3_CHANNEL 2
+#define POT1_CHANNEL 3
+#define POT2_CHANNEL 10
+#define POT3_CHANNEL 13

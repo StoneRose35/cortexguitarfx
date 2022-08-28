@@ -74,6 +74,7 @@ uint32_t encoderVal,encoderCntr,encNew;
 uint8_t enterSwitchVal;
 uint8_t exitSwitchVal;
 char displayData[128];
+uint16_t adcVal;
 /*
 void TIM2_IRQHandler()
 {
@@ -106,9 +107,9 @@ int main(void)
 	initSystickTimer();
 	initDatetimeClock();
 	initUart(57600);
-	//initDMA();
+	initDMA();
 	//initTimer();
-	//initAdc();
+	initAdc();
 	//initI2c(50);
 	
 	// use time 2 along with the debug led to check is sysclock is correct
@@ -137,6 +138,7 @@ int main(void)
 	//initI2S();
 	//initDebugLed();
 	initRotaryEncoder(switchesPins,2);
+	encoderVal=getEncoderValue();
 
 
 	/*
@@ -145,7 +147,7 @@ int main(void)
      *
 	 */
 	initCliApi();
-	//initRoundRobinReading(); // internal adc for reading parameters
+	initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
 	printf("Microsys v1.0 running\r\n");
 	//piPicoFxUiSetup();
@@ -244,7 +246,7 @@ int main(void)
 			printf(displayData);
 			printf("\r\n");
 		}
-		else if (getEncoderValue() > encoderVal+2)
+		else if (encNew > encoderVal+2)
 		{
 			printf("new encoder value ");
 			encoderVal = encNew;
@@ -258,6 +260,21 @@ int main(void)
 			printf("new enter switch value ");
 			enterSwitchVal = getSwitchValue(0);
 			UInt8ToChar(enterSwitchVal,displayData);
+			printf(displayData);
+			printf("\r\n");
+			adcVal = getChannel0Value();
+			printf("CH0: ");
+			UInt16ToChar(adcVal,displayData);
+			printf(displayData);
+			printf("\r\n");
+			adcVal = getChannel1Value();
+			printf("CH1: ");
+			UInt16ToChar(adcVal,displayData);
+			printf(displayData);
+			printf("\r\n");
+			adcVal = getChannel2Value();
+			printf("CH2: ");
+			UInt16ToChar(adcVal,displayData);
 			printf(displayData);
 			printf("\r\n");
 		}
