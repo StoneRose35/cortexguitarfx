@@ -15,8 +15,8 @@
 
 #define HEATER  6 // heating element controlled using pwm
 
-#define I2C_SCL 2
-#define I2C_SDA 1
+#define I2C_SCL 5
+#define I2C_SDA 4
 
 #define I2S_WS_PIN 12
 #define I2S_BCK_PIN 11
