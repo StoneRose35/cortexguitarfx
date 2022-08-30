@@ -199,12 +199,12 @@ void initI2SSlave()
 
 	// shift out to left and in from right 
 	*PIO1_SM0_SHIFTCTRL = (0 << PIO_SM0_SHIFTCTRL_PULL_THRESH_LSB) 
-                           | (0 << PIO_SM0_SHIFTCTRL_AUTOPULL_LSB) 
+                           | (1 << PIO_SM0_SHIFTCTRL_AUTOPULL_LSB) 
                            | (0 << PIO_SM0_SHIFTCTRL_FJOIN_TX_LSB) 
 						   | (0 << PIO_SM0_SHIFTCTRL_OUT_SHIFTDIR_LSB)
 
 						   | (0 << PIO_SM0_SHIFTCTRL_PUSH_THRESH_LSB)
-						   | (0 << PIO_SM0_SHIFTCTRL_AUTOPUSH_LSB)
+						   | (1 << PIO_SM0_SHIFTCTRL_AUTOPUSH_LSB)
 						   | (0 << PIO_SM0_SHIFTCTRL_FJOIN_RX_LSB)
 						   | (0 << PIO_SM0_SHIFTCTRL_IN_SHIFTDIR_LSB)
 						   ;
