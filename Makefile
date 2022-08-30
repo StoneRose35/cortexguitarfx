@@ -64,6 +64,9 @@ tools/pioasm_src/gen:
 Inc/gen:
 	mkdir ./Inc/gen
 
+out:
+	mkdir ./out
+
 tools/pioasm_src/gen/lexer.cpp: tools/pioasm_src/gen
 	flex -o ./tools/pioasm_src/gen/lexer.cpp ./tools/pioasm_src/lexer.ll 
 
@@ -75,25 +78,25 @@ tools/pioasm: tools/pioasm_src/gen/parser.cpp tools/pioasm_src/gen/lexer.cpp
 
 
 # boot stage code variants for the rp2040 feather and the rp2040 itsybitsy
-bs2_std.o:
+bs2_std.o: out
 	$(CC) $(CARGS) $(OPT) -c ./Startup/pico_bs2_std.S -o ./out/bs2_std.o
 
-bs2_dspi.o:
+bs2_dspi.o: out
 	$(CC) $(CARGS) $(OPT) -c ./Startup/pico_bs2_dspi.S -o ./out/bs2_dspi.o
 
-bs2_fast_qspi.o:
+bs2_fast_qspi.o: out
 	$(CC) $(CARGS) $(OPT) -c ./Startup/pico_bs2_fast_qspi.S -o ./out/bs2_fast_qspi.o
 
-bs2_fast_qspi2.o:
+bs2_fast_qspi2.o: out
 	$(CC) $(CARGS) $(OPT) -c ./Startup/pico_bs2_fast_qspi2.S -o ./out/bs2_fast_qspi2.o
 
 
 # generating the boot stage2 assembly file
 # via a full roundtrip Assembly -> .o (declared above) -> .elf -> .bin -> Assembly (data declaration with crc32 checksum) 
-bs2_code.elf: $(BOOTLOADER).o
+bs2_code.elf: $(BOOTLOADER).o out
 	$(CC) $(LARGS_BS2) -o ./out/bs2_code.elf ./out/$(BOOTLOADER).o
 
-bs2_code.bin: bs2_code.elf
+bs2_code.bin: bs2_code.elf out
 	$(OBJCPY) $(CPYARGS) ./out/bs2_code.elf ./out/bs2_code.bin
 
 bs2_code_size: bs2_code.bin
@@ -101,54 +104,54 @@ bs2_code_size: bs2_code.bin
 	@echo '* Boot Stage 2 Code is' `ls -l ./out/bs2_code.bin | cut -d ' ' -f5` 'bytes' 
 	@echo '**********************************'
 
-bootstage2.S: bs2_code.bin
+bootstage2.S: bs2_code.bin out
 	$(PAD_CKECKSUM) -s 0xffffffff ./out/bs2_code.bin ./out/bootstage2.S
 
 # rp2040 feather startup stage
-pico_startup2.o: 
+pico_startup2.o: out
 	$(CC) $(CARGS) $(OPT) -c ./Startup/pico_startup2.S -o ./out/pico_startup2.o 
 
 bootstage2.o: bootstage2.S
 	$(CC) $(CARGS) $(OPT) -c ./out/bootstage2.S -o ./out/bootstage2.o 
 
 # common libs
-out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio libs
-out/%.o: Src/common/audio/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/common/audio/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio fx libs
-out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # graphics libs
-out/%.o: Src/common/graphics/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/common/graphics/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # sdcard libs
-out/%.o: Src/common/neopixel/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/common/neopixel/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # neopixel libs
-out/%.o: Src/common/sdcard/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/common/sdcard/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # rp2040 specific libs
-out/%.o: Src/rp2040/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/rp2040/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # rp2040 specific assembly libs
-out/%.o: Src/rp2040/%.S $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/rp2040/%.S $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # application layer
-out/%.o: Src/apps/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/apps/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # services layer
-out/%.o: Src/services/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h
+out/%.o: Src/services/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # image assets
