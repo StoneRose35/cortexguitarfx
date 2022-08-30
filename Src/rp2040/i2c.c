@@ -22,8 +22,8 @@ void initI2c(uint8_t slaveAdress)
     *I2C_SCL_PAD_CNTR &= ~((1 << PADS_BANK0_GPIO0_PDE_LSB) | (1 << PADS_BANK0_GPIO0_SLEWFAST_LSB));
     *I2C_SCL_PAD_CNTR |= (1 << PADS_BANK0_GPIO0_PUE_LSB) | (1 << PADS_BANK0_GPIO0_SCHMITT_LSB);
 
-    *I2C_SCL_PAD_CNTR &= ~((1 << PADS_BANK0_GPIO0_PDE_LSB) | (1 << PADS_BANK0_GPIO0_SLEWFAST_LSB));
-    *I2C_SCL_PAD_CNTR |= (1 << PADS_BANK0_GPIO0_PUE_LSB) | (1 << PADS_BANK0_GPIO0_SCHMITT_LSB);
+    *I2C_SDA_PAD_CNTR &= ~((1 << PADS_BANK0_GPIO0_PDE_LSB) | (1 << PADS_BANK0_GPIO0_SLEWFAST_LSB));
+    *I2C_SDA_PAD_CNTR |= (1 << PADS_BANK0_GPIO0_PUE_LSB) | (1 << PADS_BANK0_GPIO0_SCHMITT_LSB);
 
     // wire up pins to i2c
     *I2C_SCL_PIN_CNTR = 3;
@@ -67,7 +67,7 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
     // put data
     if (lastCmd !=0)
     {
-        *I2C_IC_DATA_CMD = data & (1 << I2C_IC_DATA_CMD_STOP_LSB);
+        *I2C_IC_DATA_CMD = data | (1 << I2C_IC_DATA_CMD_STOP_LSB);
     }
     else
     {
