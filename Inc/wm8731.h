@@ -82,7 +82,7 @@
  * 
  * @param data b15 - b9: register, b8 - b0: data
  */
-void wm8731_write(uint16_t data);
+uint8_t wm8731_write(uint16_t data);
 
 /**
  * @brief sets the interface to the desired sample depth and sample rate
