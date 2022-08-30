@@ -7,12 +7,18 @@ uint8_t wm8731_write(uint16_t data)
     uint8_t retcodes=0;
     retcodes += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
     retcodes += masterTransmit((uint8_t)(data&0xFF),1);
+    return retcodes;
 }
 
 void setupWm8731(uint8_t sampledepth,uint8_t samplerate)
 {
     uint16_t registerData;
     uint8_t rcs=0;
+
+    // R15, reset device
+    registerData = WM8731_R15;
+    rcs += wm8731_write(registerData);
+
     // R0, set volume to 0dB for both L and R channel, disable mute
     registerData = WM8731_R0 | (23 << LIN_VOL) | (1 << LRIN_BOTH_LSB);
     rcs += wm8731_write(registerData);

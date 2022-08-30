@@ -247,7 +247,7 @@ int main(void)
 	 * 
 	 * */
 	#ifdef WM8731
-	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
+	setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
 	#endif
 	initSsd1306Display();
 	#ifdef WM8731
