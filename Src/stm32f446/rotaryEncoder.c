@@ -166,57 +166,8 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     
     // enable syscfg to define external interrupts
     RCC->APB2ENR |= (1 << RCC_APB2ENR_SYSCFGEN_Pos);
-    #ifdef EXTERNAL_INTERRUPT_IMPLEMENTATION
-
+    
     // enable the gpio port (A-H) to which the pin belongs
-    port = ENCODER_1 >> 4;
-    RCC->AHB1ENR |= (1 << port);
-    gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
-
-    // set as input with pullup enabled
-    regbfr = gpio->MODER;
-    regbfr &= ~(3 << (ENCODER_1 & 0xF));
-    gpio->MODER=regbfr;    
-    regbfr = gpio->PUPDR;
-    regbfr &= (3 << (ENCODER_1 & 0xF));
-    regbfr |= (1 << (ENCODER_1  & 0xF));
-    gpio->PUPDR = regbfr;
-
-    // wire up external interrupts
-    regbfr = SYSCFG->EXTICR[((ENCODER_1 & 0xF)>>2)];
-    regbfr &= ~(0xF << (((ENCODER_1 & 0xF) >> 2)*4));
-    regbfr |= ((ENCODER_1 >> 4) << (((ENCODER_1 & 0xF) >> 2)*4));
-    SYSCFG->EXTICR[((ENCODER_1 & 0xF)>>2)] = regbfr;
-    EXTI->IMR |= (1 << (ENCODER_1 & 0xF));
-    EXTI->FTSR |= (1 << (ENCODER_1 & 0xF));
-    EXTI->RTSR |= (1 << (ENCODER_1 & 0xF));
-
-    // enable the gpio port (A-H) to which the pin belongs
-    port = ENCODER_2 >> 4;
-    RCC->AHB1ENR |= (1 << port);
-    gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
-
-    // set as input with pullup enabled
-    regbfr = gpio->MODER;
-    regbfr &= ~(3 << (ENCODER_2 & 0xF));
-    gpio->MODER=regbfr;    
-    regbfr = gpio->PUPDR;
-    regbfr &= (3 << (ENCODER_2 & 0xF));
-    regbfr |= (1 << (ENCODER_2 & 0xF));
-    gpio->PUPDR = regbfr;
-
-    // wire up external interrupts
-    regbfr = SYSCFG->EXTICR[((ENCODER_2 & 0xF)>>2)];
-    regbfr &= ~(0xF << (((ENCODER_2 & 0xF) >> 2)*4));
-    regbfr |= ((ENCODER_2 >> 4) << (((ENCODER_2 & 0xF) >> 2)*4));
-    SYSCFG->EXTICR[((ENCODER_2 & 0xF)>>2)] = regbfr;
-    EXTI->IMR |= (1 << (ENCODER_2 & 0xF));
-    EXTI->FTSR |= (1 << (ENCODER_2 & 0xF));
-    EXTI->RTSR |= (1 << (ENCODER_2 & 0xF));
-    #endif
-
-    #ifdef TIMER_IMPLEMENTATION
-        // enable the gpio port (A-H) to which the pin belongs
     port = ENCODER_1 >> 4;
     RCC->AHB1ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
@@ -231,7 +182,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     regbfr |= (1 << ((ENCODER_1  & 0xF)<<1));
     gpio->PUPDR = regbfr;
     regbfr = gpio->AFR[(ENCODER_1 & 0xF)>>3];
-    regbfr &= ~(3 << ((ENCODER_1 & 0xF) << 2));
+    regbfr &= ~(0xF << ((ENCODER_1 & 0xF) << 2));
     regbfr |= 2 << ((ENCODER_1 & 0xF) << 2);
     gpio->AFR[(ENCODER_1 & 0xF)>>3] = regbfr;
 
@@ -250,7 +201,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     regbfr |= (1 << ((ENCODER_2 & 0xF)<<1));
     gpio->PUPDR = regbfr;
     regbfr = gpio->AFR[(ENCODER_2 & 0xF)>>3];
-    regbfr &= ~(3 << ((ENCODER_2 & 0xF) << 2));
+    regbfr &= ~(0xF << ((ENCODER_2 & 0xF) << 2));
     regbfr |= 2 << ((ENCODER_2 & 0xF) << 2);
     gpio->AFR[(ENCODER_2 & 0xF)>>3] = regbfr;
 
@@ -267,7 +218,6 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     TIM3->ARR = 0xFFFF;
     TIM3->CNT = 0x7FFF;
     TIM3->CR1 |= (1 << TIM_CR1_CEN_Pos);
-    #endif
 
     for (uint8_t c=0;c< nswitches;c++)
     {
@@ -295,10 +245,6 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         switchPins[c]=pins[c];
         enableExternalInterrupt(pins[c]);
     }
-    #ifdef EXTERNAL_INTERRUPT_IMPLEMENTATION
-    enableExternalInterrupt(ENCODER_1);
-    enableExternalInterrupt(ENCODER_2);
-    #endif
     
     oldtickenc=getTickValue();
     oldtickswitch=getTickValue();
@@ -308,12 +254,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
 
 uint32_t getEncoderValue()
 {
-    #ifdef EXTERNAL_INTERRUPT_IMPLEMENTATION
-    return encoderVal;
-    #endif
-    #ifdef TIMER_IMPLEMENTATION
     return TIM3->CNT;
-    #endif
 }
 
 uint8_t getSwitchValue(uint8_t sw)
