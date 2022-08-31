@@ -18,10 +18,10 @@
 #define I2C_SCL 5
 #define I2C_SDA 4
 
-#define I2S_WS_PIN 12
 #define I2S_BCK_PIN 11
-#define I2S_DATA_PIN 10
+#define I2S_WS_PIN 10
 #define I2S_DATA_IN_PIN 9
+#define I2S_DATA_PIN 12
 #define I2S_MCLK_PIN 8
 #define I2S_DEBUG_PIN 6
 

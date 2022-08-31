@@ -145,7 +145,7 @@ jmp i2s_duplex_loop_l side 3
 i2s_duplex_slave_start:
 wait 1 pin 1
 i2s_d_s_wait_left:
-set x,16
+set x,15
 wait 0 pin 1 
 wait 0 pin 2
 wait 1 pin 2 
@@ -157,7 +157,7 @@ in pins,1
 jmp x--,i2s_d_s_proc_left
 ;push noblock
 ;pull noblock
-set x,16
+set x,15
 wait 1 pin 1 ; wait for lrclk to toggle
 wait 0 pin 2
 wait 1 pin 2 

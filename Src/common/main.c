@@ -317,7 +317,7 @@ int main(void)
 				#ifndef I2S_INPUT
 				inputSample = (*(audioBufferInputPtr + c) << 4) - 0x7FFF;
 				#else
-				inputSample=*(audioBufferInputPtr + c*2);
+				inputSample=*(audioBufferInputPtr + c*2 + 1);
 			
 				#endif
 				//inputSample = getNextSineValue();
