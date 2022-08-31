@@ -49,7 +49,6 @@ void initAdc()
 {
     GPIO_TypeDef * gpio;
     uint32_t port;
-    uint32_t regbfr;
 
     RCC->APB2ENR |= (1 << RCC_APB2ENR_ADC1EN_Pos);
     ADC->CCR |= (3 << ADC_CCR_ADCPRE_Pos); // divide by 8 --> 90Mzh/8= 1.333 MSPS
@@ -97,7 +96,7 @@ void initRoundRobinReading()
     TIM2->CR1 |= (1 << TIM_CR1_CEN_Pos);
 
     // setup dma 2 channel 0 stream 0
-    DMA2_Stream0->PAR=&(ADC1->DR);
+    DMA2_Stream0->PAR=(uint32_t)&(ADC1->DR);
     DMA2_Stream0->M0AR=(uint32_t)adcChannelValues;
     DMA2_Stream0->M1AR=(uint32_t)adcChannelValues;
     DMA2_Stream0->CR = (1 << DMA_SxCR_MSIZE_Pos) | (1 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | (1 << DMA_SxCR_TCIE_Pos);

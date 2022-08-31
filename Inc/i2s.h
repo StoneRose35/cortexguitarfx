@@ -14,8 +14,10 @@ void enableAudioEngine();
 void disableAudioEngine();
 void toggleAudioBuffer();
 int16_t* getEditableAudioBuffer();
+int32_t* getEditableAudioBufferHiRes();
 #ifdef I2S_INPUT
 int16_t* getInputAudioBuffer();
+int32_t* getInputAudioBufferHiRes();
 void toggleAudioInputBuffer();
 #endif
 void retriggerInput();

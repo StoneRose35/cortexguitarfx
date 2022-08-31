@@ -17,6 +17,12 @@
 #define POT3 (2*16+3) // PC3
 
 
+// i2s interface
+#define I2S_BCLK (0*16+1)
+#define I2S_LRCLK (0*16+2)
+#define I2S_DOUT (0*16+3)
+#define I2S_DIN (0*16+4)
+
 
 // ***************************************
 // * additional device-specific settings *
