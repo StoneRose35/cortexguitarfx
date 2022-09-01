@@ -23,6 +23,10 @@
 #define I2S_DOUT (0*16+3)
 #define I2S_DIN (0*16+4)
 
+// i2c interface
+#define I2C_SDA (0*16+1)
+#define I2C_SCL (0*16+2)
+
 
 // ***************************************
 // * additional device-specific settings *
