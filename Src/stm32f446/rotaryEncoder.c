@@ -16,58 +16,8 @@ static volatile uint8_t lastTrigger;
 void processExternalInterrupt()
 {
     GPIO_TypeDef * gpio;
-
-    #ifdef EXTERNAL_INTERRUPT_IMPLEMENTATION
-    GPIO_TypeDef * gpioo;
-    if ((EXTI->PR & (1 << (ENCODER_1 & 0xF)))==(1 << (ENCODER_1 & 0xF)))
-    {
-        gpioo = (GPIO_TypeDef*)(GPIOA_BASE + (ENCODER_2 >> 4)*0x400);
-        gpio=(GPIO_TypeDef*)(GPIOA_BASE + (ENCODER_1 >> 4)*0x400);
-        if ((gpio->IDR & (1 << (ENCODER_1 & 0xF)))!=0) // measured value is high: rising trigger
-        {
-            if(lastTrigger == 1)
-            {
-                ((gpioo->IDR & (1 << (ENCODER_2 & 0xF))) == (1 << (ENCODER_2 & 0xF))) ? encoderVal-- : encoderVal++;
-            }
-            lastTrigger = 0;
-        }
-        else
-        {
-            if(lastTrigger == 1)
-            {
-                ((gpioo->IDR & (1 << (ENCODER_2 & 0xF))) == (1 << (ENCODER_2 & 0xF))) ? encoderVal++ : encoderVal--;
-            }
-            lastTrigger = 0;
-        }
-        EXTI->PR = (1 << (ENCODER_1 & 0xF));
-    }
-    else if ((EXTI->PR & (1 << (ENCODER_2 & 0xF)))==(1 << (ENCODER_2 & 0xF)))
-    {
-        gpioo = (GPIO_TypeDef*)(GPIOA_BASE + (ENCODER_1 >> 4)*0x400);
-        gpio=(GPIO_TypeDef*)(GPIOA_BASE + (ENCODER_2 >> 4)*0x400);
-        if ((gpio->IDR & (1 << (ENCODER_2 & 0xF)))!=0) // measured value is high: rising trigger
-        {
-            if(lastTrigger == 1)
-            {
-                ((gpioo->IDR & (1 << (ENCODER_1 & 0xF))) == (1 << (ENCODER_1 & 0xF))) ? encoderVal++ : encoderVal--;
-            }
-            lastTrigger = 0;
-        }
-        else
-        {
-            if(lastTrigger == 1)
-            {
-                ((gpioo->IDR & (1 << (ENCODER_1 & 0xF))) == (1 << (ENCODER_1 & 0xF))) ? encoderVal-- : encoderVal++;
-            }
-            lastTrigger = 0;
-        }
-        EXTI->PR = (1 << (ENCODER_2 & 0xF));
-    }
-    #endif
-
     for (uint8_t c=0;c<8;c++)
     {
-        
         if ((EXTI->PR & (1 << (switchPins[c] & 0xF)))!= 0)
         {
             gpio = (GPIO_TypeDef*)(GPIOA_BASE + (switchPins[c] >> 4)*0x400);

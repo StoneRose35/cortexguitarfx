@@ -1,7 +1,7 @@
 #ifndef _DELAY_H_
 #define _DELAY_H_
 #include <stdint.h>
-#define DELAY_LINE_LENGTH 65536
+#define DELAY_LINE_LENGTH 32768
 
 typedef int16_t(*feedbackProcessor)(int16_t,void*);
 

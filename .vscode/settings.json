@@ -39,7 +39,8 @@
         "pipicofx_param_1_scaled.h": "c",
         "spi.h": "c",
         "rp2040_registers.h": "c",
-        "consolebase.h": "c"
+        "consolebase.h": "c",
+        "stm32f446_cfg_pins.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false
