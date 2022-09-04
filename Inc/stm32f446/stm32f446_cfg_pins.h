@@ -27,6 +27,14 @@
 #define I2C_SDA (0*16+1)
 #define I2C_SCL (0*16+2)
 
+//ssd1306 display interfaced using spi
+#define SSD1306_SCK (0*16+0)
+#define SSD1306_MOSI (0*16+0)
+#define SSD1306_MISO (0*16+0)
+#define SSD1306_CD (0*16+0)
+#define SSD1306_RESET (0*16+0)
+
+
 
 // ***************************************
 // * additional device-specific settings *
