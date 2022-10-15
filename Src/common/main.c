@@ -152,7 +152,7 @@ int main(void)
 	for(;;)
 	{
 
-		cliApiTask(task);
+		//cliApiTask(task);
 		if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
 		{
 			
@@ -164,8 +164,10 @@ int main(void)
 
 			for (uint8_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
 			{
+				
 				// convert raw input to float
 				inputSample=(float)(*(audioBufferInputPtr + c) >> 8);
+				/*
 		
 
 				if (inputSample < 0.0f)
@@ -181,7 +183,7 @@ int main(void)
 				//inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
 
 
-				if (inputSample < 0)
+				if (inputSample < 0.0f)
 				{
 					avgOut = -inputSample;
 				}
@@ -193,6 +195,7 @@ int main(void)
 
 				*((uint32_t*)audioBufferPtr+c) = ((int32_t)inputSample)<<8;  
 				*((uint32_t*)audioBufferPtr+c+1) = ((int32_t)inputSample)<<8;
+				*/
 
 			}
 			task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
@@ -212,7 +215,7 @@ int main(void)
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
-
+		
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
@@ -255,7 +258,7 @@ int main(void)
                 adcChannelOld2=adcChannel;
             }
             task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
-            //*ADC_CS |= (1 << ADC_CS_START_MANY_LSB);
+            // *ADC_CS |= (1 << ADC_CS_START_MANY_LSB);
         }
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
         {

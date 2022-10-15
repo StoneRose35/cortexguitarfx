@@ -61,7 +61,7 @@ void initSsd1306Display()
 
     regbfr = SPI3->CR1;
     regbfr &= ~(7 << SPI_CR1_BR_Pos);
-    regbfr |= (8 << SPI_CR1_BR_Pos) | (1 << SPI_CR1_MSTR_Pos); // 45MHz/8=52.625 MHz, Master
+    regbfr |= (2 << SPI_CR1_BR_Pos) | (1 << SPI_CR1_MSTR_Pos) | (1 << SPI_CR1_SSM_Pos) | (1 << SPI_CR1_SSI_Pos); // 45MHz/8=5.625 MHz, Master, software slave select
     SPI3->CR1 = regbfr;
     SPI3->CR1 |= (1 << SPI_CR1_SPE_Pos);
 
