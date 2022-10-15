@@ -74,7 +74,7 @@ static void config_i2s_pin(uint8_t pinnr,uint8_t af)
     gpio->PUPDR &= ~(3 << ((pinnr & 0xF)<<1));
     regbfr = gpio->AFR[(pinnr & 0xF)>>3];
     regbfr &= ~(0xF << ((pinnr & 0x7) << 2));
-    regbfr |= 5 << ((pinnr & 0x7) << 2);
+    regbfr |= af << ((pinnr & 0x7) << 2);
     gpio->AFR[(pinnr & 0xF)>>3] = regbfr; 
 }
 
