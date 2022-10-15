@@ -88,6 +88,8 @@ void initI2S()
     //configure pins
     config_i2s_pin(I2S_BCLK);
     config_i2s_pin(I2S_LRCLK);
+    config_i2s_pin(I2S_BCLK2);
+    config_i2s_pin(I2S_LRCLK2);
     config_i2s_pin(I2S_DIN);
     config_i2s_pin(I2S_DOUT);
 

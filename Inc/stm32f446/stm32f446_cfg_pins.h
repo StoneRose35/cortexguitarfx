@@ -10,17 +10,19 @@
 
 // adc pins used by the three potentiometer, refer to the datasheet for a list of possible options
 // 
-#define POT1 (0*16+3) // PA3
+#define POT1 (0*16+3) // PA3 
 #define POT2 (2*16+0) // PC0
 #define POT3 (2*16+3) // PC3
 
 
-// i2s interface
-#define I2S_BCLK (0*16+5) // PA5
-#define I2S_LRCLK (0*16+4) // PA4 
-#define I2S_DOUT (2*16+1) // PC1 
-#define I2S_DIN (0*16+7) // PA7
 
+// i2s interface
+#define I2S_BCLK (0*16+5) // PA5 I2S1 SCK
+#define I2S_LRCLK (0*16+4) // PA4 I2S1 LRCLK
+#define I2S_DOUT (2*16+1) // PC1 I2S2 SD
+#define I2S_DIN (0*16+7) // PA7 I2S1 SD
+#define I2S_BCLK2 (1*16+10) // PB10 I2S2 SCK
+#define I2S_LRCLK2 (1*16+12) // PB12 I2S2 LRCLK
 // i2c interface
 #define I2C_SDA (1*16+9) // PB9
 #define I2C_SCL (1*16+6) // PB6
