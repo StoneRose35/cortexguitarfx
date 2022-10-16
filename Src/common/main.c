@@ -162,11 +162,11 @@ int main(void)
 			audioBufferInputPtr = getInputAudioBufferHiRes();
 
 
-			for (uint8_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
+			for (uint32_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
 			{
 				
 				// convert raw input to float
-				inputSample=(float)(*(audioBufferInputPtr + c) >> 8);
+				inputSample=(float)(*(audioBufferInputPtr + c));
 				/*
 		
 
@@ -193,10 +193,10 @@ int main(void)
 				}
 				avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
 
-				*((uint32_t*)audioBufferPtr+c) = ((int32_t)inputSample)<<8;  
-				*((uint32_t*)audioBufferPtr+c+1) = ((int32_t)inputSample)<<8;
 				*/
 
+				*(audioBufferPtr+c) = ((int32_t)inputSample);  
+				*(audioBufferPtr+c+1) = ((int32_t)inputSample);
 			}
 			task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
 			bufferCnt++;
@@ -216,6 +216,7 @@ int main(void)
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
 		
+		/*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
@@ -258,8 +259,10 @@ int main(void)
                 adcChannelOld2=adcChannel;
             }
             task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
-            // *ADC_CS |= (1 << ADC_CS_START_MANY_LSB);
+            
         }
+        */
+		
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
         {
             avgOldInBfr = (int32_t)avgInOld >> 8;
@@ -268,6 +271,7 @@ int main(void)
             updateAudioUi(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
+		
         switchVals[0] = getSwitchValue(0);
         if (switchVals[0] == 0 && switchValsOld[0] == 1)
         {
@@ -287,6 +291,7 @@ int main(void)
            rotaryCallback(encoderVal,&piPicoUiController);
            encoderValOld=encoderVal;
        }
+	   
 	}
 }
 #endif

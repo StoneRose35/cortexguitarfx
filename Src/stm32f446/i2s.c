@@ -32,7 +32,7 @@ void DMA2_Stream2_IRQHandler() // adc
         dbfrInputPtr=0;
         DMA2->LIFCR = (1 << DMA_LIFCR_CHTIF2_Pos); 
     }
-    task |= TASK_PROCESS_AUDIO_INPUT;
+    task |= (1 << TASK_PROCESS_AUDIO_INPUT);
 }
 
 
@@ -54,9 +54,9 @@ void DMA1_Stream4_IRQHandler() // dac
     else if ((DMA1->HISR & DMA_HISR_HTIF4) != 0)
     {
         dbfrPtr=0;
-        DMA2->HIFCR = (1 << DMA_HIFCR_CHTIF4_Pos); 
+        DMA1->HIFCR = (1 << DMA_HIFCR_CHTIF4_Pos); 
     }
-    task |= TASK_PROCESS_AUDIO;
+    task |= (1 << TASK_PROCESS_AUDIO);
 }
 
 static void config_i2s_pin(uint8_t pinnr,uint8_t af)
@@ -142,12 +142,13 @@ void toggleAudioBuffer()
 {}
 int32_t* getEditableAudioBufferHiRes()
 {
-    return (int32_t*)dbfrPtr;
+    int32_t* res = (int32_t*)((dbfrPtr<<2) + (uint32_t)i2sDoubleBuffer);
+    return res;
 }
 #ifdef I2S_INPUT
 int32_t* getInputAudioBufferHiRes()
 {
-    return (int32_t*)dbfrInputPtr;
+    return (int32_t*)((dbfrInputPtr<<2) + (uint32_t)i2sDoubleBufferIn);
 }
 void toggleAudioInputBuffer()
 {
