@@ -60,7 +60,8 @@ uint16_t* audioBufferInputPtr;
 #else
 int32_t* audioBufferInputPtr;
 #endif
-float inputSample, inputSampleOther;
+float inputSample,inputSampleScaled;
+int32_t inputSampleInt;
 volatile float avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
 uint16_t bufferCnt=0;
 volatile uint8_t fxProgramIdx = 1;
@@ -166,8 +167,9 @@ int main(void)
 			{
 				
 				// convert raw input to float
-				inputSample=(float)(*(audioBufferInputPtr + c));
-				/*
+				inputSampleInt = (int32_t)((uint32_t)*(audioBufferInputPtr + c) & 0x00FFFFFFL) ;
+				inputSample=(float)(inputSampleInt);
+				
 		
 
 				if (inputSample < 0.0f)
@@ -193,10 +195,9 @@ int main(void)
 				}
 				avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
 
-				*/
-
+				
 				*(audioBufferPtr+c) = ((int32_t)inputSample);  
-				*(audioBufferPtr+c+1) = ((int32_t)inputSample);
+				*(audioBufferPtr+c+1) = inputSampleInt;
 			}
 			task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
 			bufferCnt++;
@@ -262,7 +263,7 @@ int main(void)
             
         }
         */
-		
+		/*
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
         {
             avgOldInBfr = (int32_t)avgInOld >> 8;
@@ -291,7 +292,7 @@ int main(void)
            rotaryCallback(encoderVal,&piPicoUiController);
            encoderValOld=encoderVal;
        }
-	   
+	   */
 	}
 }
 #endif

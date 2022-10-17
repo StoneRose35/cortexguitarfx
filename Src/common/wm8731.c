@@ -10,6 +10,10 @@ void wm8731_write(uint16_t data)
 void setupWm8731(uint8_t sampledepth,uint8_t samplerate)
 {
     uint16_t sampleRateConf;
+
+    // reset, interface might save been enabled before
+    const uint16_t registerDataReset = WM8731_R15;
+    wm8731_write(registerDataReset);
     
     // R0, set volume to 0dB for both L and R channel, disable mute
     const uint16_t registerData0 = (WM8731_R0 | (23 << LIN_VOL) | (1 << LRIN_BOTH_LSB)); 
