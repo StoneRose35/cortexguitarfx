@@ -103,7 +103,6 @@ int main(void)
 	 * Initialize Hardware components
 	 * 
 	 * */
-	enableFpu();
     setupClock();
 	initSystickTimer();
 	initDatetimeClock();
@@ -195,8 +194,8 @@ int main(void)
 				}
 				avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
 
-				
-				*(audioBufferPtr+c) = ((int32_t)inputSample);  
+				inputSampleInt=((int32_t)inputSample);
+				*(audioBufferPtr+c) = inputSampleInt;  
 				*(audioBufferPtr+c+1) = inputSampleInt;
 			}
 			task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
@@ -263,7 +262,7 @@ int main(void)
             
         }
         */
-		/*
+		
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
         {
             avgOldInBfr = (int32_t)avgInOld >> 8;
@@ -292,7 +291,7 @@ int main(void)
            rotaryCallback(encoderVal,&piPicoUiController);
            encoderValOld=encoderVal;
        }
-	   */
+	   
 	}
 }
 #endif

@@ -94,6 +94,13 @@ LoopFillZerobss:
 /* Call static constructors */
   /*bl __libc_init_array*/
 /* Call the application's entry point.*/
+
+/* enable the fpu
+ */
+  ldr.w r1,=0xE000ED88
+  ldr r0,[r1]
+  orr r0,r0, #(0xF << 20)
+  str r0,[r1]
   bl main
 
 LoopForever:
