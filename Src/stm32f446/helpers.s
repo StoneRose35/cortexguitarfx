@@ -1,14 +1,14 @@
 
 .syntax unified
 .cpu cortex-m4
-;.fpu softvfp
+.fpu fpv4-sp-d16
 .thumb
   
 
 .align 2
 
-; delay function for the display driver (ssd1306)
-; manually tuned to work @180MHz and 2.8125MHz SPI Clock Frequency
+// delay function for the display driver (ssd1306)
+// manually tuned to work @180MHz and 2.8125MHz SPI Clock Frequency
 .global short_nop_delay
 .type short_nop_delay,%function
 .thumb_func
@@ -21,3 +21,27 @@ sub r0,r0,#1
 cmp r0,#0
 bne short_delay_l1
 pop {r0}
+
+// computes the sum of the products of two float vectors
+// a[0]*b[0] + a[1]*b[1] + a[2]*b[2] .... 
+// r0: pointer to coefficients, r1: pointer to data, r2:length
+.global convolve
+.type convolve,%function
+.thumb_func
+convolve:
+vpush {s0-s2}
+vldr.32 s0,[r0,#4]
+vldr.32 s1,[r1,#4]
+vmul.f32 s0,s0,s1
+sub r2,#1
+cmp r2,#0
+beq conv_loop_end
+conv_loop:
+vldr.32 s1,[r0,#4]
+vldr.32 s2,[r1,#4]
+vmla.f32 s0,s1,s2
+sub r2,#1
+cmp r2,#0
+bne conv_loop
+conv_loop_end:
+vpop {s0-s2}

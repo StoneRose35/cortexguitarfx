@@ -60,6 +60,9 @@ Inc/gen/compilationInfo.h: Inc/gen
 out/stm32f446_startup.o: Startup/startup_stm32f446zetx.s
 	$(CC) $(CARGS) -c  $< -o ./out/stm32f446_startup.o
 
+out/helpers.o: Src/stm32f446/helpers.s	
+	$(CC) $(CARGS) -c  $< -o ./out/helpers.o
+
 # stm32f446-specific libraries
 out/%.o: Src/stm32f446/%.c $(ASSET_IMAGES) 
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
@@ -109,7 +112,7 @@ Inc/images/%.h: Assets/%.png
 	./tools/helper_scripts.py -convertImg $^
 
 # main linking and generating flashable content
-$(PROJECT).elf: out/stm32f446_startup.o all_stm32f446 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
+$(PROJECT).elf: out/stm32f446_startup.o out/helpers.o all_stm32f446 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
 $(PROJECT).bin: $(PROJECT).elf
