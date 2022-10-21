@@ -32,7 +32,7 @@
 #define SSD1306_MOSI (1*16+2) // PB2
 #define SSD1306_MISO (2*16+11) // PC11
 #define SSD1306_CD (0*16+6) // PA6
-#define SSD1306_RESET (2*16+3) //PC3
+#define SSD1306_RESET (2*16+6) //PC6
 
 
 
