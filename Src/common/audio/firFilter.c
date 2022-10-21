@@ -6,15 +6,8 @@
 #include "hardware/rp2040_registers.h"
 #endif
 
-void initfirFilter(FirFilterType*data)
-{
-    data->filterLength=64;
-    data->delayPointer=0;
-    for(uint8_t c=0;c<data->filterLength;c++)
-    {
-        data->delayBuffer[c]=0;
-    }
-}
+#ifndef FLOAT_AUDIO
+
 
 void addSample(int16_t sampleIn,FirFilterType*data)
 {
@@ -69,4 +62,18 @@ int16_t processSecondHalf(FirFilterType*data)
     }
     res >>= 15;
     return (int16_t)res;
+}
+#else
+
+
+#endif
+
+void initfirFilter(FirFilterType*data)
+{
+    data->filterLength=64;
+    data->delayPointer=0;
+    for(uint8_t c=0;c<data->filterLength;c++)
+    {
+        data->delayBuffer[c]=0;
+    }
 }

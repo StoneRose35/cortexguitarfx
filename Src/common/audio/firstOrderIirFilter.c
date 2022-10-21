@@ -1,6 +1,7 @@
 
 #include "audio/firstOrderIirFilter.h"
 
+#ifndef FLOAT_AUDIO
 void initFirstOrderIirFilter(FirstOrderIirType*data)
 {
     data->oldVal=0;
@@ -21,3 +22,19 @@ int16_t firstOrderIirHighpassProcessSample(int16_t sampleIn,FirstOrderIirType*da
     data->oldXVal = sampleIn;
     return data->oldVal;
 }
+
+#else
+
+float firstOrderIirLowpassProcessSample(float sampleIn,FirstOrderIirType*data)
+{
+    data->oldVal = data->alpha*data->oldVal + (1.0f - data->alpha)*sampleIn;
+    return data->oldVal;
+}
+
+float firstOrderIirHighpassProcessSample(float sampleIn,FirstOrderIirType*data)
+{
+    data->oldVal = (1.0f + data->alpha)/2.0f*(sampleIn - data->oldXVal) + data->alpha*data->oldVal;
+    data->oldXVal = sampleIn;
+    return data->oldVal;
+}
+#endif

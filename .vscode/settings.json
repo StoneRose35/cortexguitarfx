@@ -40,7 +40,8 @@
         "spi.h": "c",
         "rp2040_registers.h": "c",
         "consolebase.h": "c",
-        "stm32f446_cfg_pins.h": "c"
+        "stm32f446_cfg_pins.h": "c",
+        "float.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false
