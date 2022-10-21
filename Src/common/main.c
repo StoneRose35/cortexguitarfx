@@ -216,7 +216,7 @@ int main(void)
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
 		
-		/*
+		
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
@@ -261,12 +261,12 @@ int main(void)
             task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
             
         }
-        */
+        
 		
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
         {
-            avgOldInBfr = (int32_t)avgInOld >> 8;
-            avgOldOutBfr = (int32_t)avgOutOld >> 8;
+            avgOldInBfr = (int32_t)avgInOld >> 16;
+            avgOldOutBfr = (int32_t)avgOutOld >> 16;
             cpuLoadBfr = (cpuLoad >> 1);
             updateAudioUi(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);

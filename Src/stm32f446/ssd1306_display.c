@@ -4,6 +4,7 @@
 #include "fonts/oled_font_5x7.h"
 #include "stm32f446/stm32f446xx.h"
 #include "stm32f446/stm32f446_cfg_pins.h"
+#include "stm32f446/helpers.h"
 
 static GPIO_TypeDef *gpio_cd;
 static GPIO_TypeDef *gpio_reset;
@@ -61,7 +62,7 @@ void initSsd1306Display()
 
     regbfr = SPI3->CR1;
     regbfr &= ~(7 << SPI_CR1_BR_Pos);
-    regbfr |= (4 << SPI_CR1_BR_Pos) | (1 << SPI_CR1_MSTR_Pos) | (1 << SPI_CR1_SSM_Pos) | (1 << SPI_CR1_SSI_Pos); // 45MHz/32=1.40625 MHz, Master, software slave select
+    regbfr |= (3 << SPI_CR1_BR_Pos) | (1 << SPI_CR1_MSTR_Pos) | (1 << SPI_CR1_SSM_Pos) | (1 << SPI_CR1_SSI_Pos); // 45MHz/32=1.40625 MHz, Master, software slave select
     SPI3->CR1 = regbfr;
     SPI3->CR1 |= (1 << SPI_CR1_SPE_Pos);
 
@@ -79,18 +80,23 @@ void initSsd1306Display()
     // manually set display offset and  startline since these two values turned out to be wrong after reset
     
     gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
+    short_nop_delay();
     SPI3->DR = 0x40; // set startline 0
+    short_nop_delay();              
     while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
     // set displayoffset 0
     SPI3->DR = 0xD3;
+    short_nop_delay();
     while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
     SPI3->DR = 0x0;
+    short_nop_delay();
     while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
     
     // send display on command
     gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
+    short_nop_delay();  
     SPI3->DR = 0xAF;
-    while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
+    //while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
     waitSysticks(11);
 }
 
@@ -109,16 +115,20 @@ void ssd1306_nop()
  */
 void setCursor(uint8_t row, uint8_t col)
 {
-    gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
+    gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low  
+    short_nop_delay();
     // set column, low nibble
     SPI3->DR = ((col+2) & 0x0F);
-    while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
+    short_nop_delay();
+    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
     // set column, high nibble
     SPI3->DR  = 0x10 | ((col+2) >> 4);
-    while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
+    short_nop_delay();
+    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
     // set row / page
     SPI3->DR  = 0xB0 | row;
-    while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
+    short_nop_delay();
+    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
 }
 
 void ssd1306WriteChar(uint8_t row,uint8_t col,char chr)
@@ -128,18 +138,23 @@ void ssd1306WriteChar(uint8_t row,uint8_t col,char chr)
     fontIdx = (uint8_t)chr - ' ';
 
     gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
+    short_nop_delay();
     for (uint8_t c=0;c<5;c++)
     {
         SPI3->DR = oled_font_5x7[fontIdx][c];
+        short_nop_delay();              
         while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
     }
     SPI3->DR = 0x0;
+    short_nop_delay();   
     while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
     if(col==20) // clear last two columns
     {
         SPI3->DR = 0x0;
+        short_nop_delay();  
         while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
         SPI3->DR = 0x0;
+        short_nop_delay();      
         while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
     }
 }
@@ -162,9 +177,11 @@ void ssd1306DisplayByteArray(uint8_t row,uint8_t col,uint8_t *arr,uint16_t array
 {
     setCursor(row,col);
     gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
+    short_nop_delay();
     for (uint16_t c=0;c<arrayLength;c++)
     {
         SPI3->DR = *(arr + c);
+        short_nop_delay();
         while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
     }
 }
@@ -212,10 +229,12 @@ void ssd1306DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8
     {
         setCursor(py+cc,px);
         gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
+        short_nop_delay(); 
         for(uint8_t c=0;c<sx;c++)
         {
             index=c*sy + cc;
             SPI3->DR = img[index];
+            short_nop_delay(); 
             while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);
         }
     }
@@ -231,6 +250,7 @@ void ssd1306ClearDisplay()
         {
             gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
             SPI3->DR  = 0x0;
+            short_nop_delay();
             while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
         }
     } 
