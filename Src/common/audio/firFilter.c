@@ -6,6 +6,9 @@
 #include "hardware/rp2040_registers.h"
 #endif
 
+#ifdef STM32
+#include "stm32f446/helpers.h"
+#endif
 #ifndef FLOAT_AUDIO
 
 
@@ -63,10 +66,6 @@ int16_t processSecondHalf(FirFilterType*data)
     res >>= 15;
     return (int16_t)res;
 }
-#else
-
-
-#endif
 
 void initfirFilter(FirFilterType*data)
 {
@@ -77,3 +76,43 @@ void initfirFilter(FirFilterType*data)
         data->delayBuffer[c]=0;
     }
 }
+#else
+
+void addSample(float sampleIn,FirFilterType*data)
+{
+    *(data->delayBuffer + data->delayPointer--)=sampleIn;
+    data->delayPointer &= (uint8_t)(data->filterLength-1);
+}
+
+float processFirstHalf(FirFilterType*data)
+{
+    //convolve(data->coefficients,data->delayBuffer,data->delayPointer);
+    return 0.0f;
+}
+
+float processSecondHalf(FirFilterType*data)
+{
+    //convolve(data->coefficients,data->delayBuffer,(data->delayPointer + (data->filterLength >> 1)) & (data->filterLength-1));
+    return 0.0f;
+}
+
+float firFilterProcessSample(float sampleIn,FirFilterType*data)
+{
+    addSample(sampleIn,data);
+    float res;
+    res = convolve(data->coefficients,data->delayBuffer,data->delayPointer);
+    return res;
+}
+
+void initfirFilter(FirFilterType*data)
+{
+    data->filterLength=64;
+    data->delayPointer=0;
+    for(uint8_t c=0;c<data->filterLength;c++)
+    {
+        data->delayBuffer[c]=0.0f;
+    }
+}
+#endif
+
+
