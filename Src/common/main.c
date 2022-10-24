@@ -63,12 +63,12 @@ int32_t* audioBufferInputPtr;
 float inputSample,inputSampleScaled;
 int32_t inputSampleInt;
 volatile float avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
-uint16_t bufferCnt=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
+uint16_t cpuLoads[256];
+uint16_t cpuLoadCnt=0;
+
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
-#define UI_UPDATE_IN_SAMPLE_BUFFERS 300
-#define AVERAGING_LOWPASS_CUTOFF 0.0001f
 #define ADC_LOWPASS 2
 #define UI_DMIN 1
 uint32_t encoderVal,encoderCntr,encNew;
@@ -80,7 +80,7 @@ uint16_t adcVal;
 
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
-uint8_t cpuLoadBfr;
+uint16_t cpuLoadBfr;
 uint8_t switchValsOld[2]={0,0};
 uint32_t encoderValOld=0,encoderVal;
 uint8_t switchVals[2]={0,0};
@@ -151,77 +151,15 @@ int main(void)
     /* Loop forever */
 	for(;;)
 	{
+		ticStart = getTimeLW();
 
 		//cliApiTask(task);
-		if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
-		{
-			
-			ticStart = getTimeLW();
-
-			audioBufferPtr = getEditableAudioBufferHiRes();
-			audioBufferInputPtr = getInputAudioBufferHiRes();
-
-
-			for (uint32_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
-			{
-				
-				// convert raw input to float
-				inputSampleInt = (int32_t)((uint32_t)*(audioBufferInputPtr + c) & 0x00FFFFFFL) ;
-				inputSample=(float)(inputSampleInt);
-				
-		
-
-				if (inputSample < 0.0f)
-				{
-					avgIn = -inputSample;
-				}
-				else
-				{
-					avgIn = inputSample;
-				}
-				avgInOld = AVERAGING_LOWPASS_CUTOFF*avgIn + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgInOld);
-
-				//inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
-
-
-				if (inputSample < 0.0f)
-				{
-					avgOut = -inputSample;
-				}
-				else
-				{
-					avgOut = inputSample;
-				}
-				avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
-
-				inputSampleInt=((int32_t)inputSample);
-				*(audioBufferPtr+c) = inputSampleInt;  
-				*(audioBufferPtr+c+1) = inputSampleInt;
-			}
-			task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
-			bufferCnt++;
-
-			ticEnd = getTimeLW();
-			if(ticEnd > ticStart)
-			{
-				cpuLoad = ticEnd-ticStart;
-				cpuLoad = cpuLoad*196; // *256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
-				cpuLoad = cpuLoad >> 8;
-			}
-			
-		}		
-		if (bufferCnt == UI_UPDATE_IN_SAMPLE_BUFFERS)
-		{
-			bufferCnt = 0;
-			task |= (1 << TASK_UPDATE_AUDIO_UI);
-		}
-		
-		
+	
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
             adcChannel = getChannel0Value();
-            adcChannel0 = adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
+            adcChannel0 = adcChannel; //adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
             if ((adcChannel0 > adcChannelOld0) && (adcChannel0-adcChannelOld0) > UI_DMIN )
             {
                 knob0Callback(adcChannel0,&piPicoUiController);
@@ -234,7 +172,7 @@ int main(void)
             }
 
             adcChannel = getChannel1Value();
-            adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
+            adcChannel1 = adcChannel; //adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
             if ((adcChannel1 > adcChannelOld1) && (adcChannel1-adcChannelOld1) > UI_DMIN )
             {
                 knob1Callback(adcChannel1,&piPicoUiController);
@@ -247,7 +185,7 @@ int main(void)
             }
 
             adcChannel = getChannel2Value();
-            adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
+            adcChannel2 = adcChannel;// adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
             if ((adcChannel2 > adcChannelOld2) && (adcChannel2-adcChannelOld2) > UI_DMIN )
             {
                 knob2Callback(adcChannel2,&piPicoUiController);
@@ -259,7 +197,7 @@ int main(void)
                 adcChannelOld2=adcChannel;
             }
             task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
-            
+            restartAdc();
         }
         
 		
@@ -267,7 +205,17 @@ int main(void)
         {
             avgOldInBfr = (int32_t)avgInOld >> 16;
             avgOldOutBfr = (int32_t)avgOutOld >> 16;
-            cpuLoadBfr = (cpuLoad >> 1);
+
+			if (cpuLoadCnt>255)
+			{
+				cpuLoadBfr=0;
+				for (uint16_t a=0;a<256;a++)
+				{
+					cpuLoadBfr += cpuLoads[a];
+				}
+				cpuLoadBfr = (cpuLoad >> (1+8));
+				cpuLoadCnt=0;
+			}
             updateAudioUi(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
@@ -292,6 +240,18 @@ int main(void)
            encoderValOld=encoderVal;
        }
 	   
+
+		ticEnd = getTimeLW();
+		if(ticEnd > ticStart)
+		{
+			cpuLoad = ticEnd-ticStart;
+			cpuLoad = cpuLoad*196; // *256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
+			cpuLoad = cpuLoad >> 8;
+		}
+		if (cpuLoadCnt<256)
+		{
+			cpuLoads[cpuLoadCnt++]=cpuLoad;
+		}
 	}
 }
 #endif
