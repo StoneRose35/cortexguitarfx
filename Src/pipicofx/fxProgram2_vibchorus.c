@@ -2,12 +2,21 @@
 #include "audio/fxprogram/fxProgram.h"
 #include "stringFunctions.h"
 
+#ifndef FLOAT_AUDIO
 static int16_t fxProgram2processSample(int16_t sampleIn,void*data)
 {
     FxProgram2DataType* pData = (FxProgram2DataType*)data;
     sampleIn >>= 1;
     return simpleChorusProcessSample(sampleIn,&pData->chorusData);
 }
+#else
+static float fxProgram2processSample(float sampleIn,void*data)
+{
+    FxProgram2DataType* pData = (FxProgram2DataType*)data;
+    sampleIn =sampleIn/2.0f;
+    return simpleChorusProcessSample(sampleIn,&pData->chorusData);
+}
+#endif
 
 static void fxProgram2Param1Callback(uint16_t val,void*data) // frequency
 {
@@ -46,16 +55,16 @@ static void fxProgram2Param2Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram2DataType* fData=(FxProgram2DataType*)data;
-    dVal = fData->chorusData.depth/164;
+    dVal = fData->chorusData.depth; ///164;
     Int16ToChar(dVal,res);
     for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
     {
-        if(*(res+c)==0)
-        {
-            *(res+c)='%';
-            *(res+c+1)=(char)0;
-            break;
-        }
+        //if(*(res+c)==0)
+        //{
+        //    *(res+c)='%';
+        //    *(res+c+1)=(char)0;
+        //    break;
+        //}
     }
 }
 
@@ -71,7 +80,8 @@ static void fxProgram2Param3Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram2DataType* fData = (FxProgram2DataType*)data;
-    dVal = fData->chorusData.mix/328;
+    dVal = fData->chorusData.mix*100;
+    dVal=dVal >> 8;
     Int16ToChar(dVal,res);
     for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
     {

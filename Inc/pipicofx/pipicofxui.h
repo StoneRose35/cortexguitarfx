@@ -29,5 +29,4 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data);
 
 void piPicoFxUiSetup();
 
-PiPicoFxUiType piPicoUiController;
 #endif

@@ -65,8 +65,9 @@ int32_t inputSampleInt;
 volatile float avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
-uint16_t cpuLoads[256];
-uint16_t cpuLoadCnt=0;
+PiPicoFxUiType piPicoUiController;
+//uint16_t cpuLoads[256];
+//uint16_t cpuLoadCnt=0;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define ADC_LOWPASS 2
@@ -151,7 +152,7 @@ int main(void)
     /* Loop forever */
 	for(;;)
 	{
-		ticStart = getTimeLW();
+
 
 		//cliApiTask(task);
 	
@@ -206,16 +207,17 @@ int main(void)
             avgOldInBfr = (int32_t)avgInOld >> 16;
             avgOldOutBfr = (int32_t)avgOutOld >> 16;
 
-			if (cpuLoadCnt>255)
-			{
-				cpuLoadBfr=0;
-				for (uint16_t a=0;a<256;a++)
-				{
-					cpuLoadBfr += cpuLoads[a];
-				}
-				cpuLoadBfr = (cpuLoad >> (1+8));
-				cpuLoadCnt=0;
-			}
+			//if (cpuLoadCnt>255)
+			//{
+			//	cpuLoadBfr=0;
+			//	for (uint16_t a=0;a<256;a++)
+			//	{
+			//		cpuLoadBfr += cpuLoads[a];
+			//	}
+			//	cpuLoadBfr = (cpuLoad >> (1+8));
+			//	cpuLoadCnt=0;
+			//}
+            cpuLoadBfr = cpuLoad >> 1;
             updateAudioUi(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
@@ -239,19 +241,7 @@ int main(void)
            rotaryCallback(encoderVal,&piPicoUiController);
            encoderValOld=encoderVal;
        }
-	   
-
-		ticEnd = getTimeLW();
-		if(ticEnd > ticStart)
-		{
-			cpuLoad = ticEnd-ticStart;
-			cpuLoad = cpuLoad*196; // *256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
-			cpuLoad = cpuLoad >> 8;
-		}
-		if (cpuLoadCnt<256)
-		{
-			cpuLoads[cpuLoadCnt++]=cpuLoad;
-		}
+	
 	}
 }
 #endif
