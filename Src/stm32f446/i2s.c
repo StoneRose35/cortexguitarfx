@@ -3,7 +3,8 @@
 #include "stm32f446/stm32f446xx.h"
 #include "stm32f446/stm32f446_cfg_pins.h"
 #include "system.h"
-
+#include "timer.h"
+#include "pipicofx/pipicofxui.h"
 #define AVERAGING_LOWPASS_CUTOFF 0.0001f
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 256
 
@@ -16,13 +17,15 @@ static volatile uint32_t dbfrInputPtr;
 volatile uint32_t audioState;
 extern uint32_t task;
 extern float avgInOld, avgOutOld;
+extern uint32_t cpuLoad;
+extern PiPicoFxUiType piPicoUiController;
 uint16_t bufferCnt;
 
 int32_t *  audioBufferPtr;
 int32_t *  audioBufferInputPtr;
-int32_t inputSampleInt;
+int32_t inputSampleInt,inputSampleInt2;
 float inputSample, avgIn, avgOut;
-
+uint32_t ticStart, ticEnd;
 
 void DMA2_Stream2_IRQHandler() // adc
 {
@@ -49,15 +52,18 @@ void DMA2_Stream2_IRQHandler() // adc
     if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
     {
 
-
+		ticStart = getTimeLW();
         audioBufferPtr = getEditableAudioBufferHiRes();
         audioBufferInputPtr = getInputAudioBufferHiRes();
         for (uint32_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
         {
             
             // convert raw input to float
-            inputSampleInt = (int32_t)((uint32_t)*(audioBufferInputPtr + c) & 0x00FFFFFFL) ;
-            inputSample=(float)(inputSampleInt);
+            inputSampleInt2 = *(audioBufferInputPtr + c);
+            inputSampleInt = ((int32_t)((((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF) << 16) 
+                              | (((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF0000L) >> 16))) >> 8;  
+                              // flip halfwords, then shift right by 8bits since input data is 24bit left-aligned
+            inputSample=(float)inputSampleInt;
             
     
 
@@ -71,7 +77,7 @@ void DMA2_Stream2_IRQHandler() // adc
             }
             avgInOld = AVERAGING_LOWPASS_CUTOFF*avgIn + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgInOld);
 
-            //inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
+            inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
 
 
             if (inputSample < 0.0f)
@@ -85,6 +91,7 @@ void DMA2_Stream2_IRQHandler() // adc
             avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
 
             inputSampleInt=((int32_t)inputSample);
+            inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);
             *(audioBufferPtr+c) = inputSampleInt;  
             *(audioBufferPtr+c+1) = inputSampleInt;
         }
@@ -94,6 +101,14 @@ void DMA2_Stream2_IRQHandler() // adc
 		{
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
+		}
+
+        ticEnd = getTimeLW();
+		if(ticEnd > ticStart)
+		{
+			cpuLoad = ticEnd-ticStart;
+			cpuLoad = cpuLoad*196; // *256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
+			cpuLoad = cpuLoad >> 8;
 		}
     }
 }
