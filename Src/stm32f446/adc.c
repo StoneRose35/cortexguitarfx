@@ -49,9 +49,9 @@ void initAdc()
     ADC->CCR |= (3 << ADC_CCR_ADCPRE_Pos); // divide by 8 --> 90Mzh/8= 13.33 MSPS
     ADC1->SQR1 |= (2 << ADC_SQR1_L_Pos);
     ADC1->SQR3 = (POT1_CHANNEL << 0) | (POT2_CHANNEL << 5) | (POT3_CHANNEL << 10);
-    setSampleCycles(2,POT1_CHANNEL);
-    setSampleCycles(2,POT2_CHANNEL);
-    setSampleCycles(2,POT3_CHANNEL);
+    setSampleCycles(7,POT1_CHANNEL);
+    setSampleCycles(7,POT2_CHANNEL);
+    setSampleCycles(7,POT3_CHANNEL);
     ADC1->CR1 |= (1 << ADC_CR1_SCAN_Pos);
 
     // enable the port to which the pots are attached
@@ -76,13 +76,13 @@ void initAdc()
 
         //setup timer 2
     RCC->APB1ENR |= (1 << RCC_APB1ENR_TIM2EN_Pos);
-    //TIM2->PSC = 65217; // divide 90MHz by 65217 (Prescaler) and 46 (ARR, CCR2) to achieve 30Hz ADC Sampling Frequency
+    TIM2->PSC = 65217; // divide 90MHz by 65217 (Prescaler) and 46 (ARR, CCR2) to achieve 30Hz ADC Sampling Frequency
                        // among all three channels thus update the potentiometers at 10Hz
-    //TIM2->ARR=46;
-    //TIM2->CCR2=46;
-    TIM2->PSC = 65535;
-    TIM2->ARR=137;
-    TIM2->CCR2=137;
+    TIM2->ARR=46;
+    TIM2->CCR2=46;
+    //TIM2->PSC = 65535;
+    //TIM2->ARR=137;
+    //TIM2->CCR2=137;
 }
 
 void initRoundRobinReading()
@@ -114,7 +114,7 @@ void restartAdc()
     //ADC1->CR2 &= ~(1 << ADC_CR2_DMA_Pos);
     //ADC1->CR2 |= (1 << ADC_CR2_DMA_Pos);
     TIM2->SR &= ~(1 << TIM_SR_CC2IF_Pos);
-    TIM2->CNT=0;
+    //TIM2->CNT=0;
     TIM2->CR1 |= (1 << TIM_CR1_CEN_Pos);
 }
 
