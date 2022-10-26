@@ -13,7 +13,6 @@ static int16_t fxProgram2processSample(int16_t sampleIn,void*data)
 static float fxProgram2processSample(float sampleIn,void*data)
 {
     FxProgram2DataType* pData = (FxProgram2DataType*)data;
-    sampleIn =sampleIn/2.0f;
     return simpleChorusProcessSample(sampleIn,&pData->chorusData);
 }
 #endif
