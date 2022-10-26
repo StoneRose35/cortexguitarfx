@@ -301,7 +301,7 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 		{
 			// shift digits back
 			c2=charpos;
-			for(uint8_t c=charpos;c>=0;c--)
+			for(uint8_t c=charpos;c>0;c--)
 			{
 				out[c2+(decimalPlace-charpos)+2] = out[c2];
 				c2--;
