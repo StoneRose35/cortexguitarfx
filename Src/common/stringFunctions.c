@@ -258,11 +258,11 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 	if (((uint16_t)nr & 0x8000) != 0)
 	{
 		// have to add least one zero before the decimal separator
-		if(charpos < decimalPlace+3)
+		if(charpos <= decimalPlace+1)
 		{
 			// shift digits back
 			c2=charpos;
-			for(uint8_t c=charpos;c>0;c--)
+			for(int8_t c=charpos;c>0;c--)
 			{
 				out[c2+(decimalPlace-charpos)+3] = out[c2];
 				c2--;
@@ -284,7 +284,7 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 		else
 		{
 			// shift one position back
-			c2=charpos;
+			c2=charpos-1;
 			for(uint8_t c=0;c<decimalPlace;c++)
 			{
 				out[c2+1] = out[c2];
@@ -297,11 +297,11 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 	else
 	{
 		// have to add least one zero before the decimal separator
-		if(charpos < decimalPlace+2)
+		if(charpos <= decimalPlace)
 		{
 			// shift digits back
 			c2=charpos;
-			for(uint8_t c=charpos;c>0;c--)
+			for(int8_t c=charpos;c>=0;c--)
 			{
 				out[c2+(decimalPlace-charpos)+2] = out[c2];
 				c2--;
@@ -312,18 +312,18 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 			{
 				if (c==1)
 				{
-					out[c+1] = '.';
+					out[c] = '.';
 				}
 				else
 				{
-					out[c+1] = '0';
+					out[c] = '0';
 				}
 			}
 		}
 		else
 		{
 			// shift one position back
-			c2=charpos;
+			c2=charpos-1;
 			for(uint8_t c=0;c<decimalPlace;c++)
 			{
 				out[c2+1] = out[c2];
