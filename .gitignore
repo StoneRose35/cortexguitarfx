@@ -19,6 +19,7 @@
 /Tests/processThroughFxProgram
 /Tests/pipicouitest
 /Tests/compressorTest
+/Tests/decimaltostringtest
 /Tests/audiosamples/*_proc*
 /Tests/libs/*.bmp
 /Tests/libs/bmplib
