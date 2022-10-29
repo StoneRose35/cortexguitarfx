@@ -14,7 +14,7 @@
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 2
+#define N_FX_PROGRAMS 3
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
@@ -48,6 +48,7 @@ typedef struct {
 } FxProgramType;
 
 
+#ifndef FLOAT_AUDIO
 typedef struct {
     int16_t highpassCutoff;
     uint8_t nWaveshapers;
@@ -57,6 +58,17 @@ typedef struct {
     SecondOrderIirFilterType filter1;
     DelayDataType * delay;
 } FxProgram1DataType;
+#else
+typedef struct {
+    float highpassCutoff;
+    uint8_t nWaveshapers;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    WaveShaperDataType waveshaper1;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram1DataType;
+#endif
 
 typedef struct {
     SimpleChorusType chorusData;

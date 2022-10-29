@@ -1,5 +1,14 @@
 #include "audio/waveShaper.h"
 
+
+void initWaveShaper(WaveShaperDataType * data,const WaveShaperDataType* copyFrom)
+{
+    for (uint8_t c=0;c<128;c++)
+    {
+        data->transferFunctionPoints[c]=copyFrom->transferFunctionPoints[c];
+    }
+}
+
 #ifndef FLOAT_AUDIO
 const WaveShaperDataType waveShaperUnity = {
     .transferFunctionPoints = {
@@ -50,14 +59,6 @@ const WaveShaperDataType waveShaperAsymm = {
 };
 
 
-
-void initWaveShaper(WaveShaperDataType * data,const WaveShaperDataType* copyFrom)
-{
-    for (uint8_t c=0;c<128;c++)
-    {
-        data->transferFunctionPoints[c]=copyFrom->transferFunctionPoints[c];
-    }
-}
 
 int16_t waveShaperProcessSample(int16_t sampleIn,WaveShaperDataType* data)
 {

@@ -12,6 +12,7 @@
 /Inc/gen/*.h
 /Doc/gen/*
 /Doc/.idea
+/Doc/audio/__pycache__/*
 /Tests/piRegulatorTest
 /Tests/piregulator.txt
 /Tests/audioTest
@@ -27,3 +28,4 @@
 /tools/fattestsmall.img
 **/.idea
 /.vscode/*.log
+/.vscode/.*.json

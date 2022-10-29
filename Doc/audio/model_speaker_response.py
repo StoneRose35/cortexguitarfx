@@ -9,9 +9,12 @@ import audio.filter_calculations
 
 def get_ir(fname,sampling_rate=48000):
     wavdata = scipy.io.wavfile.read(fname)
-    if len(wavdata[1][0]) > 1:
-        rawwav = np.array(list(map(lambda x: x[0],wavdata[1])))
-    else:
+    try:
+        if len(wavdata[1][0]) > 1:
+            rawwav = np.array(list(map(lambda x: x[0],wavdata[1])))
+        else:
+            rawwav = wavdata[1]
+    except:
         rawwav = wavdata[1]
     powertwo=2
     dt = 1./wavdata[0]
@@ -60,15 +63,19 @@ def renorm_ir(ir):
     current_power = np.sum(ir)# np.sqrt(np.sum(np.power(ir,2)))
     return ir/current_power
 
-def plot_model_cab_curve(sampling_rate=44100,axes=None,style="-k",sample_length=4096):
+def plot_model_cab_curve(sampling_rate=44100,axes=None,style="-k",sample_length=4096,floattype=False):
     hz = np.ones(sample_length)
     iir_lowpass_order = 2
     iir_lowpass_cutoff = 6000
     b, a=scipy.signal.butter(iir_lowpass_order,iir_lowpass_cutoff,btype="low",analog=False,output="ba",fs=sampling_rate)
-    b_out, a_out = scipy.signal.butter(iir_lowpass_order,iir_lowpass_cutoff,btype="low",analog=False,output="ba",fs=48000)
+    b_out, a_out = scipy.signal.butter(iir_lowpass_order,iir_lowpass_cutoff,btype="low",analog=False,output="ba",fs=sampling_rate)
     b_out = b_out*32767.
     a_out = a_out*32767.
-    print("butterworth lowpass @{}Hz,\r\n\tb: {}\r\n\ta: {}".format(iir_lowpass_cutoff,b_out.astype("int16"),a_out.astype("int16")))
+    if floattype is False:
+        print("butterworth lowpass @{}Hz,\r\n\tb: {}\r\n\ta: {}".format(iir_lowpass_cutoff,b_out.astype("int16"),a_out.astype("int16")))
+    else:
+        print("butterworth lowpass @{}Hz,\r\n\tb: {}\r\n\ta: {}".format(iir_lowpass_cutoff, b.astype("float"),
+                                                                        a.astype("float")))
     wz, hzn = scipy.signal.freqz(b,a,fs=sampling_rate,worN=sample_length)
     hz = hz*hzn
 
@@ -77,13 +84,16 @@ def plot_model_cab_curve(sampling_rate=44100,axes=None,style="-k",sample_length=
     iir_highpass_atten = 20
     b, a = scipy.signal.cheby2(iir_highpass_order,iir_highpass_atten,iir_highpass_cutoff,btype="high",analog=False,output="ba",fs=sampling_rate)
     b_out, a_out = scipy.signal.cheby2(iir_highpass_order, iir_highpass_atten, iir_highpass_cutoff, btype="high", analog=False,
-                               output="ba", fs=48000)
+                               output="ba", fs=sampling_rate)
     b_out = b_out*32767.
     a_out = a_out*32767.
-    print("chebychev highpass @{}Hz with attenuation {}dB\r\n\tb: {}\r\n\ta: {}".format(iir_highpass_cutoff, iir_highpass_atten, b_out.astype("int16"), a_out.astype("int16")))
+    if floattype is False:
+        print("chebychev highpass @{}Hz with attenuation {}dB\r\n\tb: {}\r\n\ta: {}".format(iir_highpass_cutoff, iir_highpass_atten, b_out.astype("int16"), a_out.astype("int16")))
+    else:
+        print("chebychev highpass @{}Hz with attenuation {}dB\r\n\tb: {}\r\n\ta: {}".format(iir_highpass_cutoff, iir_highpass_atten, b.astype("float"), a.astype("float")))
     #b, a = scipy.signal.butter(iir_highpass_order,iir_highpass_cutoff,btype="high",analog=False,output="ba",fs=sampling_rate)
     wzb,hzn = scipy.signal.freqz(b,a,fs=sampling_rate,worN=sample_length)
-    hz = hz*hzn
+    #hz = hz*hzn
     freqs = wz
 
     low_peak_freq = 200
@@ -106,7 +116,10 @@ def plot_model_cab_curve(sampling_rate=44100,axes=None,style="-k",sample_length=
     short_ir = renorm_ir(short_ir)
     wzb, hzn = scipy.signal.freqz(short_ir, fs=sampling_rate,worN=sample_length)
     for el in short_ir:
-        print("0x{:x}, ".format(np.ushort(el*32767)),end="")
+        if floattype is False:
+            print("0x{:x}, ".format(np.ushort(el*32767)),end="")
+        else:
+            print("{:f}f, ".format(el), end="")
     hzn=hzn/max(abs(hzn))
     hz = hz*hzn
     if axes is None:
@@ -359,6 +372,9 @@ class IrOptimizer:
         return soss
 
 if __name__ == "__main__":
+
+    plot_model_cab_curve(sampling_rate=48000, axes=None, style="-k", sample_length=4096,floattype=True)
+    plt.show()
 
     ir_files = ["resources/soundwoofer/Hiwatt Maxwatt M412 SM57 2.wav", "resources/soundwoofer/Fender Frontman 212 AKG D112.wav", "resources/soundwoofer/Vox AC15C1 SM57 1.wav"]
     optimizer = IrOptimizer(3)
