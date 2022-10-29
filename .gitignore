@@ -18,6 +18,7 @@
 /Tests/audioout.txt
 /Tests/processThroughFxProgram
 /Tests/pipicouitest
+/Tests/decimaltostringtest
 /Tests/compressorTest
 /Tests/audiosamples/*_proc*
 /Tests/libs/*.bmp
@@ -26,3 +27,4 @@
 /tools/fattestsmall.img
 **/.idea
 /.vscode/*.log
+/schematics/guitarpreamp/guitarpreamp-backups/*
