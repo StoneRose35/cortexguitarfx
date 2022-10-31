@@ -157,6 +157,7 @@ in pins,1
 jmp x--,i2s_d_s_proc_left
 ;push noblock
 ;pull noblock
+set pins,0 ; assert that zeros are being clocked out 
 set x,15
 wait 1 pin 1 ; wait for lrclk to toggle
 wait 0 pin 2
@@ -167,6 +168,7 @@ out pins,1
 wait 1 pin 2 
 in pins,1
 jmp x--,i2s_d_s_proc_right
+set pins,0 ; assert that zeros are being clocked out
 ;push noblock
 ;pull noblock
 jmp i2s_d_s_wait_left
