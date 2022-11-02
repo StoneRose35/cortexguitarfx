@@ -70,6 +70,8 @@
 #define UART_BT_RX 9
 #define UART_BT_TX 8
 
+// debug pin
+#define DEBUG_PIN_1 2
 
 // ****************************************
 // * other device-specific configurations *

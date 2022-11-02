@@ -8,6 +8,7 @@
 
 #define AUDIO_STATE_INPUT_ON 2
 #define AUDIO_STATE_INPUT_BUFFER_OVERRUN 3
+#define AUDIO_STATE_DMA_FAILURE 4
 
 void initAdc();
 uint16_t readChannel(uint8_t channelnr);

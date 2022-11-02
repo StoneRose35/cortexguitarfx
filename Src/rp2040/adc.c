@@ -137,7 +137,7 @@ void initRoundRobinReading()
     //*(PADS_ADC0 + 2) &= ~(1 << PADS_BANK0_GPIO26_OD_LSB);
 
     // set update frequency
-    *ADC_DIV=((F_ADC_USB/(UI_UPDATE_RATE*3)) - 1) << 8; 
+    *ADC_DIV= 0xFFFF << 8; //((F_ADC_USB/(UI_UPDATE_RATE*3)) - 1) << 8; 
 
     // set threshhold to 3
     *ADC_FCS = (1 << ADC_FCS_EN_LSB) | (3 << ADC_FCS_THRESH_LSB); 

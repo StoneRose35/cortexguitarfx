@@ -24,7 +24,7 @@ void setupWm8731(uint8_t sampledepth,uint8_t samplerate)
     rcs += wm8731_write(registerData);
 
     //R4, enable dac and disable bypass
-    registerData = WM8731_R4 | (1 << MUTE_MIC_LSB) | (1 << DACSEL_LSB);
+    registerData = WM8731_R4 | (1 << MUTE_MIC_LSB) | (1 << DACSEL_LSB) | (0 << BYPASS_LSB) | (0 << SIDETONE_LSB);
     rcs += wm8731_write(registerData);
 
     // R5, disable dac soft mute
@@ -60,7 +60,7 @@ void setupWm8731(uint8_t sampledepth,uint8_t samplerate)
     //R9: activate interface
     registerData = WM8731_R9 | (1 << ACTIVE_LSB);
     rcs += wm8731_write(registerData);
-    
+
     if (rcs > 0)
     {
         DebugLedOn();
