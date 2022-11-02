@@ -262,10 +262,11 @@ void initI2SSlave()
 						| (2 << DMA_CH3_CTRL_TRIG_DATA_SIZE_LSB) // always write left and right at once
 						| (1 << DMA_CH3_CTRL_TRIG_EN_LSB);
 
-	*DMA_INTE0 |= (1 << 3) | (1 << 2); // assert dma for channel 3 since the adc channel is always finished halb a bitclock cycle later
+	*DMA_INTE0 |= (1 << 3); // | (1 << 2); // assert dma for channel 3 since the adc channel is always finished halb a bitclock cycle later
 
 	// enable PIO1 SM0
-	*PIO1_CTRL |= ((1 << 0) << PIO_CTRL_CLKDIV_RESTART_LSB) | (1 << (PIO_CTRL_SM_ENABLE_LSB+0)) | ((1 << 0) << PIO_CTRL_SM_RESTART_LSB);
+	*PIO1_CTRL |= (1 << (PIO_CTRL_SM_ENABLE_LSB+0));
+
 }
 
 void toggleAudioBuffer()

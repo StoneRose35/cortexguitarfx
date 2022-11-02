@@ -22,6 +22,7 @@ extern volatile int16_t avgOutOld,avgInOld;
 extern volatile uint8_t fxProgramIdx;
 extern volatile uint32_t cpuLoad;
 extern volatile uint32_t audioState;
+extern PiPicoFxUiType piPicoUiController;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
 uint8_t cpuLoadBfr;
@@ -43,7 +44,6 @@ void isr_sio_irq_proc1_irq16() // only fires when a fir computation has to be ma
         core1FirData = (FirFilterType**)*SIO_FIFO_RD;
         firstHalfOut = processFirstHalf(*core1FirData);
         *SIO_FIFO_WR = firstHalfOut;
-        //*SIO_FIFO_ST = (1 << 2);
     }
     else if (((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_ROE_LSB)) != 0) || ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_WOF_LSB)) != 0))
     {
@@ -103,7 +103,6 @@ void core1Main()
                 adcChannelOld2=adcChannel;
             }
             task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
-            //*ADC_CS |= (1 << ADC_CS_START_MANY_LSB);
         }
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
         {

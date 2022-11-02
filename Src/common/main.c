@@ -194,21 +194,17 @@ extern CommBufferType usbCommBuffer;
 extern CommBufferType btCommBuffer;
 
 
-int16_t* audioBufferPtr;
-#ifndef I2S_INPUT
-uint16_t* audioBufferInputPtr;
-#else
-int16_t* audioBufferInputPtr;
-#endif
-int16_t inputSample, inputSampleOther;
+PiPicoFxUiType piPicoUiController;
 uint32_t core1Handshake;
-volatile int16_t avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
-uint16_t bufferCnt=0;
+volatile int16_t avgOutOld=0,avgInOld=0;
+volatile uint16_t bufferCnt=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
+
+
 
 /**
  * @brief the main entry point, should never exit
@@ -250,11 +246,7 @@ int main(void)
 	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
 	#endif
 	initSsd1306Display();
-	#ifdef WM8731
-	initI2SSlave();
-	#else
-	initI2S();
-	#endif
+
 	initDebugLed();
 	initRotaryEncoder(switchesPins,2);
 
@@ -293,73 +285,17 @@ int main(void)
 	ticEnd=0;
 	ticStart=0;
 
+	#ifdef WM8731
+	initI2SSlave();
+	#else
+	initI2S();
+	#endif
 
     /* Loop forever */
 	for(;;)
 	{
 
-		//cliApiTask(task);
-		if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
-		{
-			ticStart = getTimeLW();
-
-
-			audioBufferPtr = getEditableAudioBuffer();
-			#ifndef I2S_INPUT
-			audioBufferInputPtr = getReadableAudioBuffer();
-			#else
-			audioBufferInputPtr = getInputAudioBuffer();
-			#endif
-
-			for (uint8_t c=0;c<AUDIO_BUFFER_SIZE;c++) // count in frame of 4 bytes or two  16bit samples
-			{
-				// convert raw input to signed 16 bit
-				#ifndef I2S_INPUT
-				inputSample = (*(audioBufferInputPtr + c) << 4) - 0x7FFF;
-				#else
-				inputSample=*(audioBufferInputPtr + c*2 + 1);
-			
-				#endif
-				//inputSample = getNextSineValue();
-
-				if (inputSample < 0)
-				{
-					avgIn = -inputSample;
-				}
-				else
-				{
-					avgIn = inputSample;
-				}
-				avgInOld = ((AVERAGING_LOWPASS_CUTOFF*avgIn) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgInOld) >> 15);
-
-				inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);//fxPrograms[fxProgramIdx]->processSample(inputSample,fxPrograms[fxProgramIdx]->data);
-
-
-				if (inputSample < 0)
-				{
-					avgOut = -inputSample;
-				}
-				else
-				{
-					avgOut = inputSample;
-				}
-				avgOutOld = ((AVERAGING_LOWPASS_CUTOFF*avgOut) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgOutOld) >> 15);
-
-				*((uint32_t*)audioBufferPtr+c) = ((uint16_t)inputSample << 16) | (0xFFFF & (uint16_t)inputSample); 
-
-			}
-			task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
-			bufferCnt++;
-
-			ticEnd = getTimeLW();
-			if(ticEnd > ticStart)
-			{
-				cpuLoad = ticEnd-ticStart;
-				cpuLoad = cpuLoad*196; //*256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
-				cpuLoad = cpuLoad >> 8;
-			}
-		}
-		if (bufferCnt == UI_UPDATE_IN_SAMPLE_BUFFERS)
+		if (bufferCnt >= UI_UPDATE_IN_SAMPLE_BUFFERS)
 		{
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
