@@ -126,8 +126,8 @@ float waveShaperProcessSample(float sampleIn,WaveShaperDataType*data)
     v1 = data->transferFunctionPoints[indx];
     v2 = data->transferFunctionPoints[indx+1];
     rem = (sampleIn*7.62939453125e-06f+ 63.5f) - (float)indx;
-    factor = v1 + (v2-v1)*rem;
-    return sampleIn*factor;
+    factor = (v1 + (v2-v1)*rem)*8388608.0f;
+    return factor;
 }
 
 #endif

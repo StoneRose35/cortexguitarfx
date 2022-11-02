@@ -24,8 +24,8 @@ static float fxProgram1processSample(float sampleIn,void*data)
     out = out/2.0f;
 
     out = secondOrderIirFilterProcessSample(out,&pData->filter1);
-    out = out/4.0f;
-    out = firFilterProcessSample(out,&pData->filter3);
+    //out = out/4.0f;
+    //out = firFilterProcessSample(out,&pData->filter3);
     out = delayLineProcessSample(out, pData->delay);
     return out;
 }
@@ -67,8 +67,8 @@ static void fxProgram1Param3Callback(uint16_t val,void*data) // delay intensity
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
     pData->delay->delayInSamples = 2400 + (val << 3);
-    pData->delay->mix = val << 2; // up to 100%
-    pData->delay->feedback = (1<< 14);
+    pData->delay->mix = ((float)val)/4096.0f; // up to 100%
+    pData->delay->feedback = 0.25f;
 }
 
 static void fxProgram1Param3Display(void*data,char*res)
@@ -102,7 +102,7 @@ FxProgram1DataType fxProgram1data = {
     /* butterworth lowpass @ 6000Hz */
     .filter1 = {
         	.coeffB = {0.09763107f, 0.19526215f, 0.09763107f},
-            .coeffA = {-30893, 10922},
+            .coeffA = {-0.94280904f, 0.33333333f},
             .w= {0.0f,0.0f,0.0f}
     },
     .filter3 = {
