@@ -23,7 +23,7 @@ bne short_delay_l1
 pop {r0}
 bx lr
 
-.section .RamFunc.convolve
+//.section .RamFunc.convolve
 // computes the sum of the products of two float vectors
 // a[0]*b[0] + a[1]*b[1] + a[2]*b[2] .... 
 // r0: pointer to coefficients, r1: pointer to data, r2: pointer offset
@@ -35,26 +35,26 @@ convolve:
 vpush {s1,s2}
 push {r4,r5}
 mov r4,r1
+lsl r2,#2
 add r4,r2
 ldr r5,=0x40
 vldr.32 s0,[r0,#4]
 vldr.32 s1,[r4]
 vmul.f32 s0,s0,s1
-sub r5,#1
-cmp r5,#0
+subs r5,#1
 beq conv_loop_end
 conv_loop:
 add r2,r2,#4
-orr r2,r2,#63
+and r2,r2,#63
 mov r4,r1
 add r4,r2
 vldr.32 s1,[r0,#4]
 vldr.32 s2,[r4]
 vmla.f32 s0,s1,s2
-sub r2,#1
-cmp r2,#0
+subs r5,#1
 bne conv_loop
 conv_loop_end:
-vpop {s1,s2}
 pop {r4,r5}
+vpop {s1,s2}
+
 bx lr
