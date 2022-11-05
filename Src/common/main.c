@@ -90,6 +90,7 @@ uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
 
+
 /**
  * @brief the main entry point, should never exit
  * 
@@ -145,9 +146,9 @@ int main(void)
 	}
 	drawUi(&piPicoUiController);
 
+
 	ticEnd=0;
 	ticStart=0;
-
 
     /* Loop forever */
 	for(;;)
@@ -206,17 +207,6 @@ int main(void)
         {
             avgOldInBfr = (int32_t)avgInOld >> 16;
             avgOldOutBfr = (int32_t)avgOutOld >> 16;
-
-			//if (cpuLoadCnt>255)
-			//{
-			//	cpuLoadBfr=0;
-			//	for (uint16_t a=0;a<256;a++)
-			//	{
-			//		cpuLoadBfr += cpuLoads[a];
-			//	}
-			//	cpuLoadBfr = (cpuLoad >> (1+8));
-			//	cpuLoadCnt=0;
-			//}
             cpuLoadBfr = cpuLoad >> 1;
             updateAudioUi(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);

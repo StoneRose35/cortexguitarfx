@@ -16,16 +16,16 @@ static float fxProgram1processSample(float sampleIn,void*data)
     pData->highpass_old_out = pData->highpass_out;
 
     out = pData->highpass_out;
+    
     for (uint8_t c=0;c<pData->nWaveshapers;c++)
     {
         out = waveShaperProcessSample(out,&pData->waveshaper1);
     }
 
     out = out/2.0f;
-
     out = secondOrderIirFilterProcessSample(out,&pData->filter1);
-    //out = out/4.0f;
-    //out = firFilterProcessSample(out,&pData->filter3);
+    out = out/2.0f;
+    out = firFilterProcessSample(out,&pData->filter3);
     out = delayLineProcessSample(out, pData->delay);
     return out;
 }
