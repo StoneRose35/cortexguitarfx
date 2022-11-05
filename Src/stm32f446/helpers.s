@@ -38,23 +38,23 @@ mov r4,r1
 lsl r2,#2
 add r4,r2
 ldr r5,=0x40
-vldr.32 s0,[r0,#4]
+vldr.32 s0,[r0]
 vldr.32 s1,[r4]
 vmul.f32 s0,s0,s1
 subs r5,#1
-beq conv_loop_end
 conv_loop:
-add r2,r2,#4
-and r2,r2,#63
+add r0,#4
+add r2,#4
+and r2,#255
 mov r4,r1
 add r4,r2
-vldr.32 s1,[r0,#4]
+vldr.32 s1,[r0]
 vldr.32 s2,[r4]
 vmla.f32 s0,s1,s2
 subs r5,#1
 bne conv_loop
 conv_loop_end:
-pop {r4,r5}
-vpop {s1,s2}
-
+vmov r0,s0
+pop {r5,r4}
+vpop {s2,s1}
 bx lr
