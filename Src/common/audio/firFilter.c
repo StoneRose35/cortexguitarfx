@@ -80,8 +80,9 @@ void initfirFilter(FirFilterType*data)
 
 void addSample(float sampleIn,FirFilterType*data)
 {
-    *(data->delayBuffer + data->delayPointer--)=sampleIn;
+    data->delayPointer--;
     data->delayPointer &= (uint8_t)(data->filterLength-1);
+    *(data->delayBuffer + data->delayPointer)=sampleIn;
 }
 
 float processFirstHalf(FirFilterType*data)
