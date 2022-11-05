@@ -29,3 +29,11 @@
 **/.idea
 /.vscode/*.log
 /.vscode/.*.json
+/schematics/guitarpreamp/*.gbr*
+/schematics/guitarpreamp/*.drl
+/schematics/guitarpreamp/*.xml
+/schematics/guitarpreamp/*.zip
+/schematics/guitarpreamp/guitarpreamp-backups/*
+/schematics/guitarpreamp/report.txt
+/schematics/guitarpreamp/guitarpreamp
+/schematics/guitarpreamp/sym-lib-table
