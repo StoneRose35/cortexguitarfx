@@ -55,6 +55,6 @@ subs r5,#1
 bne conv_loop
 conv_loop_end:
 vmov r0,s0
-pop {r5,r4}
-vpop {s2,s1}
+pop {r4,r5}
+vpop {s1,s2}
 bx lr
