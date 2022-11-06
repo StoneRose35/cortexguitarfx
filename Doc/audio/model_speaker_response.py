@@ -1,4 +1,5 @@
 import scipy.io
+import scipy.io.wavfile
 import scipy.fft
 import scipy.interpolate
 import numpy as np
@@ -6,6 +7,7 @@ import matplotlib.pyplot as plt
 import scipy.signal
 import scipy.optimize
 import audio.filter_calculations
+
 
 def get_ir(fname,sampling_rate=48000):
     wavdata = scipy.io.wavfile.read(fname)
@@ -373,9 +375,13 @@ class IrOptimizer:
 
 if __name__ == "__main__":
 
-    plot_model_cab_curve(sampling_rate=48000, axes=None, style="-k", sample_length=4096,floattype=True)
-    plt.show()
+    # generates data for amp model 1 (manually tuned cab consisiting of an fir filter in combination with an iir filter
+    #plot_model_cab_curve(sampling_rate=48000, axes=None, style="-k", sample_length=4096,floattype=True)
+    #plt.show()
 
+    # generates data for amp model 2
+    # vary cab_index to compute various cabs
+    cab_index = 0
     ir_files = ["resources/soundwoofer/Hiwatt Maxwatt M412 SM57 2.wav", "resources/soundwoofer/Fender Frontman 212 AKG D112.wav", "resources/soundwoofer/Vox AC15C1 SM57 1.wav"]
     optimizer = IrOptimizer(3)
     optimizer.load_ir(ir_files[2])
@@ -390,6 +396,9 @@ if __name__ == "__main__":
     #max_ir = np.max(abs(shortened_ir))
     for cc in range(64):
         print("{}, ".format(int(shortened_ir[cc]*32767)), end="")
+    print("\n\n")
+    for cc in range(64):
+        print("{}f, ".format(shortened_ir[cc]), end="")
     remaining_spec = np.array(optimizer.ir_spec_full)/spec_shorted
     halflen = int(len(spec_shorted)/2)
     plt.plot(20.*np.log10(abs(np.array(optimizer.ir_spec_full[:halflen]))),"-b")

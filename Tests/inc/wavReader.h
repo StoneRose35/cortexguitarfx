@@ -29,6 +29,14 @@ typedef struct {
     FILE * filePointer;
 } WavFileType;
 
+typedef struct {
+    WavHeaderType wavHeader;
+    WavFormatType wavFormat;
+    uint32_t dataSize;
+    float * data;
+    FILE * filePointer;
+} WavFileTypeFloat;
+
 int openWavFile(char* filename,WavFileType*wavFile);
 int createWavFile(char*filename,WavFileType*wavFile,uint32_t length);
 void getNextSample(int16_t*sample,WavFileType*wavFile);

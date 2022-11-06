@@ -74,6 +74,85 @@ int openWavFile(char* filename,WavFileType*wavFile)
     return 0;
 }
 
+
+int openWavFileFloat(char* filename,WavFileTypeFloat*wavFile)
+{
+    char chunkID[5];
+    uint32_t junkSize;
+    uint8_t bytesize;
+    uint8_t * bytedata;
+    uint32_t sample; 
+    wavFile->filePointer = fopen(filename,"rb");
+    fread(&wavFile->wavHeader,sizeof(WavHeaderType),1,wavFile->filePointer);
+    fread(&chunkID,4,1,wavFile->filePointer);
+    chunkID[4]=0;
+    if (strcmp(chunkID,"JUNK")==0)
+    {
+        fread(&junkSize,4,1,wavFile->filePointer);
+        
+        if ((junkSize & 1)!= 0)
+        {
+            fseek(wavFile->filePointer,junkSize+1,SEEK_CUR);
+        }
+        else
+        {
+            fseek(wavFile->filePointer,junkSize,SEEK_CUR);
+        }
+    }
+    else
+    {
+        fseek(wavFile->filePointer,-4,SEEK_CUR);
+    }
+    fread(&wavFile->wavFormat,sizeof(WavFormatType),1,wavFile->filePointer);
+    // skip the "data" tag
+    fseek(wavFile->filePointer,4,SEEK_CUR);
+    // read the data size
+    fread(&wavFile->dataSize,4,1,wavFile->filePointer);
+    if (strncmp(wavFile->wavHeader.chunkID,"RIFF",4)!=0)
+    {
+        return WAVREADER_FORMAT_ERROR;
+    }
+    if (strncmp(wavFile->wavHeader.riffType,"WAVE",4)!=0)
+    {
+        return WAVREADER_FORMAT_ERROR;
+    }    
+    if (wavFile->wavFormat.wFormatTag != 1)
+    {
+        return WAVREADER_FORMAT_ERROR;
+    }
+    if (wavFile->wavFormat.wChannels < 1 || wavFile->wavFormat.wChannels > 2)
+    {
+        return WAVREADER_FORMAT_ERROR;
+    }    
+    if (strncmp(wavFile->wavFormat.id,"fmt ",4) !=0)
+    {
+        return WAVREADER_FORMAT_ERROR;
+    } 
+    //if (wavFile->wavFormat.wBitsPerSample != 16)
+    //{
+    //    return WAVREADER_FORMAT_ERROR;
+    //}
+    if ((wavFile->wavFormat.wBitsPerSample & 0x7)!=0) // bit size mot multiple of 8
+    {
+        return WAVREADER_FORMAT_ERROR;
+    }
+    bytesize = wavFile->wavFormat.wBitsPerSample >> 3;
+    bytedata = (uint8_t*)malloc(wavFile->dataSize*bytesize);
+    wavFile->data =  (float*)malloc(wavFile->dataSize*sizeof(float));
+    fread(bytedata,wavFile->dataSize*bytesize,1,wavFile->filePointer);
+    for(uint32_t c=0;c<wavFile->dataSize;c++)
+    {
+        sample=0;
+        for(uint8_t cc=0;cc<bytesize;cc++)
+        {
+            sample |= *(bytedata + c*bytesize + cc) >> cc*8;
+        }
+        *(wavFile->data + c) = (float)sample;
+    }
+    free(bytedata);    
+    return 0;
+}
+
 int createWavFile(char*filename,WavFileType*wavFile,uint32_t length)
 {
     const uint32_t zeroSize=0;

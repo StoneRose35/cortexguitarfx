@@ -3,36 +3,23 @@
 
 void initGainstage(gainStageData*data)
 {
-    data->gain=256;
-    data->offset=0;
+    data->gain=1.0f;
+    data->offset=0.0f;
 }
 
-int16_t gainStageProcessSample(int16_t sampleIn,gainStageData*data)
+float gainStageProcessSample(float sampleIn,gainStageData*data)
 {
-    int16_t sampleOut;
-    int32_t sampleWord = (int32_t)sampleIn;
-    if( sampleWord < -32767)
+    float sampleOut;
+
+    sampleOut = sampleIn * data->gain + data->offset;
+    
+    if( sampleOut < -1.0f)
     {
-        sampleOut = -32767;
+        sampleOut = -1.0f;
     }
-    else if (sampleWord > 32767)
+    else if (sampleOut > 1.0f)
     {
-        sampleOut = 32767;
-    }
-    sampleWord = sampleWord* data->gain;
-    sampleWord >>= 8;
-    sampleWord = sampleWord + data->offset;
-    if( sampleWord < -32767)
-    {
-        sampleOut = -32767;
-    }
-    else if (sampleWord > 32767)
-    {
-        sampleOut = 32767;
-    }
-    else
-    {
-        sampleOut=(int16_t)(sampleWord & 0xFFFF);
+        sampleOut = 1.0f;
     }
     return sampleOut;
 }

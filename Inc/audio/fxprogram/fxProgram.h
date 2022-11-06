@@ -14,7 +14,7 @@
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 3
+#define N_FX_PROGRAMS 4
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
@@ -74,6 +74,7 @@ typedef struct {
     SimpleChorusType chorusData;
 } FxProgram2DataType;
 
+#ifndef FLOAT_AUDIO
 typedef struct {
     gainStageData gainStage;
     uint8_t cabSimType;
@@ -101,6 +102,36 @@ typedef struct {
 
     //uint8_t updateLock;
 } FxProgram4DataType;
+#else
+typedef struct {
+    gainStageData gainStage;
+    uint8_t cabSimType;
+    uint8_t nWaveshapers;
+    uint8_t waveshaperType;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    const char cabNames[6][24];
+    const char waveShaperNames[4][24];
+    FirFilterType hiwattFir;
+    OversamplingWaveshaperDataType waveshaper1;
+    SecondOrderIirFilterType hiwattIir1;
+    SecondOrderIirFilterType hiwattIir2;
+    SecondOrderIirFilterType hiwattIir3;
+    
+    FirFilterType frontmanFir;
+    SecondOrderIirFilterType frontmanIir1;
+    SecondOrderIirFilterType frontmanIir2;
+    SecondOrderIirFilterType frontmanIir3;
+
+    FirFilterType voxAC15Fir;
+    SecondOrderIirFilterType voxAC15Iir1;
+    SecondOrderIirFilterType voxAC15Iir2;
+    SecondOrderIirFilterType voxAC15Iir3;
+    
+
+    //uint8_t updateLock;
+} FxProgram4DataType;
+#endif
+
 
 typedef struct 
 {
@@ -141,11 +172,6 @@ typedef struct
 } FxProgram8DataType;
 
 
-/* 
-   ***************************************************************************
-   ***************************************************************************
-*/
-
 FxProgramType fxProgram1;
 FxProgramType fxProgram2;
 FxProgramType fxProgram3;
@@ -155,6 +181,6 @@ FxProgramType fxProgram6;
 FxProgramType fxProgram7;
 FxProgramType fxProgram8;
 
-FxProgramType * fxPrograms[N_FX_PROGRAMS];
+FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
 #endif
