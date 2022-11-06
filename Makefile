@@ -12,7 +12,7 @@ ELF2UF2=./tools/elf2uf2
 OPT=-Og
 DEFINES=-DDEBUG -DSTM32 -DNUCLEO_F446ZE -DSTM32F4 -DSTM32F446ZETx -DI2S_INPUT -DFLOAT_AUDIO
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen
-LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -T./STM32F446ZETX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -T./STM32F446ZETX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group -z muldefs
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary
 

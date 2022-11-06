@@ -172,15 +172,15 @@ typedef struct
 } FxProgram8DataType;
 
 
-FxProgramType fxProgram1;
-FxProgramType fxProgram2;
-FxProgramType fxProgram3;
-FxProgramType fxProgram4;
-FxProgramType fxProgram5;
-FxProgramType fxProgram6;
-FxProgramType fxProgram7;
-FxProgramType fxProgram8;
+extern FxProgramType fxProgram1;
+extern FxProgramType fxProgram2;
+extern FxProgramType fxProgram3;
+extern FxProgramType fxProgram4;
+extern FxProgramType fxProgram5;
+extern FxProgramType fxProgram6;
+extern FxProgramType fxProgram7;
+extern FxProgramType fxProgram8;
 
-FxProgramType* fxPrograms[N_FX_PROGRAMS];
+extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
 #endif
