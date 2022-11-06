@@ -5,6 +5,8 @@
 #include "system.h"
 #include "timer.h"
 #include "pipicofx/pipicofxui.h"
+#include "debugLed.h"
+
 #define AVERAGING_LOWPASS_CUTOFF 0.0001f
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 256
 
@@ -51,8 +53,9 @@ void DMA2_Stream2_IRQHandler() // adc
 
     if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
     {
-
+    
 		ticStart = getTimeLW();
+        DebugLedOn();
         audioBufferPtr = getEditableAudioBufferHiRes();
         audioBufferInputPtr = getInputAudioBufferHiRes();
         for (uint32_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
@@ -110,6 +113,7 @@ void DMA2_Stream2_IRQHandler() // adc
 			cpuLoad = cpuLoad*196; // *256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
 			cpuLoad = cpuLoad >> 8;
 		}
+        DebugLedOff();
     }
 }
 

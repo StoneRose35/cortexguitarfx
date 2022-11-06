@@ -66,8 +66,6 @@ volatile float avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
 PiPicoFxUiType piPicoUiController;
-//uint16_t cpuLoads[256];
-//uint16_t cpuLoadCnt=0;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define ADC_LOWPASS 2
@@ -124,7 +122,7 @@ int main(void)
 	initI2S();
 	initRotaryEncoder(switchesPins,2);
 	encoderVal=getEncoderValue();
-
+    initDebugLed();
 
 	/*
      *
