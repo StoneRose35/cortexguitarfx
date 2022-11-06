@@ -328,17 +328,15 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
 }
 
 
-PiPicoFxUiType piPicoUiController;
-
-void piPicoFxUiSetup()
+void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
 {
-    piPicoUiController.currentProgram=fxPrograms[0];
-    piPicoUiController.currentProgramIdx=0;
-    piPicoUiController.currentParameter=fxPrograms[piPicoUiController.currentProgramIdx]->parameters;
-    piPicoUiController.currentParameterIdx=0;
-    piPicoUiController.displayLevel=0;
-    piPicoUiController.locked=0;
-    piPicoUiController.oldEncoderValue= 0x7FFFFFFF;
-    piPicoUiController.oldParamValue=0;
+    piPicoUiController->currentProgram=fxPrograms[0];
+    piPicoUiController->currentProgramIdx=0;
+    piPicoUiController->currentParameter=fxPrograms[piPicoUiController->currentProgramIdx]->parameters;
+    piPicoUiController->currentParameterIdx=0;
+    piPicoUiController->displayLevel=0;
+    piPicoUiController->locked=0;
+    piPicoUiController->oldEncoderValue= 0x7FFFFFFF;
+    piPicoUiController->oldParamValue=0;
 
 }

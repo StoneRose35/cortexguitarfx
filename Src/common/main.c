@@ -54,17 +54,10 @@ extern CommBufferType usbCommBuffer;
 extern CommBufferType btCommBuffer;
 
 
-int32_t* audioBufferPtr;
-#ifndef I2S_INPUT
-uint16_t* audioBufferInputPtr;
-#else
-int32_t* audioBufferInputPtr;
-#endif
-float inputSample,inputSampleScaled;
-int32_t inputSampleInt;
-volatile float avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
+float inputSampleScaled;
+volatile float avgOutOld=0,avgInOld=0;
 volatile uint8_t fxProgramIdx = 1;
-volatile uint32_t ticStart,ticEnd,cpuLoad;
+volatile uint32_t cpuLoad;
 PiPicoFxUiType piPicoUiController;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
@@ -133,7 +126,7 @@ int main(void)
 	initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
 	printf("Microsys v1.0 running\r\n");
-	piPicoFxUiSetup();
+	piPicoFxUiSetup(&piPicoUiController);
 	ssd1306ClearDisplay();
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
 	{
@@ -144,9 +137,6 @@ int main(void)
 	}
 	drawUi(&piPicoUiController);
 
-
-	ticEnd=0;
-	ticStart=0;
 
     /* Loop forever */
 	for(;;)

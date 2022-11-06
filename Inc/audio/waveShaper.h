@@ -9,12 +9,12 @@ typedef struct
 
 } WaveShaperDataType;
 
-const WaveShaperDataType waveShaperUnity;
-const WaveShaperDataType waveShaperDefaultOverdrive;
-const WaveShaperDataType waveShaperSoftOverdrive;
-const WaveShaperDataType waveShaperDistortion;
-const WaveShaperDataType waveShaperCurvedOverdrive;
-const WaveShaperDataType waveShaperAsymm; 
+extern const WaveShaperDataType waveShaperUnity;
+extern const WaveShaperDataType waveShaperDefaultOverdrive;
+extern const WaveShaperDataType waveShaperSoftOverdrive;
+extern const WaveShaperDataType waveShaperDistortion;
+extern const WaveShaperDataType waveShaperCurvedOverdrive;
+extern const WaveShaperDataType waveShaperAsymm; 
 
 
 
@@ -28,12 +28,12 @@ typedef struct
 
 } WaveShaperDataType;
 
-const WaveShaperDataType waveShaperUnity;
-const WaveShaperDataType waveShaperDefaultOverdrive;
-const WaveShaperDataType waveShaperSoftOverdrive;
-const WaveShaperDataType waveShaperDistortion;
-const WaveShaperDataType waveShaperCurvedOverdrive;
-const WaveShaperDataType waveShaperAsymm; 
+extern const WaveShaperDataType waveShaperUnity;
+extern const WaveShaperDataType waveShaperDefaultOverdrive;
+extern const WaveShaperDataType waveShaperSoftOverdrive;
+extern const WaveShaperDataType waveShaperDistortion;
+extern const WaveShaperDataType waveShaperCurvedOverdrive;
+extern const WaveShaperDataType waveShaperAsymm; 
 
 
 
