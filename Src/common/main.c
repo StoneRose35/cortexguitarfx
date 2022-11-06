@@ -159,6 +159,7 @@
 #include "systemClock.h"
 #include "systick.h"
 #include "uart.h"
+#include "consoleBase.h"
 #include "dma.h"
 #include "pio.h"
 #include "adc.h"
@@ -258,9 +259,9 @@ int main(void)
 	 */
 
 	initRoundRobinReading(); // internal adc for reading parameters
-
-	//printf("Microsys v1.0 running\r\n");
-	piPicoFxUiSetup();
+	context |= (1 << CONTEXT_USB);
+	printf("Microsys v1.0 running\r\n");
+	piPicoFxUiSetup(&piPicoUiController);
 	ssd1306ClearDisplay();
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
 	{
