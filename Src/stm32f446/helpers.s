@@ -23,11 +23,10 @@ bne short_delay_l1
 pop {r0}
 bx lr
 
-//.section .RamFunc.convolve
+.section .ramfunc.convolve
 // computes the sum of the products of two float vectors
 // a[0]*b[0] + a[1]*b[1] + a[2]*b[2] .... 
 // r0: pointer to coefficients, r1: pointer to data, r2: pointer offset
-//.section .data.RamFunc
 .global convolve
 .type convolve,%function
 .thumb_func
