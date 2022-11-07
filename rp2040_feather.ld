@@ -87,6 +87,9 @@ SECTIONS
         *(.rodata*) 
         . = ALIGN(4); 
 
+        *(.ramfunc*)
+        . = ALIGN(4); 
+
         *(.data*)
 
         . = ALIGN(4);

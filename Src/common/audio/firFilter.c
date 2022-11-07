@@ -44,6 +44,7 @@ int16_t firFilterProcessSample(int16_t sampleIn,FirFilterType*data)
     return firstHalf;
 }
 
+
 int16_t processFirstHalf(FirFilterType*data)
 {
     int32_t res=0;
