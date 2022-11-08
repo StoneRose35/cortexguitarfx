@@ -136,6 +136,11 @@ void initSsd1306Display()
     ssd1306SendCommand(0x40);// set startline 0
     ssd1306SendCommand(0xD3);// set displayoffset 0
     ssd1306SendCommand(0x0);
+
+    // column remap
+    ssd1306SendCommand(0xA1);
+    // flip common output scan direction
+    ssd1306SendCommand(0xC8);
     
     // send display on command
     ssd1306SendCommand(0xAF);
