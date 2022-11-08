@@ -2,6 +2,8 @@
 #include "audio/compressor.h"
 #include "romfunc.h"
 
+
+#ifndef FLOAT_AUDIO
 int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
 {
     int16_t sample_reduced;
@@ -101,3 +103,103 @@ int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data)
     }
     return sampleOut;
 }
+
+#else
+
+float applyGain(float sample,float avgVolume,CompressorDataType*comp)
+{
+    float sample_reduced;
+    float sampleOut;
+    if (avgVolume < comp->gainFunction.threshhold)
+    {
+        sample_reduced = avgVolume;
+        sampleOut=sample;
+    }
+    else if (comp->gainFunction.gainReduction > 16.0f)
+    {
+        sample_reduced =  comp->gainFunction.threshhold;
+        sampleOut=sample*sample_reduced;
+        if (avgVolume != 0)
+        {
+            sampleOut = sampleOut/avgVolume;
+        }
+    }
+    else
+    {
+        sample_reduced =  comp->gainFunction.threshhold + ((avgVolume-comp->gainFunction.threshhold)/(comp->gainFunction.gainReduction));
+        sampleOut=sample*sample_reduced;
+        if (avgVolume != 0)
+        {
+            sampleOut = sampleOut/avgVolume;
+        }
+    }
+
+    return sampleOut;
+}
+
+void setAttack(int32_t attackInUs,CompressorDataType*data)
+{
+    float attackFloat, samplesFloat;
+    attackFloat = int2float(attackInUs);
+    samplesFloat = 20.833f/attackFloat;
+    data->attack= samplesFloat;
+}
+
+void setRelease(int32_t releaseInUs,CompressorDataType*data)
+{
+    float releaseFloat, samplesFloat;
+    releaseFloat = int2float(releaseInUs);
+    samplesFloat = 20.833f/releaseFloat;
+    data->release= samplesFloat;
+}
+
+float compressorProcessSample(float sampleIn,CompressorDataType*data)
+{
+    int16_t absSample;
+    int16_t delta;
+    float sampleOut;
+
+    sampleOut = applyGain(sampleIn,data->currentAvg,data);
+    if(sampleOut < 0)
+    {
+        absSample = -sampleOut;
+    }
+    else
+    {
+        absSample = sampleOut;
+    }
+    delta = absSample - data->currentAvg;
+    if (delta < 0)
+    {
+        if(-delta > data->release)
+        {
+            data->currentAvg -= data->release;
+        }
+        else
+        {
+            data->currentAvg += delta;
+        }
+        if (data->currentAvg < 0)
+        {
+            data->currentAvg=0;
+        }
+    }
+    else
+    {
+        if(delta > data->attack)
+        {
+            data->currentAvg += data->attack;
+        }
+        else
+        {
+            data->currentAvg += delta;
+        }
+        if (data->currentAvg > 1.0f) // overflow in this case
+        {
+            data->currentAvg=1.0f;
+        }
+    }
+    return sampleOut;
+}
+
+#endif
