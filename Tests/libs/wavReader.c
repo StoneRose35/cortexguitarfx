@@ -132,15 +132,15 @@ int openWavFileFloat(char* filename,WavFileTypeFloat*wavFile)
     //{
     //    return WAVREADER_FORMAT_ERROR;
     //}
-    if ((wavFile->wavFormat.wBitsPerSample & 0x7)!=0) // bit size mot multiple of 8
+    if ((wavFile->wavFormat.wBitsPerSample & 0x7)!=0) // bit size not multiple of 8
     {
         return WAVREADER_FORMAT_ERROR;
     }
     bytesize = wavFile->wavFormat.wBitsPerSample >> 3;
-    bytedata = (uint8_t*)malloc(wavFile->dataSize*bytesize);
-    wavFile->data =  (float*)malloc(wavFile->dataSize*sizeof(float));
+    bytedata = (uint8_t*)malloc(wavFile->dataSize);
+    wavFile->data =  (float*)malloc(wavFile->dataSize/bytesize *sizeof(float)*wavFile->wavFormat.wChannels);
     fread(bytedata,wavFile->dataSize*bytesize,1,wavFile->filePointer);
-    for(uint32_t c=0;c<wavFile->dataSize;c++)
+    for(uint32_t c=0;c<wavFile->dataSize;c+=bytesize)
     {
         sample=0;
         for(uint8_t cc=0;cc<bytesize;cc++)
@@ -153,6 +153,15 @@ int openWavFileFloat(char* filename,WavFileTypeFloat*wavFile)
     return 0;
 }
 
+/**
+ * @brief fills the filename structure with default values (48kHz sampling rate, stereo, 16bit sample depth)
+ *  and allocates length bytes
+ * 
+ * @param filename 
+ * @param wavFile 
+ * @param length 
+ * @return int 
+ */
 int createWavFile(char*filename,WavFileType*wavFile,uint32_t length)
 {
     const uint32_t zeroSize=0;
@@ -187,6 +196,40 @@ int createWavFile(char*filename,WavFileType*wavFile,uint32_t length)
     wavFile->data = malloc(length);
 }
 
+int createWavFileFloat(char*filename,WavFileTypeFloat*wavFile,uint32_t length,uint16_t bitsize)
+{
+    const uint32_t zeroSize=0;
+    wavFile->filePointer = fopen(filename,"wb");
+    wavFile->wavHeader.chunkID[0] = 'R';
+    wavFile->wavHeader.chunkID[1] = 'I';
+    wavFile->wavHeader.chunkID[2] = 'F';
+    wavFile->wavHeader.chunkID[3] = 'F';
+    wavFile->wavHeader.riffType[0] = 'W';
+    wavFile->wavHeader.riffType[1] = 'A';
+    wavFile->wavHeader.riffType[2] = 'V';
+    wavFile->wavHeader.riffType[3] = 'E';
+
+    wavFile->wavFormat.dwAvgBytesPerSec = 2*48000;
+    wavFile->wavFormat.dwSamplesPerSec=48000;
+    wavFile->wavFormat.id[0] = 'f';
+    wavFile->wavFormat.id[1] = 'm';    
+    wavFile->wavFormat.id[2] = 't';
+    wavFile->wavFormat.id[3] = ' ';
+    wavFile->wavFormat.wBitsPerSample = bitsize;
+    wavFile->wavFormat.wBlockAlign = 2;
+    wavFile->wavFormat.wChannels = 1;
+    wavFile->wavFormat.wFormatTag = 1;
+    wavFile->wavFormat.wFmtLength = 16;
+
+    fwrite(&wavFile->wavHeader,sizeof(WavHeaderType),1,wavFile->filePointer);
+    fwrite(&wavFile->wavFormat,sizeof(WavFormatType),1,wavFile->filePointer);
+    const char dataId[4]={'d','a','t','a'};
+    fwrite(dataId,4,1,wavFile->filePointer);
+    fwrite(&length,4,1,wavFile->filePointer); 
+    wavFile->dataSize=length;
+    wavFile->data = malloc(length);
+}
+
 void getNextSample(int16_t*sample,WavFileType*wavFile)
 {
     if(wavFile->wavFormat.wChannels == 2)
@@ -203,6 +246,24 @@ void getNextSample(int16_t*sample,WavFileType*wavFile)
 void writeWavFile(WavFileType*wavFile)
 {
     fwrite(wavFile->data,2,wavFile->dataSize>>1,wavFile->filePointer);
+}
+
+
+void writeWavFileFloat(WavFileTypeFloat*wavFile)
+{
+    float scaledSample;
+    uint32_t sampleCnt=0;
+    IntByteArray sampleToWrite;
+    const uint32_t lengthInSamples = ((wavFile->dataSize/(wavFile->wavFormat.wBitsPerSample >> 3)*wavFile->wavFormat.wChannels));
+    for(uint32_t c=0;c<lengthInSamples;c++)
+    {
+        scaledSample = wavFile->data[sampleCnt++]* (float)((1 << wavFile->wavFormat.wBitsPerSample)) ;
+        sampleToWrite.intValue=(int32_t)scaledSample;
+        for (uint8_t bcnt=0;bcnt<(wavFile->wavFormat.wBitsPerSample >> 3);bcnt++)
+        {
+            fwrite(sampleToWrite.byteValue+bcnt,1,1,wavFile->filePointer);
+        }
+    }
 }
 void writeNextSample(int16_t*sample,WavFileType*wavFile)
 {

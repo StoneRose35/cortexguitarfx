@@ -37,6 +37,7 @@
                 "-I./Inc",
                 "-I./Tests/inc",
                 "-fdiagnostics-color=always",
+                "-DFLOAT_AUDIO",
                 "-g",
                 "./Tests/processThroughFxProgram.c", "./Src/common/audio/*.c","./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
                 "-o",

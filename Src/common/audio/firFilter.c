@@ -8,6 +8,19 @@
 
 #ifdef STM32
 #include "stm32f446/helpers.h"
+#else
+float convolve(const float * coefficients,float*data,uint32_t offset)
+{
+    float res=0.0f;
+    uint32_t dataIndex=offset;
+    for(uint32_t c=0;c<64;c++)
+    {
+        res += coefficients[c]*data[dataIndex];
+        dataIndex++;
+        dataIndex &= 63;
+    }
+    return res;
+}
 #endif
 #ifndef FLOAT_AUDIO
 
