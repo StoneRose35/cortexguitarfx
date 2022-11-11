@@ -120,13 +120,22 @@ const WaveShaperDataType waveShaperAsymm = {
 
 float waveShaperProcessSample(float sampleIn,WaveShaperDataType*data)
 {
-    uint32_t indx;
-    float v1,v2,rem,factor;
-    indx = (uint32_t)(sampleIn*7.62939453125e-06f+ 63.5f); // rescale to 0-127
+    int32_t indx;
+    float v1,v2,rem,factor,indexfloat;
+    indexfloat = ((sampleIn+1.0f)*64.0f);
+    indx = (int32_t)indexfloat; // rescale to 0-127
+    if (indx > 127)
+    {
+        indx=127;
+    }
+    else if (indx < 0)
+    {
+        indx=0;
+    }
     v1 = data->transferFunctionPoints[indx];
     v2 = data->transferFunctionPoints[indx+1];
-    rem = (sampleIn*7.62939453125e-06f+ 63.5f) - (float)indx;
-    factor = (v1 + (v2-v1)*rem)*8388608.0f;
+    rem = indexfloat-((float)indx);
+    factor = (v1 + (v2-v1)*rem);
     return factor;
 }
 

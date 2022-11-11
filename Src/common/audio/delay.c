@@ -35,13 +35,13 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
     {
         sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData);
     }
-    if (sampleFedBack > 8388607.0f)
+    if (sampleFedBack > 1.0f)
     {
-        sampleFedBack = 8388607.0f;
+        sampleFedBack = 1.0f;
     }
-    else if (sampleFedBack < -8388608.0f)
+    else if (sampleFedBack < -1.0f)
     {
-        sampleFedBack = -8388608.0f;
+        sampleFedBack = -1.0f;
     }
     *(data->delayLine + data->delayLinePtr) = sampleFedBack;
     data->delayLinePtr++;

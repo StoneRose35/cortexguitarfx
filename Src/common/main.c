@@ -193,8 +193,8 @@ int main(void)
 		
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
         {
-            avgOldInBfr = (int32_t)avgInOld >> 16;
-            avgOldOutBfr = (int32_t)avgOutOld >> 16;
+            avgOldInBfr = (int32_t)(avgInOld*128.0f);
+            avgOldOutBfr = (int32_t)(avgOutOld*128.0f);
             cpuLoadBfr = cpuLoad >> 1;
             updateAudioUi(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
