@@ -139,15 +139,22 @@ int openWavFileFloat(char* filename,WavFileTypeFloat*wavFile)
     bytesize = wavFile->wavFormat.wBitsPerSample >> 3;
     bytedata = (uint8_t*)malloc(wavFile->dataSize);
     wavFile->data =  (float*)malloc(wavFile->dataSize/bytesize *sizeof(float)*wavFile->wavFormat.wChannels);
-    fread(bytedata,wavFile->dataSize*bytesize,1,wavFile->filePointer);
-    for(uint32_t c=0;c<wavFile->dataSize;c+=bytesize)
+    fread(bytedata,wavFile->dataSize,1,wavFile->filePointer);
+    for(uint32_t c=0;c<wavFile->dataSize/bytesize*wavFile->wavFormat.wChannels;c++)
     {
         sample=0;
         for(uint8_t cc=0;cc<bytesize;cc++)
         {
-            sample |= *(bytedata + c*bytesize + cc) >> cc*8;
+            sample |= *(bytedata + c*bytesize + cc) << cc*8;
         }
-        *(wavFile->data + c) = (float)sample;
+        if (sample > (1 << (wavFile->wavFormat.wBitsPerSample-1)))
+        {
+            for (uint8_t c2=4;c2>( wavFile->wavFormat.wBitsPerSample >> 3);c2--) // sign extend
+            {
+                sample |= 0xFF << ((c2-1)*8);
+            }
+        }
+        *(wavFile->data + c) = ((float)(int32_t)sample)/((float)(1 << (wavFile->wavFormat.wBitsPerSample-1)));
     }
     free(bytedata);    
     return 0;
@@ -257,7 +264,7 @@ void writeWavFileFloat(WavFileTypeFloat*wavFile)
     const uint32_t lengthInSamples = ((wavFile->dataSize/(wavFile->wavFormat.wBitsPerSample >> 3)*wavFile->wavFormat.wChannels));
     for(uint32_t c=0;c<lengthInSamples;c++)
     {
-        scaledSample = wavFile->data[sampleCnt++]* (float)((1 << wavFile->wavFormat.wBitsPerSample)) ;
+        scaledSample = wavFile->data[sampleCnt++]* (float)((1 << (wavFile->wavFormat.wBitsPerSample-1)));
         sampleToWrite.intValue=(int32_t)scaledSample;
         for (uint8_t bcnt=0;bcnt<(wavFile->wavFormat.wBitsPerSample >> 3);bcnt++)
         {

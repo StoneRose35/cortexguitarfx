@@ -181,12 +181,12 @@ int main(int argc, char ** argv)
         dataOut = fxPrograms[fxProgramNr]->processSample(sample[0],fxPrograms[fxProgramNr]->data);
         if (wavFileIn.wavFormat.wChannels==2)
         {
-            wavFileOut.data[fileInPtr>>1];
+            wavFileOut.data[fileInPtr>>1]=dataOut;
             fileInPtr+=2;
         }
         else
         {
-            wavFileOut.data[fileInPtr++];
+            wavFileOut.data[fileInPtr++]=dataOut;
         }
     }
     writeWavFileFloat(&wavFileOut);
