@@ -143,7 +143,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": ["./audiosamples/tele_middle_bluespicking_maxxed.wav", "7", "20", "20", "10","400"],
+            "args": ["./audiosamples/tele_middle_bluespicking_maxxed.wav", "0", "4000", "3400", "10","400"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],
