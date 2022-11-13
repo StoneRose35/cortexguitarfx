@@ -26,12 +26,8 @@ class AudioFilter:
 
     def apply(self, sample):
         out = 0
-        if self.do_overflow is True:
-            self.w[0] = int32(int(sample) - (int32(self.a[0]*self.w[1]) >> (self.bit_res-1)) - (int32(self.a[1]*self.w[2]) >> (self.bit_res-1)))
-            out = int32(int32((int32(self.b[0]*self.w[0])>> (self.bit_res-1))) + int32((int32(self.b[1]*self.w[1]) >> (self.bit_res-1))) + int32((int32(self.b[2]*self.w[2]) >> (self.bit_res-1)) ))
-        else:
-            self.w[0] = (int(sample) - ((self.a[0]*self.w[1]) >> (self.bit_res-1)) - ((self.a[1]*self.w[2]) >> (self.bit_res-1)))
-            out = ((((self.b[0]*self.w[0])>> (self.bit_res-1))) + (((self.b[1]*self.w[1]) >> (self.bit_res-1))) + (((self.b[2]*self.w[2]) >> (self.bit_res-1)) ))
+        self.w[0] = sample - self.a[0]*self.w[1] - self.a[1]*self.w[2]
+        out = self.b[0]*self.w[0] + self.b[1]*self.w[1] + self.b[2]*self.w[2]
         self.w[2]=self.w[1]
         self.w[1]=self.w[0]
         return out
@@ -133,13 +129,13 @@ def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=16,sc
 
         max_val = ((1 << (16 - 1)) - 1)
 
-        bvals = np.array(bd * max_val).astype(int)
-        avals = np.array(ad[1:] * max_val).astype(int)
+        bvals = np.array(bd).astype(float)
+        avals = np.array(ad[1:]).astype(float)
         # pole calculation
-        p1 = (-float(avals[0]) + cmath.sqrt(float(avals[0])*float(avals[0]) - 4*float(max_val)*float(avals[1])))/(2.*float(max_val))
-        p2 = (-float(avals[0]) - cmath.sqrt(float(avals[0]) * float(avals[0]) - 4 * float(max_val) * float(avals[1]))) /(2.*float(max_val))
-        z1 = (-float(bvals[1]) + cmath.sqrt(float(bvals[1])*float(bvals[1]) - 4*float(bvals[0])*float(bvals[2])))/(2.*float(max_val))
-        z2 = (-float(bvals[1]) - cmath.sqrt(float(bvals[1]) * float(bvals[1]) - 4 * float(bvals[0]) * float(bvals[2]))) /(2.*float(max_val))
+        p1 = (-float(avals[0]) + cmath.sqrt(float(avals[0])*float(avals[0]) - 4*float(avals[1])))/(2.)
+        p2 = (-float(avals[0]) - cmath.sqrt(float(avals[0]) * float(avals[0]) - 4*float(avals[1]))) /(2.)
+        z1 = (-float(bvals[1]) + cmath.sqrt(float(bvals[1])*float(bvals[1]) - 4*float(bvals[0])*float(bvals[2])))/(2.)
+        z2 = (-float(bvals[1]) - cmath.sqrt(float(bvals[1]) * float(bvals[1]) - 4 * float(bvals[0]) * float(bvals[2]))) /(2.)
         print("pole 1 at {:.3f}/{:.3f}, absolute value: {:.3f}".format(np.real(p1),np.imag(p1),abs(p1)))
         print("pole 2 at {:.3f}/{:.3f}, absolute value: {:.3f}".format(np.real(p2), np.imag(p2), abs(p2)))
         print("zero 1 at {:.3f}/{:.3f}".format(np.real(z1),np.imag(z1)))
@@ -182,7 +178,7 @@ def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=16,sc
             tdOutput=[]
             for c in range(1024):
                 if c==0:
-                    inputVal=32767 >> (16-sample_size)
+                    inputVal=1.
                 else:
                     inputVal = 0
                 tdOutput.append(testFilter.apply(inputVal))
@@ -192,13 +188,13 @@ def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=16,sc
             tdOutput=[]
             for c in range(1024):
                 if c==0:
-                    inputVal=-32767 >> (16-sample_size)
+                    inputVal=-1.0
                 else:
                     inputVal = 0
                 tdOutput.append(testFilter.apply(inputVal))
             axs2.plot(x_time_domain,tdOutput, ".-g", label="negative pulse")
-            axs2.set_ylim([-(32768 >> (16-sample_size))*1.007, (32768 >> (16-sample_size))*1.007])
-            axs2.set_yticks(np.arange(start=-(32768 >> (16-sample_size)),stop=(32768 >> (16-sample_size)),step=(32768 >> (16-sample_size))/4))
+            axs2.set_ylim([-1.007, 1.007])
+            axs2.set_yticks(np.arange(start=-1.0,stop=1.0,step=0.25))
             axs2.set_title("Time Domain response")
             axs2.set_xlabel("Time [ms]")
             axs2.set_ylabel("Ampl. [Int16]")
@@ -208,12 +204,15 @@ def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=16,sc
             testFilter = AudioFilter(avals, bvals, do_overflow=do_overflow, bit_res=16)
             tdOutput=[]
             for c in range(1024):
-                inputVal = int((np.random.random()-0.5)*(32767 >> (16-sample_size))*2)
-                tdOutput.append(testFilter.apply(inputVal))
+                inputVal = (np.random.random()-0.5)*2.
+                try:
+                    tdOutput.append(testFilter.apply(inputVal))
+                except OverflowError:
+                    tdOutput.append(0)
             axs4 = fig.add_subplot(gs[2,1])
             axs4.plot(x_time_domain,tdOutput, ".-g", label="negative pulse")
-            axs4.set_ylim([-(32768 >> (16-sample_size))*1.007, (32768 >> (16-sample_size))*1.007])
-            axs4.set_yticks(np.arange(start=-(32768 >> (16-sample_size)),stop=(32768 >> (16-sample_size)),step=(32768 >> (16-sample_size))/4))
+            axs4.set_ylim([-1.007, 1.007])
+            axs4.set_yticks(np.arange(start=-1.0,stop=1.0,step=0.25))
             axs4.set_title("Noise response")
             axs4.set_xlabel("Time [ms]")
             axs4.set_ylabel("Ampl. [Int16]")
@@ -418,16 +417,16 @@ if __name__ == "__main__":
     # manual modeling attempt of a guitar speaker using 4 iir filters
     iirfilters=[]
     sos = design_iir_filter(6,3500,type="cheby1",ftype="lowpass")
-    design_and_plot_iir_filter(True,rs=6,fc=3500,do_overflow=True,sample_size=None,type="cheby1",ftype="lowpass")
+    design_and_plot_iir_filter(True,rs=6,fc=3500,do_overflow=True,sample_size=16,type="cheby1",ftype="lowpass")
     iirfilters.append([sos[0][:3],sos[0][3:]])
     sos = design_iir_filter(6,2500,type="cheby1",ftype="lowpass")
-    design_and_plot_iir_filter(True, rs=6, fc=2500, do_overflow=True, sample_size=None, type="cheby1", ftype="lowpass")
+    design_and_plot_iir_filter(True, rs=6, fc=2500, do_overflow=True, sample_size=16, type="cheby1", ftype="lowpass")
     iirfilters.append([sos[0][:3],sos[0][3:]])
     sos=design_iir_filter(16, 120, type="cheby1", ftype="highpass")
-    design_and_plot_iir_filter(True, rs=16, fc=12000, do_overflow=True, sample_size=None, type="cheby1", ftype="highpass")
+    design_and_plot_iir_filter(True, rs=16, fc=120, do_overflow=True, sample_size=16, type="cheby1", ftype="highpass")
     iirfilters.append([sos[0][:3],sos[0][3:]])
     sos=design_iir_filter(1, 300, type="butter", ftype="highpass")
-    design_and_plot_iir_filter(True, rs=1, fc=300, do_overflow=True, sample_size=None, type="butter", ftype="highpass")
+    design_and_plot_iir_filter(True, rs=1, fc=300, do_overflow=True, sample_size=16, type="butter", ftype="highpass")
     iirfilters.append([sos[0][:3],sos[0][3:]])
 
     plot_sos_frequency_response(iirfilters)
