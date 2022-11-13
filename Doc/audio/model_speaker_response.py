@@ -381,10 +381,10 @@ if __name__ == "__main__":
 
     # generates data for amp model 2
     # vary cab_index to compute various cabs
-    cab_index = 0
+    cab_index = 1
     ir_files = ["resources/soundwoofer/Hiwatt Maxwatt M412 SM57 2.wav", "resources/soundwoofer/Fender Frontman 212 AKG D112.wav", "resources/soundwoofer/Vox AC15C1 SM57 1.wav"]
     optimizer = IrOptimizer(3)
-    optimizer.load_ir(ir_files[2])
+    optimizer.load_ir(ir_files[cab_index])
 
     shortened_ir = optimizer.ir
     shortened_ir[64:] = 0

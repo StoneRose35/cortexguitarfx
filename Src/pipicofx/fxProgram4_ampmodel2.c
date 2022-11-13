@@ -25,7 +25,7 @@ static float fxProgram4processSample(float sampleIn,void*data)
     out = out/2.0f;
     if (pData->cabSimType == 0)
     {
-        out /=4.0f;
+        out /=2.0f;
         out = firFilterProcessSample(out,&pData->hiwattFir);
     }
     else if (pData->cabSimType == 1)
@@ -36,7 +36,7 @@ static float fxProgram4processSample(float sampleIn,void*data)
     }
     else if (pData->cabSimType == 2)
     {
-        out /=4.0f;
+        out /=2.0f;
         out = firFilterProcessSample(out,&pData->frontmanFir);
     }
     else if (pData->cabSimType == 3)
@@ -47,11 +47,17 @@ static float fxProgram4processSample(float sampleIn,void*data)
     }
     else if (pData->cabSimType == 4)
     {
-        out /=4.0f;
+        out /=2.0f;
         out = firFilterProcessSample(out,&pData->voxAC15Fir);
     }
     else if (pData->cabSimType == 5)
     {
+        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
+        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
+        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
+        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
+        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
+        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
@@ -197,8 +203,8 @@ FxProgram4DataType fxProgram4data = {
     },
     .frontmanIir3 = 
     {
-        .coeffA = {-6330, 3379},
-        .coeffB = {5892, 8922, 4388},
+        .coeffA = {0.004979f, 0.009143f},
+        .coeffB = {0.304015f, 0.298545f, -0.009865f},
         .w = {0.0f,0.0f,0.0f}
     },
     .voxAC15Fir = {
