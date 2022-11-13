@@ -77,7 +77,7 @@ int16_t simpleChorusProcessSample(int16_t sampleIn,SimpleChorusType*data)
 
 void initSimpleChorus(SimpleChorusType*data)
 {
-    for(uint16_t c=0;c<2048;c++)
+    for(uint16_t c=0;c<SIMPLE_CHORUS_DELAY_SIZE;c++)
     {
         data->delayBuffer[c]=0.0f;
     }

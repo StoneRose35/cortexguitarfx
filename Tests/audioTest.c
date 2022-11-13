@@ -3,6 +3,7 @@
 #include "audio/sineplayer.h"
 #include "audio/secondOrderIirFilter.h"
 #include "audio/waveShaper.h"
+#include "audio/sineChorus.h"
 #include "math.h"
 
 float int2float(int32_t a)
@@ -23,8 +24,7 @@ void impulseTest()
     SecondOrderIirFilterType testFilter = {
         .coeffB = {1007, -2014, 1007},
         .coeffA = {-2013,991},
-        .w= {0,0,0},
-        .bitRes=11
+        .w= {0,0,0}
     };
 
     fid = fopen("audioout.txt","wt");
@@ -44,6 +44,16 @@ void impulseTest()
     fclose(fid);
 }
 
+void sineFunctionTest()
+{
+    int16_t sval;
+    for (uint32_t c=0;c<65536;c+=512)
+    {
+        sval = getSineValue((uint16_t)c);
+        printf("Phase %d, Sine Value %d\r\n",c,sval);
+    }
+}
+
 void waveshaperTest()
 {
     WaveShaperDataType wsData;
@@ -57,5 +67,6 @@ void waveshaperTest()
 int main()
 {
     //impulseTest();
-    waveshaperTest();
+    //waveshaperTest();
+    sineFunctionTest();
 }

@@ -8,6 +8,9 @@ DelayDataType * getDelayData()
     return &singletonDelay;
 }
 
+#ifndef FLOAT_AUDIO
+
+#else
 
 void initDelay(DelayDataType*data)
 {
@@ -48,3 +51,5 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
     data->delayLinePtr &= (DELAY_LINE_LENGTH -1);
     return sampleOut;
 }
+
+#endif
