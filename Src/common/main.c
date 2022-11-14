@@ -112,7 +112,6 @@ int main(void)
 	 * */
 	initSsd1306Display();
 	setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
-	initI2S();
 	initRotaryEncoder(switchesPins,2);
 	encoderVal=getEncoderValue();
     initDebugLed();
@@ -136,6 +135,10 @@ int main(void)
 		}
 	}
 	drawUi(&piPicoUiController);
+
+
+    /* enable audio engine last (when fx programs have been set up)*/
+    initI2S();
 
 
     /* Loop forever */
