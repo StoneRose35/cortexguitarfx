@@ -1,7 +1,7 @@
 #include "stdint.h"
 #include "audio/compressor.h"
 #include "romfunc.h"
-
+#include "stdio.h"
 
 #ifndef FLOAT_AUDIO
 int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
@@ -117,21 +117,12 @@ float applyGain(float sample,float avgVolume,CompressorDataType*comp)
     }
     else if (comp->gainFunction.gainReduction > 16.0f)
     {
-        sample_reduced =  comp->gainFunction.threshhold;
-        sampleOut=sample*sample_reduced;
-        if (avgVolume != 0)
-        {
-            sampleOut = sampleOut/avgVolume;
-        }
+        sampleOut=sample*comp->gainFunction.threshhold/avgVolume;
     }
     else
     {
-        sample_reduced =  comp->gainFunction.threshhold + ((avgVolume-comp->gainFunction.threshhold)/(comp->gainFunction.gainReduction));
-        sampleOut=sample*sample_reduced;
-        if (avgVolume != 0)
-        {
-            sampleOut = sampleOut/avgVolume;
-        }
+        sample_reduced =  comp->gainFunction.threshhold + (avgVolume-comp->gainFunction.threshhold)/comp->gainFunction.gainReduction;
+        sampleOut=sample*sample_reduced/avgVolume;
     }
 
     return sampleOut;
@@ -139,28 +130,26 @@ float applyGain(float sample,float avgVolume,CompressorDataType*comp)
 
 void setAttack(int32_t attackInUs,CompressorDataType*data)
 {
-    float attackFloat, samplesFloat;
-    attackFloat = int2float(attackInUs);
-    samplesFloat = 20.833f/attackFloat;
-    data->attack= samplesFloat;
+    float attackFloat;
+    attackFloat = (float)(attackInUs);
+    data->attack= 20.833f/attackFloat;
 }
 
 void setRelease(int32_t releaseInUs,CompressorDataType*data)
 {
-    float releaseFloat, samplesFloat;
-    releaseFloat = int2float(releaseInUs);
-    samplesFloat = 20.833f/releaseFloat;
-    data->release= samplesFloat;
+    float releaseFloat;
+    releaseFloat = (float)releaseInUs;
+    data->release= 20.833f/releaseFloat;
 }
 
 float compressorProcessSample(float sampleIn,CompressorDataType*data)
 {
-    int16_t absSample;
-    int16_t delta;
+    float absSample;
+    float delta;
     float sampleOut;
 
     sampleOut = applyGain(sampleIn,data->currentAvg,data);
-    if(sampleOut < 0)
+    if(sampleOut < 0.0f)
     {
         absSample = -sampleOut;
     }
@@ -169,7 +158,7 @@ float compressorProcessSample(float sampleIn,CompressorDataType*data)
         absSample = sampleOut;
     }
     delta = absSample - data->currentAvg;
-    if (delta < 0)
+    if (delta < 0.0f)
     {
         if(-delta > data->release)
         {
@@ -181,7 +170,7 @@ float compressorProcessSample(float sampleIn,CompressorDataType*data)
         }
         if (data->currentAvg < 0)
         {
-            data->currentAvg=0;
+            data->currentAvg=0.0f;
         }
     }
     else

@@ -28,7 +28,7 @@ void toPercentChar(float,char*);
 void fixedPointUInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals);
 void fixedPointInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals);
 
-void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace);
+uint16_t decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace);
 
 uint8_t startsWith(char*,const char*);
 void toUpper(char *,char);

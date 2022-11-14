@@ -215,7 +215,7 @@ void UInt16ToChar(uint16_t nr, char * out)
 	out[charpos]=0;
 }
 
-void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
+uint16_t decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 {
 	uint16_t pos=10000;
 	uint16_t cntr=0,charpos=0;
@@ -333,7 +333,7 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 			out[charpos-decimalPlace]='.';
 		}
 	}
-
+	return charpos+1;
 }
 
 void Int16ToChar(int16_t nr, char * out)
