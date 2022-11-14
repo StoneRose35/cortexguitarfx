@@ -55,12 +55,6 @@ static float fxProgram4processSample(float sampleIn,void*data)
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
     }
     return out;
 }
@@ -284,7 +278,7 @@ FxProgramType fxProgram4 = {
         },
         {
             .name = "Gainstages     ",
-            .control=3,
+            .control=0xFF,
             .increment=1024,
             .rawValue=0,
             .getParameterDisplay=&fxProgram4Param4Display,
@@ -293,7 +287,7 @@ FxProgramType fxProgram4 = {
         },
         {
             .name = "OD/Dist Type",
-            .control = 4,
+            .control = 0xFF,
             .increment = 1024,
             .rawValue = 0,
             .getParameterDisplay=&fxProgram4Param5Display,

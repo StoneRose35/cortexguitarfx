@@ -310,7 +310,7 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
                 break;
             case 2: // UI Level 2, change Parameter Value
                 // TODO increase by defined increment
-                data->currentParameter->rawValue += diff;
+                data->currentParameter->rawValue += diff*data->currentParameter->increment;
                 if (data->currentParameter->rawValue < 0)
                 {
                     data->currentParameter->rawValue = 0;
