@@ -2,30 +2,32 @@
 #include "audio/fxprogram/fxProgram.h"
 #include "stringFunctions.h"
 
-#define P4_HIGHPASS 0.9155552f
+#define P4_HIGHPASS 0.997f //0.9155552f
 
 static float fxProgram4processSample(float sampleIn,void*data)
 {
     float out;
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
 
-    pData->highpass_out = ((((1.0f + P4_HIGHPASS)/2.0f)*(sampleIn - pData->highpass_old_in))) + ((P4_HIGHPASS *pData->highpass_old_out));
-    pData->highpass_old_in = sampleIn;
+
+
+    out = sampleIn + pData->gainStage.offset;
+    //out = gainStageProcessSample(out, &pData->gainStage);
+
+    //for (uint8_t c=0;c<pData->nWaveshapers;c++)
+    //{
+        out = multiWaveShaperProcessSample(out,&pData->waveshaper1); 
+    //}
+
+    pData->highpass_out = ((((1.0f + P4_HIGHPASS)/2.0f)*(out - pData->highpass_old_in))) + ((P4_HIGHPASS *pData->highpass_old_out));
+    pData->highpass_old_in = out;
     pData->highpass_old_out = pData->highpass_out;
 
     out = pData->highpass_out;
 
-    out = gainStageProcessSample(out, &pData->gainStage);
-
-    for (uint8_t c=0;c<pData->nWaveshapers;c++)
-    {
-        out = waveShaperProcessSample(out,&pData->waveshaper1.waveshaper); 
-    }
-
-    out = out/2.0f;
     if (pData->cabSimType == 0)
     {
-        out /=2.0f;
+        out /=4.0f;
         out = firFilterProcessSample(out,&pData->hiwattFir);
     }
     else if (pData->cabSimType == 1)
@@ -33,10 +35,11 @@ static float fxProgram4processSample(float sampleIn,void*data)
         out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir1);
         out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir2);
         out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir3);
+        out=out*1.6f;
     }
     else if (pData->cabSimType == 2)
     {
-        out /=2.0f;
+        out /=4.0f;
         out = firFilterProcessSample(out,&pData->frontmanFir);
     }
     else if (pData->cabSimType == 3)
@@ -44,10 +47,11 @@ static float fxProgram4processSample(float sampleIn,void*data)
         out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir1);
         out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir2);
         out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir3);
+        out=out*3.0f;
     }
     else if (pData->cabSimType == 4)
     {
-        out /=2.0f;
+        out /=4.0f;
         out = firFilterProcessSample(out,&pData->voxAC15Fir);
     }
     else if (pData->cabSimType == 5)
@@ -55,6 +59,7 @@ static float fxProgram4processSample(float sampleIn,void*data)
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
         out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
+        out=out*2.0f;
     }
     return out;
 }
@@ -64,6 +69,7 @@ static void fxProgram4Param1Callback(uint16_t val,void*data) // gain
 {
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
     pData->gainStage.gain = ((float)val)/64.0f + 0.25f;//((val << 2) + 0x3F); 
+    pData->waveshaper1.functionIndex = (uint8_t)(val >> 6);
 }
 
 static void fxProgram4Param1Display(void*data,char*res)
@@ -77,7 +83,7 @@ static void fxProgram4Param1Display(void*data,char*res)
 static void fxProgram4Param2Callback(uint16_t val,void*data) // offset
 {
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    pData->gainStage.offset = ((float)(val - 0x7ff))/2048.0f; //((val - 0x7FF) << 4);
+    pData->gainStage.offset = ((float)(val - 0x7ff))/2048.0f*0.1f; //((val - 0x7FF) << 4);
 }
 
 static void fxProgram4Param2Display(void*data,char*res)
@@ -103,56 +109,10 @@ static void fxProgram4Param3Display(void*data,char*res)
     }
 }
 
-static void fxProgram4Param4Callback(uint16_t val,void*data)
-{
-    FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    pData->nWaveshapers = (val >> 10) + 1;
-}
-
-static void fxProgram4Param4Display(void*data,char*res)
-{
-    FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    UInt8ToChar(pData->nWaveshapers,res);
-}
-
-
-static void fxProgram4Param5Callback(uint16_t val,void*data)
-{
-    FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    pData->waveshaperType = (val >> 10);
-    switch(pData->waveshaperType)
-    {
-        case 0:
-            initWaveShaper(&pData->waveshaper1.waveshaper,&waveShaperDefaultOverdrive);
-            break;
-        case 1:
-            initWaveShaper(&pData->waveshaper1.waveshaper,&waveShaperSoftOverdrive);
-            break;
-        case 2: 
-            initWaveShaper(&pData->waveshaper1.waveshaper,&waveShaperDistortion);
-            break;            
-        case 3:
-            initWaveShaper(&pData->waveshaper1.waveshaper,&waveShaperCurvedOverdrive);
-            break;
-        default:
-            break;
-    }
-}
-
-static void fxProgram4Param5Display(void*data,char*res)
-{
-    FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    for(uint8_t c=0;c<24;c++)
-    {
-        *(res+c) =  pData->waveShaperNames[pData->waveshaperType][c];
-    }
-}
-
-
 static void fxProgram4Setup(void*data)
 {
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    initWaveShaper(&pData->waveshaper1.waveshaper,&waveShaperAsymm);
+    initMultiWaveShaper(&pData->waveshaper1,&multiWaveshaper1);
     initfirFilter(&pData->frontmanFir);
     initfirFilter(&pData->hiwattFir);
     initfirFilter(&pData->voxAC15Fir);
@@ -236,18 +196,12 @@ FxProgram4DataType fxProgram4data = {
     .gainStage.gain=512,
     .nWaveshapers = 4,
     .waveshaperType=0,
-    .cabSimType = 1,
-    .waveshaper1 = {
-        .oversamplingFilter = {
-            .coeffB = {0.09762573f, 0.19525146f, 0.09762573f},
-            .coeffA = {-0.942779541f, -0.3333129f}
-        }
-    }
+    .cabSimType = 1
 };
 
 FxProgramType fxProgram4 = {
     .name = "Amp Model 2          ",
-    .nParameters=5,
+    .nParameters=3,
     .parameters = {
         {
             .name = "Gain           ",
@@ -275,25 +229,7 @@ FxProgramType fxProgram4 = {
             .getParameterDisplay=&fxProgram4Param3Display,
             .getParameterValue=0,
             .setParameter=&fxProgram4Param3Callback
-        },
-        {
-            .name = "Gainstages     ",
-            .control=0xFF,
-            .increment=1024,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgram4Param4Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram4Param4Callback
-        },
-        {
-            .name = "OD/Dist Type",
-            .control = 0xFF,
-            .increment = 1024,
-            .rawValue = 0,
-            .getParameterDisplay=&fxProgram4Param5Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram4Param5Callback
-        }     
+        }  
     },
     .processSample = &fxProgram4processSample,
     .setup = &fxProgram4Setup,

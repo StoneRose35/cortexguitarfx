@@ -14,7 +14,7 @@
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 5
+#define N_FX_PROGRAMS 6
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
@@ -70,6 +70,28 @@ typedef struct {
 } FxProgram1DataType;
 #endif
 
+
+#ifndef FLOAT_AUDIO
+typedef struct {
+    int16_t highpassCutoff;
+    uint8_t nWaveshapers;
+    int16_t highpass_out,highpass_old_out,highpass_old_in;
+    WaveShaperDataType waveshaper1;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram1DataType;
+#else
+typedef struct {
+    float highpassCutoff;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    MultiWaveShaperDataType waveshaper;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram9DataType;
+#endif
+
 typedef struct {
     SimpleChorusType chorusData;
 } FxProgram2DataType;
@@ -112,7 +134,7 @@ typedef struct {
     const char cabNames[6][24];
     const char waveShaperNames[4][24];
     FirFilterType hiwattFir;
-    OversamplingWaveshaperDataType waveshaper1;
+    MultiWaveShaperDataType waveshaper1;
     SecondOrderIirFilterType hiwattIir1;
     SecondOrderIirFilterType hiwattIir2;
     SecondOrderIirFilterType hiwattIir3;
@@ -180,6 +202,7 @@ extern FxProgramType fxProgram5;
 extern FxProgramType fxProgram6;
 extern FxProgramType fxProgram7;
 extern FxProgramType fxProgram8;
+extern FxProgramType fxProgram9;
 
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 

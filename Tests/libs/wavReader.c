@@ -265,6 +265,14 @@ void writeWavFileFloat(WavFileTypeFloat*wavFile)
     for(uint32_t c=0;c<lengthInSamples;c++)
     {
         scaledSample = wavFile->data[sampleCnt++]* (float)((1 << (wavFile->wavFormat.wBitsPerSample-1)));
+        if (scaledSample > (float)((1 << (wavFile->wavFormat.wBitsPerSample-1))-1))
+        {
+            scaledSample = (float)((1 << (wavFile->wavFormat.wBitsPerSample-1))-1);
+        }
+        else if (scaledSample < (float)(-(1 << (wavFile->wavFormat.wBitsPerSample-1))))
+        {
+            scaledSample = (float)(-(1 << (wavFile->wavFormat.wBitsPerSample-1)));
+        }
         sampleToWrite.intValue=(int32_t)scaledSample;
         for (uint8_t bcnt=0;bcnt<(wavFile->wavFormat.wBitsPerSample >> 3);bcnt++)
         {
