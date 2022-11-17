@@ -5,7 +5,7 @@ primenumbers = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 
 
 
 def compute_feedback(tau, d_samples, f_sampling=48000):
-    return np.power(np.exp(1), -d_samples/tau/f_sampling)
+    return np.power(0.001, d_samples/tau/f_sampling)
 
 
 if __name__ == "__main__":
