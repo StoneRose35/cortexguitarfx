@@ -18,7 +18,11 @@
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
+#ifndef FLOAT_AUDIO
 typedef int16_t(*processSampleCallback)(int16_t,void*);
+#else
+typedef float(*processSampleCallback)(float,void*);
+#endif
 typedef void(*paramChangeCallback)(uint16_t,void*);
 typedef void(*setupCallback)(void*);
 typedef void*(*getParameterValueFct)(void*);
@@ -44,6 +48,7 @@ typedef struct {
 } FxProgramType;
 
 
+#ifndef FLOAT_AUDIO
 typedef struct {
     int16_t highpassCutoff;
     uint8_t nWaveshapers;
@@ -53,11 +58,45 @@ typedef struct {
     SecondOrderIirFilterType filter1;
     DelayDataType * delay;
 } FxProgram1DataType;
+#else
+typedef struct {
+    float highpassCutoff;
+    uint8_t nWaveshapers;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    WaveShaperDataType waveshaper1;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram1DataType;
+#endif
+
+
+#ifndef FLOAT_AUDIO
+typedef struct {
+    int16_t highpassCutoff;
+    uint8_t nWaveshapers;
+    int16_t highpass_out,highpass_old_out,highpass_old_in;
+    MultiWaveShaperDataType waveshaper;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram9DataType;
+#else
+typedef struct {
+    float highpassCutoff;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    MultiWaveShaperDataType waveshaper;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram9DataType;
+#endif
 
 typedef struct {
     SimpleChorusType chorusData;
 } FxProgram2DataType;
 
+#ifndef FLOAT_AUDIO
 typedef struct {
     gainStageData gainStage;
     uint8_t cabSimType;
@@ -85,6 +124,36 @@ typedef struct {
 
     //uint8_t updateLock;
 } FxProgram4DataType;
+#else
+typedef struct {
+    gainStageData gainStage;
+    uint8_t cabSimType;
+    uint8_t nWaveshapers;
+    uint8_t waveshaperType;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    const char cabNames[6][24];
+    const char waveShaperNames[4][24];
+    FirFilterType hiwattFir;
+    MultiWaveShaperDataType waveshaper1;
+    SecondOrderIirFilterType hiwattIir1;
+    SecondOrderIirFilterType hiwattIir2;
+    SecondOrderIirFilterType hiwattIir3;
+    
+    FirFilterType frontmanFir;
+    SecondOrderIirFilterType frontmanIir1;
+    SecondOrderIirFilterType frontmanIir2;
+    SecondOrderIirFilterType frontmanIir3;
+
+    FirFilterType voxAC15Fir;
+    SecondOrderIirFilterType voxAC15Iir1;
+    SecondOrderIirFilterType voxAC15Iir2;
+    SecondOrderIirFilterType voxAC15Iir3;
+    
+
+    //uint8_t updateLock;
+} FxProgram4DataType;
+#endif
+
 
 typedef struct 
 {
@@ -97,38 +166,12 @@ typedef struct
 } FxProgram6DataType;
 
 
-typedef struct
-{
-    WaveShaperDataType waveshaper1;
-    WaveShaperDataType waveshaper2;
-    WaveShaperDataType waveshaper3;
-    gainStageData gainStage;
-    CompressorDataType compressor;
-    int16_t highpass_out,highpass_old_out,highpass_old_in;
-    const char cabNames[4][24];
-    FirFilterType hiwattFir;
-    FirFilterType frontmanFir;
-    FirFilterType voxAC15Fir;
-    SecondOrderIirFilterType cabF1;
-    SecondOrderIirFilterType cabF2;
-    SecondOrderIirFilterType cabF3;
-    SecondOrderIirFilterType cabF4;    
-    DelayDataType* delay;
-    uint8_t cabSimType;
-    
-} FxProgram7DataType;
-
-
 typedef struct 
 {
     CompressorDataType compressor;
 } FxProgram8DataType;
 
 
-/* 
-   ***************************************************************************
-   ***************************************************************************
-*/
 
 extern FxProgramType fxProgram1;
 extern FxProgramType fxProgram2;
@@ -136,8 +179,8 @@ extern FxProgramType fxProgram3;
 extern FxProgramType fxProgram4;
 extern FxProgramType fxProgram5;
 extern FxProgramType fxProgram6;
-extern FxProgramType fxProgram7;
 extern FxProgramType fxProgram8;
+extern FxProgramType fxProgram9;
 
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 

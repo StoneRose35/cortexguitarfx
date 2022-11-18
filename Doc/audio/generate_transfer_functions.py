@@ -83,7 +83,7 @@ def generate_matrix_transfer_function(xa,xb,ya,yb,successions,do_plot=True,outpu
                 yvals[idx]=xvals[idx]
             else:
                 yvals[idx] = tf.compute(yvals[idx])
-            bytearray += "0x{:x}, ".format(ushort(yvals[idx]*32767))
+            bytearray += "0x{:x}, ".format(ushort(yvals[idx]*32768))
             floatarray += "{:f}f, ".format(yvals[idx])
         bytearray += "\r\n},"
         floatarray += "\r\n},"
@@ -109,5 +109,5 @@ if __name__ == "__main__":
     #generate_curved_overdrive()
     #generate_asymmetric_od()
 
-    generate_matrix_transfer_function(0.9, 0.91, 0.975, 0.98,64,do_plot=False,output_type=OUTPUT_TYPE_FLOAT,npoints=256)
+    generate_matrix_transfer_function(0.9, 0.91, 0.975, 0.98,64,do_plot=False,output_type=OUTPUT_TYPE_INT16,npoints=256)
     
