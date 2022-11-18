@@ -10,11 +10,12 @@
 #include "audio/bitcrusher.h"
 #include "audio/delay.h"
 #include "audio/compressor.h"
+#include "audio/reverb.h"
 
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 6
+#define N_FX_PROGRAMS 8
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
@@ -192,6 +193,12 @@ typedef struct
 {
     CompressorDataType compressor;
 } FxProgram8DataType;
+
+
+typedef struct
+{
+    ReverbType reverb;
+} FxProgram10DataType;
 
 
 extern FxProgramType fxProgram1;
