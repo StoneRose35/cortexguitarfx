@@ -12,7 +12,7 @@
 #include "system.h"
 
 /**
- * @brief compares to bytes interpreted as unsigned integers
+ * @brief compares two bytes interpreted as unsigned integers
  * 
  * @param a the first integer 
  * @param b  the second integer
