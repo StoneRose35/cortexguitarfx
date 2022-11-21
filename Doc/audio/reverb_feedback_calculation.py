@@ -9,7 +9,7 @@ def compute_feedback(tau, d_samples, f_sampling=48000):
 
 
 if __name__ == "__main__":
-    delay_times = [31, 67, 101, 113]
+    delay_times = [2011, 2551, 3163, 4093]#[31, 67, 101, 113]
     taus = np.linspace(0.1, 2.0, 4)
     tau = 0.1
     d_samples = 13
