@@ -161,7 +161,7 @@ int openWavFileFloat(char* filename,WavFileTypeFloat*wavFile)
 }
 
 /**
- * @brief fills the filename structure with default values (48kHz sampling rate, stereo, 16bit sample depth)
+ * @brief fills the filename structure with default values (48kHz sampling rate, mono, 16bit sample depth)
  *  and allocates length bytes
  * 
  * @param filename 

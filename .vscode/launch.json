@@ -189,6 +189,31 @@
             ],
             "preLaunchTask": "compile offline audio processor",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "gcc-9 - generate unit pulse wav",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Tests/generateUnitPulseWav",
+            "cwd": "${workspaceFolder}/Tests",
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "compile generateUnitPulseWav",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }

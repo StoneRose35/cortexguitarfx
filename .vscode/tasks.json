@@ -57,6 +57,32 @@
         },
         {
             "type": "cppbuild",
+            "label": "compile generateUnitPulseWav",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-DFLOAT_AUDIO",
+                "-g",
+                "./Tests/generateUnitPulseWav.c","./Tests/libs/wavReader.c",
+                "-o",
+                "./Tests/generateUnitPulseWav", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Generates a Unit Pulse Wav File"
+        },
+        {
+            "type": "cppbuild",
             "label": "compile bitmap helper",
             "command": "/usr/bin/gcc-9",
             "args": [
