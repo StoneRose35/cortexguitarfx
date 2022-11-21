@@ -17,6 +17,8 @@ static float fxProgramprocessSample(float sampleIn,void*data)
 
     out = pData->highpass_out;
 
+    // twice to overcome gain limitations due to interpolation
+    out = multiWaveShaperProcessSample(out,&pData->waveshaper);
     out = multiWaveShaperProcessSample(out,&pData->waveshaper);
 
     out = out/2.0f;
