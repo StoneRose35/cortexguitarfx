@@ -14,10 +14,7 @@ DelayDataType * getDelayData()
 
 void initDelay(DelayDataType*data)
 {
-    for (uint32_t c=0;c<DELAY_LINE_LENGTH;c++)
-    {
-        data->delayLine[c]=0.0f;
-    }
+    emptyDelayLine(data->delayLine);
     data->delayInSamples=1;
     data->delayLinePtr=0;
     data->feedback=0.0f;
@@ -50,6 +47,18 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
     data->delayLinePtr++;
     data->delayLinePtr &= (DELAY_LINE_LENGTH -1);
     return sampleOut;
+}
+
+float * getDelayLine()
+{
+    return (float*)singletonDelay.delayLine;
+}
+void emptyDelayLine(float*delayLine)
+{
+    for (uint32_t c=0;c<DELAY_LINE_LENGTH;c++)
+    {
+        delayLine[c]=0.0f;
+    }
 }
 
 #endif

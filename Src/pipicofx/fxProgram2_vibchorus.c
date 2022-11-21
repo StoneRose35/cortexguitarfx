@@ -70,27 +70,16 @@ static void fxProgram2Param2Display(void*data,char*res)
 static void fxProgram2Param3Callback(uint16_t val,void*data) // mix
 {
     FxProgram2DataType* pData = (FxProgram2DataType*)data;
-    // map to 0 to 255
-    val >>= 4;
-    pData->chorusData.mix = (uint8_t)val;
+    pData->chorusData.mix = ((float)val)/4095.0f;
 }
 
 static void fxProgram2Param3Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram2DataType* fData = (FxProgram2DataType*)data;
-    dVal = fData->chorusData.mix*100;
-    dVal=dVal >> 8;
+    dVal = (int16_t)(fData->chorusData.mix*100.0f);
     Int16ToChar(dVal,res);
-    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
-    {
-        if(*(res+c)==0)
-        {
-            *(res+c)='%';
-            *(res+c+1)=(char)0;
-            break;
-        }
-    }
+    appendToString(res,"%");
 }
 
 static void fxProgram2Setup(void*data)
@@ -101,7 +90,7 @@ static void fxProgram2Setup(void*data)
 
 FxProgram2DataType fxProgram2data = {
     .chorusData = {
-        .mix = 128,
+        .mix = 0.5f,
         .frequency = 500,
         .depth = 10
     }

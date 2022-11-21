@@ -91,7 +91,7 @@ void initSimpleChorus(SimpleChorusType*data)
 float simpleChorusProcessSample(float sampleIn,SimpleChorusType*data)
 {
     uint16_t delayPtr;
-    float sampleOut, mixf;
+    float sampleOut;
     int16_t lfoValInterp;
     data->lfoUpdateCnt++;
 
@@ -125,8 +125,7 @@ float simpleChorusProcessSample(float sampleIn,SimpleChorusType*data)
         lfoValInterp = data->lfoValOld + ((data->lfoUpdateCnt*(data->lfoVal - data->lfoValOld)) >> 8);
         // compute current index of the delay pointer
         delayPtr = (data->delayInputPtr - 5 - (((lfoValInterp+0xFF)*data->depth) >> 8)) & (SIMPLE_CHORUS_DELAY_SIZE-1); 
-        mixf=((float)data->mix)/255.0f;
-        sampleOut=sampleIn*(1.0f-mixf) + mixf*data->delayBuffer[delayPtr];
+        sampleOut=sampleIn*(1.0f-data->mix) + data->mix*data->delayBuffer[delayPtr];
         *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
         return sampleOut;
 }

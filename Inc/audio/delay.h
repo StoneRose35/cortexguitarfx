@@ -33,6 +33,9 @@ typedef struct
 } DelayDataType;
  
 float delayLineProcessSample(float sampleIn,DelayDataType*data);
+float * getDelayLine();
+void emptyDelayLine(float*delayLine);
+
 #endif
 void initDelay(DelayDataType*data);
 
