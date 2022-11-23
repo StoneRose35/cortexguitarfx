@@ -114,7 +114,7 @@ void ssd1306ClearDisplay()
  * @param arr the data array (lsb is on top)
  * @param arrayLength the length of the array
  */
-void ssd1306DisplayByteArray(uint8_t row,uint8_t col,uint8_t *arr,uint16_t arrayLength)
+void ssd1306DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayLength)
 {
     setCursor(row,col);
     *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD); // switch to data
@@ -237,5 +237,26 @@ void ssd1306WriteText(const char * str,uint8_t posH,uint8_t posV)
         hCurrent += 1;
 
         cnt++;
+    }
+}
+
+/**
+ * @brief writes a left-aligned text and fills the entire line
+ * 
+ * @param str 
+ * @param posV 
+ */
+void ssd1306WriteTextLine(const char * str,uint8_t posV)
+{
+    uint8_t cnt=0;
+
+    while(*(str+cnt) != 0)
+    {
+        ssd1306WriteChar(posV,cnt,*(str+cnt));
+        cnt++;
+    }
+    while(cnt < 21)
+    {
+        ssd1306WriteChar(posV,cnt++,' ');
     }
 }

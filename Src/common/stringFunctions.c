@@ -825,7 +825,14 @@ void dateTimeToString(char * out,uint16_t year,uint8_t month,uint8_t day,uint8_t
      *(out + strPos) = 0;
 }
 
-uint16_t appendToString(char * appendee,char *  appender)
+/**
+ * @brief appends appendee to appender
+ * 
+ * @param appendee 
+ * @param appender 
+ * @return uint16_t 
+ */
+uint16_t appendToString(char * appendee,const char *  appender)
 {
 	uint16_t c=0,c2=0;
 	while (*(appendee + c) != 0)
