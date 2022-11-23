@@ -17,10 +17,12 @@
 /Tests/audioTest
 /Tests/audioout.txt
 /Tests/processThroughFxProgram
+/Tests/generateUnitPulseWav
 /Tests/pipicouitest
 /Tests/decimaltostringtest
 /Tests/compressorTest
 /Tests/audiosamples/*_proc*
+/Tests/audiosamples/unitPulse.wav
 /Tests/libs/*.bmp
 /Tests/libs/bmplib
 /Src/common/fatLib

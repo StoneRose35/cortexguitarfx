@@ -32,8 +32,8 @@ class AudioFilter:
         else:
             self.w[0] = (int(sample) - ((self.a[0]*self.w[1]) >> (self.bit_res-1)) - ((self.a[1]*self.w[2]) >> (self.bit_res-1)))
             out = ((((self.b[0]*self.w[0])>> (self.bit_res-1))) + (((self.b[1]*self.w[1]) >> (self.bit_res-1))) + (((self.b[2]*self.w[2]) >> (self.bit_res-1)) ))
-        self.w[2]=self.w[1]
-        self.w[1]=self.w[0]
+        self.w[2] = self.w[1]
+        self.w[1] = self.w[0]
         return out
 
 def compute_td_energy_fraction(bd_orig,ad_orig,do_overflow,sample_size=16):
@@ -108,7 +108,7 @@ def design_iir_filter(rs=20,fc=None,fs=48000,do_overflow=True,sample_size=16,sca
         sos= [[1.,0.,0.], [1.,0.,0.]]
     return sos
 
-def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=16,scaling=None,fc=None,ftype=None,type=None,rs=0):
+def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=15,scaling=None,fc=None,ftype=None,type=None,rs=0):
 
     auto_sample_size = sample_size is None
     cnt=0
@@ -131,7 +131,7 @@ def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=16,sc
                 print("sample size: {}, energy fraction: {}".format(sample_size_dyn,energy_fraction))
             sample_size = sample_size_dyn
 
-        max_val = ((1 << (16 - 1)) - 1)
+        max_val = ((1 << (sample_size - 1)) - 1)
 
         bvals = np.array(bd * max_val).astype(int)
         avals = np.array(ad[1:] * max_val).astype(int)
@@ -178,7 +178,7 @@ def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=16,sc
 
             # time-domain test
             x_time_domain = np.linspace(0,1./fs*1000,1024)
-            testFilter = AudioFilter(avals,bvals,do_overflow=do_overflow,bit_res=16)
+            testFilter = AudioFilter(avals,bvals,do_overflow=do_overflow,bit_res=sample_size)
             tdOutput=[]
             for c in range(1024):
                 if c==0:
@@ -188,7 +188,7 @@ def plot_iir_filter(sos,do_plot=True,fs=48000,do_overflow=True,sample_size=16,sc
                 tdOutput.append(testFilter.apply(inputVal))
             axs2=fig.add_subplot(gs[2,0])
             axs2.plot(x_time_domain,tdOutput, ".-r", label="positive pulse")
-            testFilter = AudioFilter(avals,bvals,do_overflow=do_overflow,bit_res=16)
+            testFilter = AudioFilter(avals,bvals,do_overflow=do_overflow,bit_res=sample_size)
             tdOutput=[]
             for c in range(1024):
                 if c==0:
@@ -418,16 +418,16 @@ if __name__ == "__main__":
     # manual modeling attempt of a guitar speaker using 4 iir filters
     iirfilters=[]
     sos = design_iir_filter(6,3500,type="cheby1",ftype="lowpass")
-    design_and_plot_iir_filter(True,rs=6,fc=3500,do_overflow=True,sample_size=None,type="cheby1",ftype="lowpass")
+    design_and_plot_iir_filter(True,rs=6,fc=3500,do_overflow=False,sample_size=15,type="cheby1",ftype="lowpass")
     iirfilters.append([sos[0][:3],sos[0][3:]])
     sos = design_iir_filter(6,2500,type="cheby1",ftype="lowpass")
-    design_and_plot_iir_filter(True, rs=6, fc=2500, do_overflow=True, sample_size=None, type="cheby1", ftype="lowpass")
+    design_and_plot_iir_filter(True, rs=6, fc=2500, do_overflow=False, sample_size=15, type="cheby1", ftype="lowpass")
     iirfilters.append([sos[0][:3],sos[0][3:]])
     sos=design_iir_filter(16, 120, type="cheby1", ftype="highpass")
-    design_and_plot_iir_filter(True, rs=16, fc=12000, do_overflow=True, sample_size=None, type="cheby1", ftype="highpass")
+    design_and_plot_iir_filter(True, rs=16, fc=12000, do_overflow=False, sample_size=15, type="cheby1", ftype="highpass")
     iirfilters.append([sos[0][:3],sos[0][3:]])
-    sos=design_iir_filter(1, 300, type="butter", ftype="highpass")
-    design_and_plot_iir_filter(True, rs=1, fc=300, do_overflow=True, sample_size=None, type="butter", ftype="highpass")
+    sos=design_iir_filter(2, 300, type="butter", ftype="highpass")
+    design_and_plot_iir_filter(True, rs=2, fc=300, do_overflow=False, sample_size=15, type="butter", ftype="highpass")
     iirfilters.append([sos[0][:3],sos[0][3:]])
 
     plot_sos_frequency_response(iirfilters)
