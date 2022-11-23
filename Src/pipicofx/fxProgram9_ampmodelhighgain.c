@@ -17,8 +17,8 @@ static int16_t fxProgramprocessSample(int16_t sampleIn,void*data)
     pData->highpass_old_out = pData->highpass_out;
 
     out = pData->highpass_out;
-    out =multiWaveShaperProcessSample(out,&pData->waveshaper);
-
+    out =multiWaveShaperProcessSample(out,&pData->waveshaper1);
+    out =multiWaveShaperProcessSample(out,&pData->waveshaper1);
     out = out >> 1;
 
     out = secondOrderIirFilterProcessSample(out,&pData->filter1);
@@ -47,14 +47,14 @@ static void fxProgramParam2Callback(uint16_t val,void*data) // gain
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
     // map 0-4095 to 0-63
     val >>= 6;
-    pData->waveshaper.functionIndex = val;
+    pData->waveshaper1.functionIndex = val;
 }
 
 
 static void fxProgramParam2Display(void*data,char*res)
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
-    UInt8ToChar(pData->waveshaper.functionIndex,res);
+    UInt8ToChar(pData->waveshaper1.functionIndex,res);
 }
 
 
@@ -87,7 +87,7 @@ static void fxProgramSetup(void*data)
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
     initfirFilter(&pData->filter3);
-    initMultiWaveShaper(&pData->waveshaper,&multiWaveshaper1);
+    initMultiWaveShaper(&pData->waveshaper1,&multiWaveshaper1);
     pData->delay = getDelayData();
     initDelay(pData->delay);
 }

@@ -5,16 +5,18 @@
 #include "audio/secondOrderIirFilter.h"
 #include "audio/firFilter.h"
 #include "audio/simpleChorus.h"
+#include "audio/sineChorus.h"
 #include "audio/oversamplingWaveshaper.h"
 #include "audio/gainstage.h"
 #include "audio/bitcrusher.h"
 #include "audio/delay.h"
 #include "audio/compressor.h"
+#include "audio/reverb.h"
 
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 8
+#define N_FX_PROGRAMS 10
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
@@ -76,7 +78,7 @@ typedef struct {
     int16_t highpassCutoff;
     uint8_t nWaveshapers;
     int16_t highpass_out,highpass_old_out,highpass_old_in;
-    MultiWaveShaperDataType waveshaper;
+    MultiWaveShaperDataType waveshaper1;
     FirFilterType filter3;
     SecondOrderIirFilterType filter1;
     DelayDataType * delay;
@@ -158,6 +160,7 @@ typedef struct {
 typedef struct 
 {
     BitCrusherDataType bitcrusher;
+    uint8_t resolution;
 } FxProgram5DataType;
 
 typedef struct 
@@ -166,10 +169,44 @@ typedef struct
 } FxProgram6DataType;
 
 
+typedef struct
+{
+    WaveShaperDataType waveshaper1;
+    WaveShaperDataType waveshaper2;
+    WaveShaperDataType waveshaper3;
+    gainStageData gainStage;
+    CompressorDataType compressor;
+    int16_t highpass_out,highpass_old_out,highpass_old_in;
+    const char cabNames[4][24];
+    FirFilterType hiwattFir;
+    FirFilterType frontmanFir;
+    FirFilterType voxAC15Fir;
+    SecondOrderIirFilterType cabF1;
+    SecondOrderIirFilterType cabF2;
+    SecondOrderIirFilterType cabF3;
+    SecondOrderIirFilterType cabF4;    
+    DelayDataType* delay;
+    uint8_t cabSimType;
+    
+} FxProgram7DataType;
+
+
 typedef struct 
 {
     CompressorDataType compressor;
 } FxProgram8DataType;
+
+
+typedef struct
+{
+    ReverbType reverb;
+    int16_t reverbTime;
+} FxProgram10DataType;
+
+typedef struct 
+{
+    SineChorusType sineChorus;
+} FxProgram11DataType;
 
 
 
@@ -179,8 +216,11 @@ extern FxProgramType fxProgram3;
 extern FxProgramType fxProgram4;
 extern FxProgramType fxProgram5;
 extern FxProgramType fxProgram6;
+extern FxProgramType fxProgram7;
 extern FxProgramType fxProgram8;
 extern FxProgramType fxProgram9;
+extern FxProgramType fxProgram10;
+extern FxProgramType fxProgram11;
 
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
