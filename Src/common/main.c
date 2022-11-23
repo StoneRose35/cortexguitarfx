@@ -103,7 +103,7 @@ int main(void)
 	initDMA();
 	initTimer();
 	initAdc();
-	initI2c(26);
+	initI2c(26); // 26 for wm8731, 72 for cs4270
 	
 	/*
 	 *

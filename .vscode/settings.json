@@ -42,7 +42,8 @@
         "consolebase.h": "c",
         "stm32f446_cfg_pins.h": "c",
         "float.h": "c",
-        "reverb.h": "c"
+        "reverb.h": "c",
+        "stm32f446xx.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false
