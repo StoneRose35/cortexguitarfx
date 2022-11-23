@@ -98,6 +98,10 @@ static void fxProgram4Param3Callback(uint16_t val,void*data) // choose cab sim f
 {
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
     pData->cabSimType = (val >> 9) & 7;
+    if (pData->cabSimType > 5)
+    {
+        pData->cabSimType = 5;
+    }
 }
 
 static void fxProgram4Param3Display(void*data,char*res)

@@ -160,6 +160,7 @@ typedef struct {
 typedef struct 
 {
     BitCrusherDataType bitcrusher;
+    uint8_t resolution;
 } FxProgram5DataType;
 
 typedef struct 
@@ -199,6 +200,7 @@ typedef struct
 typedef struct
 {
     ReverbType reverb;
+    float reverbTime;
 } FxProgram10DataType;
 
 typedef struct 

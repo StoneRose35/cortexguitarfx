@@ -7,17 +7,7 @@
  * and tau values (time when signal is at 0.001) of 0.1, 0.73333333,1.36666667,2.        
  * 
  */
-/*
-const float feedback[4][4] = {
-{
-0.9563679f, 0.9939349f, 0.9967410f, 0.9977719f, 
-},{
-0.9080819f, 0.9869378f, 0.9929697f, 0.9951906f, 
-},{
-0.8647190f, 0.9803746f, 0.9894209f, 0.9927588f, 
-},{
-0.8499140f, 0.9780686f, 0.9881715f, 0.9919020f, 
-}};*/
+
 const float feedback[4][4] = {
 {
 0.0553509f, 0.6739194f, 0.8091584f, 0.8652792f, 
@@ -30,7 +20,7 @@ const float feedback[4][4] = {
 },};
 
 const float taus[4] = {0.1, 0.733333333f,1.366666666f,2.0f}; 
-const uint16_t delayInSamples[4] = {2011, 2551, 3163, 4093};//{31,67,101,113};
+const uint16_t delayInSamples[4] = {2011, 2551, 3163, 4093};
 const uint16_t allpassDelays[3] = {1021,337,115};
 const float phaseshifts[4]= {0.7f,0.7f,0.7f,0.7f};
 
@@ -66,7 +56,7 @@ float allpassProcessSample(float sampleIn,AllpassType*allpass)
     return sampleOut;
 }
 
-void initReverb(ReverbType*reverbData)
+void initReverb(ReverbType*reverbData,float reverbTime)
 {
     DelayDataType * delaySingleton = getDelayData();
     initDelay(delaySingleton);
@@ -78,8 +68,7 @@ void initReverb(ReverbType*reverbData)
         reverbData->allpasses[c].delayPtr=0;
         reverbData->allpasses[c].delayInSamples=allpassDelays[c];
     }
-    reverbData->delayTime=0.3;
-    setReverbTime(reverbData->delayTime,reverbData);
+    setReverbTime(reverbTime,reverbData);
     reverbData->delayPointer=0;
 }
 

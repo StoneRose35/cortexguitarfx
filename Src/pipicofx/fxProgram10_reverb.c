@@ -11,14 +11,14 @@ static float fxProgramprocessSample(float sampleIn,void*data)
 static void fxProgramParam1Callback(uint16_t val,void*data) // reverb time
 {
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
-    float fval = ((float)val)/4095.0f*(2.0f-0.1f) + 0.1;
-    setReverbTime(fval,&pData->reverb);
+    pData->reverbTime = ((float)val)/4095.0f*(2.0f-0.1f) + 0.1;
+    setReverbTime(pData->reverbTime,&pData->reverb);
 }
 
 static void fxProgramParam1Display(void*data,char*res)
 {
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
-    int16_t reverbms = (int16_t)(pData->reverb.delayTime*1000.0f);
+    int16_t reverbms = (int16_t)(pData->reverbTime*1000.0f);
     Int16ToChar(reverbms,res);
     appendToString(res," ms");
 }
@@ -43,10 +43,13 @@ static void fxProgramParam2Display(void*data,char*res)
 static void fxProgramSetup(void*data)
 {
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
-    initReverb(&pData->reverb);
+    initReverb(&pData->reverb,pData->reverbTime);
 }
 
-FxProgram10DataType fxProgram10data;
+FxProgram10DataType fxProgram10data=
+{
+    .reverbTime=0.3f
+};
 
 FxProgramType fxProgram10 = {
     .name = "Reverb                 ",

@@ -16,13 +16,12 @@ typedef struct
     AllpassType allpasses[4];
     uint16_t delayPointer;
     float feedbackValues[4];
-    float delayTime;
     float mix;
 
 } ReverbType;
 
 float reverbProcessSample(float sampleIn,ReverbType*reverbData);
-void initReverb(ReverbType*reverbData);
+void initReverb(ReverbType*reverbData,float);
 void setReverbTime(float reverbTime,ReverbType*reverbData);
 
 

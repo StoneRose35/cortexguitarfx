@@ -73,17 +73,9 @@ static void fxProgramParam3Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
-    dVal=pData->delay->mix/164;
+    dVal=(int16_t)(pData->delay->mix*100.0f);
     Int16ToChar(dVal,res);
-    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
-    {
-        if(*(res+c)==0)
-        {
-            *(res+c)='%';
-            *(res+c+1)=(char)0;
-            break;
-        }
-    }
+    appendToString(res,"%");
 }
 
 static void fxProgramSetup(void*data)
