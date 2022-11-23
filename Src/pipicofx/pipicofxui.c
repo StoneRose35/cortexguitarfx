@@ -6,6 +6,7 @@
 #include "images/pipicofx_param_1_scaled.h"
 #include "romfunc.h"
 #include "audio/fxprogram/fxProgram.h"
+#include "stringFunctions.h"
 
 const uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
 
@@ -86,7 +87,7 @@ void updateAudioUi(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
             drawLine(cx,cy,px,py,&imgBfr);
             ssd1306DisplayImageStandardAdressing(13,2,imgBfr.sx,imgBfr.sy>>3,imgBfr.data); 
             data->currentParameter->getParameterDisplay(data->currentProgram->data,paramValueBfr);
-            ssd1306WriteText(paramValueBfr,0,7);
+            ssd1306WriteTextLine(paramValueBfr,7);
 
             break;
         case 2:
@@ -108,7 +109,7 @@ void updateAudioUi(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
             drawLine(cx,cy,px,py,&imgBfr);   
             ssd1306DisplayImageStandardAdressing(13,2,imgBfr.sx,imgBfr.sy>>3,imgBfr.data); 
             data->currentParameter->getParameterDisplay(data->currentProgram->data,paramValueBfr);
-            ssd1306WriteText(paramValueBfr,0,7);
+            ssd1306WriteTextLine(paramValueBfr,7);
 
             break;
     }
@@ -120,37 +121,45 @@ void updateAudioUi(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
  * @param data 
  */
 void drawUi(PiPicoFxUiType*data)
-{
+{                  
+    char lineBuffer[24];
+    lineBuffer[0]=0;
     uint8_t paramIdxesDrawn[3]={0,0,0};
     switch(data->displayLevel)
     {
         case 0:
-            ssd1306WriteText(data->currentProgram->name,0,0);
+            ssd1306WriteTextLine(data->currentProgram->name,0);
             if (data->locked != 0)
             {
                 ssd1306DisplayByteArray(0,122,locksymbol,5);
             }
-            ssd1306WriteText("                   ",0,1);
-            ssd1306WriteText("                   ",0,2);
-            ssd1306WriteText("                   ",0,3);
+            ssd1306WriteTextLine(" ",1);
+            ssd1306WriteTextLine(" ",2);
+            ssd1306WriteTextLine(" ",3);
             for (uint8_t c=0;c<data->currentProgram->nParameters;c++)
             {
                 if (data->currentProgram->parameters[c].control == 0)
                 {
-                    ssd1306WriteText("P1:",0,4);
-                    ssd1306WriteText(data->currentProgram->parameters[c].name,3,4);
+                    lineBuffer[0]=0;
+                    appendToString(lineBuffer,"P1:");
+                    appendToString(lineBuffer,data->currentProgram->parameters[c].name);
+                    ssd1306WriteTextLine(lineBuffer,4);
                     paramIdxesDrawn[0]=1;
                 }
                 if (data->currentProgram->parameters[c].control == 1)
                 {
-                    ssd1306WriteText("P2:",0,5);
-                    ssd1306WriteText(data->currentProgram->parameters[c].name,3,5);
+                    lineBuffer[0]=0;
+                    appendToString(lineBuffer,"P2:");
+                    appendToString(lineBuffer,data->currentProgram->parameters[c].name);
+                    ssd1306WriteTextLine(lineBuffer,5);
                     paramIdxesDrawn[1]=1;
                 }
                 if (data->currentProgram->parameters[c].control == 2)
                 {
-                    ssd1306WriteText("P3:",0,6);
-                    ssd1306WriteText(data->currentProgram->parameters[c].name,3,6);
+                    lineBuffer[0]=0;
+                    appendToString(lineBuffer,"P3:");
+                    appendToString(lineBuffer,data->currentProgram->parameters[c].name);
+                    ssd1306WriteTextLine(lineBuffer,6);
                     paramIdxesDrawn[2]=1;
                 }                
             }
@@ -158,31 +167,30 @@ void drawUi(PiPicoFxUiType*data)
             {
                 if (paramIdxesDrawn[c]==0)
                 {
-                    ssd1306WriteText("                   ",0,c+4);
+                    ssd1306WriteTextLine(" ",c+4);
                 }
             }
-            ssd1306WriteText("                   ",0,7);
+            ssd1306WriteTextLine(" ",7);
             break;
         case 1:
-            ssd1306WriteText(data->currentProgram->name,0,0);
-            ssd1306WriteText(data->currentParameter->name,0,1);
-            ssd1306WriteText("                   ",0,2);
-            ssd1306WriteText("                   ",0,3);
-            ssd1306WriteText("                   ",0,4);
-            ssd1306WriteText("                   ",0,5);
-            ssd1306WriteText("                   ",0,6);
-            ssd1306WriteText("                   ",0,7);
+            ssd1306WriteTextLine(data->currentProgram->name,0);
+            ssd1306WriteTextLine(data->currentParameter->name,1);
+            ssd1306WriteTextLine(" ",2);
+            ssd1306WriteTextLine(" ",3);
+            ssd1306WriteTextLine(" ",4);
+            ssd1306WriteTextLine(" ",5);
+            ssd1306WriteTextLine(" ",6);
+            ssd1306WriteTextLine(" ",7);
             break;
         case 2:
-            ssd1306WriteText(data->currentProgram->name,0,0);
-            ssd1306WriteText(data->currentParameter->name,0,1);
-            ssd1306WriteText("                   ",0,2);    
-            ssd1306WriteText("                   ",0,3);
-            ssd1306WriteText("                   ",0,4);
-            ssd1306WriteText("                   ",0,5);
-            ssd1306WriteText("                   ",0,6);
-            ssd1306WriteText("                   ",0,7);
-            break;
+            ssd1306WriteTextLine(data->currentProgram->name,0);
+            ssd1306WriteTextLine(data->currentParameter->name,1);
+            ssd1306WriteTextLine(" ",2);    
+            ssd1306WriteTextLine(" ",3);
+            ssd1306WriteTextLine(" ",4);
+            ssd1306WriteTextLine(" ",5);
+            ssd1306WriteTextLine(" ",6);
+            ssd1306WriteTextLine(" ",7);
             break;
     }
 }
@@ -218,13 +226,21 @@ void knob2Callback(uint16_t val,PiPicoFxUiType*data)
     knobCallback(val,data,2);
 }
 
-void button1Callback(PiPicoFxUiType*data)
+/**
+ * @brief Calback for the "Enter"-Button
+ * 
+ * @param data 
+ */
+void button1Callback(PiPicoFxUiType*data) 
 {
     switch (data->displayLevel)
     {
-        case 0: // UI Level 0: to level 1
-            data->displayLevel = 1;
-            drawUi(data);
+        case 0: // UI Level 0: to level 1 if the program contains at least one paramenter
+            if (data->currentProgram->nParameters > 0)
+            {
+                data->displayLevel = 1;
+                drawUi(data);
+            }
             break;
         case 1: // UI Level 1: go to  level 2 if the parameter is not controlled by knob
             if (data->currentParameter->control == 0xFF)
@@ -309,7 +325,6 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
                 drawUi(data);
                 break;
             case 2: // UI Level 2, change Parameter Value
-                // TODO increase by defined increment
                 data->currentParameter->rawValue += diff*data->currentParameter->increment;
                 if (data->currentParameter->rawValue < 0)
                 {
@@ -320,7 +335,6 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
                     data->currentParameter->rawValue = ((1 << 12)-1);
                 }
                 data->currentParameter->setParameter(data->currentParameter->rawValue,data->currentProgram->data);
-                drawUi(data);
                 break;
         }
         data->oldEncoderValue=encoderValue;

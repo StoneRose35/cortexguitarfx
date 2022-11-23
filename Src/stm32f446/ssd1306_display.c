@@ -199,6 +199,27 @@ void ssd1306WriteText(const char * str,uint8_t posH,uint8_t posV)
     }
 }
 
+/**
+ * @brief writes a left-aligned text and fills the entire line
+ * 
+ * @param str 
+ * @param posV 
+ */
+void ssd1306WriteTextLine(const char * str,uint8_t posV)
+{
+    uint8_t cnt=0;
+
+    while(*(str+cnt) != 0)
+    {
+        ssd1306WriteChar(posV,cnt,*(str+cnt));
+        cnt++;
+    }
+    while(cnt < 21)
+    {
+        ssd1306WriteChar(posV,cnt++,' ');
+    }
+}
+
 void ssd1306DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayLength)
 {
     setCursor(row,col);
