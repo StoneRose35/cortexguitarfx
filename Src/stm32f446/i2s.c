@@ -59,7 +59,7 @@ void DMA1_Stream4_IRQHandler() // dac
     task |= TASK_PROCESS_AUDIO;
 }
 
-static void config_i2s_pin(uint8_t pinnr,uint8_t af)
+static void config_i2s_pin(uint8_t pinnr)
 {
     GPIO_TypeDef *gpio;
     uint32_t port;
@@ -74,7 +74,7 @@ static void config_i2s_pin(uint8_t pinnr,uint8_t af)
     gpio->PUPDR &= ~(3 << ((pinnr & 0xF)<<1));
     regbfr = gpio->AFR[(pinnr & 0xF)>>3];
     regbfr &= ~(0xF << ((pinnr & 0xF) << 2));
-    regbfr |= af << ((pinnr & 0xF) << 2);
+    regbfr |= 5 << ((pinnr & 0xF) << 2);
     gpio->AFR[(pinnr & 0xF)>>3] = regbfr; 
 }
 
@@ -86,16 +86,15 @@ void initI2S()
     RCC->APB2ENR |= (1 << RCC_APB2ENR_SPI1EN_Pos);
 
     //configure pins
-    config_i2s_pin(I2S_BCLK,5);
-    config_i2s_pin(I2S_LRCLK,5);
-    config_i2s_pin(I2S_BCLK2,5);
-    config_i2s_pin(I2S_LRCLK2,5);
-    config_i2s_pin(I2S_DIN,5);
-    config_i2s_pin(I2S_DOUT,7);
+    config_i2s_pin(I2S_BCLK);
+    config_i2s_pin(I2S_LRCLK);
+    config_i2s_pin(I2S_BCLK2);
+    config_i2s_pin(I2S_LRCLK2);
+    config_i2s_pin(I2S_DIN);
+    config_i2s_pin(I2S_DOUT);
 
 
     // configure i2s/spi interface
-    // i2s2 is transmitter, i2s1 is  receiver
     SPI1->CR2 |= (1 << SPI_CR2_RXDMAEN_Pos);
     SPI2->CR2 |= (1 << SPI_CR2_TXDMAEN_Pos);
     SPI1->I2SCFGR = (1 << SPI_I2SCFGR_I2SMOD_Pos) | (1 << SPI_I2SCFGR_DATLEN_Pos) | 
