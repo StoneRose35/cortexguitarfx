@@ -27,12 +27,16 @@
 #define I2C_SDA (1*16+9) // PB9
 #define I2C_SCL (1*16+6) // PB6
 
+//cs4270 reset line
+#define CS4270_RESET (0*16+0)
+
 //ssd1306 display interfaced using spi
 #define SSD1306_SCK (2*16+10) // PC10
 #define SSD1306_MOSI (1*16+2) // PB2
 #define SSD1306_MISO (2*16+11) // PC11
 #define SSD1306_CD (0*16+6) // PA6
-#define SSD1306_RESET (2*16+3) //PC3
+#define SSD1306_RESET (2*16+6) //PC6
+#define SSD1306_CS (2*16+8) //PC8
 
 
 

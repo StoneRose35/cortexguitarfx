@@ -3,7 +3,7 @@
 #include "stringFunctions.h"
 #include "romfunc.h"
 
-static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
+static float fxProgramProcessSample(float sampleIn,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     return compressorProcessSample(sampleIn,&pData->compressor);
@@ -12,26 +12,21 @@ static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 static void fxProgramP1Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->compressor.attack = val << 3;
+    setAttack(val << 3,&pData->compressor);
 }
 
 static void fxProgramP1Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    float attackFloat;
-    float dval;
-    int32_t ival;
+    float releaseFloat;
     int16_t i16val;
     uint8_t c=0;
-    attackFloat = int2float(pData->compressor.attack)+ 0.1f;
-    dval = 682655.744f/attackFloat;
-    if (dval > 1000.0f)
+    releaseFloat = 20.833f/pData->compressor.attack; // attack in microseconds
+    if (releaseFloat > 1000.0f)
     {
-        dval = dval/1000.0f;
-        ival = float2int(dval);
-        i16val = (int16_t)ival;
+        releaseFloat = releaseFloat/1000.0f;
+        i16val = (int16_t)(int32_t)releaseFloat;
         Int16ToChar(i16val,res);
-
         while (*(res+c) != 0)
         {
             c++;
@@ -42,8 +37,7 @@ static void fxProgramP1Display(void*data,char*res)
     }
     else
     {
-        ival = float2int(dval);
-        i16val = (int16_t)ival;
+        i16val = (int16_t)(int32_t)releaseFloat;
         Int16ToChar(i16val,res);
         while (*(res+c) != 0)
         {
@@ -62,26 +56,21 @@ static void fxProgramP1Display(void*data,char*res)
 static void fxProgramP2Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->compressor.release = val << 3;
+    setRelease(val << 3,&pData->compressor);
 }
 
 static void fxProgramP2Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     float releaseFloat;
-    float dval;
-    int32_t ival;
     int16_t i16val;
     uint8_t c=0;
-    releaseFloat = int2float(pData->compressor.release)+ 0.1f;
-    dval = 682655.744f/releaseFloat;
-    if (dval > 1000.0f)
+    releaseFloat = 20.833f/pData->compressor.release; // release in microseconds
+    if (releaseFloat > 1000.0f)
     {
-        dval = dval/1000.0f;
-        ival = float2int(dval);
-        i16val = (int16_t)ival;
+        releaseFloat = releaseFloat/1000.0f;
+        i16val = (int16_t)(int32_t)releaseFloat;
         Int16ToChar(i16val,res);
-
         while (*(res+c) != 0)
         {
             c++;
@@ -92,8 +81,7 @@ static void fxProgramP2Display(void*data,char*res)
     }
     else
     {
-        ival = float2int(dval);
-        i16val = (int16_t)ival;
+        i16val = (int16_t)(int32_t)releaseFloat;
         Int16ToChar(i16val,res);
         while (*(res+c) != 0)
         {
@@ -117,35 +105,61 @@ static void fxProgramP3Callback(uint16_t val,void*data)
     {
         enumVal=4;
     }
-    pData->compressor.gainFunction.gainReduction = enumVal;
+    switch (enumVal)
+    {
+        case 0:
+            pData->compressor.gainFunction.gainReduction = 2.0f;
+            break;
+        case 1:
+            pData->compressor.gainFunction.gainReduction = 4.0f;
+            break;
+        case 2:
+            pData->compressor.gainFunction.gainReduction = 8.0f;
+            break;
+        case 3:
+            pData->compressor.gainFunction.gainReduction = 16.0f;
+            break;
+        default:
+            pData->compressor.gainFunction.gainReduction = 1000.0f;
+            break;
+    }
 }
 
 static void fxProgramP3Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    const char* dstrings[5];
-    dstrings[0]="1:2            ";
-    dstrings[1]="1:4            ";
-    dstrings[2]="1:8            ";
-    dstrings[3]="1:16           ";
-    dstrings[4]="1:Inf          ";
-
-    for(uint8_t c=0;c<16;c++)
+    uint16_t c=0,cres=0;
+    const char* infDisplay="Inf          ";
+    int32_t gainReductionInt = (int32_t)pData->compressor.gainFunction.gainReduction;
+    *(res+cres++)='1';
+    *(res+cres++)=':';
+    if (gainReductionInt > 16)
     {
-        *(res+c)=*(dstrings[pData->compressor.gainFunction.gainReduction] + c);
+        while(*(infDisplay+c) !=0)
+        {
+            *(res+cres++)=*(infDisplay+c++);
+        }
+    }
+    else
+    {
+        cres +=  decimalInt16ToChar((int16_t)(gainReductionInt*10),res+cres,1);
+        for (c=0;c<16-cres;c++)
+        {
+            *(res+cres++)=' ';
+        }
     }
 }
 
 static void fxProgramP4Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->compressor.gainFunction.threshhold = val << 3;
+    pData->compressor.gainFunction.threshhold = ((float)val)/4095.0f*0.99f+0.01f;
 }
 
 static void fxProgramP4Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    Int16ToChar(pData->compressor.gainFunction.threshhold,res);
+    decimalInt16ToChar((int16_t)(int32_t)(pData->compressor.gainFunction.threshhold*100.0f),res,2);
 }
 
 
@@ -153,9 +167,9 @@ FxProgram8DataType fxProgram8Data =
 {
     .compressor.attack = 400,
     .compressor.release=400,
-    .compressor.currentAvg=0,
-    .compressor.gainFunction.gainReduction=0,
-    .compressor.gainFunction.threshhold=32767
+    .compressor.currentAvg=0.0f,
+    .compressor.gainFunction.gainReduction=2.0f,
+    .compressor.gainFunction.threshhold=0.8f
 };
 
 

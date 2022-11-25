@@ -23,6 +23,7 @@ void toggleAudioInputBuffer();
 uint16_t * getReadableAudioBuffer();
 
 void initRoundRobinReading();
+void restartAdc();
 
 uint16_t getChannel0Value();
 uint16_t getChannel1Value();

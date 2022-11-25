@@ -5,20 +5,26 @@
 #include "audio/secondOrderIirFilter.h"
 #include "audio/firFilter.h"
 #include "audio/simpleChorus.h"
+#include "audio/sineChorus.h"
 #include "audio/oversamplingWaveshaper.h"
 #include "audio/gainstage.h"
 #include "audio/bitcrusher.h"
 #include "audio/delay.h"
 #include "audio/compressor.h"
+#include "audio/reverb.h"
 
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 8
+#define N_FX_PROGRAMS 10
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
+#ifndef FLOAT_AUDIO
 typedef int16_t(*processSampleCallback)(int16_t,void*);
+#else
+typedef float(*processSampleCallback)(float,void*);
+#endif
 typedef void(*paramChangeCallback)(uint16_t,void*);
 typedef void(*setupCallback)(void*);
 typedef void*(*getParameterValueFct)(void*);
@@ -44,6 +50,7 @@ typedef struct {
 } FxProgramType;
 
 
+#ifndef FLOAT_AUDIO
 typedef struct {
     int16_t highpassCutoff;
     uint8_t nWaveshapers;
@@ -53,11 +60,45 @@ typedef struct {
     SecondOrderIirFilterType filter1;
     DelayDataType * delay;
 } FxProgram1DataType;
+#else
+typedef struct {
+    float highpassCutoff;
+    uint8_t nWaveshapers;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    WaveShaperDataType waveshaper1;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram1DataType;
+#endif
+
+
+#ifndef FLOAT_AUDIO
+typedef struct {
+    int16_t highpassCutoff;
+    uint8_t nWaveshapers;
+    int16_t highpass_out,highpass_old_out,highpass_old_in;
+    WaveShaperDataType waveshaper1;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram1DataType;
+#else
+typedef struct {
+    float highpassCutoff;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    MultiWaveShaperDataType waveshaper;
+    FirFilterType filter3;
+    SecondOrderIirFilterType filter1;
+    DelayDataType * delay;
+} FxProgram9DataType;
+#endif
 
 typedef struct {
     SimpleChorusType chorusData;
 } FxProgram2DataType;
 
+#ifndef FLOAT_AUDIO
 typedef struct {
     gainStageData gainStage;
     uint8_t cabSimType;
@@ -85,10 +126,41 @@ typedef struct {
 
     //uint8_t updateLock;
 } FxProgram4DataType;
+#else
+typedef struct {
+    gainStageData gainStage;
+    uint8_t cabSimType;
+    uint8_t nWaveshapers;
+    uint8_t waveshaperType;
+    float highpass_out,highpass_old_out,highpass_old_in;
+    const char cabNames[6][24];
+    const char waveShaperNames[4][24];
+    FirFilterType hiwattFir;
+    MultiWaveShaperDataType waveshaper1;
+    SecondOrderIirFilterType hiwattIir1;
+    SecondOrderIirFilterType hiwattIir2;
+    SecondOrderIirFilterType hiwattIir3;
+    
+    FirFilterType frontmanFir;
+    SecondOrderIirFilterType frontmanIir1;
+    SecondOrderIirFilterType frontmanIir2;
+    SecondOrderIirFilterType frontmanIir3;
+
+    FirFilterType voxAC15Fir;
+    SecondOrderIirFilterType voxAC15Iir1;
+    SecondOrderIirFilterType voxAC15Iir2;
+    SecondOrderIirFilterType voxAC15Iir3;
+    
+
+    //uint8_t updateLock;
+} FxProgram4DataType;
+#endif
+
 
 typedef struct 
 {
     BitCrusherDataType bitcrusher;
+    uint8_t resolution;
 } FxProgram5DataType;
 
 typedef struct 
@@ -125,20 +197,31 @@ typedef struct
 } FxProgram8DataType;
 
 
-/* 
-   ***************************************************************************
-   ***************************************************************************
-*/
+typedef struct
+{
+    ReverbType reverb;
+    float reverbTime;
+} FxProgram10DataType;
 
-FxProgramType fxProgram1;
-FxProgramType fxProgram2;
-FxProgramType fxProgram3;
-FxProgramType fxProgram4;
-FxProgramType fxProgram5;
-FxProgramType fxProgram6;
-FxProgramType fxProgram7;
-FxProgramType fxProgram8;
+typedef struct 
+{
+    SineChorusType sineChorus;
+} FxProgram11DataType;
 
-FxProgramType * fxPrograms[N_FX_PROGRAMS];
+
+
+extern FxProgramType fxProgram1;
+extern FxProgramType fxProgram2;
+extern FxProgramType fxProgram3;
+extern FxProgramType fxProgram4;
+extern FxProgramType fxProgram5;
+extern FxProgramType fxProgram6;
+extern FxProgramType fxProgram7;
+extern FxProgramType fxProgram8;
+extern FxProgramType fxProgram9;
+extern FxProgramType fxProgram10;
+extern FxProgramType fxProgram11;
+
+extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
 #endif

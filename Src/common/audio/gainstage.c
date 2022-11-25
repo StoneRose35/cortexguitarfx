@@ -1,38 +1,50 @@
 #include "audio/gainstage.h"
 
-
+#ifndef FLOAT_AUDIO
 void initGainstage(gainStageData*data)
 {
-    data->gain=256;
+    data->gain=255;
     data->offset=0;
 }
-
 int16_t gainStageProcessSample(int16_t sampleIn,gainStageData*data)
 {
+    int32_t sampleWord;
     int16_t sampleOut;
-    int32_t sampleWord = (int32_t)sampleIn;
-    if( sampleWord < -32767)
-    {
-        sampleOut = -32767;
-    }
-    else if (sampleWord > 32767)
-    {
-        sampleOut = 32767;
-    }
-    sampleWord = sampleWord* data->gain;
-    sampleWord >>= 8;
+
+    sampleWord = (sampleIn * data->gain) >> 8;
     sampleWord = sampleWord + data->offset;
-    if( sampleWord < -32767)
+    
+    if( sampleOut < -32768)
     {
-        sampleOut = -32767;
+        sampleOut = -32768;
     }
-    else if (sampleWord > 32767)
+    else if (sampleOut > 32767)
     {
         sampleOut = 32767;
-    }
-    else
-    {
-        sampleOut=(int16_t)(sampleWord & 0xFFFF);
     }
     return sampleOut;
 }
+#else
+void initGainstage(gainStageData*data)
+{
+    data->gain=1.0f;
+    data->offset=0.0f;
+}
+
+float gainStageProcessSample(float sampleIn,gainStageData*data)
+{
+    float sampleOut;
+
+    sampleOut = sampleIn * data->gain + data->offset;
+    
+    if( sampleOut < -1.0f)
+    {
+        sampleOut = -1.0f;
+    }
+    else if (sampleOut > 1.0f)
+    {
+        sampleOut = 1.0f;
+    }
+    return sampleOut;
+}
+#endif

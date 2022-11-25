@@ -9,8 +9,8 @@ PROJECT=microsys_audio
 CC=arm-none-eabi-gcc
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
-OPT=-O3
-DEFINES=-DDEBUG -DSTM32 -DNUCLEO_F446ZE -DSTM32F4 -DSTM32F446ZETx -DI2S_INPUT
+OPT=-Og
+DEFINES=-DDEBUG -DSTM32 -DNUCLEO_F446ZE -DSTM32F4 -DSTM32F446ZETx -DI2S_INPUT -DFLOAT_AUDIO
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen
 LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -T./STM32F446ZETX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
@@ -59,6 +59,9 @@ Inc/gen/compilationInfo.h: Inc/gen
 # generate the startup file
 out/stm32f446_startup.o: Startup/startup_stm32f446zetx.s
 	$(CC) $(CARGS) -c  $< -o ./out/stm32f446_startup.o
+
+out/helpers.o: Src/stm32f446/helpers.s	
+	$(CC) $(CARGS) -c  $< -o ./out/helpers.o
 
 # stm32f446-specific libraries
 out/%.o: Src/stm32f446/%.c $(ASSET_IMAGES) 
@@ -109,7 +112,7 @@ Inc/images/%.h: Assets/%.png
 	./tools/helper_scripts.py -convertImg $^
 
 # main linking and generating flashable content
-$(PROJECT).elf: out/stm32f446_startup.o all_stm32f446 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
+$(PROJECT).elf: out/stm32f446_startup.o out/helpers.o all_stm32f446 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
 $(PROJECT).bin: $(PROJECT).elf

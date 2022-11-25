@@ -8,7 +8,7 @@
                 "Inc"
             ],
             "defines": [
-                "RP2040_FEATHER", "ITSYBITSY", "I2S_INPUT"
+                "I2S_INPUT", "DEBUG", "STM32", "NUCLEO_F446ZE", "STM32F4", "STM32F446ZETx", "FLOAT_AUDIO"
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "cStandard": "c11",

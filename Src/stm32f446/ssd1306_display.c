@@ -4,11 +4,14 @@
 #include "fonts/oled_font_5x7.h"
 #include "stm32f446/stm32f446xx.h"
 #include "stm32f446/stm32f446_cfg_pins.h"
+#include "stm32f446/helpers.h"
+#include <stdlib.h>
 
 static GPIO_TypeDef *gpio_cd;
 static GPIO_TypeDef *gpio_reset;
+static GPIO_TypeDef *gpio_cs;
 
-static void config_spi_pin(uint8_t pinnr)
+static void config_spi_pin(uint8_t pinnr,uint8_t alternateFunction)
 {
     GPIO_TypeDef *gpio;
     uint32_t port;
@@ -20,11 +23,40 @@ static void config_spi_pin(uint8_t pinnr)
     regbfr &= ~(3 << ((pinnr & 0xF)<<1));
     regbfr |= (2 << ((pinnr & 0xF)<<1));
     gpio->MODER=regbfr;
+    regbfr = gpio->OSPEEDR;
+    //regbfr &=~(3 << ((pinnr & 0xF)<<1));
+    regbfr |= (3 << ((pinnr & 0xF)<<1));
+    gpio->OSPEEDR = regbfr;
     gpio->PUPDR &= ~(3 << ((pinnr & 0xF)<<1));
     regbfr = gpio->AFR[(pinnr & 0xF)>>3];
-    regbfr &= ~(0xF << ((pinnr & 0xF) << 2));
-    regbfr |= 5 << ((pinnr & 0xF) << 2);
+    regbfr &= ~(0xF << ((pinnr & 0x7) << 2));
+    regbfr |= alternateFunction << ((pinnr & 0x7) << 2);
     gpio->AFR[(pinnr & 0xF)>>3] = regbfr; 
+}
+
+void ssd1306SendCommand(uint8_t cmd)
+{
+    gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF)+16)); // cs low
+    gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
+    short_nop_delay();
+    SPI3->DR=cmd;
+    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
+    short_nop_delay();
+    gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // cs high
+}
+
+void ssd1306SendData(const uint8_t*data,uint8_t l)
+{
+    gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF)+16)); // cs low
+    gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF))); // cd high
+    short_nop_delay();
+    for(uint8_t c=0;c<l;c++)
+    {
+        SPI3->DR=*(data+c);
+        while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
+    }
+    short_nop_delay();
+    gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // cs high
 }
 
 void initSsd1306Display()
@@ -41,7 +73,10 @@ void initSsd1306Display()
     regbfr |= (1 << ((SSD1306_CD & 0xF)<<1));
     gpio_cd->MODER=regbfr;
     gpio_cd->OTYPER &= ~(1 << (SSD1306_CD & 0xF));
-    gpio_cd->OSPEEDR &= ~(3 << ((SSD1306_CD & 0xF)<<1));
+    regbfr = gpio_cd->OSPEEDR;
+    //regbfr &=~(3 << ((SSD1306_CD & 0xF)<<1));
+    regbfr |= (3 << ((SSD1306_CD & 0xF)<<1));
+    gpio_cd->OSPEEDR = regbfr;
     gpio_cd->PUPDR &= ~(3 << ((SSD1306_CD & 0xF)<<1));
 
     port = SSD1306_RESET >> 4;
@@ -52,18 +87,39 @@ void initSsd1306Display()
     regbfr |= (1 << ((SSD1306_RESET & 0xF)<<1));
     gpio_reset->MODER=regbfr;
     gpio_reset->OTYPER &= ~(1 << (SSD1306_RESET & 0xF));
-    gpio_reset->OSPEEDR &= ~(3 << ((SSD1306_RESET & 0xF)<<1));
+    regbfr = gpio_reset->OSPEEDR;
+    //regbfr &=~(3 << ((SSD1306_RESET & 0xF)<<1));
+    regbfr |= (3 << ((SSD1306_RESET & 0xF)<<1));
+    gpio_reset->OSPEEDR = regbfr;
     gpio_reset->PUPDR &= ~(3 << ((SSD1306_RESET & 0xF)<<1));
 
-    config_spi_pin(SSD1306_MISO);
-    config_spi_pin(SSD1306_MOSI);
-    config_spi_pin(SSD1306_SCK);
+    port = SSD1306_CS >> 4;
+    RCC->AHB1ENR |= (1 << port);
+    gpio_cs=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
+    regbfr = gpio_cs->MODER;
+    regbfr &= ~(3 << ((SSD1306_CS & 0xF)<<1));
+    regbfr |= (1 << ((SSD1306_CS & 0xF)<<1));
+    gpio_cs->MODER=regbfr;
+    gpio_cs->OTYPER &= ~(1 << (SSD1306_CS & 0xF));
+    regbfr = gpio_cs->OSPEEDR;
+    //regbfr &=~(3 << ((SSD1306_CS & 0xF)<<1));
+    regbfr |= (3 << ((SSD1306_CS & 0xF)<<1));
+    gpio_cs->OSPEEDR = regbfr;
+    gpio_cs->PUPDR &= ~(3 << ((SSD1306_CS & 0xF)<<1));
+
+    gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // chip select high
+
+    config_spi_pin(SSD1306_MISO,6);
+    config_spi_pin(SSD1306_MOSI,7);
+    config_spi_pin(SSD1306_SCK,6);
 
     regbfr = SPI3->CR1;
     regbfr &= ~(7 << SPI_CR1_BR_Pos);
-    regbfr |= (8 << SPI_CR1_BR_Pos) | (1 << SPI_CR1_MSTR_Pos); // 45MHz/8=52.625 MHz, Master
+    regbfr |= (3 << SPI_CR1_BR_Pos) | (1 << SPI_CR1_MSTR_Pos) | (1 << SPI_CR1_SSM_Pos) | (1 << SPI_CR1_SSI_Pos); // 45MHz/32=1.40625 MHz, Master, software slave select
     SPI3->CR1 = regbfr;
     SPI3->CR1 |= (1 << SPI_CR1_SPE_Pos);
+
+    
 
     // reset high
     gpio_reset->BSRR = (1 << (SSD1306_RESET & 0xF));
@@ -77,21 +133,24 @@ void initSsd1306Display()
 
 
     // manually set display offset and  startline since these two values turned out to be wrong after reset
-    gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
+    ssd1306SendCommand(0x40);// set startline 0
+    ssd1306SendCommand(0xD3);// set displayoffset 0
+    ssd1306SendCommand(0x0);
 
-    SPI3->DR = 0x40; // set startline 0
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-    // set displayoffset 0
-    SPI3->DR = 0xD3;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-    SPI3->DR = 0x0;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-
+    // column remap
+    ssd1306SendCommand(0xA1);
+    // flip common output scan direction
+    ssd1306SendCommand(0xC8);
+    
     // send display on command
-    gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
-    SPI3->DR = 0xAF;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
+    ssd1306SendCommand(0xAF);
     waitSysticks(11);
+}
+
+void ssd1306_nop()
+{
+    SPI3->DR =0xE3;
+    while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
 }
 
 
@@ -102,41 +161,27 @@ void initSsd1306Display()
  * @param col columns, goes from 0 to 127
  */
 void setCursor(uint8_t row, uint8_t col)
-{
-    gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
-    // set column, low nibble
-    SPI3->DR = ((col+2) & 0x0F);
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-    // set column, high nibble
-    SPI3->DR  = 0x10 | ((col+2) >> 4);
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-
+{              
     // set row / page
-    SPI3->DR  = 0xB0 | row;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-
+    ssd1306SendCommand(0xB0 | row);
+    // set column, low nibble
+    ssd1306SendCommand((col+2) & 0x0F);
+    // set column, high nibble
+    ssd1306SendCommand(0x10 | ((col+2) >> 4));
 }
 
 void ssd1306WriteChar(uint8_t row,uint8_t col,char chr)
 {
     uint8_t fontIdx;
+    uint8_t zeros[2]={0,0};
     setCursor(row,col*6);
     fontIdx = (uint8_t)chr - ' ';
 
-    gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
-    for (uint8_t c=0;c<5;c++)
-    {
-        SPI3->DR = oled_font_5x7[fontIdx][c];
-        while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-    }
-    SPI3->DR = 0x0;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
+    ssd1306SendData(oled_font_5x7[fontIdx],5);
+    ssd1306SendData(zeros,1);
     if(col==20) // clear last two columns
     {
-        SPI3->DR = 0x0;
-        while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-        SPI3->DR = 0x0;
-        while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
+        ssd1306SendData(zeros,2);
     }
 }
 
@@ -154,15 +199,31 @@ void ssd1306WriteText(const char * str,uint8_t posH,uint8_t posV)
     }
 }
 
-void ssd1306DisplayByteArray(uint8_t row,uint8_t col,uint8_t *arr,uint16_t arrayLength)
+/**
+ * @brief writes a left-aligned text and fills the entire line
+ * 
+ * @param str 
+ * @param posV 
+ */
+void ssd1306WriteTextLine(const char * str,uint8_t posV)
+{
+    uint8_t cnt=0;
+
+    while(*(str+cnt) != 0)
+    {
+        ssd1306WriteChar(posV,cnt,*(str+cnt));
+        cnt++;
+    }
+    while(cnt < 21)
+    {
+        ssd1306WriteChar(posV,cnt++,' ');
+    }
+}
+
+void ssd1306DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayLength)
 {
     setCursor(row,col);
-    gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
-    for (uint16_t c=0;c<arrayLength;c++)
-    {
-        SPI3->DR = *(arr + c);
-        while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-    }
+    ssd1306SendData(arr,arrayLength);
 }
 
 void ssd1306DisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
@@ -203,31 +264,41 @@ void ssd1306DisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * i
 
 void ssd1306DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
 {
-    uint16_t index;
+    uint8_t * imgBfr;
+    uint16_t imgBfrCnt=0;
+    imgBfr = (uint8_t*)malloc(sx*sy);
+    // reorder image to diplay line by line
+    for(uint8_t cc=0;cc<sy;cc++)
+    {
+        for (uint8_t c=0;c<sx;c++)
+        {
+            *(imgBfr + imgBfrCnt++) = *(img + c*sy + cc); 
+        }
+    }
+
     for(uint8_t cc=0;cc<sy;cc++)
     {
         setCursor(py+cc,px);
-        gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
-        for(uint8_t c=0;c<sx;c++)
-        {
-            index=c*sy + cc;
-            SPI3->DR = img[index];
-            while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);
-        }
+        ssd1306SendData(imgBfr + cc*sx,sx);
+        //for (uint8_t c=0;c<sx;c++)
+        //{
+        //    ssd1306SendData(img + c*sy,1);
+        //}
     }
+    free(imgBfr);
 }
 
 
 void ssd1306ClearDisplay()
 {
+    const uint8_t zeros[128]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        };
     for(uint8_t r=0;r<8;r++)
     {
-        for(uint8_t c=0;c<128;c++)
-        {
-            setCursor(r,c);
-            gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
-            SPI3->DR  = 0x0;
-            while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-        }
+        setCursor(r,0);
+        ssd1306SendData(zeros,128);
     } 
 }

@@ -37,10 +37,11 @@
                 "-I./Inc",
                 "-I./Tests/inc",
                 "-fdiagnostics-color=always",
+                "-DFLOAT_AUDIO",
                 "-g",
                 "./Tests/processThroughFxProgram.c", "./Src/common/audio/*.c","./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
                 "-o",
-                "./Tests/processThroughFxProgram"
+                "./Tests/processThroughFxProgram", "-lm"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -53,6 +54,32 @@
                 "isDefault": true
             },
             "detail": "Function to run a given wavefile through a predefined fx program."
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile generateUnitPulseWav",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-DFLOAT_AUDIO",
+                "-g",
+                "./Tests/generateUnitPulseWav.c","./Tests/libs/wavReader.c",
+                "-o",
+                "./Tests/generateUnitPulseWav", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Generates a Unit Pulse Wav File"
         },
         {
             "type": "cppbuild",
@@ -82,19 +109,20 @@
         },
         {
             "type": "cppbuild",
-            "label": "compile audio test",
+            "label": "compile audio tests",
             "command": "/usr/bin/gcc-9",
             "args": [
-                "-I./../Inc",
-                "-I./../Tests/inc",
+                "-I./Inc",
+                "-I./Tests/inc",
                 "-fdiagnostics-color=always",
+                "-DFLOAT_AUDIO",
                 "-g",
-                "${file}", "./../Src/common/audio/*.c","./../Src/common/stringFunctions.c","./../Src/pipicofx/fxProgram*.c","./libs/wavReader.c",
-                "-o", "${fileBasenameNoExtension}",
-                "-lm"
+                "./Tests/audioTest.c", "./Src/common/audio/*.c","./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "-o",
+                "./Tests/audioTest", "-lm"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [
                 "$gcc"
@@ -103,7 +131,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Audio Test."
-        }
+            "detail": "Audio Unit Tests."
+        },
     ]
 }

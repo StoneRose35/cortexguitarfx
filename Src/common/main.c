@@ -54,20 +54,13 @@ extern CommBufferType usbCommBuffer;
 extern CommBufferType btCommBuffer;
 
 
-int32_t* audioBufferPtr;
-#ifndef I2S_INPUT
-uint16_t* audioBufferInputPtr;
-#else
-int32_t* audioBufferInputPtr;
-#endif
-float inputSample, inputSampleOther;
-volatile float avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
-uint16_t bufferCnt=0;
+float inputSampleScaled;
+volatile float avgOutOld=0,avgInOld=0;
 volatile uint8_t fxProgramIdx = 1;
-volatile uint32_t ticStart,ticEnd,cpuLoad;
+volatile uint32_t cpuLoad;
+PiPicoFxUiType piPicoUiController;
+
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
-#define UI_UPDATE_IN_SAMPLE_BUFFERS 300
-#define AVERAGING_LOWPASS_CUTOFF 0.0001f
 #define ADC_LOWPASS 2
 #define UI_DMIN 1
 uint32_t encoderVal,encoderCntr,encNew;
@@ -79,7 +72,7 @@ uint16_t adcVal;
 
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
-uint8_t cpuLoadBfr;
+uint16_t cpuLoadBfr;
 uint8_t switchValsOld[2]={0,0};
 uint32_t encoderValOld=0,encoderVal;
 uint8_t switchVals[2]={0,0};
@@ -87,6 +80,7 @@ uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
+
 
 /**
  * @brief the main entry point, should never exit
@@ -102,7 +96,6 @@ int main(void)
 	 * Initialize Hardware components
 	 * 
 	 * */
-	enableFpu();
     setupClock();
 	initSystickTimer();
 	initDatetimeClock();
@@ -110,7 +103,7 @@ int main(void)
 	initDMA();
 	initTimer();
 	initAdc();
-	initI2c(26);
+	initI2c(26); // 26 for wm8731, 72 for cs4270
 	
 	/*
 	 *
@@ -119,10 +112,9 @@ int main(void)
 	 * */
 	initSsd1306Display();
 	setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
-	initI2S();
 	initRotaryEncoder(switchesPins,2);
 	encoderVal=getEncoderValue();
-
+    initDebugLed();
 
 	/*
      *
@@ -133,7 +125,7 @@ int main(void)
 	initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
 	printf("Microsys v1.0 running\r\n");
-	piPicoFxUiSetup();
+	piPicoFxUiSetup(&piPicoUiController);
 	ssd1306ClearDisplay();
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
 	{
@@ -144,80 +136,23 @@ int main(void)
 	}
 	drawUi(&piPicoUiController);
 
-	ticEnd=0;
-	ticStart=0;
+
+    /* enable audio engine last (when fx programs have been set up)*/
+    initI2S();
 
 
     /* Loop forever */
 	for(;;)
 	{
 
-		cliApiTask(task);
-		if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
-		{
-			
-			ticStart = getTimeLW();
 
-			audioBufferPtr = getEditableAudioBufferHiRes();
-			audioBufferInputPtr = getInputAudioBufferHiRes();
-
-
-			for (uint8_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
-			{
-				// convert raw input to float
-				inputSample=(float)(*(audioBufferInputPtr + c) >> 8);
-		
-
-				if (inputSample < 0.0f)
-				{
-					avgIn = -inputSample;
-				}
-				else
-				{
-					avgIn = inputSample;
-				}
-				avgInOld = AVERAGING_LOWPASS_CUTOFF*avgIn + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgInOld);
-
-				//inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
-
-
-				if (inputSample < 0)
-				{
-					avgOut = -inputSample;
-				}
-				else
-				{
-					avgOut = inputSample;
-				}
-				avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
-
-				*((uint32_t*)audioBufferPtr+c) = ((int32_t)inputSample)<<8;  
-				*((uint32_t*)audioBufferPtr+c+1) = ((int32_t)inputSample)<<8;
-
-			}
-			task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
-			bufferCnt++;
-
-			ticEnd = getTimeLW();
-			if(ticEnd > ticStart)
-			{
-				cpuLoad = ticEnd-ticStart;
-				cpuLoad = cpuLoad*196; // *256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
-				cpuLoad = cpuLoad >> 8;
-			}
-			
-		}		
-		if (bufferCnt == UI_UPDATE_IN_SAMPLE_BUFFERS)
-		{
-			bufferCnt = 0;
-			task |= (1 << TASK_UPDATE_AUDIO_UI);
-		}
-
+		//cliApiTask(task);
+	
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
             adcChannel = getChannel0Value();
-            adcChannel0 = adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
+            adcChannel0 = adcChannel; //adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
             if ((adcChannel0 > adcChannelOld0) && (adcChannel0-adcChannelOld0) > UI_DMIN )
             {
                 knob0Callback(adcChannel0,&piPicoUiController);
@@ -230,7 +165,7 @@ int main(void)
             }
 
             adcChannel = getChannel1Value();
-            adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
+            adcChannel1 = adcChannel; //adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
             if ((adcChannel1 > adcChannelOld1) && (adcChannel1-adcChannelOld1) > UI_DMIN )
             {
                 knob1Callback(adcChannel1,&piPicoUiController);
@@ -243,7 +178,7 @@ int main(void)
             }
 
             adcChannel = getChannel2Value();
-            adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
+            adcChannel2 = adcChannel;// adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
             if ((adcChannel2 > adcChannelOld2) && (adcChannel2-adcChannelOld2) > UI_DMIN )
             {
                 knob2Callback(adcChannel2,&piPicoUiController);
@@ -255,16 +190,19 @@ int main(void)
                 adcChannelOld2=adcChannel;
             }
             task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
-            //*ADC_CS |= (1 << ADC_CS_START_MANY_LSB);
+            restartAdc();
         }
+        
+		
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
         {
-            avgOldInBfr = (int32_t)avgInOld >> 8;
-            avgOldOutBfr = (int32_t)avgOutOld >> 8;
-            cpuLoadBfr = (cpuLoad >> 1);
+            avgOldInBfr = (int32_t)(avgInOld*128.0f);
+            avgOldOutBfr = (int32_t)(avgOutOld*128.0f);
+            cpuLoadBfr = cpuLoad >> 1;
             updateAudioUi(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
+		
         switchVals[0] = getSwitchValue(0);
         if (switchVals[0] == 0 && switchValsOld[0] == 1)
         {
@@ -284,6 +222,7 @@ int main(void)
            rotaryCallback(encoderVal,&piPicoUiController);
            encoderValOld=encoderVal;
        }
+	
 	}
 }
 #endif

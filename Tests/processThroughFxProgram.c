@@ -10,7 +10,11 @@
 #define FX_PROGRAM_PARAM1_VAL 200 // amp model 2: gain 
 #define FX_PROGRAM_PARAM2_VAL 3800 // 
 #define FX_PROGRAM_PARAM3_VAL 520 // 
+#ifndef FLOAT_AUDIO
 #define TAIL_TIME 48000
+#else
+#define TAIL_TIME (48000*3)
+#endif
 
 void zeroString(char*data,int16_t len)
 {
@@ -32,11 +36,19 @@ int32_t float2int(float a)
 
 int main(int argc, char ** argv)
 {
-    uint32_t byteCnt=0;
+    uint32_t fileInPtr=0;
+    #ifndef FLOAT_AUDIO
     WavFileType wavFileIn;
     WavFileType wavFileOut;
     int16_t sample[2];
     int16_t dataOut;
+    #else
+    WavFileTypeFloat wavFileIn;
+    WavFileTypeFloat wavFileOut;
+    float sample[2];
+    float dataOut;
+    #endif
+
     char filenameOut[256];
     char filenameIn[256];
     char paramDisplay[64];
@@ -73,8 +85,15 @@ int main(int argc, char ** argv)
     printf("\tFx Program: %s\r\n",fxPrograms[fxProgramNr]->name);
     size_t fnamelen = strlen(filenameIn);
     strcpy(filenameOut+fnamelen-4,"_proc.wav");
+    #ifndef FLOAT_AUDIO
     openWavFile(filenameIn,&wavFileIn);
     createWavFile(filenameOut,&wavFileOut,wavFileIn.dataSize+TAIL_TIME);
+    #else
+    openWavFileFloat(filenameIn,&wavFileIn);
+    createWavFileFloat(filenameOut,&wavFileOut,wavFileIn.dataSize+TAIL_TIME,wavFileIn.wavFormat.wBitsPerSample);
+    wavFileOut.wavFormat.wBitsPerSample = wavFileIn.wavFormat.wBitsPerSample;
+    #endif
+
     for (uint16_t c=0;c<N_FX_PROGRAMS;c++)
     {
         if (fxPrograms[c]->setup != 0)
@@ -115,14 +134,15 @@ int main(int argc, char ** argv)
         }
 
     }
-    while(byteCnt < wavFileIn.dataSize+TAIL_TIME)
+    #ifndef FLOAT_AUDIO
+    while(fileInPtr < wavFileIn.dataSize+TAIL_TIME)
     {
-        if (byteCnt < wavFileIn.dataSize)
+        if (fileInPtr < wavFileIn.dataSize)
         {
-            sample[0] = wavFileIn.data[byteCnt>>1];
+            sample[0] = wavFileIn.data[fileInPtr>>1];
             if (wavFileIn.wavFormat.wChannels == 2)
             {
-                sample[1] = wavFileIn.data[(byteCnt>>1)+1];
+                sample[1] = wavFileIn.data[(fileInPtr>>1)+1];
             }
         }
         else
@@ -132,16 +152,46 @@ int main(int argc, char ** argv)
         dataOut = fxPrograms[fxProgramNr]->processSample(sample[0],fxPrograms[fxProgramNr]->data);
         if (wavFileIn.wavFormat.wChannels==2)
         {
-            wavFileOut.data[byteCnt >> 2]=dataOut;
-            byteCnt+=4;
+            wavFileOut.data[fileInPtr >> 2]=dataOut;
+            fileInPtr+=4;
         }
         else
         {
-            wavFileOut.data[byteCnt>>1]=dataOut;
-            byteCnt+=2;
+            wavFileOut.data[fileInPtr>>1]=dataOut;
+            fileInPtr+=2;
         }
     }
     writeWavFile(&wavFileOut);
+    #else
+    const uint32_t lengthInSamples = ((wavFileIn.dataSize/(wavFileIn.wavFormat.wBitsPerSample >> 3)*wavFileIn.wavFormat.wChannels));
+    while(fileInPtr < lengthInSamples +TAIL_TIME/(wavFileIn.wavFormat.wBitsPerSample >> 3))
+    {
+        if (fileInPtr < lengthInSamples)
+        {
+            sample[0]= wavFileIn.data[fileInPtr];
+            if (wavFileIn.wavFormat.wChannels == 2)
+            {
+                sample[1] = wavFileIn.data[fileInPtr+1];
+            }
+        }
+        else
+        {
+            sample[0]=0.0f;
+        }
+        dataOut = fxPrograms[fxProgramNr]->processSample(sample[0],fxPrograms[fxProgramNr]->data);
+        if (wavFileIn.wavFormat.wChannels==2)
+        {
+            wavFileOut.data[fileInPtr>>1]=dataOut;
+            fileInPtr+=2;
+        }
+        else
+        {
+            wavFileOut.data[fileInPtr++]=dataOut;
+        }
+    }
+    writeWavFileFloat(&wavFileOut);
+    #endif
+
     fclose(wavFileIn.filePointer);
     fclose(wavFileOut.filePointer);
 }

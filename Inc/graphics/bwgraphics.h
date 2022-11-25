@@ -13,7 +13,7 @@ float fsin(float x);
 #endif
 typedef struct BwImageStruct
 {
-	uint8_t * data; // data is arrange y axis first, starting from top left
+	const uint8_t * data; // data is arrange y axis first, starting from top left
 	uint8_t sx; // size in pixels
 	uint8_t sy; // size in pixels
 } BwImageType;

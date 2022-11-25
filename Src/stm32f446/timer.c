@@ -5,9 +5,10 @@
 
 void initTimer()
 {
+    RCC->APB1ENR &= ~(1 << RCC_APB1ENR_TIM5EN_Pos);
     RCC->APB1ENR |= (1 << RCC_APB1ENR_TIM5EN_Pos);
     TIM5->PSC=90-1;
-    TIM5->CNT=0;
+    TIM5->CNT=0xFFFFFFFF;
     TIM5->CR1=(1 << TIM_CR1_CEN_Pos);    
 }
 

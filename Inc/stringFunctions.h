@@ -28,7 +28,7 @@ void toPercentChar(float,char*);
 void fixedPointUInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals);
 void fixedPointInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals);
 
-void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace);
+uint16_t decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace);
 
 uint8_t startsWith(char*,const char*);
 void toUpper(char *,char);
@@ -46,6 +46,6 @@ uint8_t expandRange(char *,uint8_t**);
 void timeToString(char * bfr,uint8_t h,uint8_t m,uint8_t s);
 void dateToString(char * bfr, uint16_t y,uint8_t month, uint8_t d);
 void dateTimeToString(char * bfr,uint16_t year,uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t seconds);
-uint16_t appendToString(char * appendee,char *  appender);
+uint16_t appendToString(char * appendee,const char *  appender);
 
 #endif /* STRINGFUNCTIONS_H_ */

@@ -1,5 +1,6 @@
 #include "audio/secondOrderIirFilter.h"
 
+#ifndef FLOAT_AUDIO
 void initSecondOrderIirFilter(SecondOrderIirFilterType* data)
 {
     data->w[0]=0;
@@ -58,3 +59,23 @@ int16_t secondOrderIirFilterProcessSample(int16_t sampleIn,SecondOrderIirFilterT
     }
     return (int16_t)(out & 0xFFFF);
 }
+#else
+
+float secondOrderIirFilterProcessSample(float sampleIn,SecondOrderIirFilterType*data)
+{
+    float out;
+    data->w[0] = sampleIn - data->coeffA[0]*data->w[1] - data->coeffA[1]*data->w[2];
+    out = data->coeffB[0]*data->w[0]+data->coeffB[1]*data->w[1]+data->coeffB[2]*data->w[2];
+    data->w[2]=data->w[1];
+    data->w[1]=data->w[0];
+    return out;
+}
+
+void initSecondOrderIirFilter(SecondOrderIirFilterType* data)
+{
+    data->w[0]=0.0f;
+    data->w[1]=0.0f;
+    data->w[2]=0.0f;
+}
+
+#endif
