@@ -18,6 +18,8 @@
 #define I2C_SCL 5
 #define I2C_SDA 4
 
+#define AUDIO_CODEC_RESET 3
+
 #define I2S_BCK_PIN 11
 #define I2S_WS_PIN 10
 #define I2S_DATA_IN_PIN 9
@@ -344,6 +346,8 @@ typedef struct {
 
 #define I2C_SCL_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + 4*I2C_SCL + 4))
 #define I2C_SDA_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + 4*I2C_SDA + 4))
+#define AUDIO_CODEC_RESET_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*AUDIO_CODEC_RESET))
+#define AUDIO_CODEC_RESET_PAD_CNTR  ((volatile uint32_t*)(PADS_BANK0_BASE + 4*AUDIO_CODEC_RESET + 4))
 
 #define DISPLAY_BACKLIGHT_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*DISPLAY_BACKLIGHT))
 

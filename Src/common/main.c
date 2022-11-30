@@ -167,6 +167,7 @@
 #include "gpio.h"
 #include "ssd1306_display.h"
 #include "wm8731.h"
+#include "cs4270_audio_codec.h"
 #include "debugLed.h"
 #include "consoleHandler.h"
 #include "apiHandler.h"
@@ -235,7 +236,9 @@ int main(void)
 	#ifdef WM8731
 	initI2c(26);
 	#endif
-	
+	#ifdef CS4270
+	initI2c(72); //72 
+	#endif
 
 
 	/*
@@ -246,6 +249,10 @@ int main(void)
 	#ifdef WM8731
 	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
 	#endif
+	#ifdef CS4270
+	setupCS4270();
+	#endif
+
 	initSsd1306Display();
 
 	initDebugLed();
@@ -259,8 +266,6 @@ int main(void)
 	 */
 
 	initRoundRobinReading(); // internal adc for reading parameters
-	context |= (1 << CONTEXT_USB);
-	printf("Microsys v1.0 running\r\n");
 	piPicoFxUiSetup(&piPicoUiController);
 	ssd1306ClearDisplay();
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
@@ -289,19 +294,18 @@ int main(void)
 	#ifdef WM8731
 	initI2SSlave();
 	#else
-	initI2S();
+	initI2SSlave();
 	#endif
 
     /* Loop forever */
 	for(;;)
 	{
-
 		if (bufferCnt >= UI_UPDATE_IN_SAMPLE_BUFFERS)
 		{
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
-		
+
 	}
 }
 #endif
