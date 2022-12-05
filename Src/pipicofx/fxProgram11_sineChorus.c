@@ -13,7 +13,7 @@ static int16_t fxProgram2processSample(int16_t sampleIn,void*data)
 static float fxProgramprocessSample(float sampleIn,void*data)
 {
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
-    return sineChorusProcessSample(sampleIn,&pData->sineChorus);
+    return sineChorusInterpolatedProcessSample(sampleIn,&pData->sineChorus);
 }
 #endif
 

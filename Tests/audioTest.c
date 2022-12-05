@@ -50,7 +50,7 @@ void sineFunctionTest()
     for (uint32_t c=0;c<65536;c+=512)
     {
         sval = getSineValue((uint16_t)c);
-        printf("Phase %d, Sine Value %d\r\n",c,sval);
+        printf("%d,%d\r\n",c,sval);
     }
 }
 

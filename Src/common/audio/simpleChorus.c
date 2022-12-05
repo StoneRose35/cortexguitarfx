@@ -129,4 +129,49 @@ float simpleChorusProcessSample(float sampleIn,SimpleChorusType*data)
         *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
         return sampleOut;
 }
+
+
+float simpleChorusInterpolatedProcessSample(float sampleIn,SimpleChorusType*data)
+{
+    uint16_t delayPtr,delayPtrNext;
+    float sampleOut, q;
+    int16_t lfoValInterp;
+    data->lfoUpdateCnt++;
+
+    if (data->lfoUpdateCnt == SIMPLE_CHORUS_LFO_DIVIDER)
+    {
+        data->lfoValOld = data->lfoVal;
+        if (data->lfoQuadrant == 0 )
+        {
+            data->lfoVal += data->lfoPhaseinc;
+            if (data->lfoVal > 255)
+            {
+                data->lfoVal = 512 - data->lfoVal;
+                data->lfoQuadrant += 1;
+                data->lfoQuadrant &= 1;
+            }
+        }
+        else
+        {
+            data->lfoVal -= data->lfoPhaseinc;
+            if (data->lfoVal < -255)
+            {
+                data->lfoVal = -512 - data->lfoVal;
+                data->lfoQuadrant += 1;
+                data->lfoQuadrant &= 1;
+            }
+        }
+        data->lfoUpdateCnt=0;
+    }
+
+        data->delayInputPtr &= (SIMPLE_CHORUS_DELAY_SIZE-1);
+        lfoValInterp = data->lfoValOld + ((data->lfoUpdateCnt*(data->lfoVal - data->lfoValOld)) >> 8);
+        // compute current index of the delay pointer
+        delayPtr = (data->delayInputPtr - 5 - ((((lfoValInterp >> 3)+0xFF)*data->depth) >> 6)) & (SIMPLE_CHORUS_DELAY_SIZE-1); 
+        delayPtrNext = (delayPtr - 1)  & (SIMPLE_CHORUS_DELAY_SIZE-1); 
+        q = ((float)(lfoValInterp & 0x7))/8.0f;
+        sampleOut=sampleIn*(1.0f-data->mix) + data->mix*(data->delayBuffer[delayPtr]*(1.0 - q) + data->delayBuffer[delayPtrNext]*q);
+        *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
+        return sampleOut;
+}
 #endif

@@ -36,6 +36,7 @@ typedef struct
     uint16_t lfoUpdateCnt;
 } SimpleChorusType;
 float simpleChorusProcessSample(float sampleIn,SimpleChorusType*data);
+float simpleChorusInterpolatedProcessSample(float sampleIn,SimpleChorusType*data);
 #endif
 void simpleChorusSetFrequency(uint16_t freq,SimpleChorusType*data);
 

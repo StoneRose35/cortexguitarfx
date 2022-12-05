@@ -6,32 +6,32 @@ static const int16_t firstSineQuadrant[33] = {0,12,25,38,51,63,76,88,100,112,123
 /** set frequency in Hz/100 */
 void sineChorusSetFrequency(uint16_t freq,SineChorusType*data)
 {
-    data->lfoPhaseinc=(freq*447) >> 7; //*65536*SINE_CHORUS_LFO_DIVIDER/4800000;
+    data->lfoPhaseinc= freq*894; //*4294967296/4800000;
     data->frequency = freq;
 }
 
-int16_t getSineValue(uint16_t phase)
+int16_t getSineValue(uint32_t phase)
 {
     uint8_t index;
     uint8_t quadrant;
     int16_t val;
-    index=(phase >> 9) & 0x1f;
-    quadrant = phase >>14;
+    index=(phase >> 25) & 0x1f;
+    quadrant = phase >>30;
     switch (quadrant)
     {
         case 0:
-            val = firstSineQuadrant[index] + (((firstSineQuadrant[index+1]-firstSineQuadrant[index])*(phase & 0x1FF)) >> 9);
+            val = firstSineQuadrant[index] + (((firstSineQuadrant[index+1]-firstSineQuadrant[index])*(phase & 0x1FFFFFF)) >> 25);
             break;
         case 1:
             index = 32 - index;
-            val = firstSineQuadrant[index] + (((firstSineQuadrant[index-1]-firstSineQuadrant[index])*(phase & 0x1FF)) >> 9);
+            val = firstSineQuadrant[index] - (int16_t)(((firstSineQuadrant[index]-firstSineQuadrant[index-1])*(phase & 0x1FFFFFF)) >> 25);
             break;
         case 2:
-            val = -firstSineQuadrant[index] + (((-firstSineQuadrant[index+1]+firstSineQuadrant[index])*(phase & 0x1FF)) >> 9);
+            val = -firstSineQuadrant[index] - (int16_t)(((firstSineQuadrant[index+1]-firstSineQuadrant[index])*(phase & 0x1FFFFFF)) >> 25);
             break;
         default:
             index = 32 - index;
-            val = -firstSineQuadrant[index] + (((-firstSineQuadrant[index-1]+firstSineQuadrant[index])*(phase & 0x1FF)) >> 9);
+            val = -firstSineQuadrant[index] + (((firstSineQuadrant[index]-firstSineQuadrant[index-1])*(phase & 0x1FFFFFF)) >> 25);
             break;
     }
     return val;
@@ -75,6 +75,25 @@ float sineChorusProcessSample(float sampleIn,SineChorusType*data)
         return sampleOut;
 }
 
+float sineChorusInterpolatedProcessSample(float sampleIn,SineChorusType*data)
+{
+    uint16_t delayPtr,delayPtrNext;
+    float sampleOut, q;
+    int16_t lfoValInterp;
+    uint16_t totalDelay;
 
+        data->lfoVal = getSineValue(data->lfoPhase+=data->lfoPhaseinc);
+
+        data->delayInputPtr &= (SINE_CHORUS_DELAY_SIZE-1);
+        lfoValInterp = data->lfoVal;
+        // compute current index of the delay pointer
+        totalDelay = (((uint32_t)((lfoValInterp + 0xFF)*data->depth)) >> 6);
+        delayPtr = (data->delayInputPtr -5 - (totalDelay >> 3)) & (SINE_CHORUS_DELAY_SIZE-1);
+        delayPtrNext = (delayPtr - 1) & (SINE_CHORUS_DELAY_SIZE-1);
+        q =((float)(totalDelay & 0x7))/8.0f;
+        sampleOut=sampleIn*(1.0f-data->mix) + data->mix*(data->delayBuffer[delayPtr]*(1.0f - q) + data->delayBuffer[delayPtrNext]*q);
+        *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
+        return sampleOut;
+}
 
 #endif
