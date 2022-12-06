@@ -8,7 +8,7 @@
                 "Inc"
             ],
             "defines": [
-                "RP2040_FEATHER", "I2S_INPUT", "CS4270"
+                "RP2040", "I2S_INPUT", "CS4270"
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "cStandard": "c11",

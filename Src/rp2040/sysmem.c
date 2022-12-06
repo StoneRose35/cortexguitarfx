@@ -1,5 +1,5 @@
 
-#ifdef RP2040_FEATHER
+#ifdef RP2040
 /* Includes */
 #include <errno.h>
 #include <stdint.h>

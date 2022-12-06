@@ -2,7 +2,7 @@
 #define _BWGRAPHICS_H_
 #include <stdint.h>
 
-#ifndef RP2040_FEATHER
+#ifndef RP2040
 #include "math.h"
 float fsqrt(float a);
 int32_t float2int(float a);

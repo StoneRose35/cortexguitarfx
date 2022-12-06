@@ -1,5 +1,5 @@
 #include "audio/firFilter.h"
-#ifdef RP2040_FEATHER
+#ifdef RP2040
 #include "multicore.h"
 #include "gpio.h"
 #include "hardware/regs/addressmap.h"
@@ -27,7 +27,7 @@ int16_t firFilterProcessSample(int16_t sampleIn,FirFilterType*data)
 {
     volatile int16_t firstHalf,secondHalf;
     addSample(sampleIn,data);
-    #ifdef RP2040_FEATHER
+    #ifdef RP2040
     while ((*SIO_FIFO_ST & ( 1 << SIO_FIFO_ST_RDY_LSB)) == 0);
     // send pointer to data to core1 to indicate that a fir calculation has to be made
     *SIO_FIFO_WR = (uint32_t)&data;

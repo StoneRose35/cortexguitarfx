@@ -11,9 +11,9 @@ OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
 OPT=-Og
 PAD_CKECKSUM=./tools/pad_checksum
-DEFINES=-DRP2040_FEATHER -DI2S_INPUT -DCS4270
+DEFINES=-DRP2040 -DI2S_INPUT -DCS4270
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen
-LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -T./RP2040.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary
 BOOTLOADER=bs2_fast_qspi2
@@ -26,10 +26,6 @@ COMMON_OBJS := $(patsubst Src/common/%.c,out/%.o,$(wildcard Src/common/*.c))
 AUDIO_OBJS := $(patsubst Src/common/audio/%.c,out/%.o,$(wildcard Src/common/audio/*.c))
 AUDIO_FX_OBJS := $(patsubst Src/pipicofx/%.c,out/%.o,$(wildcard Src/pipicofx/*.c))
 GRAPHICS_OBJS := $(patsubst Src/common/graphics/%.c,out/%.o,$(wildcard Src/common/graphics/*.c))
-NEOPIXEL_OBJS := $(patsubst Src/common/neopixel/%.c,out/%.o,$(wildcard Src/common/neopixel/*.c))
-SDCARD_OBJS := $(patsubst Src/common/sdcard/%.c,out/%.o,$(wildcard Src/common/sdcard/*.c))
-APPS_OBJS := $(patsubst Src/apps/%.c,out/%.o,$(wildcard Src/apps/*.c))
-SERVICES_OBJS := $(patsubst Src/services/%.c,out/%.o,$(wildcard Src/services/*.c))
 ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 
@@ -37,10 +33,6 @@ all_rp2040: $(RP2040_OBJS) $(RP2040_OBJS_ASM)
 all_common: $(COMMON_OBJS)
 all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS)
 all_graphics: $(GRAPHICS_OBJS)
-all_neopixel: $(NEOPIXEL_OBJS)
-all_sdcard: $(SDCARD_OBJS)
-all_apps: $(APPS_OBJS)
-all_services: $(SERVICES_OBJS)
 all_images: $(ASSET_IMAGES)
 
 clean_objs:
@@ -130,14 +122,6 @@ out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 out/%.o: Src/common/graphics/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
-# sdcard libs
-out/%.o: Src/common/neopixel/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
-	$(CC) $(CARGS) $(OPT) -c $< -o $@
-
-# neopixel libs
-out/%.o: Src/common/sdcard/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
-	$(CC) $(CARGS) $(OPT) -c $< -o $@
-
 # rp2040 specific libs
 out/%.o: Src/rp2040/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
@@ -150,22 +134,10 @@ out/%.o: Src/rp2040/%.S $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 out/%.o: Src/apps/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
-# services layer
-out/%.o: Src/services/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
-	$(CC) $(CARGS) $(OPT) -c $< -o $@
-
 # image assets
 Inc/images/%.h: Assets/%.png
 	./tools/helper_scripts.py -convertImg $^
 
-
-Src/rp2040/neopixelDriver.c: Inc/gen/pio0_pio.h
-
-Src/rp2040/simple_neopixel.c: Inc/gen/pio0_pio.h
-
-Src/rp2040/simple_timertest.c: Inc/gen/pio0_pio.h
-
-Src/rp2040/ds18b20.c: Inc/gen/pio0_pio.h
 
 # pio assembler
 Inc/gen/pio0_pio.h: Inc/gen tools/pioasm
@@ -205,9 +177,6 @@ testout/$(PROJECT): $(TEST_COMMON_OBJS) $(TEST_MOCK_OBJS) $(TEST_MAIN_OBJS)
 tests: clean_tests testout/$(PROJECT)
 
 testout/%.o: Src/common/%.c 
-	$(CC_TEST) -o $@ -c $^
-
-testout/%.o: Src/mock/%.c
 	$(CC_TEST) -o $@ -c $^
 
 testout/%.o: Tests/%.c

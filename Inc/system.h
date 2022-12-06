@@ -19,7 +19,7 @@
 #ifdef HARDWARE
 
 
-#ifdef RP2040_FEATHER
+#ifdef RP2040
 
 #define F_XOSC (12000000)
 #define F_ADC_USB (48000000)

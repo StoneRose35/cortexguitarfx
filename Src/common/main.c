@@ -30,7 +30,6 @@
 #include "cliApiTask.h"
 #include "i2s.h"
 #include "i2c.h"
-#include "audio/sineplayer.h"
 #include "audio/simpleChorus.h"
 #include "audio/secondOrderIirFilter.h"
 #include "audio/firFilter.h"
@@ -143,11 +142,7 @@ int main(void)
 	ticEnd=0;
 	ticStart=0;
 
-	#ifdef WM8731
 	initI2SSlave();
-	#else
-	initI2SSlave();
-	#endif
 
     /* Loop forever */
 	for(;;)

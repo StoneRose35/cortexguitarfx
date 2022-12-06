@@ -5,7 +5,7 @@
  *      Author: philipp
  */
 
-#ifdef RP2040_FEATHER
+#ifdef RP2040
 
 #include "uart.h"
 #include "system.h"

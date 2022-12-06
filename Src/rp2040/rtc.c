@@ -1,6 +1,6 @@
 #include "datetimeClock.h"
 #include <stdint.h>
-#ifdef RP2040_FEATHER
+#ifdef RP2040
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/rtc.h"
 #include "hardware/regs/resets.h"

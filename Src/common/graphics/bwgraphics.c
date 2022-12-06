@@ -1,6 +1,6 @@
 #include "graphics/bwgraphics.h"
 #include "stdlib.h"
-#ifdef RP2040_FEATHER
+#ifdef RP2040
 #include "romfunc.h"
 #else
 #include "math.h"
