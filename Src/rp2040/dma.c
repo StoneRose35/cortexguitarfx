@@ -1,6 +1,5 @@
 
 #include "dma.h"
-#include "neopixelDriver.h"
 #include "i2s.h"
 #include "adc.h"
 #include "gpio.h"
@@ -11,6 +10,7 @@
 #include "hardware/regs/pio.h"
 #include "hardware/rp2040_registers.h"
 #include "timer.h"
+#include "system.h"
 #include "pipicofx/pipicofxui.h"
 
 int16_t* audioBufferPtr;
@@ -52,17 +52,7 @@ void initDMA()
  */
 void isr_dma_irq0_irq11()
 {
-	if ((*DMA_INTS0 & (1<<0))==(1 << 0)) // if from channel 0: neopixel  frame timer
-	{
-		// clear interrupt
-		*DMA_INTS0 = (1<<0);
-
-		// disable dma channel 0
-		*DMA_CH0_CTRL_TRIG &= ~(1 << 0);
-
-		sendState = SEND_STATE_SENT;
-	}
-	else if ((*DMA_INTS0 & (1<<1))==(1 << 1)) // from channel 1: usb uart transmission done
+    if ((*DMA_INTS0 & (1<<1))==(1 << 1)) // from channel 1: usb uart transmission done
 	{
 		*DMA_INTS0 = (1<<1);
 		*DMA_CH1_CTRL_TRIG &= ~(1 << DMA_CH1_CTRL_TRIG_EN_LSB); // disable dma channel 1

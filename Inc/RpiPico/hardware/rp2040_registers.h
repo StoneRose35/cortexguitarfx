@@ -1,6 +1,6 @@
 #ifndef _RP2040_REGISTERS_
 #define _RP2040_REGISTERS_
-
+#include "stdint.h"
 /**
  * @brief device-specific settings such as pin numbers and timings
  * 
@@ -11,9 +11,6 @@
 // ***************
 #define RP2040_LED_PIN (25) // 13 on rp2040 feather, 25 on rpi pico boards
 
-#define DS18B20_PIN 2
-
-#define HEATER  6 // heating element controlled using pwm
 
 #define I2C_SCL 5
 #define I2C_SDA 4
@@ -27,15 +24,6 @@
 #define I2S_MCLK_PIN 8
 #define I2S_DEBUG_PIN 6
 
-// GPIO number where the neopixel is attached
-// Integrated Neopixel on RP2040 Feather: 16
-// Integrated Neopixel on RP2040 Itsybitsy: 17
-#ifdef ITSYBITSY
-#define NEOPIXEL_PIN 17
-#define NEOPIXEL_POWER_PIN 16
-#else
-#define NEOPIXEL_PIN 16
-#endif
 
 #define REMOTESWITCH_PIN 14 // 433 MHz radio-controller switch, reverse-engineered
 
@@ -44,20 +32,6 @@
 #define ENCODER_2 6
 #define ENTER_SWITCH 22
 #define EXIT_SWITCH 20
-
-// backlight for lcd display
-#define BACKLIGHT 8
-
-// 1.8" Color TFT LCD display with MicroSD Card Breakout - ST7735R
-// one spi sharing connection to a ST7735 display and  an sd card
-#define CS_SDCARD 5
-#define CS_DISPLAY 12
-#define MISO 20
-#define MOSI 19
-#define SCK 18
-#define DISPLAY_RESET 24
-#define DISPLAY_CD 25
-#define DISPLAY_BACKLIGHT 8 
 
 // driver for ssd1306-based display (128*64 pixel oled display interfaced using spi)
 #define SSD1306_CS_DISPLAY 21
