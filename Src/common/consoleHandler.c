@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include "consoleHandler.h"
 #include <string.h>
-#include "taskManager.h"
 #include "system.h"
+#include "taskManager.h"
 
 static char currentPath[CONSOLE_MAX_PATHLENGTH];
 static uint16_t currentPathCnt = 0;

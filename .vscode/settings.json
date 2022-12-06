@@ -27,7 +27,8 @@
         "stringfunctions.h": "c",
         "triopsbreederservice.h": "c",
         "ds18b20.h": "c",
-        "cs4270_audio_codec.h": "c"
+        "cs4270_audio_codec.h": "c",
+        "utilcommands.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": true

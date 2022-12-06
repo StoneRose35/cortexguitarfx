@@ -12,8 +12,6 @@
 #define TASKMANAGER_H_
 
 #define CONTEXT_TYPE_NONE 0 //!< the second argument passed to commandFct in is a null pointer
-#define CONTEXT_TYPE_RGBSTREAM 1 //!< the second argment passed to commandFct is a RgbStream
-#define CONTEXT_TYPE_INTERPOLATORS 2 //!< the second argment passed to commandFct is a Tasks data structure
 #define CONTEXT_TYPE_BUFFEREDINPUT 3 //!< the second argment passed to commandFct is a BufferedInput
 /**
  * @brief compound of a defineable command name und a function pointer

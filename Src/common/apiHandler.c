@@ -12,8 +12,8 @@
 
 #include "system.h"
 #include "apiHandler.h"
-#include "taskManager.h"
 #include "bufferedInputHandler.h"
+#include "taskManager.h"
 
 /**
  * @brief inits the @see Api  structure
