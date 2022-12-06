@@ -8,7 +8,6 @@
 #include "pipicofx/pipicofxui.h"
 #include "adc.h"
 #include "rotaryEncoder.h"
-//#include "i2s.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
 #include "hardware/regs/m0plus.h"
@@ -29,7 +28,6 @@ uint8_t cpuLoadBfr;
 uint8_t switchValsOld[2]={0,0};
 uint32_t encoderValOld=0,encoderVal;
 uint8_t switchVals[2]={0,0};
-//PiPicoFxUiType uiControllerData;
 uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;

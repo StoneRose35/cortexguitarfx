@@ -21,32 +21,44 @@
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
 #ifndef FLOAT_AUDIO
-typedef int16_t(*processSampleCallback)(int16_t,void*);
+typedef int16_t(*processSampleCallback)(int16_t,void*); // function template for the processed fuction of the program
 #else
 typedef float(*processSampleCallback)(float,void*);
 #endif
-typedef void(*paramChangeCallback)(uint16_t,void*);
-typedef void(*setupCallback)(void*);
-typedef void*(*getParameterValueFct)(void*);
-typedef void(*getParameterDisplayFct)(void*,char*);
+/**
+ * @brief function template for the function which should be called when a parameter needs to be changed
+ *  the first parameter is a values between 0 and 4095
+ */
+typedef void(*paramChangeCallback)(uint16_t,void*); 
+typedef void(*setupCallback)(void*); // function template for the program initiazer routine
+typedef void*(*getParameterValueFct)(void*); // UNUSED
+typedef void(*getParameterDisplayFct)(void*,char*); // function template for the function which returns a displayable string of a parameters value
 
+/**
+ * @brief data structure for an editable parameter in an effects program
+ * 
+ */
 typedef struct {
     const char name[PARAMETER_NAME_MAXLEN];
     const uint8_t control; // 0-2: Potentiometers, 255: no control binding
     int16_t rawValue;
-    int16_t increment;
-    const getParameterValueFct getParameterValue; // returns the converted parameter value, data type depends on the implementation
+    int16_t increment; // increment to apply when this parameter is changed using the rotary encoder
+    const getParameterValueFct getParameterValue; // UNUSED
     const getParameterDisplayFct getParameterDisplay; // returns the display value as a string of a Parameter
     paramChangeCallback setParameter; // sets the parameter in a meaningful way in the individual program
 } FxProgramParameterType;
 
+/**
+ * @brief generica data structure for an effects program
+ * 
+ */
 typedef struct {
-    const char name[FXPROGRAM_NAME_MAXLEN];
-    FxProgramParameterType parameters[FXPROGRAM_MAX_PARAMETERS];
-    const processSampleCallback processSample;
-    const setupCallback setup;
-    const uint8_t nParameters;
-    void * data;
+    const char name[FXPROGRAM_NAME_MAXLEN]; // the name of the program
+    FxProgramParameterType parameters[FXPROGRAM_MAX_PARAMETERS]; //array of editable parameters, is always of a fixed maximum length
+    const processSampleCallback processSample; // the function which processes a sample, is called when the audio streams are updated
+    const setupCallback setup; // function in intialize an effects program, is called when the system is started
+    const uint8_t nParameters; //the number of editable parameters, should never exceed FXPROGRAM_MAX_PARAMETERS
+    void * data; // context data of a effects program
 } FxProgramType;
 
 
