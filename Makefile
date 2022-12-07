@@ -5,7 +5,7 @@
 #
 # **********************************
 
-PROJECT=microsys_audio
+PROJECT=pipicofx
 CC=arm-none-eabi-gcc
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2

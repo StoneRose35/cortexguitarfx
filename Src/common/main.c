@@ -73,9 +73,6 @@ int main(void)
 	 * Initialize Hardware components
 	 * 
 	 * */
-	#ifdef STM32
-	enableFpu();
-	#endif
     setupClock();
 	initUsbPll();
 	initSystickTimer();
@@ -88,7 +85,7 @@ int main(void)
 	initI2c(26);
 	#endif
 	#ifdef CS4270
-	initI2c(72); //72 
+	initI2c(72); 
 	#endif
 
 
