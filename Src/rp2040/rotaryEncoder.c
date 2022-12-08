@@ -12,7 +12,7 @@ static uint32_t oldtickenc,oldtickswitch;
 static volatile uint32_t encoderVal = 0x7FFFFFFF;
 static volatile uint8_t switchVal;
 static volatile uint8_t switchPins[8];
-static volatile uint8_t switchVals[8];
+static volatile uint8_t switchVals[8]; // bit 0: sticky bit set when button is pressed (chage from 0 to 1), bit 1: sticky bit set when button is released, bit 2: momentary value
 static volatile uint32_t oldTickSwitches[8];
 static volatile uint8_t lastTrigger;
 void isr_io_irq_bank0_irq13()
@@ -64,7 +64,8 @@ void isr_io_irq_bank0_irq13()
             *switchIntAddress |= (1 << (((4*switchPins[c]) & 0x1F)+3));
             if (oldTickSwitches[c] + ROTARY_ENCODER_DEBOUNCE < getTickValue())
             {
-                switchVals[c]=0;
+                switchVals[c] &= ~(1 << 2);
+                switchVals[c] |= (1 << 1);
                 oldTickSwitches[c]=getTickValue();
             }
         }
@@ -73,7 +74,7 @@ void isr_io_irq_bank0_irq13()
             *switchIntAddress |= (1 << (((4*switchPins[c]) & 0x1F)+2));
             if (oldTickSwitches[c] + ROTARY_ENCODER_DEBOUNCE < getTickValue())
             {
-                switchVals[c]=1;
+                switchVals[c] |= ((1 << 2) | (1 << 0));
                 oldTickSwitches[c]=getTickValue();
             }
         }
@@ -132,4 +133,14 @@ uint32_t getEncoderValue()
 uint8_t getSwitchValue(uint8_t nr)
 {
     return switchVals[nr];
+}
+
+void clearPressedStickyBit(uint8_t nr)
+{
+    switchVals[nr] &= ~(1 << 0);
+}
+
+void clearReleasedStickyBit(uint8_t nr)
+{
+    switchVals[nr] &= ~(1 << 1);
 }

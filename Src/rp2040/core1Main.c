@@ -26,7 +26,6 @@ extern PiPicoFxUiType piPicoUiController;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
 uint8_t cpuLoadBfr;
-uint8_t switchValsOld[2]={0,0};
 uint32_t encoderValOld=0,encoderVal;
 uint8_t switchVals[2]={0,0};
 //PiPicoFxUiType uiControllerData;
@@ -113,18 +112,18 @@ void core1Main()
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
         switchVals[0] = getSwitchValue(0);
-        if (switchVals[0] == 0 && switchValsOld[0] == 1)
+        if ((switchVals[0] & 1) > 0)
         {
             button1Callback(&piPicoUiController);
+            clearPressedStickyBit(0);
         }
-        switchValsOld[0] = getSwitchValue(0);
 
         switchVals[1] = getSwitchValue(1);
-        if (switchVals[1] == 0 && switchValsOld[1] == 1)
+        if ((switchVals[1] & 1) > 0)
         {
             button2Callback(&piPicoUiController);
+            clearPressedStickyBit(1);
         }
-        switchValsOld[1] = getSwitchValue(1);
        encoderVal=getEncoderValue();
        if (encoderValOld > encoderVal + 2 || encoderValOld < encoderVal - 2)
        {
