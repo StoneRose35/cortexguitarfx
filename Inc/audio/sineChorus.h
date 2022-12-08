@@ -14,13 +14,14 @@ typedef struct
     int16_t mix; // 0.0 to 32767
     int16_t lfoVal; // from -255 to +255
     int16_t lfoValOld;
-    int16_t lfoPhaseinc;
-    int16_t lfoPhase;
+    uint32_t lfoPhaseinc;
+    uint32_t lfoPhase;
     uint16_t delayInputPtr;
     uint16_t lfoUpdateCnt;
 } SineChorusType;
 
 int16_t sineChorusProcessSample(int16_t sampleIn,SineChorusType*data);
+int16_t sineChorusInterpolatedProcessSample(int16_t sampleIn,SineChorusType*data);
 void initSineChorus(SineChorusType*data);
 void sineChorusSetFrequency(uint16_t freq,SineChorusType*data);
 
