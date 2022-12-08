@@ -61,23 +61,54 @@ static void fxProgramParam3Display(void*data,char*res)
     appendToString(res,"%");
 }
 
+static void fxProgramParam4Callback(uint16_t val,void*data)
+{
+    FxProgram11DataType* pData = (FxProgram11DataType*)data;
+    pData->sineChorus.offset = 49 + (val >> 1);
+}
+
+static void fxProgramParam4Display(void*data,char*res)
+{
+    FxProgram11DataType* pData = (FxProgram11DataType*)data;
+    uint16_t msValue;
+    msValue = (uint16_t)(((uint32_t)pData->sineChorus.offset*21) >> 10);
+    UInt16ToChar(msValue,res);
+    appendToString(res, " ms");
+}
+
+static void fxProgramParam5Callback(uint16_t val,void*data)
+{
+    FxProgram11DataType* pData = (FxProgram11DataType*)data;
+    pData->sineChorus.feedback = val << 3;
+
+}
+
+static void fxProgramParam5Display(void*data,char*res)
+{
+    FxProgram11DataType* pData = (FxProgram11DataType*)data;
+    Int16ToChar(pData->sineChorus.feedback/328,res);
+    appendToString(res,"%");
+}
+
 static void fxProgramSetup(void*data)
 {
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
-    initSineChorus(&pData->sineChorus);
+    initSineChorus(&pData->sineChorus,0);
 }
 
 FxProgram11DataType fxProgram11data = {
     .sineChorus = {
-        .mix = 0.5f,
+        .mix = 16384,
         .frequency = 500,
-        .depth = 10
+        .depth = 10,
+        .feedback = 0,
+        .offset = 49
     }
 };
 
 FxProgramType fxProgram11 = {
     .name = "Sine Chorus        ",
-    .nParameters=3,
+    .nParameters=5,
     .processSample = &fxProgramprocessSample,
     .parameters = {
         {
@@ -99,14 +130,33 @@ FxProgramType fxProgram11 = {
             .setParameter=&fxProgramParam2Callback
         },
         {
-            .name = "Mix            ",
+            .name = "Blend         ",
             .control=2,
             .increment=64,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam3Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam3Callback
+        },
+        {
+            .name = "Offset         ",
+            .control=3,
+            .increment=64,
+            .rawValue=0,
+            .getParameterDisplay=&fxProgramParam4Display,
+            .getParameterValue=0,
+            .setParameter=&fxProgramParam4Callback
+        },
+        {
+            .name = "Feedback       ",
+            .control=4,
+            .increment=64,
+            .rawValue=0,
+            .getParameterDisplay=&fxProgramParam5Display,
+            .getParameterValue=0,
+            .setParameter=&fxProgramParam5Callback
         }
+
     },
     .setup = &fxProgramSetup,
     .data = (void*)&fxProgram11data

@@ -1,5 +1,6 @@
 
 #include "audio/sineChorus.h"
+#include "audio/delay.h"
 
 static const int16_t firstSineQuadrant[33] = {0,12,25,38,51,63,76,88,100,112,123,134,145,156,166,175,184,193,201,209,216,222,228,234,239,243,246,249,252,253,254,255,255};
 
@@ -40,16 +41,24 @@ int16_t getSineValue(uint32_t phase)
 
 #ifndef FLOAT_AUDIO
 
-void initSineChorus(SineChorusType*data)
+/**
+ * @brief 
+ * 
+ * @param data the data structure holding the dynamic values 
+ * @param instanceNr the instance nr: 0-15, up to 16 independent instances can be spawned 
+ */
+void initSineChorus(SineChorusType*data,int8_t instanceNr)
 {
+    data->delayBuffer = (int16_t*)(((uint32_t)getDelayData()->delayLine)+4096*instanceNr);
     for(uint16_t c=0;c<SINE_CHORUS_DELAY_SIZE;c++)
     {
-        data->delayBuffer[c]=0.0f;
+        *(data->delayBuffer + c)=0;
     }
-    data->frequency=100;
     data->lfoVal=0;
     data->lfoValOld=0;
-    data->lfoPhaseinc=data->frequency*4*256*SINE_CHORUS_LFO_DIVIDER/4800000;
+    data->offset = 48;
+    data->feedback=0;
+    sineChorusSetFrequency(100,data);
 }
 
 int16_t sineChorusProcessSample(int16_t sampleIn,SineChorusType*data)
@@ -69,9 +78,9 @@ int16_t sineChorusProcessSample(int16_t sampleIn,SineChorusType*data)
         data->delayInputPtr &= (SINE_CHORUS_DELAY_SIZE-1);
         lfoValInterp = data->lfoValOld + ((data->lfoUpdateCnt*(data->lfoVal - data->lfoValOld)) >> 8);
         // compute current index of the delay pointer
-        delayPtr = (data->delayInputPtr - 5 - (((uint16_t)(lfoValInterp+0xFF)*data->depth) >> 8)) & (SINE_CHORUS_DELAY_SIZE-1); 
+        delayPtr = (data->delayInputPtr - data->offset - (((uint16_t)(lfoValInterp+0xFF)*data->depth) >> 8)) & (SINE_CHORUS_DELAY_SIZE-1); 
         sampleOut=((sampleIn*((1 << 15)-data->mix))>>15) + ((data->mix*data->delayBuffer[delayPtr]) >> 15);
-        *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
+        *(data->delayBuffer + data->delayInputPtr++)=sampleIn + ((data->feedback*sampleOut) >> 15);
         return sampleOut;
 }
 
