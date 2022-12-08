@@ -10,7 +10,7 @@ void sineChorusSetFrequency(uint16_t freq,SineChorusType*data)
     data->frequency = freq;
 }
 
-int16_t getSineValue(uint16_t phase)
+int16_t getSineValue(uint32_t phase)
 {
     uint8_t index;
     uint8_t quadrant;
@@ -24,18 +24,19 @@ int16_t getSineValue(uint16_t phase)
             break;
         case 1:
             index = 32 - index;
-            val = firstSineQuadrant[index] + (((firstSineQuadrant[index-1]-firstSineQuadrant[index])*(phase & 0x1FFFFFF)) >> 25);
+            val = firstSineQuadrant[index] - (int16_t)(((firstSineQuadrant[index]-firstSineQuadrant[index-1])*(phase & 0x1FFFFFF)) >> 25);
             break;
         case 2:
-            val = -firstSineQuadrant[index] + (((-firstSineQuadrant[index+1]+firstSineQuadrant[index])*(phase & 0x1FFFFFF)) >> 25);
+            val = -firstSineQuadrant[index] - (int16_t)(((firstSineQuadrant[index+1]-firstSineQuadrant[index])*(phase & 0x1FFFFFF)) >> 25);
             break;
         default:
             index = 32 - index;
-            val = -firstSineQuadrant[index] + (((-firstSineQuadrant[index-1]+firstSineQuadrant[index])*(phase & 0x1FFFFFF)) >> 25);
+            val = -firstSineQuadrant[index] + (((firstSineQuadrant[index]-firstSineQuadrant[index-1])*(phase & 0x1FFFFFF)) >> 25);
             break;
     }
     return val;
 }
+
 
 #ifndef FLOAT_AUDIO
 
@@ -81,18 +82,18 @@ int16_t sineChorusInterpolatedProcessSample(int16_t sampleIn,SineChorusType*data
     int16_t lfoValInterp;
     uint16_t totalDelay;
 
-        data->lfoVal = getSineValue(data->lfoPhase+=data->lfoPhaseinc);
+    data->lfoVal = getSineValue(data->lfoPhase+=data->lfoPhaseinc);
 
-        data->delayInputPtr &= (SINE_CHORUS_DELAY_SIZE-1);
-        lfoValInterp = data->lfoVal;
-        // compute current index of the delay pointer
-        totalDelay = (((uint32_t)((lfoValInterp + 0xFF)*data->depth)) >> 6);
-        delayPtr = (data->delayInputPtr -5 - (totalDelay >> 3)) & (SINE_CHORUS_DELAY_SIZE-1);
-        delayPtrNext = (delayPtr - 1) & (SINE_CHORUS_DELAY_SIZE-1);
-        q =totalDelay & 0x7;
-        sampleOut=((sampleIn*((1 << 15)-data->mix)) >> 15) + ((data->mix*((data->delayBuffer[delayPtr]*(8 - q) + data->delayBuffer[delayPtrNext]*q)>>3)) >> 15);
-        *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
-        return sampleOut;
+    data->delayInputPtr &= (SINE_CHORUS_DELAY_SIZE-1);
+    lfoValInterp = data->lfoVal;
+    // compute current index of the delay pointer
+    totalDelay = (((uint32_t)((lfoValInterp + 0xFF)*data->depth)) >> 6);
+    delayPtr = (data->delayInputPtr -5 - (totalDelay >> 3)) & (SINE_CHORUS_DELAY_SIZE-1);
+    delayPtrNext = (delayPtr - 1) & (SINE_CHORUS_DELAY_SIZE-1);
+    q =totalDelay & 0x7;
+    sampleOut=((sampleIn*((1 << 15)-data->mix)) >> 15) + ((data->mix*((data->delayBuffer[delayPtr]*(8 - q) + data->delayBuffer[delayPtrNext]*q)>>3)) >> 15);
+    *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
+    return sampleOut;
 }
 
 #else

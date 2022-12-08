@@ -46,6 +46,6 @@ void sineChorusSetFrequency(uint16_t freq,SineChorusType*data);
 
 #endif
 
-int16_t getSineValue(uint16_t);
+int16_t getSineValue(uint32_t);
 
 #endif
