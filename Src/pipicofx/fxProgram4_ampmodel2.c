@@ -95,7 +95,13 @@ static void fxProgram4Param2Display(void*data,char*res)
 static void fxProgram4Param3Callback(uint16_t val,void*data) // choose cab sim filters
 {
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    pData->cabSimType = (val >> 9) & 7;
+    uint8_t uval = (val >> 9) & 7;
+    if (uval > 5)
+    {
+        uval = 5;
+    }
+    pData->cabSimType = uval;
+
 }
 
 static void fxProgram4Param3Display(void*data,char*res)
@@ -294,7 +300,7 @@ FxProgramType fxProgram4 = {
         },
         {
             .name = "Gainstages     ",
-            .control=3,
+            .control=0xFF,
             .increment=1024,
             .rawValue=0,
             .getParameterDisplay=&fxProgram4Param4Display,
@@ -303,7 +309,7 @@ FxProgramType fxProgram4 = {
         },
         {
             .name = "OD/Dist Type",
-            .control = 4,
+            .control = 0xFF,
             .increment = 1024,
             .rawValue = 0,
             .getParameterDisplay=&fxProgram4Param5Display,

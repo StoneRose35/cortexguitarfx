@@ -140,7 +140,7 @@ FxProgramType fxProgram11 = {
         },
         {
             .name = "Offset         ",
-            .control=3,
+            .control=0xFF,
             .increment=64,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam4Display,
@@ -149,7 +149,7 @@ FxProgramType fxProgram11 = {
         },
         {
             .name = "Feedback       ",
-            .control=4,
+            .control=0xFF,
             .increment=64,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam5Display,
