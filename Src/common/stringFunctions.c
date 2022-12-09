@@ -284,8 +284,8 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 		else
 		{
 			// shift one position back
-			c2=charpos-1;
-			for(uint8_t c=0;c<decimalPlace;c++)
+			c2=charpos;
+			for(uint8_t c=0;c<decimalPlace+1;c++)
 			{
 				out[c2+1] = out[c2];
 				c2--;
@@ -323,8 +323,8 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 		else
 		{
 			// shift one position back
-			c2=charpos-1;
-			for(uint8_t c=0;c<decimalPlace;c++)
+			c2=charpos;
+			for(uint8_t c=0;c<decimalPlace+1;c++)
 			{
 				out[c2+1] = out[c2];
 				c2--;
@@ -826,7 +826,7 @@ void dateTimeToString(char * out,uint16_t year,uint8_t month,uint8_t day,uint8_t
 }
 
 /**
- * @brief appends appendee to appender
+ * @brief appends appender to appendee
  * 
  * @param appendee 
  * @param appender 
