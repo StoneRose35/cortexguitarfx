@@ -22,7 +22,6 @@ static void fxProgramP1Display(void*data,char*res)
     float dval;
     int32_t ival;
     int16_t i16val;
-    uint8_t c=0;
     attackFloat = int2float(pData->compressor.attack)+ 0.1f;
     dval = 682655.744f/attackFloat;
     if (dval > 1000.0f)
@@ -31,31 +30,14 @@ static void fxProgramP1Display(void*data,char*res)
         ival = float2int(dval);
         i16val = (int16_t)ival;
         Int16ToChar(i16val,res);
-
-        while (*(res+c) != 0)
-        {
-            c++;
-        }
-        *(res + c++)=' ';
-        *(res + c++)='m';
-        *(res + c++)='s';
+        appendToString(res," ms");
     }
     else
     {
         ival = float2int(dval);
         i16val = (int16_t)ival;
         Int16ToChar(i16val,res);
-        while (*(res+c) != 0)
-        {
-            c++;
-        }
-        *(res + c++)=' ';
-        *(res + c++)='u';
-        *(res + c++)='s';
-    }
-    for(uint8_t c2=c;c2<PARAMETER_NAME_MAXLEN;c2++)
-    {
-        *(res+c2)=' ';
+        appendToString(res," us");
     }
 }
 
@@ -72,7 +54,6 @@ static void fxProgramP2Display(void*data,char*res)
     float dval;
     int32_t ival;
     int16_t i16val;
-    uint8_t c=0;
     releaseFloat = int2float(pData->compressor.release)+ 0.1f;
     dval = 682655.744f/releaseFloat;
     if (dval > 1000.0f)
@@ -81,32 +62,16 @@ static void fxProgramP2Display(void*data,char*res)
         ival = float2int(dval);
         i16val = (int16_t)ival;
         Int16ToChar(i16val,res);
-
-        while (*(res+c) != 0)
-        {
-            c++;
-        }
-        *(res + c++)=' ';
-        *(res + c++)='m';
-        *(res + c++)='s';
+        appendToString(res," ms");
     }
     else
     {
         ival = float2int(dval);
         i16val = (int16_t)ival;
         Int16ToChar(i16val,res);
-        while (*(res+c) != 0)
-        {
-            c++;
-        }
-        *(res + c++)=' ';
-        *(res + c++)='u';
-        *(res + c++)='s';
+        appendToString(res," us");
     }
-    for(uint8_t c2=c;c2<PARAMETER_NAME_MAXLEN;c2++)
-    {
-        *(res+c2)=' ';
-    }
+
 }
 
 static void fxProgramP3Callback(uint16_t val,void*data) 

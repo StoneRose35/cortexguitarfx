@@ -22,6 +22,7 @@ void initSimpleChorus(SimpleChorusType*data)
 void simpleChorusSetFrequency(uint16_t freq,SimpleChorusType*data)
 {
     data->lfoPhaseinc=freq*4*256*SIMPLE_CHORUS_LFO_DIVIDER/4800000;
+    data->frequency=freq;
 }
 
 
