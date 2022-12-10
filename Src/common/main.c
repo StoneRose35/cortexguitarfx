@@ -61,8 +61,8 @@ volatile uint32_t cpuLoad;
 PiPicoFxUiType piPicoUiController;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
-#define ADC_LOWPASS 2
-#define UI_DMIN 1
+#define ADC_LOWPASS 60
+#define UI_DMIN 16
 uint32_t encoderVal,encoderCntr,encNew;
 uint8_t enterSwitchVal;
 uint8_t exitSwitchVal;
@@ -73,7 +73,6 @@ uint16_t adcVal;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
 uint16_t cpuLoadBfr;
-uint8_t switchValsOld[2]={0,0};
 uint32_t encoderValOld=0,encoderVal;
 uint8_t switchVals[2]={0,0};
 uint16_t adcChannelOld0=0,adcChannel0=0;
@@ -152,7 +151,7 @@ int main(void)
         {
             // call the update function of the chosen program
             adcChannel = getChannel0Value();
-            adcChannel0 = adcChannel; //adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
+            adcChannel0 = adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
             if ((adcChannel0 > adcChannelOld0) && (adcChannel0-adcChannelOld0) > UI_DMIN )
             {
                 knob0Callback(adcChannel0,&piPicoUiController);
@@ -165,7 +164,7 @@ int main(void)
             }
 
             adcChannel = getChannel1Value();
-            adcChannel1 = adcChannel; //adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
+            adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
             if ((adcChannel1 > adcChannelOld1) && (adcChannel1-adcChannelOld1) > UI_DMIN )
             {
                 knob1Callback(adcChannel1,&piPicoUiController);
@@ -178,7 +177,7 @@ int main(void)
             }
 
             adcChannel = getChannel2Value();
-            adcChannel2 = adcChannel;// adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
+            adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
             if ((adcChannel2 > adcChannelOld2) && (adcChannel2-adcChannelOld2) > UI_DMIN )
             {
                 knob2Callback(adcChannel2,&piPicoUiController);
@@ -204,18 +203,18 @@ int main(void)
         }
 		
         switchVals[0] = getSwitchValue(0);
-        if (switchVals[0] == 0 && switchValsOld[0] == 1)
+        if ((switchVals[0] & 1) > 0)
         {
             button1Callback(&piPicoUiController);
+            clearPressedStickyBit(0);
         }
-        switchValsOld[0] = getSwitchValue(0);
 
         switchVals[1] = getSwitchValue(1);
-        if (switchVals[1] == 0 && switchValsOld[1] == 1)
+        if ((switchVals[1] & 1) > 0)
         {
             button2Callback(&piPicoUiController);
+            clearPressedStickyBit(1);
         }
-        switchValsOld[1] = getSwitchValue(1);
        encoderVal=getEncoderValue();
        if (encoderValOld > encoderVal + 2 || encoderValOld < encoderVal - 2)
        {

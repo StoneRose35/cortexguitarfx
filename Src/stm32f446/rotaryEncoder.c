@@ -8,7 +8,7 @@ static uint32_t oldtickenc,oldtickswitch;
 static volatile uint32_t encoderVal = 0x7FFFFFFF;
 static volatile uint8_t switchVal;
 static volatile uint8_t switchPins[8];
-static volatile uint8_t switchVals[8];
+static volatile uint8_t switchVals[8]; // bit 0: sticky bit set when button is pressed (chage from 0 to 1), bit 1: sticky bit set when button is released, bit 2: momentary value
 static volatile uint32_t oldTickSwitches[8];
 static volatile uint8_t lastTrigger;
 #define TIMER_IMPLEMENTATION
@@ -23,13 +23,14 @@ void processExternalInterrupt()
             gpio = (GPIO_TypeDef*)(GPIOA_BASE + (switchPins[c] >> 4)*0x400);
             if (oldTickSwitches[c] + ROTARY_ENCODER_DEBOUNCE < getTickValue())
             {
-                if ((gpio->IDR & (1 << (switchPins[c] & 0xF)))!=0)
+                if ((gpio->IDR & (1 << (switchPins[c] & 0xF)))==0)
                 {
-                    switchVals[c]=1;
+                    switchVals[c] |= ((1 << 2) | (1 << 0));
                 }
                 else
                 {
-                    switchVals[c]=0;
+                    switchVals[c] &= ~(1 << 2);
+                    switchVals[c] |= (1 << 1);
                 }
                 oldTickSwitches[c]=getTickValue();
             }
@@ -193,6 +194,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         EXTI->FTSR |= (1 << (pins[c] & 0xF));
         EXTI->RTSR |= (1 << (pins[c] & 0xF));
         switchPins[c]=pins[c];
+        switchVals[c]=0;
         enableExternalInterrupt(pins[c]);
     }
     
@@ -210,4 +212,14 @@ uint32_t getEncoderValue()
 uint8_t getSwitchValue(uint8_t sw)
 {
     return switchVals[sw];
+}
+
+void clearPressedStickyBit(uint8_t nr)
+{
+    switchVals[nr] &= ~(1 << 0);
+}
+
+void clearReleasedStickyBit(uint8_t nr)
+{
+    switchVals[nr] &= ~(1 << 1);
 }

@@ -11,5 +11,8 @@ uint32_t getEncoderValue();
 
 uint8_t getSwitchValue(uint8_t);
 
+void clearReleasedStickyBit(uint8_t nr);
+void clearPressedStickyBit(uint8_t nr);
+
 #endif
 
