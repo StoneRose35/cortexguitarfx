@@ -1,6 +1,7 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "ssd1306_display.h"
+#include "adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
 #include "images/pipicofx_param_1_scaled.h"
@@ -250,8 +251,7 @@ void button1Callback(PiPicoFxUiType*data)
                 drawUi(data);
             }
             break;
-        case 2: // UI Level 2: apply/do not revert and go back to level 1
-            data->displayLevel = 1;
+        case 2: // UI Level 2: do nothing
             break;
         default:
             break;
@@ -270,8 +270,7 @@ void button2Callback(PiPicoFxUiType*data)
             data->displayLevel = 0;
             drawUi(data);
             break;
-        case 2: // UI Level 2, revert and go back to level 1
-            data->currentParameter->rawValue = data->oldParamValue;
+        case 2: // UI Level 2, apply and go back to level 1
             data->displayLevel = 1;
             drawUi(data);
             break;
@@ -282,6 +281,7 @@ void button2Callback(PiPicoFxUiType*data)
 
 void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
+    uint16_t knobVal;
     if (data->locked == 0 && encoderDelta != 0)
     {
         switch(data->displayLevel)
@@ -300,6 +300,27 @@ void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 data->currentProgram = fxPrograms[data->currentProgramIdx];
                 data->currentParameterIdx=0;
                 data->currentParameter = data->currentProgram->parameters;
+                // set all parameters controlled by the pots to the current value
+                for(uint8_t c=0; c < data->currentProgram->nParameters; c++)
+                {
+                    switch (data->currentProgram->parameters[c].control)
+                    {
+                        case 0:
+                            knobVal = getChannel0Value();
+                            knob0Callback(knobVal,data);
+                            break;
+                        case 1:
+                            knobVal = getChannel1Value();
+                            knob1Callback(knobVal,data);
+                            break;
+                        case 2:
+                            knobVal = getChannel2Value();
+                            knob2Callback(knobVal,data);
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 drawUi(data);
                 break;
             case 1: // UI Level 1, change parameter
