@@ -15,5 +15,9 @@ void clearPressedStickyBit(uint8_t nr);
 
 void clearReleasedStickyBit(uint8_t nr);
 
+int16_t getStickyIncrementDelta();
+
+void clearStickyIncrementDelta();
+
 #endif
 

@@ -26,7 +26,7 @@ extern PiPicoFxUiType piPicoUiController;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
 uint8_t cpuLoadBfr;
-uint32_t encoderValOld=0,encoderVal;
+int16_t encoderDelta;
 uint8_t switchVals[2]={0,0};
 //PiPicoFxUiType uiControllerData;
 uint16_t adcChannelOld0=0,adcChannel0=0;
@@ -57,7 +57,6 @@ void core1Main()
     *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
     *NVIC_ISER = (1 << 16); //enable interrupt for adc and sio of proc1 
 
-    encoderValOld=getEncoderValue();
     for(;;)
     {
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
@@ -124,11 +123,19 @@ void core1Main()
             button2Callback(&piPicoUiController);
             clearPressedStickyBit(1);
         }
-       encoderVal=getEncoderValue();
-       if (encoderValOld > encoderVal + 2 || encoderValOld < encoderVal - 2)
+       encoderDelta=getStickyIncrementDelta();
+       if (encoderDelta != 0)
        {
-           rotaryCallback(encoderVal,&piPicoUiController);
-           encoderValOld=encoderVal;
+            if (encoderDelta > 0)
+            {
+                encoderDelta=1;
+            }
+            else
+            {
+                encoderDelta=-1;
+            }
+           rotaryCallback(encoderDelta,&piPicoUiController);
+           clearStickyIncrementDelta();
        }
     }
 }

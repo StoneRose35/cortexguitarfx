@@ -280,29 +280,20 @@ void button2Callback(PiPicoFxUiType*data)
     }
 }
 
-void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
+void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
-    int32_t diff = (encoderValue - data->oldEncoderValue);
-    if (diff > 0)
-    {
-        diff = 1;
-    }
-    else
-    {
-        diff = -1;
-    }
-    if (data->locked == 0 && diff != 0)
+    if (data->locked == 0 && encoderDelta != 0)
     {
         switch(data->displayLevel)
         {
             case 0: // UI Level 0 
                 //switch Programs
-                data->currentProgramIdx += diff;
-                if (data->currentProgramIdx >= N_FX_PROGRAMS && diff > 0)
+                data->currentProgramIdx += encoderDelta;
+                if (data->currentProgramIdx >= N_FX_PROGRAMS && encoderDelta > 0)
                 {
                     data->currentProgramIdx = N_FX_PROGRAMS-1;
                 } 
-                else if (data->currentProgramIdx >= N_FX_PROGRAMS && diff < 0)
+                else if (data->currentProgramIdx >= N_FX_PROGRAMS && encoderDelta < 0)
                 {
                     data->currentProgramIdx = 0;
                 }
@@ -312,12 +303,12 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
                 drawUi(data);
                 break;
             case 1: // UI Level 1, change parameter
-                data->currentParameterIdx += diff;
-                if (data->currentParameterIdx >= data->currentProgram->nParameters && diff > 0)
+                data->currentParameterIdx += encoderDelta;
+                if (data->currentParameterIdx >= data->currentProgram->nParameters && encoderDelta > 0)
                 {
                     data->currentParameterIdx=data->currentProgram->nParameters-1;
                 }
-                else if (data->currentParameterIdx >= data->currentProgram->nParameters && diff < 0)
+                else if (data->currentParameterIdx >= data->currentProgram->nParameters && encoderDelta < 0)
                 {
                     data->currentParameterIdx = 0;
                 }
@@ -325,7 +316,7 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
                 drawUi(data);
                 break;
             case 2: // UI Level 2, change Parameter Value
-                data->currentParameter->rawValue += diff*data->currentParameter->increment;
+                data->currentParameter->rawValue += encoderDelta*data->currentParameter->increment;
                 if (data->currentParameter->rawValue < 0)
                 {
                     data->currentParameter->rawValue = 0;
@@ -337,7 +328,6 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
                 data->currentParameter->setParameter(data->currentParameter->rawValue,data->currentProgram->data);
                 break;
         }
-        data->oldEncoderValue=encoderValue;
     }
 }
 

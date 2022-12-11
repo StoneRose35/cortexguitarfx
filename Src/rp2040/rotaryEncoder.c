@@ -10,6 +10,9 @@
 
 static uint32_t oldtickenc,oldtickswitch;
 static volatile uint32_t encoderVal = 0x7FFFFFFF;
+static volatile uint32_t encoderValOld = 0x7FFFFFFF;
+static volatile int16_t encoderStickyIncrement=0;
+static volatile int16_t encoderStickyDecrement=0;
 static volatile uint8_t switchVal;
 static volatile uint8_t switchPins[8];
 static volatile uint8_t switchVals[8]; // bit 0: sticky bit set when button is pressed (chage from 0 to 1), bit 1: sticky bit set when button is released, bit 2: momentary value
@@ -23,7 +26,20 @@ void isr_io_irq_bank0_irq13()
         *ENCODER_1_INTR |= (1 << ENCODER_1_EDGE_HIGH);
         if(lastTrigger == 1)
         {
-            ((*GPIO_IN & (1 << ENCODER_2)) == (1 << ENCODER_2)) ? encoderVal-- : encoderVal++;
+            if ((*GPIO_IN & (1 << ENCODER_2)) == (1 << ENCODER_2)) 
+            { 
+                encoderVal--;
+                if (encoderValOld > encoderVal+1)
+                {
+                    encoderStickyDecrement++;
+                    encoderValOld=encoderVal;
+                }
+            }
+            else
+            { 
+                encoderVal++;
+                //encoderStickyIncrement++;
+            }
         }
         lastTrigger = 0;
     }
@@ -32,7 +48,16 @@ void isr_io_irq_bank0_irq13()
         *ENCODER_1_INTR |= (1 << ENCODER_1_EDGE_LOW);
         if(lastTrigger==1)
         {
-            ((*GPIO_IN & (1 << ENCODER_2)) == (1 << ENCODER_2)) ? encoderVal++ : encoderVal--;
+            if ((*GPIO_IN & (1 << ENCODER_2)) == (1 << ENCODER_2)) 
+            { 
+                encoderVal++;
+                //encoderStickyIncrement++; 
+            }
+            else
+            { 
+                encoderVal--;
+                //encoderStickyDecrement++;
+            }
         }
         lastTrigger = 0;
     }
@@ -41,7 +66,20 @@ void isr_io_irq_bank0_irq13()
         *ENCODER_2_INTR |= (1 << ENCODER_2_EDGE_HIGH);
         if(lastTrigger == 0)
         {
-            ((*GPIO_IN & (1 << ENCODER_1)) == (1 << ENCODER_1)) ? encoderVal++ : encoderVal--;
+            if ((*GPIO_IN & (1 << ENCODER_1)) == (1 << ENCODER_1)) 
+            { 
+                encoderVal++;
+                if (encoderVal > encoderValOld+1)
+                { 
+                    encoderStickyIncrement++;
+                    encoderValOld=encoderVal;
+                }
+            }
+            else 
+            { 
+                encoderVal--;
+                //encoderStickyDecrement++;
+            }
         }
         lastTrigger = 1;
     }
@@ -50,7 +88,16 @@ void isr_io_irq_bank0_irq13()
         *ENCODER_2_INTR |= (1 << ENCODER_2_EDGE_LOW);
         if(lastTrigger == 0)
         {
-            ((*GPIO_IN & (1 << ENCODER_1)) == (1 << ENCODER_1)) ? encoderVal-- : encoderVal++;
+            if ((*GPIO_IN & (1 << ENCODER_1)) == (1 << ENCODER_1)) 
+            {
+                encoderVal--;
+                //encoderStickyDecrement++;
+            } 
+            else 
+            {
+                encoderVal++;
+                //encoderStickyIncrement++;
+            }
         }
         lastTrigger = 1;
     }
@@ -143,4 +190,15 @@ void clearPressedStickyBit(uint8_t nr)
 void clearReleasedStickyBit(uint8_t nr)
 {
     switchVals[nr] &= ~(1 << 1);
+}
+
+int16_t getStickyIncrementDelta()
+{
+    return encoderStickyIncrement-encoderStickyDecrement;
+}
+
+void clearStickyIncrementDelta()
+{
+    encoderStickyDecrement=0;
+    encoderStickyIncrement=0;
 }

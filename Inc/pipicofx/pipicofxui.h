@@ -25,7 +25,7 @@ void knob2Callback(uint16_t val,PiPicoFxUiType*data);
 
 void button1Callback(PiPicoFxUiType*data);
 void button2Callback(PiPicoFxUiType*data);
-void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data);
+void rotaryCallback(int16_t encoderValue,PiPicoFxUiType*data);
 
 void piPicoFxUiSetup(PiPicoFxUiType*);
 
