@@ -26,7 +26,7 @@ const int16_t phaseshifts[4]= {22937,22937,22937,22937};
 
 int16_t getFeedback(uint8_t delayLineIndex,int16_t tau)
 {
-    int16_t feedbackVal=0.0f;
+    int16_t feedbackVal=0;
     for(uint8_t c=0;c<3;c++)
     {
         if (taus[c] < tau && taus[c+1] > tau)
@@ -90,12 +90,12 @@ int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData)
     
     for (uint8_t c=0;c<4;c++)
     {
-        reverbSignal += delaySingleton->delayLine[(reverbData->delayPointer-delayInSamples[c]) & 0x1FFF] >> 2;
+        reverbSignal += delaySingleton->delayLine[(reverbData->delayPointer-delayInSamples[c]) & 0x1FFF] >> 1;
     }
 
     for (uint8_t rc=0;rc < 4;rc++)
     {
-        delaySingleton->delayLine[reverbData->delayPointer & 0x1FFF] = sampleIn + ((delaySingleton->delayLine[(reverbData->delayPointer-delayInSamples[rc]) & 0x1FFF]*(reverbData->feedbackValues[rc])) >> 15);
+        delaySingleton->delayLine[reverbData->delayPointer & 0x1FFF] = (sampleIn>>1) + ((delaySingleton->delayLine[(reverbData->delayPointer-delayInSamples[rc]) & 0x1FFF]*(reverbData->feedbackValues[rc])) >> 15);
     }
     reverbData->delayPointer++;
     
@@ -105,6 +105,6 @@ int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData)
         reverbSignal = allpassProcessSample(reverbSignal,reverbData->allpasses+c);
     }
 
-    sampleOut = ((((1 << 15)-reverbData->mix)*sampleIn) >> 15) + ((reverbData->mix*reverbSignal) >> 15);
+    sampleOut = sampleIn + ((reverbData->mix*reverbSignal) >> 15);
     return sampleOut;
 }
