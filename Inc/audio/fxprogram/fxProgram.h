@@ -16,7 +16,7 @@
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 10
+#define N_FX_PROGRAMS 9
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
@@ -90,10 +90,30 @@ typedef struct {
     int16_t highpassCutoff;
     uint8_t nWaveshapers;
     int16_t highpass_out,highpass_old_out,highpass_old_in;
+    const char cabNames[8][24];
+    const char waveShaperNames[4][24];
+    uint8_t modType;
+    uint8_t cabSimType;
     MultiWaveShaperDataType waveshaper1;
     FirFilterType filter3;
     SecondOrderIirFilterType filter1;
     DelayDataType * delay;
+    ReverbType reverb;
+
+    FirFilterType hiwattFir;
+    SecondOrderIirFilterType hiwattIir1;
+    SecondOrderIirFilterType hiwattIir2;
+    SecondOrderIirFilterType hiwattIir3;
+    
+    FirFilterType frontmanFir;
+    SecondOrderIirFilterType frontmanIir1;
+    SecondOrderIirFilterType frontmanIir2;
+    SecondOrderIirFilterType frontmanIir3;
+
+    FirFilterType voxAC15Fir;
+    SecondOrderIirFilterType voxAC15Iir1;
+    SecondOrderIirFilterType voxAC15Iir2;
+    SecondOrderIirFilterType voxAC15Iir3;
 } FxProgram9DataType;
 #else
 typedef struct {
