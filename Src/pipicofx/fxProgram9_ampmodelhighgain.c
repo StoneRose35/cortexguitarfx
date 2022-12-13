@@ -129,13 +129,14 @@ static void fxProgramParam4Callback(uint16_t val,void*data) // modulation type
 static void fxProgramParam4Display(void*data,char*res) // modulation type
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
+    *res=0;
     if (pData->modType==0)
     {
-        res="Delay";
+        appendToString(res,"Delay");
     }
     else
     {
-        res="Reverb";
+        appendToString(res,"Reverb");
     }
 }
 
@@ -148,7 +149,10 @@ static void fxProgramParam5Callback(uint16_t val,void*data) // cab type
 static void fxProgramParam5Display(void*data,char*res) // cab type
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
-    res=(char*)pData->cabNames[pData->cabSimType];
+    for(uint8_t c=0;c<24;c++)
+    {
+        *(res+c)=pData->cabNames[pData->cabSimType][c];
+    }
 }
 
 static void fxProgramSetup(void*data)
@@ -289,7 +293,7 @@ FxProgramType fxProgram9 = {
             .getParameterDisplay=&fxProgramParam2Display
         },
         {
-            .name="Mod Intensity   ",
+            .name="Mod Intensity  ",
             .control=2,
             .increment=64,
             .rawValue=0,
@@ -298,7 +302,7 @@ FxProgramType fxProgram9 = {
             .getParameterDisplay=&fxProgramParam3Display
         },
         {
-            .name="Mod Type        ",
+            .name="Mod Type       ",
             .control=0xFF,
             .increment=2048,
             .rawValue=0,
@@ -309,7 +313,7 @@ FxProgramType fxProgram9 = {
         {
             .name="Cab Type       ",
             .control=0xFF,
-            .increment=2048,
+            .increment=512,
             .rawValue=0,
             .setParameter=&fxProgramParam5Callback,
             .getParameterValue=0,
