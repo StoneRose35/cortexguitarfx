@@ -97,11 +97,11 @@ int16_t sineChorusInterpolatedProcessSample(int16_t sampleIn,SineChorusType*data
     lfoValInterp = data->lfoVal;
     // compute current index of the delay pointer
     totalDelay = (((uint32_t)((lfoValInterp + 0xFF)*data->depth)) >> 6);
-    delayPtr = (data->delayInputPtr -5 - (totalDelay >> 3)) & (SINE_CHORUS_DELAY_SIZE-1);
+    delayPtr = (data->delayInputPtr - data->offset - (totalDelay >> 3)) & (SINE_CHORUS_DELAY_SIZE-1);
     delayPtrNext = (delayPtr - 1) & (SINE_CHORUS_DELAY_SIZE-1);
     q =totalDelay & 0x7;
     sampleOut=((sampleIn*((1 << 15)-data->mix)) >> 15) + ((data->mix*((data->delayBuffer[delayPtr]*(8 - q) + data->delayBuffer[delayPtrNext]*q)>>3)) >> 15);
-    *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
+    *(data->delayBuffer + data->delayInputPtr++)=sampleIn + ((data->feedback*sampleOut) >> 15);
     return sampleOut;
 }
 
