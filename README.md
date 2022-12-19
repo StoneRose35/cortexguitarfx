@@ -22,9 +22,11 @@ The PiPicoFX is a simple multieffects unit for Guitar built around a Raspberry P
 * Enclosure
 * Power Connector
 ## Audio-Codec Board
-Generally an audio codec able to operate in 48 kHz I2S Master Mode is able to work with the raspberry pi pico. In fact at the beginning of the development even the internal ADC of the Pi Pico served as an input. The most straightforward and probably best-sounding way is to build the audio-codec pcb's using the [http://gerberfiles.zip] from your favorite small-batch manufacturer and then using the [bom.csv] to order the parts from your preferred electronics distributor. Of course some SMD-soldering is required as well... 
+Generally an audio codec able to operate in 48 kHz I2S Master Mode is able to work with the raspberry pi pico. In fact at the beginning of the development even the internal ADC of the Pi Pico served as an input. The most straightforward and probably best-sounding way is to build the audio-codec pcb's using the [gerberfiles](schematics/guitarpreamp/audiocodecboard.zip) from your favorite small-batch manufacturer and then using the [bom](schematics/guitarpreamp/audiocodecboard_bom.csv) to order the parts from your preferred electronics distributor. Of course some SMD-soldering is required as well... 
+### Schematic
+![Audio Codec Board Schematics](schematics/guitarpreamp/audiocodecboard_schematic.svg)
 ## Software Installation
-Download [pipicofx.uf2]. Then connect the Raspberry Pi Pico while having the "boot" button depressed. Drag the file downloaded to the mass-storage device showing up, then you are done.
+Download [pipicofx.uf2](pipicofx.uf2). Then connect the Raspberry Pi Pico while having the "boot" button depressed. Drag the file downloaded to the mass-storage device showing up, then you are done.
 
  ## Assembly
  Mount the UI Elements (Buttons, Encoder, Potentiometers, Jacks, Power connector) to the Enclosure the wire up the entire system using the sketch shown below
