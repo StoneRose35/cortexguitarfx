@@ -30,4 +30,5 @@ Download [pipicofx.uf2](pipicofx.uf2). Then connect the Raspberry Pi Pico while 
 
  ## Assembly
  Mount the UI Elements (Buttons, Encoder, Potentiometers, Jacks, Power connector) to the Enclosure the wire up the entire system using the sketch shown below
+ ![Wiring Diagram](schematics/wiring_diagram.png)
 
