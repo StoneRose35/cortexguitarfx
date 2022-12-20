@@ -12,7 +12,7 @@ ELF2UF2=./tools/elf2uf2
 OPT=-Og
 PAD_CKECKSUM=./tools/pad_checksum
 DEFINES=-DRP2040_FEATHER -DI2S_INPUT -DCS4270
-CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen
+CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
 LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary
@@ -33,6 +33,90 @@ SERVICES_OBJS := $(patsubst Src/services/%.c,out/%.o,$(wildcard Src/services/*.c
 ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 
+
+
+
+TUSB_SRC_C += \
+	Src/tusb/tusb.c \
+	tusb/common/tusb_fifo.c \
+	tusb/device/usbd.c \
+	tusb/device/usbd_control.c \
+	tusb/class/audio/audio_device.c \
+	tusb/class/cdc/cdc_device.c \
+	tusb/class/dfu/dfu_device.c \
+	tusb/class/dfu/dfu_rt_device.c \
+	tusb/class/hid/hid_device.c \
+	tusb/class/midi/midi_device.c \
+	tusb/class/msc/msc_device.c \
+	tusb/class/net/ecm_rndis_device.c \
+	tusb/class/net/ncm_device.c \
+	tusb/class/usbtmc/usbtmc_device.c \
+	tusb/class/video/video_device.c \
+	tusb/class/vendor/vendor_device.c
+
+TUSB_FILES_C += \
+	tusb.c \
+	tusb_fifo.c \
+	usbd.c \
+	usbd_control.c \
+	audio_device.c \
+	cdc_device.c \
+	dfu_device.c \
+	dfu_rt_device.c \
+	hid_device.c \
+	midi_device.c \
+	msc_device.c \
+	ecm_rndis_device.c \
+	ncm_device.c \
+	usbtmc_device.c \
+	video_device.c \
+	vendor_device.c
+
+TUSB_OBJS += $(addprefix out/, $(TUSB_FILES_C:.c=.o))
+
+echotusb:
+	@echo $(TUSB_OBJS)
+
+out/%.o: Src/tusb/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/common/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/device/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/audio/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/cdc/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/dfu/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/hid/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/midi/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/msc/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/net/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/usbtmc/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/video/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/class/vendor/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+all_usb: $(TUSB_OBJS)
 all_rp2040: $(RP2040_OBJS) $(RP2040_OBJS_ASM)
 all_common: $(COMMON_OBJS)
 all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS)
