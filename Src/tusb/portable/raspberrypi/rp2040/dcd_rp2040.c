@@ -24,12 +24,14 @@
  * This file is part of the TinyUSB stack.
  */
 
+#include "stdint.h"
 #include "tusb_option.h"
 
 #if CFG_TUD_ENABLED && (CFG_TUSB_MCU == OPT_MCU_RP2040) && !CFG_TUD_RPI_PIO_USB
 
 #include "pico.h"
 #include "rp2040_usb.h"
+#include "hardware/rp2040_registers.h"
 
 #if TUD_OPT_RP2040_USB_DEVICE_ENUMERATION_FIX
 #include "pico/fix/rp2040_usb_device_enumeration.h"
@@ -73,7 +75,7 @@ static struct hw_endpoint *hw_endpoint_get_by_addr(uint8_t ep_addr)
 static void _hw_endpoint_alloc(struct hw_endpoint *ep, uint8_t transfer_type)
 {
   // size must be multiple of 64
-  uint size = tu_div_ceil(ep->wMaxPacketSize, 64) * 64u;
+  uint32_t size = tu_div_ceil(ep->wMaxPacketSize, 64) * 64u;
 
   // double buffered Bulk endpoint
   if ( transfer_type == TUSB_XFER_BULK )
@@ -84,14 +86,14 @@ static void _hw_endpoint_alloc(struct hw_endpoint *ep, uint8_t transfer_type)
   ep->hw_data_buf = next_buffer_ptr;
   next_buffer_ptr += size;
 
-  assert(((uintptr_t )next_buffer_ptr & 0b111111u) == 0);
-  uint dpram_offset = hw_data_offset(ep->hw_data_buf);
-  hard_assert(hw_data_offset(next_buffer_ptr) <= USB_DPRAM_MAX);
+  //assert(((uintptr_t )next_buffer_ptr & 0b111111u) == 0);
+  uint32_t dpram_offset = hw_data_offset(ep->hw_data_buf);
+  //hard_assert(hw_data_offset(next_buffer_ptr) <= USB_DPRAM_MAX);
 
-  pico_info("  Allocated %d bytes at offset 0x%x (0x%p)\r\n", size, dpram_offset, ep->hw_data_buf);
+  //pico_info("  Allocated %d bytes at offset 0x%x (0x%p)\r\n", size, dpram_offset, ep->hw_data_buf);
 
   // Fill in endpoint control register with buffer offset
-  uint32_t const reg = EP_CTRL_ENABLE_BITS | ((uint)transfer_type << EP_CTRL_BUFFER_TYPE_LSB) | dpram_offset;
+  uint32_t const reg = EP_CTRL_ENABLE_BITS | ((uint32_t)transfer_type << EP_CTRL_BUFFER_TYPE_LSB) | dpram_offset;
 
   *ep->endpoint_control = reg;
 }
@@ -192,7 +194,7 @@ static void __tusb_irq_path_func(hw_handle_buff_status)(void)
 {
     uint32_t remaining_buffers = usb_hw->buf_status;
     pico_trace("buf_status = 0x%08x\n", remaining_buffers);
-    uint bit = 1u;
+    uint32_t bit = 1u;
     for (uint8_t i = 0; remaining_buffers && i < USB_MAX_ENDPOINTS * 2; i++)
     {
         if (remaining_buffers & bit)
@@ -222,7 +224,7 @@ TU_ATTR_ALWAYS_INLINE static inline void reset_ep0_pid(void)
     // If we have finished this transfer on EP0 set pid back to 1 for next
     // setup transfer. Also clear a stall in case
     uint8_t addrs[] = {0x0, 0x80};
-    for (uint i = 0 ; i < TU_ARRAY_SIZE(addrs); i++)
+    for (uint32_t i = 0 ; i < TU_ARRAY_SIZE(addrs); i++)
     {
         struct hw_endpoint *ep = hw_endpoint_get_by_addr(addrs[i]);
         ep->next_pid = 1u;
@@ -245,7 +247,7 @@ static void __tusb_irq_path_func(reset_non_control_endpoints)(void)
   next_buffer_ptr = &usb_dpram->epx_data[0];
 }
 
-static void __tusb_irq_path_func(dcd_rp2040_irq)(void)
+void isr_usbctrl_irq5(void)
 {
     uint32_t const status = usb_hw->ints;
     uint32_t handled = 0;
@@ -341,10 +343,10 @@ static void __tusb_irq_path_func(dcd_rp2040_irq)(void)
         usb_hw_clear->sie_status = USB_SIE_STATUS_RESUME_BITS;
     }
 
-    if (status ^ handled)
-    {
-        panic("Unhandled IRQ 0x%x\n", (uint) (status ^ handled));
-    }
+    //if (status ^ handled)
+    //{
+    //    panic("Unhandled IRQ 0x%x\n", (uint32_t) (status ^ handled));
+    //}
 }
 
 #define USB_INTS_ERROR_BITS ( \
@@ -360,7 +362,7 @@ static void __tusb_irq_path_func(dcd_rp2040_irq)(void)
 
 void dcd_init (uint8_t rhport)
 {
-  assert(rhport == 0);
+  //assert(rhport == 0);
 
   // Reset hardware to default state
   rp2040_usb_init();
@@ -370,7 +372,7 @@ void dcd_init (uint8_t rhport)
   usb_hw->pwr = USB_USB_PWR_VBUS_DETECT_BITS | USB_USB_PWR_VBUS_DETECT_OVERRIDE_EN_BITS;
 #endif
 
-  irq_add_shared_handler(USBCTRL_IRQ, dcd_rp2040_irq, PICO_SHARED_IRQ_HANDLER_HIGHEST_ORDER_PRIORITY);
+  //irq_add_shared_handler(USBCTRL_IRQ, dcd_rp2040_irq, PICO_SHARED_IRQ_HANDLER_HIGHEST_ORDER_PRIORITY);
 
   // Init control endpoints
   tu_memclr(hw_endpoints[0], 2*sizeof(hw_endpoint_t));
@@ -397,19 +399,22 @@ void dcd_init (uint8_t rhport)
 
 void dcd_int_enable(__unused uint8_t rhport)
 {
-    assert(rhport == 0);
-    irq_set_enabled(USBCTRL_IRQ, true);
+    //assert(rhport == 0);
+    //irq_set_enabled(USBCTRL_IRQ, true)
+    *NVIC_ISER = (1 << USBCTRL_IRQ);
+    
 }
 
 void dcd_int_disable(__unused uint8_t rhport)
 {
-    assert(rhport == 0);
-    irq_set_enabled(USBCTRL_IRQ, false);
+    //assert(rhport == 0);
+    //irq_set_enabled(USBCTRL_IRQ, false);
+    *NVIC_ICER = (1 << USBCTRL_IRQ);
 }
 
 void dcd_set_address (__unused uint8_t rhport, __unused uint8_t dev_addr)
 {
-  assert(rhport == 0);
+  //assert(rhport == 0);
 
   // Can't set device address in hardware until status xfer has complete
   // Send 0len complete response on EP0 IN
@@ -418,8 +423,8 @@ void dcd_set_address (__unused uint8_t rhport, __unused uint8_t dev_addr)
 
 void dcd_remote_wakeup(__unused uint8_t rhport)
 {
-  pico_info("dcd_remote_wakeup %d\n", rhport);
-  assert(rhport == 0);
+  //pico_info("dcd_remote_wakeup %d\n", rhport);
+  //assert(rhport == 0);
 
   // since RESUME interrupt is not triggered if we are the one initiate
   // briefly enable SOF to notify usbd when bus is ready
@@ -474,7 +479,7 @@ void dcd_edpt0_status_complete(uint8_t rhport, tusb_control_request_t const * re
 
 bool dcd_edpt_open (__unused uint8_t rhport, tusb_desc_endpoint_t const * desc_edpt)
 {
-    assert(rhport == 0);
+    //assert(rhport == 0);
     hw_endpoint_init(desc_edpt->bEndpointAddress, tu_edpt_packet_size(desc_edpt), desc_edpt->bmAttributes.xfer);
     return true;
 }
@@ -489,7 +494,7 @@ void dcd_edpt_close_all (uint8_t rhport)
 
 bool dcd_edpt_xfer(__unused uint8_t rhport, uint8_t ep_addr, uint8_t * buffer, uint16_t total_bytes)
 {
-    assert(rhport == 0);
+    //assert(rhport == 0);
     hw_endpoint_xfer(ep_addr, buffer, total_bytes);
     return true;
 }
@@ -529,14 +534,14 @@ void dcd_edpt_close (uint8_t rhport, uint8_t ep_addr)
 {
     (void) rhport;
 
-    pico_trace("dcd_edpt_close %02x\n", ep_addr);
+    //pico_trace("dcd_edpt_close %02x\n", ep_addr);
     hw_endpoint_close(ep_addr);
 }
 
 void __tusb_irq_path_func(dcd_int_handler)(uint8_t rhport)
 {
   (void) rhport;
-  dcd_rp2040_irq();
+  isr_usbctrl_irq5();
 }
 
 #endif

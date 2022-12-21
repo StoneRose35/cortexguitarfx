@@ -13,7 +13,7 @@ OPT=-Og
 PAD_CKECKSUM=./tools/pad_checksum
 DEFINES=-DRP2040_FEATHER -DI2S_INPUT -DCS4270
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
-LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary
 BOOTLOADER=bs2_fast_qspi2
@@ -52,9 +52,15 @@ TUSB_SRC_C += \
 	tusb/class/net/ncm_device.c \
 	tusb/class/usbtmc/usbtmc_device.c \
 	tusb/class/video/video_device.c \
-	tusb/class/vendor/vendor_device.c
+	tusb/class/vendor/vendor_device.c \
+	tusb/portable/raspberrypi/rp2040/dcd_rp2040.c \
+	tusb/portable/raspberrypi/rp2040/hcd_rp2040.c \
+	tusb/portable/raspberrypi/rp2040/rp2040_usb.c \
+
 
 TUSB_FILES_C += \
+	usb_descriptors.c \
+	cdc_msc.c \
 	tusb.c \
 	tusb_fifo.c \
 	usbd.c \
@@ -70,7 +76,10 @@ TUSB_FILES_C += \
 	ncm_device.c \
 	usbtmc_device.c \
 	video_device.c \
-	vendor_device.c
+	vendor_device.c \
+	dcd_rp2040.c \
+	hcd_rp2040.c \
+	rp2040_usb.c \
 
 TUSB_OBJS += $(addprefix out/, $(TUSB_FILES_C:.c=.o))
 
@@ -114,6 +123,9 @@ out/%.o: Src/tusb/class/video/%.c
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 out/%.o: Src/tusb/class/vendor/%.c
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/tusb/portable/raspberrypi/rp2040/%.c
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 all_usb: $(TUSB_OBJS)
@@ -257,7 +269,7 @@ Inc/gen/pio0_pio.h: Inc/gen tools/pioasm
 
 
 # main linking and generating flashable content
-$(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common  all_audio all_graphics  $(ASSET_IMAGES)
+$(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common  all_audio all_graphics all_usb  $(ASSET_IMAGES)
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 #~/pico/pico-libs/rp2_common/pico_stdio/stdio.c.obj ~/pico/pico-libs/common/pico_sync/mutex.c.obj ~/pico/pico-libs/rp2_common/hardware_timer/timer.c.obj ~/pico/pico-libs/common/pico_time/time.c.obj
 

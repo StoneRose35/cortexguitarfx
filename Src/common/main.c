@@ -167,6 +167,7 @@
 #include "gpio.h"
 #include "ssd1306_display.h"
 #include "wm8731.h"
+#include "tusb.h"
 #include "cs4270_audio_codec.h"
 #include "debugLed.h"
 #include "consoleHandler.h"
@@ -239,7 +240,7 @@ int main(void)
 	#ifdef CS4270
 	initI2c(72); //72 
 	#endif
-
+	tud_init(BOARD_TUD_RHPORT);
 
 	/*
 	 *
@@ -306,6 +307,7 @@ int main(void)
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
 
+tud_task(); // tinyusb device task
 	}
 }
 #endif

@@ -98,10 +98,10 @@ void __tusb_irq_path_func(_hw_endpoint_buffer_control_update32)(struct hw_endpoi
     value |= or_mask;
     if ( or_mask & USB_BUF_CTRL_AVAIL )
     {
-      if ( *ep->buffer_control & USB_BUF_CTRL_AVAIL )
-      {
-        panic("ep %d %s was already available", tu_edpt_number(ep->ep_addr), ep_dir_string[tu_edpt_dir(ep->ep_addr)]);
-      }
+      //if ( *ep->buffer_control & USB_BUF_CTRL_AVAIL )
+      //{
+      //  panic("ep %d %s was already available", tu_edpt_number(ep->ep_addr), ep_dir_string[tu_edpt_dir(ep->ep_addr)]);
+      //}
       *ep->buffer_control = value & ~USB_BUF_CTRL_AVAIL;
       // 12 cycle delay.. (should be good for 48*12Mhz = 576Mhz)
       // Don't need delay in host mode as host is in charge
@@ -234,14 +234,14 @@ static uint16_t __tusb_irq_path_func(sync_ep_buffer)(struct hw_endpoint *ep, uin
   {
     // We are continuing a transfer here. If we are TX, we have successfully
     // sent some data can increase the length we have sent
-    assert(!(buf_ctrl & USB_BUF_CTRL_FULL));
+    //assert(!(buf_ctrl & USB_BUF_CTRL_FULL));
 
     ep->xferred_len = (uint16_t)(ep->xferred_len + xferred_bytes);
   }else
   {
     // If we have received some data, so can increase the length
     // we have received AFTER we have copied it to the user buffer at the appropriate offset
-    assert(buf_ctrl & USB_BUF_CTRL_FULL);
+    //assert(buf_ctrl & USB_BUF_CTRL_FULL);
 
     memcpy(ep->user_buf, ep->hw_data_buf + buf_id*64, xferred_bytes);
     ep->xferred_len = (uint16_t)(ep->xferred_len + xferred_bytes);
@@ -314,10 +314,10 @@ bool __tusb_irq_path_func(hw_endpoint_xfer_continue)(struct hw_endpoint *ep)
 {
   _hw_endpoint_lock_update(ep, 1);
   // Part way through a transfer
-  if (!ep->active)
-  {
-    panic("Can't continue xfer on inactive ep %d %s", tu_edpt_number(ep->ep_addr), ep_dir_string[tu_edpt_dir(ep->ep_addr)]);
-  }
+  //if (!ep->active)
+  //{
+  //  panic("Can't continue xfer on inactive ep %d %s", tu_edpt_number(ep->ep_addr), ep_dir_string[tu_edpt_dir(ep->ep_addr)]);
+  //}
 
   // Update EP struct from hardware state
   _hw_endpoint_xfer_sync(ep);
