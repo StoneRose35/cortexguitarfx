@@ -193,8 +193,12 @@
 volatile uint32_t task=0;
 volatile uint8_t context;
 
-extern CommBufferType usbCommBuffer;
-extern CommBufferType btCommBuffer;
+
+CommBufferType usbCommBuffer __attribute__((aligned (256)));
+ConsoleType usbConsole;
+ApiType usbApi;
+BufferedInputType bufferedInput;
+//CommBufferType btCommBuffer;
 
 
 PiPicoFxUiType piPicoUiController;
@@ -207,7 +211,7 @@ const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
-
+void cdc_task(CommBuffer bfr);
 
 /**
  * @brief the main entry point, should never exit
@@ -277,6 +281,7 @@ int main(void)
 		}
 	}
 	drawUi(&piPicoUiController);
+	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 
 	startCore1(&core1Main);
@@ -307,7 +312,9 @@ int main(void)
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
 
-tud_task(); // tinyusb device task
+		tud_task(); // tinyusb device task
+		cdc_task(&usbCommBuffer);
+		cliApiTask(&bufferedInput);
 	}
 }
 #endif

@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include "hardware/regs/uart.h"
 #include "hardware/regs/addressmap.h"
+#include "bufferedInputStructs.h"
 
 #define BAUD_RATE 57600
 
@@ -49,14 +50,14 @@ typedef struct
  * 
  * @param baudrate allowed values: 2400, 4800, 9600 19200,28800,57600, 115200
  */
-void initUart(uint16_t baudrate);
+void initUart(uint16_t baudrate,CommBuffer bfr);
 
 /**
  * @brief initialize the uart meanth to have a bluetooth interface attached
  * 
  * @param baudrate allowed values: 2400, 4800, 9600 19200,28800,57600, 115200
  */
-void initBTUart(uint16_t baudrate);
+void initBTUart(uint16_t baudrate,CommBuffer bfr);
 
 /**
  * @brief send's one or multiple characters from out output buffer 
@@ -66,8 +67,8 @@ void initBTUart(uint16_t baudrate);
  *  * 
  * @return uint8_t 1 if transmission has terminated (buffer emptied), 0 if buffer is not empty
  */
-uint8_t sendCharAsyncUsb();
-uint8_t sendCharAsyncBt();
+void sendCharAsyncUsb(void * commBuffer,uint8_t blocking);
+void sendCharAsyncBt(void * commBuffer,uint8_t blocking);
 
 
 #endif /* UART_H_ */

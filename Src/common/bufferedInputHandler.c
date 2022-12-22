@@ -9,6 +9,7 @@
  */
 
 #include "bufferedInputHandler.h"
+#include "bufferedInputStructs.h"
 #include "consoleHandler.h"
 #include "apiHandler.h"
 #include "consoleBase.h"
@@ -30,7 +31,8 @@ void processInputBuffer(BufferedInput binput)
 		{
 			returnBfr = onCharacterReception(binput,binput->commBuffer->inputBuffer[binput->commBuffer->inputBufferCnt-1]);
 			binput->commBuffer->inputBufferCnt--;
-			printf(returnBfr);
+			appendStringToOutputBuffer((binput->commBuffer),returnBfr);
+			//printf(returnBfr);
 		}
 
 	} else if (binput->interfaceType == BINPUT_TYPE_API)
@@ -39,8 +41,75 @@ void processInputBuffer(BufferedInput binput)
 		{
 			returnBfr = onByteReception(binput,binput->commBuffer->inputBuffer[binput->commBuffer->inputBufferCnt-1]);
 			binput->commBuffer->inputBufferCnt--;
-			printf(returnBfr);
+			appendStringToOutputBuffer((binput->commBuffer),returnBfr);
+			//printf(returnBfr);
 		}
 	}
+}
 
+void appendToInputBuffer(CommBuffer bfr,uint8_t * data,uint32_t len)
+{
+	for (uint32_t c=0;c<len;c++)
+	{
+		bfr->inputBuffer[bfr->inputBufferCnt++]=data[c];
+		bfr->inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
+	}
+}
+
+void appendToOutputBuffer(CommBuffer bfr,uint8_t * data,uint32_t len)
+{
+	for (uint32_t c=0;c<len;c++)
+	{
+		bfr->outputBuffer[bfr->outputBufferReadCnt++]=data[c];
+		bfr->outputBufferReadCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
+		if(isOutputBufferFull(bfr))
+		{
+			bfr->bufferConsumer(bfr,1);
+		}
+	}
+}
+
+
+void appendStringToOutputBuffer(CommBuffer bfr,const char * data)
+{
+	uint32_t c=0;
+	while(data[c]!=0)
+	{
+		bfr->outputBuffer[bfr->outputBufferReadCnt++]=data[c++];
+		bfr->outputBufferReadCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
+		if(isOutputBufferFull(bfr))
+		{
+			bfr->bufferConsumer(bfr,1);
+		}
+	}
+}
+
+
+uint32_t getOutputBufferFillLength(CommBuffer bfr)
+{
+	if (bfr->outputBufferReadCnt >= bfr->outputBufferWriteCnt)
+	{
+		return bfr->outputBufferReadCnt - bfr->outputBufferWriteCnt;
+	}
+	else
+	{
+		return ((1 << OUTPUT_BUFFER_SIZE) - (bfr->outputBufferWriteCnt - bfr->outputBufferReadCnt));
+	}
+}
+
+void consumeOutputBufferBytes(CommBuffer bfr,uint32_t nbytes)
+{
+	bfr->outputBufferWriteCnt += nbytes;
+	bfr->outputBufferWriteCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
+}
+
+uint8_t isOutputBufferFull(CommBuffer bfr)
+{
+	return getOutputBufferFillLength(bfr) == (1 << OUTPUT_BUFFER_SIZE)-1;
+}
+
+void getOutputBuffer(CommBuffer bfr,uint32_t* len,uint32_t* offset)
+{
+	*len = getOutputBufferFillLength(bfr);
+	*offset=bfr->outputBufferWriteCnt;
 }
