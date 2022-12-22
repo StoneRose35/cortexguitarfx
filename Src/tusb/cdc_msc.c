@@ -1,5 +1,68 @@
+#include "stdlib.h"
 #include "stdint.h"
 #include "tusb.h"
+#include "bufferedInputHandler.h"
+#include "consoleHandler.h"
+
+extern uint32_t task;
+
+void cdc_write(CommBuffer bfr, uint8_t blocking)
+{
+  uint32_t len;
+  uint32_t offset;
+  uint8_t * str;
+  getOutputBuffer(bfr,&len,&offset);
+  if (len > 0)
+  {
+    str = (uint8_t*)malloc(len);
+    for(uint32_t c=0;c<len;c++)
+    {
+      *(str + c) = *(bfr->outputBuffer + ((offset + c) & ((1 << OUTPUT_BUFFER_SIZE)-1)));
+    }
+    tud_cdc_write(str, len);
+    tud_cdc_write_flush();
+    consumeOutputBufferBytes(bfr,len);
+  }
+  /*
+  while (*(str+len)!= 0)
+  {
+    len++;
+  }
+  tud_cdc_write(str, len);
+  tud_cdc_write_flush();
+  */
+}
+
+void cdc_task(CommBuffer bfr)
+{
+    if ( tud_cdc_available() )
+    {
+      // read data
+      char buf[64];
+      uint16_t count = tud_cdc_read(buf, sizeof(buf));
+      //for (uint16_t c=0;c<count;c++)
+      //{
+        appendToInputBuffer(bfr,(uint8_t*)buf,count);
+        //usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=buf[c];
+		    //usbCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
+      //}
+      //processInputBuffer(&usbInput);
+
+      // Echo back
+      // Note: Skip echo by commenting out write() and write_flush()
+      // for throughput test e.g
+      //    $ dd if=/dev/zero of=/dev/ttyACM0 count=10000
+      //tud_cdc_write(buf, count);
+      //tud_cdc_write_flush();
+    }
+    //getOutputBuffer(&usbCommBuffer,&len,&offset);
+    //if(len > 0)
+    //{
+    //  (&usbCommBuffer)->bufferConsumer(&usbCommBuffer,0);
+    //}
+    
+}
+
 
 
 /*
