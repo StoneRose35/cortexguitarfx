@@ -111,6 +111,7 @@
 
 #define CLK_ADC_CTRL ((volatile uint32_t*)(CLOCKS_BASE + CLOCKS_CLK_ADC_CTRL_OFFSET))
 #define CLK_ADC_DIV ((volatile uint32_t*)(CLOCKS_BASE + CLOCKS_CLK_ADC_DIV_OFFSET))
+#define CLK_USB_CTRL ((volatile uint32_t*)(CLOCKS_BASE + CLOCKS_CLK_USB_CTRL_OFFSET))
 
 #define ADC_CS ((volatile uint32_t*)(ADC_BASE + ADC_CS_OFFSET))
 #define ADC_DIV ((volatile uint32_t*)(ADC_BASE + ADC_DIV_OFFSET))

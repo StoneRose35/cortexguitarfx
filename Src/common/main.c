@@ -168,6 +168,7 @@
 #include "ssd1306_display.h"
 #include "wm8731.h"
 #include "tusb.h"
+#include "usb.h"
 #include "cs4270_audio_codec.h"
 #include "debugLed.h"
 #include "consoleHandler.h"
@@ -244,6 +245,8 @@ int main(void)
 	#ifdef CS4270
 	initI2c(72); //72 
 	#endif
+	initUSB();
+
 	tud_init(BOARD_TUD_RHPORT);
 
 	/*
@@ -255,10 +258,10 @@ int main(void)
 	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
 	#endif
 	#ifdef CS4270
-	setupCS4270();
+	//setupCS4270();
 	#endif
 
-	initSsd1306Display();
+	//initSsd1306Display();
 
 	initDebugLed();
 	initRotaryEncoder(switchesPins,2);
@@ -270,17 +273,17 @@ int main(void)
      *
 	 */
 
-	initRoundRobinReading(); // internal adc for reading parameters
-	piPicoFxUiSetup(&piPicoUiController);
-	ssd1306ClearDisplay();
-	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	{
-		if ((uint32_t)fxPrograms[c]->setup != 0)
-		{
-			fxPrograms[c]->setup(fxPrograms[c]->data);
-		}
-	}
-	drawUi(&piPicoUiController);
+	//initRoundRobinReading(); // internal adc for reading parameters
+	//piPicoFxUiSetup(&piPicoUiController);
+	//ssd1306ClearDisplay();
+	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
+	//{
+	//	if ((uint32_t)fxPrograms[c]->setup != 0)
+	//	{
+	//		fxPrograms[c]->setup(fxPrograms[c]->data);
+	//	}
+	//}
+	//drawUi(&piPicoUiController);
 	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 
@@ -300,7 +303,7 @@ int main(void)
 	#ifdef WM8731
 	initI2SSlave();
 	#else
-	initI2SSlave();
+	//initI2SSlave();
 	#endif
 
     /* Loop forever */
