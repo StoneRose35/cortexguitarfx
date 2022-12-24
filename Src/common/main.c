@@ -157,6 +157,7 @@
 #include "system.h"
 #include "core.h"
 #include "systemClock.h"
+#include "datetimeClock.h"
 #include "systick.h"
 #include "uart.h"
 #include "consoleBase.h"
@@ -212,7 +213,6 @@ const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
-void cdc_task(CommBuffer bfr);
 
 /**
  * @brief the main entry point, should never exit
@@ -239,6 +239,7 @@ int main(void)
 	initGpio();
 	initTimer();
 	initAdc();
+	initDatetimeClock();
 	#ifdef WM8731
 	initI2c(26);
 	#endif
@@ -246,6 +247,7 @@ int main(void)
 	initI2c(72); //72 
 	#endif
 	initUSB();
+	//initUart(57600,&usbCommBuffer);
 
 	tud_init(BOARD_TUD_RHPORT);
 
@@ -284,7 +286,7 @@ int main(void)
 	//	}
 	//}
 	//drawUi(&piPicoUiController);
-	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
+	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,cdc_write);
 
 
 	startCore1(&core1Main);

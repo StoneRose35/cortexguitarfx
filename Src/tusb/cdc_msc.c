@@ -89,17 +89,22 @@ void cdc_write(CommBuffer bfr, uint8_t blocking)
 {
   uint32_t len;
   uint32_t offset;
+  uint32_t written=0;
   uint8_t * str;
+  uint8_t blocklen;
+  uint32_t bfrptr=0;
   getOutputBuffer(bfr,&len,&offset);
   if (len > 0)
   {
-    str = (uint8_t*)malloc(len);
+
+    str=(uint8_t*)malloc(len);
     for(uint32_t c=0;c<len;c++)
     {
       *(str + c) = *(bfr->outputBuffer + ((offset + c) & ((1 << OUTPUT_BUFFER_SIZE)-1)));
     }
     tud_cdc_write(str, len);
     tud_cdc_write_flush();
+    free(str);
     consumeOutputBufferBytes(bfr,len);
   }
 }
@@ -110,8 +115,14 @@ void cdc_task(CommBuffer bfr)
     {
       // read data
       char buf[64];
+      char bfrReversed[64];
       uint16_t count = tud_cdc_read(buf, sizeof(buf));
-      appendToInputBuffer(bfr,(uint8_t*)buf,count);
+
+      for (uint32_t c=0;c<count;c++)
+      {
+        bfrReversed[c] = buf[count - c - 1];
+      }
+      appendToInputBuffer(bfr,(uint8_t*)bfrReversed,count);
     }
 
     
