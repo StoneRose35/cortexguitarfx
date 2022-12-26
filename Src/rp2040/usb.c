@@ -64,6 +64,14 @@
 #define EP_BUFFER_CTRL_BUFFER_0_AVAIL 10
 #define EP_BUFFER_CTRL_BUFFER_0_LEN 0
 
+#define EP_CTRL_ENABLE_POS 31
+#define EP_CTRL_BUFFERTYPE_POS 30
+#define EP_CTRL_INTR_AFTER_EVERY_BUFFER_POS 29
+#define EP_CTRL_INTR_AFTER_TWO_BUFFERS_POS 28
+#define EP_CTRL_EP_TYPE 26 // 0: control, 1: ISO, 2: Bulk, 3: Interrupt
+#define EP_CTRL_INTR_STALL 17
+#define EP_CTRL_INTER_NAK 16
+
 
 #define ENDPOINT_DIR_POS 7
 #define ENDPOINT_DIR_OUT 0 
@@ -82,6 +90,12 @@
 #define ENDPOINT_ATTR_USAGE_DATA 0
 #define ENDPOINT_ATTR_USAGE_FEEDBACK 1
 #define ENDPOINT_ATTR_USAGE_IMPL_FEEDBACK 2
+
+#define CDC_FUNC_DESC_HEADER 0
+#define CDC_FUNC_DESC_CALL_MANAGEMENT 1
+#define CDC_FUNC_DESC_ABSTRACT_CONTROL_MANAGEMENT 2
+#define CDC_FUNC_DESC_UNION 6
+
 
 
 typedef volatile struct
@@ -154,6 +168,13 @@ typedef struct
     uint8_t bInterval;
 } UsbEndpointDescriptorType;
 
+
+typedef struct 
+{
+    /* data */
+} UsbInterfaceCSDescriptorType;
+
+
 typedef UsbEndpointDescriptorType* UsbEndpointDescriptor;
 
 typedef struct 
@@ -175,6 +196,19 @@ typedef struct
 typedef UsbString0DescriptorType* UsbString0Descriptor;
 
 
+typedef struct 
+{
+    uint8_t* bufferIn;
+    uint8_t* bufferOut;
+    usb_device_dpram_t* dpram;
+    uint8_t pid;
+    uint8_t nr;
+} UsbEndpointConfigurationType;
+
+
+void usb_start_in_transfer(UsbEndpointConfigurationType * ep,const uint8_t * data,uint8_t len);
+void usb_start_out_transfer(UsbEndpointConfigurationType * ep,uint8_t len);
+
 void generateStringDescriptor(UsbStringDescriptor descr,const char * str)
 {
     uint8_t c=0;
@@ -191,7 +225,7 @@ const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
     .bLength=sizeof(UsbDeviceDescriptorType),
     .bDescriptorType=1,
     .bcdUSB=0x200,
-    .bDeviceClass=239, // taken from tinyusb cdc_msc example config
+    .bDeviceClass=2, //239, // taken from tinyusb cdc_msc example config
     .bDeviceSubClass=2, // taken from tinyusb cdc_msc example config
     .bMaxPacketSize=64,
     .idVendor=0xcafe, // NOT OFFICIAL
@@ -207,6 +241,7 @@ const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
 typedef struct {
     const UsbConfigurationDescriptorType config;
     const UsbInterfaceDescriptorType cdcControlInterface;
+    const uint8_t cdcCSDescriptors[5+5+4+5];
     const UsbEndpointDescriptorType cdcControlEpIn;
     const UsbInterfaceDescriptorType cdcDataInterface;
     const UsbEndpointDescriptorType cdcDataEpIn;
@@ -219,7 +254,7 @@ const pipicofxFullConfigDescriptorType pipicofxFullConfig = {
         .bLength=sizeof(UsbConfigurationDescriptorType),
         .bDescriptorType=2,
         .bNumInterfaces=2,
-        .wTotalLength=sizeof(UsbConfigurationDescriptorType) + sizeof(UsbInterfaceDescriptor)*2 + sizeof(UsbEndpointDescriptorType)*3,
+        .wTotalLength=sizeof(UsbConfigurationDescriptorType) + sizeof(UsbInterfaceDescriptor)*2 + sizeof(UsbEndpointDescriptorType)*3+19,
         .bConfigurationValue=1,
         .iConfiguration=4, //add extra string describing the config
         .bmAttributes=0x80, // bus powered
@@ -235,6 +270,12 @@ const pipicofxFullConfigDescriptorType pipicofxFullConfig = {
         .bInterfaceSubClass=2,
         .bInterfaceProtocol=0,
         .iInterface=5 // add string descriptor
+    },
+    .cdcCSDescriptors = { // as specified in CDC PSTN Subclass Specification
+        5, 0x24, CDC_FUNC_DESC_HEADER, 0x20, 0x1, // CDC Header, version 1.2
+        5, 0x24, CDC_FUNC_DESC_CALL_MANAGEMENT, 0, 1, // call management: no capabilities, data interface 1
+        4, 0x24, CDC_FUNC_DESC_ABSTRACT_CONTROL_MANAGEMENT, 2, // 2: 0Device supports the request combination of Set_Line_Coding, Set_Control_Line_State, Get_Line_Coding, and the notification Serial_State.
+        5, 0x24, CDC_FUNC_DESC_UNION, 0, 1 // control interface is interface 0, subordinate interface is interface 1
     },
     .cdcControlEpIn = {
         .bLength=7,
@@ -294,6 +335,20 @@ char const* pipicofxStringDescriptors[] = {
     "CDC Data" // Interface
 };
 
+
+UsbEndpointConfigurationType ep0={
+    .nr=0
+};
+UsbEndpointConfigurationType ep1={
+    .nr=1
+};
+UsbEndpointConfigurationType ep2={
+    .nr=2
+};
+
+static volatile uint16_t deviceAddress;
+static uint8_t setAddress=0;
+
 // usb controller interrupt routine
 void isr_usbctrl_irq5()
 {
@@ -318,17 +373,14 @@ void isr_usbctrl_irq5()
                     switch (setupPacket->wValue)
                     {
                         case (SETUP_PACKET_DESCR_TYPE_DEVICE << 8):
-                            // put device descriptor into buffer for ep0
-                            memcpy(usb_dpram->ep0_buf_a,&pipicofxUsbDeviceDescriptor,sizeof(UsbDeviceDescriptorType));
-
-                            // set pid to 1, available and buffer control full
-                            usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (sizeof(UsbDeviceDescriptorType) << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                            
+                            ep0.pid=1;
+                            usb_start_in_transfer(&ep0,(uint8_t*)&pipicofxUsbDeviceDescriptor,sizeof(UsbDeviceDescriptorType));
                             break;
                         case (SETUP_PACKET_DESCR_TYPE_CONFIGURATION << 8):
                             if (setupPacket->wLength == sizeof(UsbConfigurationDescriptorType))
                             {
-                                memcpy(usb_dpram->ep0_buf_a,&pipicofxFullConfig.config,sizeof(UsbConfigurationDescriptorType));
-                                usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (sizeof(UsbConfigurationDescriptorType) << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                                usb_start_in_transfer(&ep0,(uint8_t*)&pipicofxFullConfig.config,sizeof(UsbConfigurationDescriptorType));
                             }
                             else // send full configuration descriptor, divide into pieces of bMaxPacketSize length
                             {
@@ -346,21 +398,18 @@ void isr_usbctrl_irq5()
                                 //        usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (nToSend << EP_BUFFER_CTRL_BUFFER_0_LEN);
                                 //    }
                                 //}
-                                memcpy(usb_dpram->ep0_buf_a,((uint8_t*)&pipicofxFullConfig),pipicofxFullConfig.config.wTotalLength);
-                                usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (pipicofxFullConfig.config.wTotalLength << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                                usb_start_in_transfer(&ep0,(uint8_t*)&pipicofxFullConfig,pipicofxFullConfig.config.wTotalLength);
                             }
                             break;
                         case (SETUP_PACKET_DESCR_TYPE_STRING<<8):
                             if (setupPacket->wIndex==0)
                             {
-                                memcpy(usb_dpram->ep0_buf_a,(uint8_t*)&pipicoString0Descriptor,sizeof(UsbString0DescriptorType));
-                                usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (sizeof(UsbString0DescriptorType) << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                                usb_start_in_transfer(&ep0,(uint8_t*)&pipicoString0Descriptor,sizeof(UsbString0DescriptorType));
                             }
                             else 
                             {
                                 generateStringDescriptor(&stringdescr,pipicofxStringDescriptors[setupPacket->wIndex-1]);
-                                memcpy(usb_dpram->ep0_buf_a,(uint8_t*)&stringdescr,stringdescr.bLength);
-                                usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (stringdescr.bLength << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                                usb_start_in_transfer(&ep0,(uint8_t*)pipicofxStringDescriptors[setupPacket->wIndex-1],stringdescr.bLength);
                             }
                             break;
                         default:
@@ -382,8 +431,12 @@ void isr_usbctrl_irq5()
                 case SETUP_PACKET_REQ_CLEAR_FEATURE:
                     break;
                 case SETUP_PACKET_REQ_SET_ADDRESS:
+                    deviceAddress = setupPacket->wValue;
+                    setAddress=1;
+                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
                     break;
                 case SETUP_PACKET_REQ_SET_CONFIGURATION:
+                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
                     break;
                 case SETUP_PACKET_REQ_SET_DESCRIPTOR:
                     break;
@@ -392,6 +445,8 @@ void isr_usbctrl_irq5()
                 case SETUP_PACKET_REQ_SET_INTERFACE:
                     break;
                 default:
+                    //blindly acknowledge at first...
+                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
                     break;
             }
         }
@@ -406,12 +461,26 @@ void isr_usbctrl_irq5()
                 // handle in endpoint transferred
                 // endpoint nr is c>>1
                 usb_hw_clear->buf_status = (1 << c);
+                if ((c>>1)==0) // endpoint 0
+                {
+                    if(setAddress)
+                    {
+                        usb_hw->dev_addr_ctrl=deviceAddress;
+                        setAddress=0;
+                    }
+                    else
+                    {
+                        usb_start_out_transfer(&ep0,0);
+                    }
+                }
+                //TODO add handlers for ep1 and ep2
             }
             if ((bfrstatus & (1 << (c+1)))!=0)
             {
                 // handle out endpoint transferred
                 // endpoint nr is c>>1
                 usb_hw_clear->buf_status = (1 << (c+1));
+                //TODO add handlers for ep1 and ep2
             }
         }
     }
@@ -419,12 +488,57 @@ void isr_usbctrl_irq5()
     {
         usb_hw_clear->sie_status = (1 << USB_SIE_STATUS_BUS_RESET_LSB);
         usb_hw->dev_addr_ctrl=0;
+        setAddress=0;
     }
 
     // 
-
 }
 
+
+void usb_start_in_transfer(UsbEndpointConfigurationType * ep,const uint8_t * data,uint8_t len)
+{
+    uint32_t ctrlval;
+    memcpy(ep->bufferIn,data,len);
+    ctrlval = len | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (1 << EP_BUFFER_CTRL_BUFFER_0_FULL);
+    ctrlval |= ep->pid ? USB_BUF_CTRL_DATA1_PID : USB_BUF_CTRL_DATA0_PID;
+    ep->pid ^=1;
+    usb_dpram->ep_buf_ctrl[ep->nr].in = ctrlval;
+}
+
+void usb_start_out_transfer(UsbEndpointConfigurationType * ep,uint8_t len)
+{
+    uint32_t ctrlval;
+    ctrlval = len | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (0 << EP_BUFFER_CTRL_BUFFER_0_FULL);
+    ctrlval |= ep->pid ? USB_BUF_CTRL_DATA1_PID : USB_BUF_CTRL_DATA0_PID;
+    ep->pid ^=1;
+    usb_dpram->ep_buf_ctrl[ep->nr].out = ctrlval;
+}
+
+
+void initUsbCdcDevice()
+{
+    ep0.bufferIn=usb_dpram->ep0_buf_a;
+    ep0.bufferOut=usb_dpram->ep0_buf_a;
+    ep0.dpram=usb_dpram;
+    ep0.pid=0;
+    ep0.nr=0;
+
+    ep1.bufferIn=usb_dpram->epx_data;
+    ep1.bufferOut=0;
+    ep1.dpram=usb_dpram;
+    ep1.pid=0;
+    ep1.nr=1;
+    ep1.dpram->ep_ctrl[ep1.nr].in = (1 << EP_CTRL_ENABLE_POS) | ((uint32_t)ep1.bufferIn - (uint32_t)usb_dpram) | (3 << EP_CTRL_EP_TYPE) | (1 << EP_CTRL_INTR_AFTER_EVERY_BUFFER_POS);
+
+    ep2.bufferIn=usb_dpram->epx_data+64;
+    ep2.bufferOut=usb_dpram->epx_data+64*2;
+    ep2.dpram=usb_dpram;
+    ep2.pid=0;
+    ep2.nr=2;
+    ep2.dpram->ep_ctrl[ep2.nr].in = (1 << EP_CTRL_ENABLE_POS) | ((uint32_t)ep2.bufferIn - (uint32_t)usb_dpram) | (2 << EP_CTRL_EP_TYPE);
+    ep2.dpram->ep_ctrl[ep2.nr].out = (1 << EP_CTRL_ENABLE_POS) | ((uint32_t)ep2.bufferOut - (uint32_t)usb_dpram) | (2 << EP_CTRL_EP_TYPE);
+
+}
 
 /**
  * @brief initializes the usb hardware
