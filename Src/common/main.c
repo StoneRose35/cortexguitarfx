@@ -249,7 +249,7 @@ int main(void)
 	initUSB();
 	//initUart(57600,&usbCommBuffer);
 
-	tud_init(BOARD_TUD_RHPORT);
+	//tud_init(BOARD_TUD_RHPORT);
 
 	/*
 	 *
@@ -286,7 +286,7 @@ int main(void)
 	//	}
 	//}
 	//drawUi(&piPicoUiController);
-	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,cdc_write);
+	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 
 	startCore1(&core1Main);
@@ -317,8 +317,8 @@ int main(void)
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
 
-		tud_task(); // tinyusb device task
-		cdc_task(&usbCommBuffer);
+		//tud_task(); // tinyusb device task
+		//cdc_task(&usbCommBuffer);
 		cliApiTask(&bufferedInput);
 	}
 }

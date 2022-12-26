@@ -64,6 +64,26 @@
 #define EP_BUFFER_CTRL_BUFFER_0_AVAIL 10
 #define EP_BUFFER_CTRL_BUFFER_0_LEN 0
 
+
+#define ENDPOINT_DIR_POS 7
+#define ENDPOINT_DIR_OUT 0 
+#define ENDPOINT_DIR_IN 1
+#define ENDPOINT_ATTR_TRANSFERTYPE_POS 0
+#define ENDPOINT_ATTR_TRANSFERTYPE_CONTROL 0
+#define ENDPOINT_ATTR_TRANSFERTYPE_ISOCHRONOUS 1
+#define ENDPOINT_ATTR_TRANSFERTYPE_BULK 2
+#define ENDPOINT_ATTR_TRANSFERTYPE_INTERRUPT 3
+#define ENDPOINT_ATTR_SYNC_TYPE_POS 2
+#define ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC 0
+#define ENDPOINT_ATTR_SYNC_TYPE_ASYNC 1
+#define ENDPOINT_ATTR_SYNC_TYPE_ADAPTIVE 2
+#define ENDPOINT_ATTR_SYNC_TYPE_SYNC 3
+#define ENDPOINT_ATTR_USAGE_POS 4
+#define ENDPOINT_ATTR_USAGE_DATA 0
+#define ENDPOINT_ATTR_USAGE_FEEDBACK 1
+#define ENDPOINT_ATTR_USAGE_IMPL_FEEDBACK 2
+
+
 typedef volatile struct
 {
     uint8_t mbRequestType;
@@ -140,27 +160,40 @@ typedef struct
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    char * bString;
+    const char * bString;
 } UsbStringDescriptorType;
 
-typedef UsbStringDescriptorType* UsbStringDecriptor;
+typedef UsbStringDescriptorType* UsbStringDescriptor;
 
 typedef struct 
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    uint16_t * wLangId;
+    uint16_t wLangId;
 } UsbString0DescriptorType;
 
 typedef UsbString0DescriptorType* UsbString0Descriptor;
 
-const UsbDeviceDescriptorType pipicofxUsbDevice = {
+
+void generateStringDescriptor(UsbStringDescriptor descr,const char * str)
+{
+    uint8_t c=0;
+    while (*(str+c)!=0)
+    {
+        c++;
+    }
+    descr->bLength=c+2;
+    descr->bString=str;
+    descr->bDescriptorType=3;
+}
+
+const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
     .bLength=sizeof(UsbDeviceDescriptorType),
     .bDescriptorType=1,
     .bcdUSB=0x200,
     .bDeviceClass=239, // taken from tinyusb cdc_msc example config
     .bDeviceSubClass=2, // taken from tinyusb cdc_msc example config
-    .bMaxPacketSize=32,
+    .bMaxPacketSize=64,
     .idVendor=0xcafe, // NOT OFFICIAL
     .idProduct=0x4003, // NOT OFFICIAL
     .bcdDevice=0x100, // taken from tinyusb cdc_msc example config
@@ -170,13 +203,104 @@ const UsbDeviceDescriptorType pipicofxUsbDevice = {
     .bNumConfigurations=1 // taken from tinyusb cdc_msc example config
 };
 
+
+typedef struct {
+    const UsbConfigurationDescriptorType config;
+    const UsbInterfaceDescriptorType cdcControlInterface;
+    const UsbEndpointDescriptorType cdcControlEpIn;
+    const UsbInterfaceDescriptorType cdcDataInterface;
+    const UsbEndpointDescriptorType cdcDataEpIn;
+    const UsbEndpointDescriptorType cdcDataEpOut;
+} pipicofxFullConfigDescriptorType;
+
+
+const pipicofxFullConfigDescriptorType pipicofxFullConfig = {
+    .config={
+        .bLength=sizeof(UsbConfigurationDescriptorType),
+        .bDescriptorType=2,
+        .bNumInterfaces=2,
+        .wTotalLength=sizeof(UsbConfigurationDescriptorType) + sizeof(UsbInterfaceDescriptor)*2 + sizeof(UsbEndpointDescriptorType)*3,
+        .bConfigurationValue=1,
+        .iConfiguration=4, //add extra string describing the config
+        .bmAttributes=0x80, // bus powered
+        .bMaxPower=50 // 100mA
+    },
+    .cdcControlInterface={
+        .bLength=9,
+        .bDescriptorType=4,
+        .bInterfaceNumber=0,
+        .bAlternateSetting=0,
+        .bNumEndpoints=1,
+        .bInterfaceClass=2,
+        .bInterfaceSubClass=2,
+        .bInterfaceProtocol=0,
+        .iInterface=5 // add string descriptor
+    },
+    .cdcControlEpIn = {
+        .bLength=7,
+        .bDescriptorType=5,
+        .bEndpointAddress=0x81,
+        .bmAttributes=(ENDPOINT_ATTR_TRANSFERTYPE_INTERRUPT << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),
+        .wMaxPacketSize=0x8,
+        .bInterval=16
+    },
+    .cdcDataInterface = {
+        .bLength=9,
+        .bDescriptorType=4,
+        .bInterfaceNumber=1,
+        .bAlternateSetting=0,
+        .bNumEndpoints=2,
+        .bInterfaceClass=10,
+        .bInterfaceSubClass=0,
+        .bInterfaceProtocol=0,
+        .iInterface=6 // add string descriptor
+    },
+    .cdcDataEpIn = {
+        .bLength=7,
+        .bDescriptorType=5,
+        .bEndpointAddress=0x82,
+        .bmAttributes=(ENDPOINT_ATTR_TRANSFERTYPE_BULK << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),
+        .wMaxPacketSize=0x40,
+        .bInterval=0
+    },
+    .cdcDataEpOut = {
+        .bLength=7,
+        .bDescriptorType=5,
+        .bEndpointAddress=0x2,
+        .bmAttributes=(ENDPOINT_ATTR_TRANSFERTYPE_BULK << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),
+        .wMaxPacketSize=0x40,
+        .bInterval=0
+    }
+};
+
+const UsbString0DescriptorType pipicoString0Descriptor = {
+    .bDescriptorType=3,
+    .bLength=4,
+    .wLangId=0x409
+};
+
+char const* pipicofxStringDescriptors[] = {
+    "Stonerose35", // 1: Manufacturer 
+    "PiPicoFX", // 2: Product
+    "123456789012", // 3: Serial Number
+    "Default Config", // 4: Configuration
+    "CDC Control", // Interface
+    "CDC Data" // Interface
+};
+
 // usb controller interrupt routine
 void isr_usbctrl_irq5()
 {
     uint32_t stat;
     stat = usb_hw->ints;
     UsbSetupPacket setupPacket;
-
+    UsbStringDescriptorType stringdescr;
     // setup case
     if ((stat & (1 << USB_INTS_SETUP_REQ_LSB)) != 0)
     {
@@ -195,20 +319,53 @@ void isr_usbctrl_irq5()
                     {
                         case (SETUP_PACKET_DESCR_TYPE_DEVICE << 8):
                             // put device descriptor into buffer for ep0
-                            memcpy(usb_dpram->ep0_buf_a,&pipicofxUsbDevice,sizeof(UsbDeviceDescriptorType));
+                            memcpy(usb_dpram->ep0_buf_a,&pipicofxUsbDeviceDescriptor,sizeof(UsbDeviceDescriptorType));
 
                             // set pid to 1, available and buffer control full
                             usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (sizeof(UsbDeviceDescriptorType) << EP_BUFFER_CTRL_BUFFER_0_LEN);
                             break;
                         case (SETUP_PACKET_DESCR_TYPE_CONFIGURATION << 8):
+                            if (setupPacket->wLength == sizeof(UsbConfigurationDescriptorType))
+                            {
+                                memcpy(usb_dpram->ep0_buf_a,&pipicofxFullConfig.config,sizeof(UsbConfigurationDescriptorType));
+                                usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (sizeof(UsbConfigurationDescriptorType) << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                            }
+                            else // send full configuration descriptor, divide into pieces of bMaxPacketSize length
+                            {
+                                //uint16_t c=0;
+                                //for(c=0;c<(pipicofxFullConfig.config.wTotalLength/pipicofxUsbDeviceDescriptor.bMaxPacketSize)+1;c++)
+                                //{
+                                //    uint16_t nToSend=pipicofxFullConfig.config.wTotalLength - c*pipicofxUsbDeviceDescriptor.bMaxPacketSize;
+                                //    if (nToSend > pipicofxUsbDeviceDescriptor.bMaxPacketSize)
+                                //    {
+                                //        nToSend = pipicofxUsbDeviceDescriptor.bMaxPacketSize;
+                                //    }
+                                //    for(uint16_t c2=0;c2<nToSend;c2++)
+                                //    {
+                                //        memcpy(usb_dpram->ep0_buf_a,((uint8_t*)&pipicofxFullConfig)+c*pipicofxUsbDeviceDescriptor.bMaxPacketSize,nToSend);
+                                //        usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (nToSend << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                                //    }
+                                //}
+                                memcpy(usb_dpram->ep0_buf_a,((uint8_t*)&pipicofxFullConfig),pipicofxFullConfig.config.wTotalLength);
+                                usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (pipicofxFullConfig.config.wTotalLength << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                            }
                             break;
                         case (SETUP_PACKET_DESCR_TYPE_STRING<<8):
+                            if (setupPacket->wIndex==0)
+                            {
+                                memcpy(usb_dpram->ep0_buf_a,(uint8_t*)&pipicoString0Descriptor,sizeof(UsbString0DescriptorType));
+                                usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (sizeof(UsbString0DescriptorType) << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                            }
+                            else 
+                            {
+                                generateStringDescriptor(&stringdescr,pipicofxStringDescriptors[setupPacket->wIndex-1]);
+                                memcpy(usb_dpram->ep0_buf_a,(uint8_t*)&stringdescr,stringdescr.bLength);
+                                usb_dpram->ep_buf_ctrl[0].in = (1 << EP_BUFFER_CTRL_BUFFER_0_DATA_PID) | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (stringdescr.bLength << EP_BUFFER_CTRL_BUFFER_0_LEN);
+                            }
                             break;
                         default:
                             break;
                     }
-
-
                     break;
                 case SETUP_PACKET_REQ_GET_STATUS:
                     break;
@@ -242,7 +399,6 @@ void isr_usbctrl_irq5()
     if ((stat & (1 << USB_INTS_BUFF_STATUS_LSB)) != 0) // when a buffer is transferred
     {
         uint32_t bfrstatus = usb_hw->buf_status;
-        //usb_hw->buf_status = 0xFFFFFFFF;
         for(uint8_t c=0;c<16;c+=2)
         {
             if ((bfrstatus & (1 << c))!=0)
