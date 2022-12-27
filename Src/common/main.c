@@ -247,7 +247,7 @@ int main(void)
 	initI2c(72); //72 
 	#endif
 	initUSB();
-	//initUart(57600,&usbCommBuffer);
+	initUart(57600,&usbCommBuffer);
 
 	//tud_init(BOARD_TUD_RHPORT);
 
