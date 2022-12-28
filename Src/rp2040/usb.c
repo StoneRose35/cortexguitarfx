@@ -211,13 +211,18 @@ typedef struct
 } UsbMultipacketTransfer;
 
 
-void generateStringDescriptor(UsbStringDescriptor descr,const char * str)
+void generateStringDescriptor(UsbEndpointConfigurationType* ep, UsbStringDescriptor descr,const char * str)
 {
     uint8_t c=0;
     while (*(str+c)!=0)
     {
+        *(ep->bufferIn + c)= *(str+c);
         c++;
+        *(ep->bufferIn+ c)=0;
+        c++;
+
     }
+    
     descr->bLength=c+2;
     descr->bString=str;
     descr->bDescriptorType=3;
@@ -236,12 +241,14 @@ const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
     .iManufacturer=1, // taken from tinyusb cdc_msc example config
     .iProduct=2, // taken from tinyusb cdc_msc example config
     .iSerialNumber=3, // taken from tinyusb cdc_msc example config
-    .bNumConfigurations=1 // taken from tinyusb cdc_msc example config
+    .bNumConfigurations=1, // taken from tinyusb cdc_msc example config
+    .bDeviceProtocol=0
 };
 
 
 typedef struct {
     const UsbConfigurationDescriptorType config;
+    //const uint8_t interfaceAssociation[8];
     const UsbInterfaceDescriptorType cdcControlInterface;
     const uint8_t cdcCSDescriptors[5+5+4+5];
     const UsbEndpointDescriptorType cdcControlEpIn;
@@ -251,8 +258,36 @@ typedef struct {
 } pipicofxFullConfigDescriptorType;
 
 
-const pipicofxFullConfigDescriptorType pipicofxFullConfig = {
-    .config={
+const uint8_t pipicofxfc[] = {
+    // configuration descriptor
+CONFIGURATION_DESCRIPTOR_LENGTH,2,CONFIGURATION_DESCRIPTOR_LENGTH 
+                    + INTERFACE_DESCRIPTOR_LENGTH*2 
+                    + ENDPOINT_DESCRIPTOR_LENGTH*3
+                    + 19,0x0,2,1,4,0x80,50,
+    // cdc control interface descriptor
+    INTERFACE_DESCRIPTOR_LENGTH,4,0,0,1,2,2,0,5,
+    // cdc cd descriptors
+    5, 0x24, CDC_FUNC_DESC_HEADER, 0x20, 0x1, // CDC Header, version 1.2
+    5, 0x24, CDC_FUNC_DESC_CALL_MANAGEMENT, 0, 1, // call management: no capabilities, data interface 1
+    4, 0x24, CDC_FUNC_DESC_ABSTRACT_CONTROL_MANAGEMENT, 2, // 2: 0Device supports the request combination of Set_Line_Coding, Set_Control_Line_State, Get_Line_Coding, and the notification Serial_State.
+    5, 0x24, CDC_FUNC_DESC_UNION, 0, 1, // control interface is interface 0, subordinate interface is interface 1
+    // EP 1 in: control endpoit
+    ENDPOINT_DESCRIPTOR_LENGTH,5,0x81,(ENDPOINT_ATTR_TRANSFERTYPE_INTERRUPT << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),0x8,0x0,16,
+    // cdc data interface
+    INTERFACE_DESCRIPTOR_LENGTH,4,1,0,2,10,0,0,6,
+    // data endpoint in
+    ENDPOINT_DESCRIPTOR_LENGTH,5,0x82,(ENDPOINT_ATTR_TRANSFERTYPE_BULK << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),0x40,0x0,0,
+    // data endpoint out
+    ENDPOINT_DESCRIPTOR_LENGTH,5,0x2,(ENDPOINT_ATTR_TRANSFERTYPE_BULK << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),0x40,0x0,0,
+};
+const pipicofxFullConfigDescriptorType pipicofxFullConfig  = {
+    .config ={
         .bLength=CONFIGURATION_DESCRIPTOR_LENGTH,
         .bDescriptorType=2,
         .bNumInterfaces=2,
@@ -265,6 +300,7 @@ const pipicofxFullConfigDescriptorType pipicofxFullConfig = {
         .bmAttributes=0x80, // bus powered
         .bMaxPower=50 // 100mA
     },
+    //.interfaceAssociation = {8,11,0,2,2,2,0,0},
     .cdcControlInterface={
         .bLength=INTERFACE_DESCRIPTOR_LENGTH,
         .bDescriptorType=4,
@@ -323,13 +359,17 @@ const pipicofxFullConfigDescriptorType pipicofxFullConfig = {
         .wMaxPacketSize=0x40,
         .bInterval=0
     }
-};
+} ;
 
-const UsbString0DescriptorType pipicoString0Descriptor = {
-    .bDescriptorType=3,
-    .bLength=4,
-    .wLangId=0x409
+
+const uint8_t pipicoString0Descriptor[] = {
+    4,3,0x9,0x4
 };
+//const UsbString0DescriptorType pipicoString0Descriptor = {
+//    .bDescriptorType=3,
+//    .bLength=4,
+//    .wLangId=0x409
+//};
 
 char const* pipicofxStringDescriptors[] = {
     "Stonerose35", // 1: Manufacturer 
@@ -352,8 +392,9 @@ UsbEndpointConfigurationType ep2={
 };
 
 static volatile uint16_t deviceAddress;
-static uint8_t setAddress=0;
-static UsbMultipacketTransfer transferhandler= {
+static volatile uint8_t setAddress=0;
+static uint8_t epBfr[64];
+static volatile UsbMultipacketTransfer transferhandler= {
     .address=0,
     .bMaxPacketSize=0,
     .idx=0,
@@ -368,127 +409,11 @@ void isr_usbctrl_irq5()
     stat = usb_hw->ints;
     UsbSetupPacket setupPacket;
     UsbStringDescriptorType stringdescr;
+    volatile uint8_t descrType;
+    volatile uint8_t descrIndex;
     char charbfr[8];
-    // setup case
-    if ((stat & (1 << USB_INTS_SETUP_REQ_LSB)) != 0)
-    {
-        // gather setup packet
-        setupPacket = (UsbSetupPacket)usb_dpram->setup_packet;
-        usb_hw_clear->sie_status = (1 << USB_SIE_STATUS_SETUP_REC_LSB);
-        
-        if ((setupPacket->mbRequestType & (SETUP_PACKET_REQTYPE_DIR_DEVICE_TO_HOST))==(SETUP_PACKET_REQTYPE_DIR_DEVICE_TO_HOST))
-        {
-            switch (setupPacket->bRequest)
-            {
-                case SETUP_PACKET_REQ_GET_CONFIGURATION:
-                    break;
-                case SETUP_PACKET_REQ_GET_DESCRIPTOR:
-                    switch (setupPacket->wValue)
-                    {
-                        case (SETUP_PACKET_DESCR_TYPE_DEVICE << 8):
-                            
-                            ep0.pid=1;
-                            printf("get device descriptor\r\n");
-                            usb_start_in_transfer(&ep0,(uint8_t*)&pipicofxUsbDeviceDescriptor,DEVICE_DESCRIPTOR_LENGTH);
-                            break;
-                        case (SETUP_PACKET_DESCR_TYPE_CONFIGURATION << 8):
-                            if (setupPacket->wLength == CONFIGURATION_DESCRIPTOR_LENGTH)
-                            {
-                                printf("get configuration descriptor\r\n");
-                                usb_start_in_transfer(&ep0,(uint8_t*)&(pipicofxFullConfig.config),CONFIGURATION_DESCRIPTOR_LENGTH);
-                            }
-                            else // send full configuration descriptor, divide into pieces of bMaxPacketSize length
-                            {
-                                transferhandler.address=(uint32_t)&pipicofxFullConfig;
-                                transferhandler.bMaxPacketSize=pipicofxUsbDeviceDescriptor.bMaxPacketSize;
-                                transferhandler.idx=0;
-                                transferhandler.len=pipicofxFullConfig.config.wTotalLength;
-                                transferhandler.transferInProgress=1;
-                                printf("get full configuration descriptor\r\n");
-                                if ((transferhandler.idx + transferhandler.bMaxPacketSize) > transferhandler.len)
-                                {
-                                    usb_start_in_transfer(&ep0,(const uint8_t*)(transferhandler.address+transferhandler.idx),transferhandler.len-transferhandler.idx);
-                                    transferhandler.idx=transferhandler.len;
-                                    transferhandler.transferInProgress=0;
-                                } 
-                                else if ((transferhandler.idx + transferhandler.bMaxPacketSize) == transferhandler.len)
-                                {
-                                    usb_start_in_transfer(&ep0,(const uint8_t*)(transferhandler.address+transferhandler.idx),transferhandler.bMaxPacketSize);
-                                    transferhandler.idx=transferhandler.len;
-                                    transferhandler.transferInProgress=1; // send a zero-length packet in the end
-                                }
-                                else
-                                {
-                                    usb_start_in_transfer(&ep0,(const uint8_t*)(transferhandler.address+transferhandler.idx),transferhandler.bMaxPacketSize);
-                                    transferhandler.idx += transferhandler.bMaxPacketSize;
-                                }
-                                //usb_start_in_transfer(&ep0,(uint8_t*)&pipicofxFullConfig,pipicofxFullConfig.config.wTotalLength);
-                            }
-                            break;
-                        case (SETUP_PACKET_DESCR_TYPE_STRING<<8):
-                            if (setupPacket->wIndex==0)
-                            {
-                                printf("get string descriptor 0\r\n");
-                                usb_start_in_transfer(&ep0,(uint8_t*)&pipicoString0Descriptor,sizeof(UsbString0DescriptorType));
-                            }
-                            else 
-                            {
-                                printf("get string descriptor ");
-                                UInt16ToChar(setupPacket->wIndex,charbfr);
-                                printf(charbfr);
-                                printf("\r\n");
-                                generateStringDescriptor(&stringdescr,pipicofxStringDescriptors[setupPacket->wIndex-1]);
-                                usb_start_in_transfer(&ep0,(uint8_t*)pipicofxStringDescriptors[setupPacket->wIndex-1],stringdescr.bLength);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case SETUP_PACKET_REQ_GET_STATUS:
-                    break;
-                case SETUP_PACKET_REQ_SYNCH_FRAME:
-                    break;
-                default:
-                    break;
-            }
-        }
-        else // Host do Device
-        {
-            switch(setupPacket->bRequest)
-            {
-                case SETUP_PACKET_REQ_CLEAR_FEATURE:
-                    break;
-                case SETUP_PACKET_REQ_SET_ADDRESS:
-                    deviceAddress = setupPacket->wValue;
-                    setAddress=1;
-                    printf("set address received, address: ");
-                    UInt16ToChar(deviceAddress,charbfr);
-                    printf(charbfr);
-                    printf("\r\n");
-                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
-                    break;
-                case SETUP_PACKET_REQ_SET_CONFIGURATION:
-                    printf("set configuration\r\n");
-                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
-                    break;
-                case SETUP_PACKET_REQ_SET_DESCRIPTOR:
-                    //break;
-                case SETUP_PACKET_REQ_SET_FEATURE:
-                    //break;
-                case SETUP_PACKET_REQ_SET_INTERFACE:
-                    //break;
-                default:
-                    //blindly acknowledge at first...
-                    printf("got unknown request \r\n");
-                    UInt8ToChar(setupPacket->bRequest,charbfr);
-                    printf(charbfr);
-                    printf("\n");
-                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
-                    break;
-            }
-        }
-    }
+
+
     if ((stat & (1 << USB_INTS_BUFF_STATUS_LSB)) != 0) // when a buffer is transferred
     {
         uint32_t bfrstatus = usb_hw->buf_status;
@@ -496,6 +421,11 @@ void isr_usbctrl_irq5()
         {
             if ((bfrstatus & (1 << c))!=0) // IN transfer done
             {
+                if (usb_hw->sie_status & USB_SIE_STATUS_ACK_REC_BITS)
+                {
+                    printf("ACK rec.\r\n");
+                    usb_hw_clear->sie_status = USB_SIE_STATUS_ACK_REC_BITS;
+                }
                 // handle in endpoint transferred
                 // endpoint nr is c>>1
                 usb_hw_clear->buf_status = (1 << c);
@@ -542,6 +472,129 @@ void isr_usbctrl_irq5()
             }
         }
     }
+    // setup case
+    if ((stat & (1 << USB_INTS_SETUP_REQ_LSB)) != 0)
+    {
+        // gather setup packet
+        setupPacket = (UsbSetupPacket)usb_dpram->setup_packet;
+        usb_hw_clear->sie_status = (1 << USB_SIE_STATUS_SETUP_REC_LSB);
+        
+        if ((setupPacket->mbRequestType & (SETUP_PACKET_REQTYPE_DIR_DEVICE_TO_HOST))==(SETUP_PACKET_REQTYPE_DIR_DEVICE_TO_HOST))
+        {
+            switch (setupPacket->bRequest)
+            {
+                case SETUP_PACKET_REQ_GET_CONFIGURATION:
+                    break;
+                case SETUP_PACKET_REQ_GET_DESCRIPTOR:
+                    descrType=setupPacket->wValue >> 8; 
+                    descrIndex=setupPacket->wValue & 0xFF;
+                    switch (descrType)
+                    {
+                        case (SETUP_PACKET_DESCR_TYPE_DEVICE):
+                            
+                            ep0.pid=1;
+                            printf("get device descriptor\r\n");
+                            usb_start_in_transfer(&ep0,(uint8_t*)&pipicofxUsbDeviceDescriptor,DEVICE_DESCRIPTOR_LENGTH);
+                            break;
+                        case (SETUP_PACKET_DESCR_TYPE_CONFIGURATION):
+                            if (setupPacket->wLength == CONFIGURATION_DESCRIPTOR_LENGTH)
+                            {
+                                printf("get configuration descriptor\r\n");
+                                usb_start_in_transfer(&ep0,(uint8_t*)&(pipicofxFullConfig.config),CONFIGURATION_DESCRIPTOR_LENGTH);
+                            }
+                            else // send full configuration descriptor, divide into pieces of bMaxPacketSize length
+                            {
+                                transferhandler.address=(uint32_t)pipicofxfc;
+                                transferhandler.bMaxPacketSize=pipicofxUsbDeviceDescriptor.bMaxPacketSize;
+                                transferhandler.idx=0;
+                                transferhandler.len=pipicofxFullConfig.config.wTotalLength;
+                                transferhandler.transferInProgress=1;
+                                printf("get full configuration descriptor\r\n");
+                                if ((transferhandler.idx + transferhandler.bMaxPacketSize) > transferhandler.len)
+                                {
+                                    usb_start_in_transfer(&ep0,(const uint8_t*)(transferhandler.address+transferhandler.idx),transferhandler.len-transferhandler.idx);
+                                    transferhandler.idx=transferhandler.len;
+                                    transferhandler.transferInProgress=0;
+                                } 
+                                else if ((transferhandler.idx + transferhandler.bMaxPacketSize) == transferhandler.len)
+                                {
+                                    usb_start_in_transfer(&ep0,(const uint8_t*)(transferhandler.address+transferhandler.idx),transferhandler.bMaxPacketSize);
+                                    transferhandler.idx=transferhandler.len;
+                                    transferhandler.transferInProgress=1; // send a zero-length packet in the end
+                                }
+                                else
+                                {
+                                    usb_start_in_transfer(&ep0,(const uint8_t*)(transferhandler.address+transferhandler.idx),transferhandler.bMaxPacketSize);
+                                    transferhandler.idx += transferhandler.bMaxPacketSize;
+                                }
+                                //usb_start_in_transfer(&ep0,(uint8_t*)&pipicofxFullConfig,pipicofxFullConfig.config.wTotalLength);
+                            }
+                            break;
+                        case (SETUP_PACKET_DESCR_TYPE_STRING):
+                            if (descrIndex==0)
+                            {
+                                printf("get lang string descriptor\r\n");
+                                memcpy(epBfr,pipicoString0Descriptor,4);
+                                usb_start_in_transfer(&ep0,epBfr,4);
+                            }
+                            else 
+                            {
+                                printf("get string descriptor ");
+                                UInt16ToChar(descrIndex,charbfr);
+                                printf(charbfr);
+                                printf("\r\n");
+                                generateStringDescriptor(&ep0,&stringdescr,pipicofxStringDescriptors[descrIndex-1]);
+                                usb_start_in_transfer(&ep0,0,stringdescr.bLength);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case SETUP_PACKET_REQ_GET_STATUS:
+                    break;
+                case SETUP_PACKET_REQ_SYNCH_FRAME:
+                    break;
+                default:
+                    break;
+            }
+        }
+        else // Host to Device
+        {
+            switch(setupPacket->bRequest)
+            {
+                case SETUP_PACKET_REQ_CLEAR_FEATURE:
+                    break;
+                case SETUP_PACKET_REQ_SET_ADDRESS:
+                    deviceAddress = setupPacket->wValue;
+                    setAddress=1;
+                    printf("set address received, address: ");
+                    UInt16ToChar(deviceAddress,charbfr);
+                    printf(charbfr);
+                    printf("\r\n");
+                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
+                    break;
+                case SETUP_PACKET_REQ_SET_CONFIGURATION:
+                    printf("set configuration\r\n");
+                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
+                    break;
+                case SETUP_PACKET_REQ_SET_DESCRIPTOR:
+                    //break;
+                case SETUP_PACKET_REQ_SET_FEATURE:
+                    //break;
+                case SETUP_PACKET_REQ_SET_INTERFACE:
+                    //break;
+                default:
+                    //blindly acknowledge at first...
+                    printf("got unknown request \r\n");
+                    UInt8ToChar(setupPacket->bRequest,charbfr);
+                    printf(charbfr);
+                    printf("\n");
+                    usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
+                    break;
+            }
+        }
+    }
     if ((stat & (1 << USB_INTS_BUS_RESET_LSB)) != 0) // bus reset
     {
         printf("usb reset\r\n");
@@ -557,7 +610,10 @@ void isr_usbctrl_irq5()
 void usb_start_in_transfer(UsbEndpointConfigurationType * ep,const uint8_t * data,uint8_t len)
 {
     uint32_t ctrlval;
-    memcpy(ep->bufferIn,data,len);
+    if (data)
+    {
+        memcpy(ep->bufferIn,data,len);
+    }
     ctrlval = len | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (1 << EP_BUFFER_CTRL_BUFFER_0_FULL);
     ctrlval |= ep->pid ? USB_BUF_CTRL_DATA1_PID : USB_BUF_CTRL_DATA0_PID;
     ep->pid ^=1;
