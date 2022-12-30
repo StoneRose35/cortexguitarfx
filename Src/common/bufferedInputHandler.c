@@ -56,6 +56,15 @@ void appendToInputBuffer(CommBuffer bfr,uint8_t * data,uint32_t len)
 	}
 }
 
+void appendToInputBufferReverse(CommBuffer bfr,uint8_t * data,uint32_t len)
+{
+	for (int32_t c=len-1;c>=0;c--)
+	{
+		bfr->inputBuffer[bfr->inputBufferCnt++]=data[c];
+		bfr->inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
+	}
+}
+
 void appendToOutputBuffer(CommBuffer bfr,uint8_t * data,uint32_t len)
 {
 	for (uint32_t c=0;c<len;c++)
@@ -105,7 +114,15 @@ void consumeOutputBufferBytes(CommBuffer bfr,uint32_t nbytes)
 
 uint8_t isOutputBufferFull(CommBuffer bfr)
 {
-	return getOutputBufferFillLength(bfr) == (1 << OUTPUT_BUFFER_SIZE)-1;
+	uint32_t fl = getOutputBufferFillLength(bfr);
+	if (fl >= ((1 << OUTPUT_BUFFER_SIZE)-1))
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 void getOutputBuffer(CommBuffer bfr,uint32_t* len,uint32_t* offset)

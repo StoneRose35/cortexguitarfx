@@ -25,7 +25,7 @@
 extern uint32_t task;
 extern uint8_t context; // used by printf to decide where a certain information should be output
 
-static CommBuffer usbBuffer;
+CommBuffer usbBuffer;
 
 static CommBuffer bluetoothBuffer;
 

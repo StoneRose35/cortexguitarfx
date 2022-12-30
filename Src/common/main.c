@@ -169,7 +169,8 @@
 #include "ssd1306_display.h"
 #include "wm8731.h"
 #include "tusb.h"
-#include "usb.h"
+#include "usb/usb_common.h"
+#include "usb/usb_cdc.h"
 #include "cs4270_audio_codec.h"
 #include "debugLed.h"
 #include "consoleHandler.h"
@@ -213,7 +214,9 @@ const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
+volatile uint16_t secCnt=0;
 
+char charbfr[8];
 /**
  * @brief the main entry point, should never exit
  * 
@@ -286,7 +289,7 @@ int main(void)
 	//	}
 	//}
 	//drawUi(&piPicoUiController);
-	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
+	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendOverUsb);
 
 
 	startCore1(&core1Main);
@@ -307,7 +310,7 @@ int main(void)
 	#else
 	//initI2SSlave();
 	#endif
-
+	
     /* Loop forever */
 	for(;;)
 	{
@@ -319,6 +322,7 @@ int main(void)
 
 		//tud_task(); // tinyusb device task
 		//cdc_task(&usbCommBuffer);
+		
 		cliApiTask(&bufferedInput);
 	}
 }

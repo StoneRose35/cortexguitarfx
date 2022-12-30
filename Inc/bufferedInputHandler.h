@@ -27,6 +27,7 @@ void getOutputBuffer(CommBuffer bfr,uint32_t* len,uint32_t* offset);
 
 
 void appendToInputBuffer(CommBuffer bfr,uint8_t * data,uint32_t len);
+void appendToInputBufferReverse(CommBuffer bfr,uint8_t * data,uint32_t len);
 void appendToOutputBuffer(CommBuffer bfr,uint8_t * data,uint32_t len);
 void appendStringToOutputBuffer(CommBuffer bfr,const char * data);
 uint32_t getOutputBufferFillLength(CommBuffer bfr);
