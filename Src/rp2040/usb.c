@@ -187,7 +187,7 @@ typedef struct
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    const char * bString;
+    char * bString;
 } UsbStringDescriptorType;
 
 typedef UsbStringDescriptorType* UsbStringDescriptor;
@@ -214,18 +214,19 @@ typedef struct
 void generateStringDescriptor(UsbEndpointConfigurationType* ep, UsbStringDescriptor descr,const char * str)
 {
     uint8_t c=0;
-    while (*(str+c)!=0)
+    while (*(str+(c >> 1))!=0)
     {
-        *(ep->bufferIn + c)= *(str+c);
+        *(ep->bufferIn + c + 2)= *(str+(c >> 1));
         c++;
-        *(ep->bufferIn+ c)=0;
+        *(ep->bufferIn+ c + 2)=0;
         c++;
 
     }
-    
+    *(ep->bufferIn)=c+2;
+    *(ep->bufferIn+1)=SETUP_PACKET_DESCR_TYPE_STRING;
     descr->bLength=c+2;
     descr->bString=str;
-    descr->bDescriptorType=3;
+    descr->bDescriptorType=SETUP_PACKET_DESCR_TYPE_STRING;
 }
 
 const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
@@ -363,13 +364,10 @@ const pipicofxFullConfigDescriptorType pipicofxFullConfig  = {
 
 
 const uint8_t pipicoString0Descriptor[] = {
-    4,3,0x9,0x4
+    4,3,9,4
 };
-//const UsbString0DescriptorType pipicoString0Descriptor = {
-//    .bDescriptorType=3,
-//    .bLength=4,
-//    .wLangId=0x409
-//};
+
+const uint8_t status[]={0x0, 0x0};
 
 char const* pipicofxStringDescriptors[] = {
     "Stonerose35", // 1: Manufacturer 
@@ -411,6 +409,7 @@ void isr_usbctrl_irq5()
     UsbStringDescriptorType stringdescr;
     volatile uint8_t descrType;
     volatile uint8_t descrIndex;
+    volatile uint16_t descrLen;
     char charbfr[8];
 
 
@@ -423,7 +422,9 @@ void isr_usbctrl_irq5()
             {
                 if (usb_hw->sie_status & USB_SIE_STATUS_ACK_REC_BITS)
                 {
+                    #ifdef USB_DBG
                     printf("ACK rec.\r\n");
+                    #endif
                     usb_hw_clear->sie_status = USB_SIE_STATUS_ACK_REC_BITS;
                 }
                 // handle in endpoint transferred
@@ -458,8 +459,20 @@ void isr_usbctrl_irq5()
                     }
                     else
                     {
+                        #ifdef USB_DBG
+                        printf("out0 req\r\n");
+                        #endif
                         usb_start_out_transfer(&ep0,0);
                     }
+                }
+                else
+                {
+                    #ifdef USB_DBG
+                    printf("ep");
+                    UInt8ToChar(c>>1,charbfr);
+                    printf(charbfr);
+                    printf(" in done\r\n");
+                    #endif
                 }
                 //TODO add handlers for ep1 and ep2
             }
@@ -468,6 +481,21 @@ void isr_usbctrl_irq5()
                 // handle out endpoint transferred
                 // endpoint nr is c>>1
                 usb_hw_clear->buf_status = (1 << (c+1));
+                if ((c>>1)==0) // EP 0 
+                {
+                    #ifdef USB_DBG
+                    printf("out0 rec\r\n");
+                    #endif
+                }
+                else
+                {
+                    #ifdef USB_DBG
+                    printf("ep");
+                    UInt8ToChar(c>>1,charbfr);
+                    printf(charbfr);
+                    printf(" out done\r\n");
+                    #endif
+                }
                 //TODO add handlers for ep1 and ep2
             }
         }
@@ -476,6 +504,7 @@ void isr_usbctrl_irq5()
     if ((stat & (1 << USB_INTS_SETUP_REQ_LSB)) != 0)
     {
         // gather setup packet
+        ep0.pid=1;
         setupPacket = (UsbSetupPacket)usb_dpram->setup_packet;
         usb_hw_clear->sie_status = (1 << USB_SIE_STATUS_SETUP_REC_LSB);
         
@@ -488,18 +517,21 @@ void isr_usbctrl_irq5()
                 case SETUP_PACKET_REQ_GET_DESCRIPTOR:
                     descrType=setupPacket->wValue >> 8; 
                     descrIndex=setupPacket->wValue & 0xFF;
+                    descrLen=setupPacket->wLength;
                     switch (descrType)
                     {
                         case (SETUP_PACKET_DESCR_TYPE_DEVICE):
-                            
-                            ep0.pid=1;
+                            #ifdef USB_DBG
                             printf("get device descriptor\r\n");
+                            #endif
                             usb_start_in_transfer(&ep0,(uint8_t*)&pipicofxUsbDeviceDescriptor,DEVICE_DESCRIPTOR_LENGTH);
                             break;
                         case (SETUP_PACKET_DESCR_TYPE_CONFIGURATION):
                             if (setupPacket->wLength == CONFIGURATION_DESCRIPTOR_LENGTH)
-                            {
+                            {   
+                                #ifdef USB_DBG
                                 printf("get configuration descriptor\r\n");
+                                #endif
                                 usb_start_in_transfer(&ep0,(uint8_t*)&(pipicofxFullConfig.config),CONFIGURATION_DESCRIPTOR_LENGTH);
                             }
                             else // send full configuration descriptor, divide into pieces of bMaxPacketSize length
@@ -509,7 +541,9 @@ void isr_usbctrl_irq5()
                                 transferhandler.idx=0;
                                 transferhandler.len=pipicofxFullConfig.config.wTotalLength;
                                 transferhandler.transferInProgress=1;
+                                #ifdef USB_DBG
                                 printf("get full configuration descriptor\r\n");
+                                #endif
                                 if ((transferhandler.idx + transferhandler.bMaxPacketSize) > transferhandler.len)
                                 {
                                     usb_start_in_transfer(&ep0,(const uint8_t*)(transferhandler.address+transferhandler.idx),transferhandler.len-transferhandler.idx);
@@ -533,16 +567,20 @@ void isr_usbctrl_irq5()
                         case (SETUP_PACKET_DESCR_TYPE_STRING):
                             if (descrIndex==0)
                             {
+                                #ifdef USB_DBG
                                 printf("get lang string descriptor\r\n");
+                                #endif
                                 memcpy(epBfr,pipicoString0Descriptor,4);
                                 usb_start_in_transfer(&ep0,epBfr,4);
                             }
                             else 
                             {
+                                #ifdef USB_DBG
                                 printf("get string descriptor ");
                                 UInt16ToChar(descrIndex,charbfr);
                                 printf(charbfr);
                                 printf("\r\n");
+                                #endif
                                 generateStringDescriptor(&ep0,&stringdescr,pipicofxStringDescriptors[descrIndex-1]);
                                 usb_start_in_transfer(&ep0,0,stringdescr.bLength);
                             }
@@ -552,6 +590,7 @@ void isr_usbctrl_irq5()
                     }
                     break;
                 case SETUP_PACKET_REQ_GET_STATUS:
+                    usb_start_in_transfer(&ep0,status,2);
                     break;
                 case SETUP_PACKET_REQ_SYNCH_FRAME:
                     break;
@@ -568,14 +607,19 @@ void isr_usbctrl_irq5()
                 case SETUP_PACKET_REQ_SET_ADDRESS:
                     deviceAddress = setupPacket->wValue;
                     setAddress=1;
+                    #ifdef USB_DBG
                     printf("set address received, address: ");
+                    
                     UInt16ToChar(deviceAddress,charbfr);
                     printf(charbfr);
                     printf("\r\n");
+                    #endif
                     usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
                     break;
                 case SETUP_PACKET_REQ_SET_CONFIGURATION:
+                    #ifdef USB_DBG
                     printf("set configuration\r\n");
+                     #endif
                     usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
                     break;
                 case SETUP_PACKET_REQ_SET_DESCRIPTOR:
@@ -586,10 +630,12 @@ void isr_usbctrl_irq5()
                     //break;
                 default:
                     //blindly acknowledge at first...
+                    #ifdef USB_DBG
                     printf("got unknown request \r\n");
                     UInt8ToChar(setupPacket->bRequest,charbfr);
                     printf(charbfr);
                     printf("\n");
+                    #endif
                     usb_start_in_transfer(&ep0,0,0); // send empty package to acknowledge
                     break;
             }
@@ -597,7 +643,9 @@ void isr_usbctrl_irq5()
     }
     if ((stat & (1 << USB_INTS_BUS_RESET_LSB)) != 0) // bus reset
     {
+        #ifdef USB_DBG
         printf("usb reset\r\n");
+        #endif
         usb_hw_clear->sie_status = (1 << USB_SIE_STATUS_BUS_RESET_LSB);
         usb_hw->dev_addr_ctrl=0;
         setAddress=0;
@@ -614,25 +662,41 @@ void usb_start_in_transfer(UsbEndpointConfigurationType * ep,const uint8_t * dat
     {
         memcpy(ep->bufferIn,data,len);
     }
-    ctrlval = len | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (1 << EP_BUFFER_CTRL_BUFFER_0_FULL);
+    ctrlval = len | (1 << EP_BUFFER_CTRL_BUFFER_0_FULL) | (1 << EP_BUFFER_CTRL_RESET_BFR_SEL);
     ctrlval |= ep->pid ? USB_BUF_CTRL_DATA1_PID : USB_BUF_CTRL_DATA0_PID;
     ep->pid ^=1;
     usb_dpram->ep_buf_ctrl[ep->nr].in = ctrlval;
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");    
+    __asm volatile (
+            "b 1f\n"
+            "1: b 1f\n"
+            "1: b 1f\n"
+            "1: b 1f\n"
+            "1: b 1f\n"
+            "1: b 1f\n"
+            "1:\n"
+            : : : "memory");
+    ctrlval |= (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL);
+    usb_dpram->ep_buf_ctrl[ep->nr].in = ctrlval;    
 }
 
 void usb_start_out_transfer(UsbEndpointConfigurationType * ep,uint8_t len)
 {
     uint32_t ctrlval;
-    ctrlval = len | (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL) | (0 << EP_BUFFER_CTRL_BUFFER_0_FULL);
+    ctrlval = len | (0 << EP_BUFFER_CTRL_BUFFER_0_FULL);
     ctrlval |= ep->pid ? USB_BUF_CTRL_DATA1_PID : USB_BUF_CTRL_DATA0_PID;
     ep->pid ^=1;
     usb_dpram->ep_buf_ctrl[ep->nr].out = ctrlval;
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");  
+    __asm volatile (
+            "b 1f\n"
+            "1: b 1f\n"
+            "1: b 1f\n"
+            "1: b 1f\n"
+            "1: b 1f\n"
+            "1: b 1f\n"
+            "1:\n"
+            : : : "memory");
+    ctrlval |= (1 << EP_BUFFER_CTRL_BUFFER_0_AVAIL);
+    usb_dpram->ep_buf_ctrl[ep->nr].out = ctrlval;
 }
 
 
