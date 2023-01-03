@@ -2,6 +2,7 @@
 #define USB_RP2040_H_
 #include "stdint.h"
 #include "hardware/structs/usb.h"
+#include "usb/usb_common.h"
 
 #define usb_hw_set hw_set_alias(usb_hw)
 #define usb_hw_clear hw_clear_alias(usb_hw)
@@ -29,17 +30,10 @@
 #define EP_CTRL_INTR_STALL 17
 #define EP_CTRL_INTER_NAK 16
 
-typedef struct 
-{
-    uint8_t* buffer;
-    volatile uint32_t* ep_buf_ctrl;
-    uint8_t pid;
-} UsbEndpointConfigurationType;
+
 
 void usb_start_in_transfer(UsbEndpointConfigurationType * ep,const uint8_t * data,uint8_t len);
 void usb_start_out_transfer(UsbEndpointConfigurationType * ep,uint8_t len);
-void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th);
-void initUsbCdcDevice();
 
 #define CDC_DATA_MAX_PACKET_SIZE_IN 0x40
 #define CDC_DATA_MAX_PACKET_SIZE_OUT 0x40

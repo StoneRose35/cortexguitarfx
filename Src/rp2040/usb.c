@@ -10,32 +10,13 @@
 #include "hardware/rp2040_registers.h"
 #include "systemClock.h"
 #include "memFunctions.h"
-#include "usb/usb_common.h"
-#include "usb/usb_cdc.h"
 #include "hardware/usb_rp2040.h"
+#include "usb/usb_cdc.h"
+#include "usb/usb_common.h"
 #include "consoleBase.h"
 #include "stringFunctions.h"
 #include "bufferedInputHandler.h"
 
-
-extern CommBuffer usbBuffer;
-
-void generateStringDescriptor(UsbEndpointConfigurationType* ep, UsbStringDescriptor descr,const char * str)
-{
-    uint8_t c=0;
-    while (*(str+(c >> 1))!=0)
-    {
-        *(ep->buffer + c + 2)= *(str+(c >> 1));
-        c++;
-        *(ep->buffer+ c + 2)=0;
-        c++;
-
-    }
-    *(ep->buffer)=c+2;
-    *(ep->buffer+1)=SETUP_PACKET_DESCR_TYPE_STRING;
-    descr->bLength=c+2;
-    descr->bDescriptorType=SETUP_PACKET_DESCR_TYPE_STRING;
-}
 
 const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
     .bLength=DEVICE_DESCRIPTOR_LENGTH,
@@ -98,31 +79,31 @@ char const* pipicofxStringDescriptors[] = {
     "CDC Data" // Interface
 };
 
-const struct __attribute__((packed))
-{
-    uint32_t dwDTERate;
-    uint8_t bCharFormat;
-    uint8_t bParityType;
-    uint8_t bDataBits;
 
-} getcoding=
+void generateStringDescriptor(UsbEndpointConfigurationType* ep, UsbStringDescriptor descr,const char * str)
 {
-    .dwDTERate=115200,
-    .bCharFormat=0,
-    .bParityType=0,
-    .bDataBits=8
-};
+    uint8_t c=0;
+    while (*(str+(c >> 1))!=0)
+    {
+        *(ep->buffer + c + 2)= *(str+(c >> 1));
+        c++;
+        *(ep->buffer+ c + 2)=0;
+        c++;
 
+    }
+    *(ep->buffer)=c+2;
+    *(ep->buffer+1)=SETUP_PACKET_DESCR_TYPE_STRING;
+    descr->bLength=c+2;
+    descr->bDescriptorType=SETUP_PACKET_DESCR_TYPE_STRING;
+}
 
 UsbEndpointConfigurationType ep0In;
 UsbEndpointConfigurationType ep0Out;
-UsbEndpointConfigurationType ep1In;
-UsbEndpointConfigurationType ep2In;
-UsbEndpointConfigurationType ep2Out;
+void(*onConfigured)(void)=0;
 
 static volatile uint16_t deviceAddress;
 static volatile uint8_t setAddress=0;
-static uint8_t epBfr[256];
+uint8_t epBfr[256];
 static volatile uint8_t configured=0;
 static UsbMultipacketTransfer transferhandler= {
     .address=0,
@@ -132,13 +113,9 @@ static UsbMultipacketTransfer transferhandler= {
     .transferInProgress=0
 };
 
-static UsbMultipacketTransfer transferHandlerCDC = {
-    .address=0,
-    .bMaxPacketSize=0,
-    .idx=0,
-    .len=0,
-    .transferInProgress=0
-};
+
+UsbEndpointConfigurationType * endpointsIn[16];
+UsbEndpointConfigurationType * endpointsOut[16];
 
 // usb controller interrupt routine
 void isr_usbctrl_irq5()
@@ -149,7 +126,7 @@ void isr_usbctrl_irq5()
     UsbStringDescriptorType stringdescr;
     volatile uint8_t descrType;
     volatile uint8_t descrIndex;
-    uint16_t transferLength;
+    uint8_t handled=0;
     #ifdef USB_DBG
     char charbfr[8];
     #endif
@@ -191,21 +168,13 @@ void isr_usbctrl_irq5()
                         usb_start_out_transfer(&ep0Out,0);
                     }
                 }
-                else if ((c>>1)==2)
-                {
-                    if(transferHandlerCDC.transferInProgress==1)
-                    {
-                        send_next_packet(&ep2In,&transferHandlerCDC);
-                    }
-                }
+
                 else
                 {
-                    #ifdef USB_DBG
-                    printf("ep");
-                    UInt8ToChar(c>>1,charbfr);
-                    printf(charbfr);
-                    printf(" in done\r\n");
-                    #endif
+                    if (endpointsIn[c>>1]->epHandler != 0)
+                    {
+                        endpointsIn[c>>1]->epHandler();
+                    }
                 }
             }
             if ((bfrstatus & (1 << (c+1)))!=0)
@@ -219,23 +188,13 @@ void isr_usbctrl_irq5()
                     printf("out0 rec\r\n");
                     #endif
                 }
-                else if ((c>>1)==2) // CDC Data
-                {
-                    transferLength = *ep2Out.ep_buf_ctrl & 0x3FF;
-                    appendToInputBufferReverse(usbBuffer, ep2Out.buffer ,transferLength);
-                    usb_start_out_transfer(&ep2Out,64);
-                
-                }
                 else
                 {
-                    #ifdef USB_DBG
-                    printf("ep");
-                    UInt8ToChar(c>>1,charbfr);
-                    printf(charbfr);
-                    printf(" out done\r\n");
-                    #endif
-                } 
-                
+                    if (endpointsOut[c>>1]->epHandler != 0)
+                    {
+                        endpointsOut[c>>1]->epHandler();
+                    }
+                }                
             }
         }
     }
@@ -315,10 +274,8 @@ void isr_usbctrl_irq5()
                     break;
                 case SETUP_PACKET_REQ_SYNCH_FRAME:
                     break;
-                case SETUP_PACKET_REQ_CDC_GET_LINE_CODING:
-                    usb_start_in_transfer(&ep0In,(const uint8_t*)&getcoding,7);
-                    break;
                 default:
+                    handled = handleSetupRequestIn(setupPacket,&ep0In);
                     break;
             }
         }
@@ -338,18 +295,15 @@ void isr_usbctrl_irq5()
                     printf(charbfr);
                     printf("\r\n");
                     #endif
-                    usb_start_in_transfer(&ep0In,0,0); // send empty package to acknowledge
+                    handled=1;
                     break;
                 case SETUP_PACKET_REQ_SET_CONFIGURATION:
                     #ifdef USB_DBG
                     printf("set configuration\r\n");
                      #endif
                      configured=1;
-                    usb_start_in_transfer(&ep0In,0,0); // send empty package to acknowledge
-
-                    // CDC-specifix
-                    // get ready to receive data in ep2
-                    usb_start_out_transfer(&ep2Out,64);
+                     handled=1;
+                    if (onConfigured) onConfigured();
                     break;
                 case SETUP_PACKET_REQ_SET_DESCRIPTOR:
                     //break;
@@ -357,27 +311,20 @@ void isr_usbctrl_irq5()
                     //break;
                 case SETUP_PACKET_REQ_SET_INTERFACE:
                     //break;
-
-                case SETUP_PACKET_REQ_CDC_SET_LINE_CODING:
-                    // configure physical uart port behind if present
-                    // in our case ignore 
-                    usb_start_in_transfer(&ep0In,0,0); 
-                    break;
-                case SETUP_PACKET_REQ_CDC_SET_CONTROL_LINE_STATE:
-                    // arm both rs232 control line DTR and RTS in case they are present
-                    // ignore as well
-                    usb_start_in_transfer(&ep0In,0,0); 
-                    break;
                 default:
-                    //blindly acknowledge at first...
                     #ifdef USB_DBG
                     printf("got unknown request \r\n");
                     UInt8ToChar(setupPacket->bRequest,charbfr);
                     printf(charbfr);
                     printf("\n");
                     #endif
-                    usb_start_in_transfer(&ep0In,0,0); // send empty package to acknowledge
+                    handled=handleSetupRequestOut(setupPacket,&ep0In);
+                    
                     break;
+            }
+            if (handled==1)
+            {
+                usb_start_in_transfer(&ep0In,0,0); // send empty package to acknowledge
             }
         }
     }
@@ -467,66 +414,25 @@ void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* t
 }
 
 
-void initUsbCdcDevice()
+void initUsbDevice()
 {
+    for (uint8_t c=0;c<16;c++)
+    {
+        endpointsIn[c]=0;
+        endpointsOut[c]=0;
+    }
     ep0In.buffer=usb_dpram->ep0_buf_a;
     ep0Out.buffer=usb_dpram->ep0_buf_a;
     ep0In.ep_buf_ctrl=&(usb_dpram->ep_buf_ctrl[0].in);
     ep0Out.ep_buf_ctrl=&(usb_dpram->ep_buf_ctrl[0].out);
     ep0In.pid=0;
     ep0Out.pid=0;
-
-    ep1In.buffer=usb_dpram->epx_data;
-    ep1In.pid=0;
-    ep1In.ep_buf_ctrl=&(usb_dpram->ep_buf_ctrl[1].in);
-    usb_dpram->ep_ctrl[1-1].in = (1 << EP_CTRL_ENABLE_POS) | ((uint32_t)ep1In.buffer - (uint32_t)usb_dpram) | (3 << EP_CTRL_EP_TYPE) | (1 << EP_CTRL_INTR_AFTER_EVERY_BUFFER_POS);
-
-    ep2In.buffer=usb_dpram->epx_data+64;
-    ep2In.pid=0;
-    ep2In.ep_buf_ctrl=&(usb_dpram->ep_buf_ctrl[2].in);
-    usb_dpram->ep_ctrl[2-1].in = (1 << EP_CTRL_ENABLE_POS) | ((uint32_t)ep2In.buffer - (uint32_t)usb_dpram) | (2 << EP_CTRL_EP_TYPE) |  (1 << EP_CTRL_INTR_AFTER_EVERY_BUFFER_POS);
-
-    ep2Out.buffer=usb_dpram->epx_data+64*2;
-    ep2Out.pid=0;
-    ep2Out.ep_buf_ctrl=&usb_dpram->ep_buf_ctrl[2].out;
-    usb_dpram->ep_ctrl[2-1].out = (1 << EP_CTRL_ENABLE_POS) | ((uint32_t)ep2Out.buffer - (uint32_t)usb_dpram) | (2 << EP_CTRL_EP_TYPE) |  (1 << EP_CTRL_INTR_AFTER_EVERY_BUFFER_POS);
-
-}
-
-void startUsbCdcDevice()
-{
-    if (configured)
-    {
-        usb_start_out_transfer(&ep2Out,64); // get ready to receive data
-    }
+    endpointsIn[0]=&ep0In;
+    endpointsOut[0]=&ep0Out;
 }
 
 
-void sendOverUsb(void * commBfr,uint8_t blocking)
-{
-	uint32_t len;
-	uint32_t offset;
-	CommBuffer bfr = (CommBuffer)commBfr;
-	getOutputBuffer(bfr,&len,&offset);
 
-    while (transferHandlerCDC.transferInProgress || (*ep2In.ep_buf_ctrl & (1 << EP_BUFFER_CTRL_BUFFER_0_FULL)));
-    for (uint16_t c4=0;c4<len;c4++)
-    {
-        *(epBfr+c4) = *(bfr->outputBuffer + ((offset + c4) & ((1 << OUTPUT_BUFFER_SIZE)-1))); 
-    }
-
-    transferHandlerCDC.bMaxPacketSize = CDC_DATA_MAX_PACKET_SIZE_IN;
-    transferHandlerCDC.address=(uint32_t)epBfr;
-    transferHandlerCDC.idx=0;
-    transferHandlerCDC.len=len;
-    send_next_packet(&ep2In,&transferHandlerCDC);
-    consumeOutputBufferBytes(bfr,len);
-
-    if(blocking)
-    {
-        while (transferHandlerCDC.transferInProgress || (*ep2In.ep_buf_ctrl & (1 << EP_BUFFER_CTRL_BUFFER_0_FULL)));
-    }
-}
 
 /**
  * @brief initializes the usb hardware
@@ -555,7 +461,8 @@ void initUSB()
     memset(usb_dpram,0,4096);
 
 
-    initUsbCdcDevice();
+    initUsbDevice();
+    initUsbDeviceDriver(endpointsIn,endpointsOut,onConfigured);
 
     //
     // Hardware configuration, when done the usb controller listens th interrupts and works in device mode

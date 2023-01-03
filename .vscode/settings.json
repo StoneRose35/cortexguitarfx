@@ -28,7 +28,9 @@
         "triopsbreederservice.h": "c",
         "ds18b20.h": "c",
         "cs4270_audio_codec.h": "c",
-        "consolebase.h": "c"
+        "consolebase.h": "c",
+        "usb_cdc.h": "c",
+        "usb_rp2040.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

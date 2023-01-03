@@ -3,6 +3,7 @@
 #include "stdint.h"
 
 
+
 #define SETUP_PACKET_REQTYPE_DIR_HOST_TO_DEVICE 0
 #define SETUP_PACKET_REQTYPE_DIR_DEVICE_TO_HOST (1<<7)
 #define SETUP_PACKET_REQTYPE_STD 0
@@ -106,6 +107,15 @@ typedef struct
     uint8_t bMaxPower;
 } UsbConfigurationDescriptorType;
 
+typedef struct 
+{
+    uint8_t* buffer;
+    volatile uint32_t* ep_buf_ctrl;
+    uint8_t pid;
+    void(*epHandler)(void);
+    
+} UsbEndpointConfigurationType;
+
 typedef UsbConfigurationDescriptorType* UsbConfigurationDescriptor;
 
 typedef struct
@@ -162,8 +172,43 @@ typedef struct
     uint32_t idx;
 } UsbMultipacketTransfer;
 
+/**
+ * @brief send the next packet of a transfer spanning multiple packets over the given endpoint. 
+ * 
+ * @param ep the endpoint to send the data over
+ * @param th the object containing the data for the multipacket transfer
+ */
+void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th);
 
+/**
+ * @brief initializes the usb device. Specifically configures endpoint0 to be ready to handle the default setup requests
+ * 
+ */
 void initUSB();
 
+/**
+ * @brief to be implemented in the specific device driverm, should setup the endpoints according to the 
+ * specific device type , e.g. and HID device contains typically a single in endpoints besides ep0In and ep0Out
+ * 
+ */
+void initUsbDeviceDriver(UsbEndpointConfigurationType **,UsbEndpointConfigurationType **,void(*)(void));
+
+/**
+ * @brief handles setup packets from device to host which are driver-specific
+ * 
+ * @param pck 
+ * @param ep 
+ * @return uint8_t 1 if handled 0 otherwise
+ */
+uint8_t handleSetupRequestIn(UsbSetupPacket pck,UsbEndpointConfigurationType * ep);
+
+/**
+ * @brief handles setup packets from the host to the device
+ * 
+ * @param pck 
+ * @param ep 
+ * @return uint8_t 
+ */
+uint8_t handleSetupRequestOut(UsbSetupPacket pck,UsbEndpointConfigurationType * ep);
 
 #endif
