@@ -289,7 +289,7 @@ int main(void)
 	//	}
 	//}
 	//drawUi(&piPicoUiController);
-	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendOverUsb);
+	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 
 	startCore1(&core1Main);

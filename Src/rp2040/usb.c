@@ -13,11 +13,15 @@
 #include "hardware/usb_rp2040.h"
 #include "usb/usb_cdc.h"
 #include "usb/usb_common.h"
+#include "usb/usb_config.h"
 #include "consoleBase.h"
 #include "stringFunctions.h"
 #include "bufferedInputHandler.h"
 
-
+//
+// *************************************************************************************************************************
+//
+#ifdef USB_CDC_DRIVER
 const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
     .bLength=DEVICE_DESCRIPTOR_LENGTH,
     .bDescriptorType=1,
@@ -78,8 +82,62 @@ char const* pipicofxStringDescriptors[] = {
     "CDC Control", // Interface
     "CDC Data" // Interface
 };
+#endif
 
+#ifdef USB_MSC_DRIVER
+const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
+    .bLength=DEVICE_DESCRIPTOR_LENGTH,
+    .bDescriptorType=1,
+    .bcdUSB=0x200,
+    .bDeviceClass=0, //239, // taken from tinyusb cdc_msc example config
+    .bDeviceSubClass=0, // taken from tinyusb cdc_msc example config
+    .bMaxPacketSize=64,
+    .idVendor=0xcafe, // NOT OFFICIAL
+    .idProduct=0x4003, // NOT OFFICIAL
+    .bcdDevice=0x100, // taken from tinyusb cdc_msc example config
+    .iManufacturer=1, // taken from tinyusb cdc_msc example config
+    .iProduct=2, // taken from tinyusb cdc_msc example config
+    .iSerialNumber=3, // taken from tinyusb cdc_msc example config
+    .bNumConfigurations=1, // taken from tinyusb cdc_msc example config
+    .bDeviceProtocol=0
+};
 
+const uint8_t pipicofxfc[] = {
+    // configuration descriptor
+CONFIGURATION_DESCRIPTOR_LENGTH,2,CONFIGURATION_DESCRIPTOR_LENGTH 
+                    + INTERFACE_DESCRIPTOR_LENGTH 
+                    + ENDPOINT_DESCRIPTOR_LENGTH*2
+                    ,0x0,1,1,4,0x80,50,
+    // msc interface descriptor
+    INTERFACE_DESCRIPTOR_LENGTH,4,0,0,2,8,6,80,0,
+    ENDPOINT_DESCRIPTOR_LENGTH,5,0x81,(ENDPOINT_ATTR_TRANSFERTYPE_INTERRUPT << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),0x8,0x0,16,
+    ENDPOINT_DESCRIPTOR_LENGTH,5,0x81,(ENDPOINT_ATTR_TRANSFERTYPE_BULK << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),CDC_DATA_MAX_PACKET_SIZE_IN,0x0,0,
+    // data endpoint out
+    ENDPOINT_DESCRIPTOR_LENGTH,5,0x1,(ENDPOINT_ATTR_TRANSFERTYPE_BULK << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
+                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
+                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),CDC_DATA_MAX_PACKET_SIZE_OUT,0x0,0,
+};
+
+const uint8_t pipicoString0Descriptor[] = {
+    4,3,9,4
+};
+
+const uint8_t status[]={0x0, 0x0};
+
+char const* pipicofxStringDescriptors[] = {
+    "Stonerose35", // 1: Manufacturer 
+    "PiPicoFX", // 2: Product
+    "03012023001", // 3: Serial Number
+    "Default Config", // 4: Configuration
+};
+#endif
+//
+// *************************************************************************************************************************
+//
 void generateStringDescriptor(UsbEndpointConfigurationType* ep, UsbStringDescriptor descr,const char * str)
 {
     uint8_t c=0;
@@ -408,6 +466,28 @@ void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* t
     else
     {
         usb_start_in_transfer(ep,(const uint8_t*)(th->address+th->idx),th->bMaxPacketSize);
+        th->idx += th->bMaxPacketSize;
+        th->transferInProgress=1;
+    }
+}
+
+void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th)
+{
+    if ((th->idx + th->bMaxPacketSize) > th->len)
+    {
+        usb_start_out_transfer(ep,th->len-th->idx);
+        th->idx=th->len;
+        th->transferInProgress=0;
+    } 
+    else if ((th->idx + th->bMaxPacketSize) == th->len)
+    {
+        usb_start_out_transfer(ep,th->bMaxPacketSize);
+        th->idx=th->len;
+        th->transferInProgress=1; // send a zero-length packet in the end
+    }
+    else
+    {
+        usb_start_out_transfer(ep,th->bMaxPacketSize);
         th->idx += th->bMaxPacketSize;
         th->transferInProgress=1;
     }

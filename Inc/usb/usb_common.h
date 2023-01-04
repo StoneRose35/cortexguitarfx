@@ -64,7 +64,7 @@
 #define INTERFACE_DESCRIPTOR_LENGTH 9
 #define ENDPOINT_DESCRIPTOR_LENGTH 7
 
-typedef volatile struct
+typedef volatile struct __attribute__((__packed__))
 {
     uint8_t mbRequestType;
     uint8_t bRequest;
@@ -75,7 +75,7 @@ typedef volatile struct
 
 typedef UsbSetupPacketType* UsbSetupPacket; 
 
-typedef struct 
+typedef struct __attribute__((__packed__))
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
@@ -95,7 +95,7 @@ typedef struct
 
 typedef UsbDeviceDescriptorType* UsbDeviceDescriptor;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
@@ -118,7 +118,7 @@ typedef struct
 
 typedef UsbConfigurationDescriptorType* UsbConfigurationDescriptor;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
@@ -133,7 +133,7 @@ typedef struct
 
 typedef UsbInterfaceDescriptorType* UsbInterfaceDescriptor;
 
-typedef struct 
+typedef struct __attribute__((__packed__))
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
@@ -145,7 +145,7 @@ typedef struct
 
 typedef UsbEndpointDescriptorType* UsbEndpointDescriptor;
 
-typedef struct 
+typedef struct  __attribute__((__packed__))
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
@@ -154,7 +154,7 @@ typedef struct
 
 typedef UsbStringDescriptorType* UsbStringDescriptor;
 
-typedef struct 
+typedef struct __attribute__((__packed__))
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
@@ -179,6 +179,9 @@ typedef struct
  * @param th the object containing the data for the multipacket transfer
  */
 void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th);
+
+
+void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th);
 
 /**
  * @brief initializes the usb device. Specifically configures endpoint0 to be ready to handle the default setup requests

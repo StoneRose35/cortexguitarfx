@@ -30,7 +30,8 @@
         "cs4270_audio_codec.h": "c",
         "consolebase.h": "c",
         "usb_cdc.h": "c",
-        "usb_rp2040.h": "c"
+        "usb_rp2040.h": "c",
+        "usb_common.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

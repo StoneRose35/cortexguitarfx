@@ -5,6 +5,7 @@
 #include "usb/usb_common.h"
 #include "bufferedInputHandler.h"
 
+#ifdef USB_CDC_DRIVER
 UsbEndpointConfigurationType ep2In;
 UsbEndpointConfigurationType ep2Out;
 UsbEndpointConfigurationType ep1In;
@@ -149,3 +150,4 @@ static void CDCDataOutHandler()
     appendToInputBufferReverse(usbBuffer, ep2Out.buffer ,transferLength);
     usb_start_out_transfer(&ep2Out,64);
 }
+#endif
