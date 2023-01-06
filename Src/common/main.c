@@ -250,7 +250,7 @@ int main(void)
 	initI2c(72); //72 
 	#endif
 	initUSB();
-	//initUart(57600,&usbCommBuffer);
+	initUart(57600,&usbCommBuffer);
 
 	//tud_init(BOARD_TUD_RHPORT);
 
@@ -289,7 +289,7 @@ int main(void)
 	//	}
 	//}
 	//drawUi(&piPicoUiController);
-	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendOverUsb);
+	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 
 	startCore1(&core1Main);
