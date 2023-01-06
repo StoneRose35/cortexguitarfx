@@ -448,6 +448,12 @@ void usb_start_out_transfer(UsbEndpointConfigurationType * ep,uint8_t len)
     *ep->ep_buf_ctrl = ctrlval;
 }
 
+/**
+ * @brief sends the next packet of a multipacket transfer 
+ * 
+ * @param ep the endpoint through which the data needs to be sent 
+ * @param th the transfer handler denoting the address of the data to send and various status information
+ */
 void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th)
 {
 
@@ -542,7 +548,7 @@ void initUSB()
 
 
     initUsbDevice();
-    initUsbDeviceDriver(endpointsIn,endpointsOut,onConfigured);
+    initUsbDeviceDriver(endpointsIn,endpointsOut,&onConfigured);
 
     //
     // Hardware configuration, when done the usb controller listens th interrupts and works in device mode

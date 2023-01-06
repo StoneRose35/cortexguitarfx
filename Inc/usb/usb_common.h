@@ -194,7 +194,7 @@ void initUSB();
  * specific device type , e.g. and HID device contains typically a single in endpoints besides ep0In and ep0Out
  * 
  */
-void initUsbDeviceDriver(UsbEndpointConfigurationType **,UsbEndpointConfigurationType **,void(*)(void));
+void initUsbDeviceDriver(UsbEndpointConfigurationType **,UsbEndpointConfigurationType **,void(**)(void));
 
 /**
  * @brief handles setup packets from device to host which are driver-specific

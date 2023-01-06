@@ -3,6 +3,7 @@
 #include "usb/usb_cdc.h"
 
 #include "usb/usb_common.h"
+#include "usb/usb_config.h"
 #include "bufferedInputHandler.h"
 
 #ifdef USB_CDC_DRIVER
@@ -10,7 +11,7 @@ UsbEndpointConfigurationType ep2In;
 UsbEndpointConfigurationType ep2Out;
 UsbEndpointConfigurationType ep1In;
 
-extern CommBuffer usbBuffer;
+extern CommBufferType usbCommBuffer;
 extern uint8_t epBfr[256];
 
 static void CDCDataInHandler(void);
@@ -41,7 +42,7 @@ const struct __attribute__((packed))
 };
 
 
-void initUsbDeviceDriver(UsbEndpointConfigurationType ** epsIn,UsbEndpointConfigurationType ** epsOut,void(*onConfigured)(void))
+void initUsbDeviceDriver(UsbEndpointConfigurationType ** epsIn,UsbEndpointConfigurationType ** epsOut,void(**onConfigured)(void))
 {
 
     ep1In.buffer=usb_dpram->epx_data;
@@ -65,7 +66,7 @@ void initUsbDeviceDriver(UsbEndpointConfigurationType ** epsIn,UsbEndpointConfig
     epsOut[2]=&ep2Out;
     usb_dpram->ep_ctrl[2-1].out = (1 << EP_CTRL_ENABLE_POS) | ((uint32_t)ep2Out.buffer - (uint32_t)usb_dpram) | (2 << EP_CTRL_EP_TYPE) |  (1 << EP_CTRL_INTR_AFTER_EVERY_BUFFER_POS);
 
-    onConfigured=startCDCDataReception;
+    *onConfigured=startCDCDataReception;
 
 }
 
@@ -147,7 +148,7 @@ static void CDCDataOutHandler()
 {
     uint16_t transferLength;
     transferLength = *ep2Out.ep_buf_ctrl & 0x3FF;
-    appendToInputBufferReverse(usbBuffer, ep2Out.buffer ,transferLength);
+    appendToInputBufferReverse(&usbCommBuffer, ep2Out.buffer ,transferLength);
     usb_start_out_transfer(&ep2Out,64);
 }
 #endif
