@@ -84,11 +84,13 @@ char const* pipicofxStringDescriptors[] = {
 };
 #endif
 
+#define USB_DBG
+
 #ifdef USB_MSC_DRIVER
 const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
     .bLength=DEVICE_DESCRIPTOR_LENGTH,
     .bDescriptorType=1,
-    .bcdUSB=0x200,
+    .bcdUSB=0x110,
     .bDeviceClass=0, //239, // taken from tinyusb cdc_msc example config
     .bDeviceSubClass=0, // taken from tinyusb cdc_msc example config
     .bMaxPacketSize=64,
@@ -110,9 +112,6 @@ CONFIGURATION_DESCRIPTOR_LENGTH,2,CONFIGURATION_DESCRIPTOR_LENGTH
                     ,0x0,1,1,4,0x80,50,
     // msc interface descriptor
     INTERFACE_DESCRIPTOR_LENGTH,4,0,0,2,8,6,80,0,
-    ENDPOINT_DESCRIPTOR_LENGTH,5,0x81,(ENDPOINT_ATTR_TRANSFERTYPE_INTERRUPT << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
-                    (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
-                    (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),0x8,0x0,16,
     ENDPOINT_DESCRIPTOR_LENGTH,5,0x81,(ENDPOINT_ATTR_TRANSFERTYPE_BULK << ENDPOINT_ATTR_TRANSFERTYPE_POS) |
                     (ENDPOINT_ATTR_SYNC_TYPE_NO_SYNC << ENDPOINT_ATTR_SYNC_TYPE_POS) |
                     (ENDPOINT_ATTR_USAGE_DATA << ENDPOINT_ATTR_USAGE_POS),CDC_DATA_MAX_PACKET_SIZE_IN,0x0,0,
@@ -199,9 +198,6 @@ void isr_usbctrl_irq5()
             {
                 if (usb_hw->sie_status & USB_SIE_STATUS_ACK_REC_BITS)
                 {
-                    #ifdef USB_DBG
-                    printf("ACK rec.\r\n");
-                    #endif
                     usb_hw_clear->sie_status = USB_SIE_STATUS_ACK_REC_BITS;
                 }
                 // handle in endpoint transferred
@@ -220,9 +216,6 @@ void isr_usbctrl_irq5()
                     }
                     else
                     {
-                        #ifdef USB_DBG
-                        printf("out0 req\r\n");
-                        #endif
                         usb_start_out_transfer(&ep0Out,0);
                     }
                 }
@@ -242,9 +235,6 @@ void isr_usbctrl_irq5()
                 usb_hw_clear->buf_status = (1 << (c+1));
                 if ((c>>1)==0) // EP 0 
                 {
-                    #ifdef USB_DBG
-                    printf("out0 rec\r\n");
-                    #endif
                 }
                 else
                 {
@@ -305,25 +295,22 @@ void isr_usbctrl_irq5()
                         case (SETUP_PACKET_DESCR_TYPE_STRING):
                             if (descrIndex==0)
                             {
-                                #ifdef USB_DBG
-                                printf("get lang string descriptor\r\n");
-                                #endif
                                 memcpy(epBfr,pipicoString0Descriptor,4);
                                 usb_start_in_transfer(&ep0In,epBfr,4);
                             }
                             else 
                             {
-                                #ifdef USB_DBG
-                                printf("get string descriptor ");
-                                UInt16ToChar(descrIndex,charbfr);
-                                printf(charbfr);
-                                printf("\r\n");
-                                #endif
                                 generateStringDescriptor(&ep0In,&stringdescr,pipicofxStringDescriptors[descrIndex-1]);
                                 usb_start_in_transfer(&ep0In,0,stringdescr.bLength);
                             }
                             break;
                         default:
+                            #ifdef USB_DBG
+                            printf("get unknown descriptor: ");
+                            UInt8ToChar(descrType,charbfr);
+                            printf(charbfr);
+                            printf("\r\n");
+                            #endif
                             break;
                     }
                     break;
@@ -356,6 +343,10 @@ void isr_usbctrl_irq5()
                     handled=1;
                     break;
                 case SETUP_PACKET_REQ_SET_CONFIGURATION:
+
+                    // configure the endpoints independent of the actual configuration requested since i'm only 
+                    // consider devices havin one configuration
+                    initUsbDeviceDriver(endpointsIn,endpointsOut,&onConfigured);
                     #ifdef USB_DBG
                     printf("set configuration\r\n");
                      #endif
@@ -370,12 +361,6 @@ void isr_usbctrl_irq5()
                 case SETUP_PACKET_REQ_SET_INTERFACE:
                     //break;
                 default:
-                    #ifdef USB_DBG
-                    printf("got unknown request \r\n");
-                    UInt8ToChar(setupPacket->bRequest,charbfr);
-                    printf(charbfr);
-                    printf("\n");
-                    #endif
                     handled=handleSetupRequestOut(setupPacket,&ep0In);
                     
                     break;
@@ -391,6 +376,14 @@ void isr_usbctrl_irq5()
         #ifdef USB_DBG
         printf("usb reset\r\n");
         #endif
+
+        // disable all non-control endpoints
+        for (uint8_t c=0;c<15;c++)
+        {
+            usb_dpram->ep_ctrl[c].in = 0;
+            usb_dpram->ep_ctrl[c].out = 0;
+        }
+
         usb_hw_clear->sie_status = (1 << USB_SIE_STATUS_BUS_RESET_LSB);
         usb_hw->dev_addr_ctrl=0;
         setAddress=0;
@@ -548,7 +541,6 @@ void initUSB()
 
 
     initUsbDevice();
-    initUsbDeviceDriver(endpointsIn,endpointsOut,&onConfigured);
 
     //
     // Hardware configuration, when done the usb controller listens th interrupts and works in device mode
@@ -561,7 +553,7 @@ void initUSB()
 
     // set endpoint0 to single buffered, set bit in BUFFER_STATUS on every buffer completed
     // enable pullup
-    usb_hw->sie_ctrl |= (1 << USB_SIE_CTRL_EP0_INT_1BUF_LSB)| (1 << USB_SIE_CTRL_PULLUP_EN_LSB);
+    usb_hw->sie_ctrl |= (1 << USB_SIE_CTRL_EP0_INT_1BUF_LSB); 
 
     // virtually connect the device to a host
     usb_hw->pwr =  (1 << USB_USB_PWR_VBUS_DETECT_LSB) | (1 << USB_USB_PWR_VBUS_DETECT_OVERRIDE_EN_LSB);
@@ -585,4 +577,6 @@ void initUSB()
     // finally enable the usb controller
     usb_hw->main_ctrl |= (1 << USB_MAIN_CTRL_CONTROLLER_EN_LSB);
 
+    // become connectable by enabling the pullup
+    usb_hw->sie_ctrl |= (1 << USB_SIE_CTRL_PULLUP_EN_LSB);
 }

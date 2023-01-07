@@ -78,8 +78,8 @@ typedef struct __attribute__((__packed__))
 {
 	uint8_t bPeripheralDeviceType; // always 0x1F
 	uint8_t bRemovableMedia; // 0x80 if removable, 0x00 otherwise
-	uint8_t bIsoEcmaAnsiVersion; // always 0
-	uint8_t bResponseDataFormat; //always 0x1
+	uint8_t bIsoEcmaAnsiVersion; // always 2
+	uint8_t bResponseDataFormat; //always 2
 	uint8_t bAdditionalLength; // always 31
 	uint8_t res[3];
 	char cVendor[8]; // vendor string

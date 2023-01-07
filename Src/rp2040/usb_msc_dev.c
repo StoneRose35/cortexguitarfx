@@ -6,6 +6,8 @@
 #include "usb/usb_config.h"
 #include "usb/usb_msc.h"
 
+#define USB_DBG
+
 #ifdef USB_MSC_DRIVER
 UsbEndpointConfigurationType ep1In;
 UsbEndpointConfigurationType ep1Out;
@@ -16,17 +18,17 @@ static volatile uint8_t packetsTransferred;
 static volatile uint32_t currentTag;
 UsbMultipacketTransfer transferMSC;
 CSWType  currentCSW;
-uint32_t currentSense;
+volatile uint32_t currentSense;
+volatile uint8_t statusSent;
 
 static void MSCDataOutHandler();
 static void MSCDataInHandler();
 
-void generateCSW(CSWType * csw,uint8_t status,uint32_t remaining)
+void generateCSW(CSWType * csw,uint32_t remaining)
 {
 	csw->dCSWSignature = 0x53425355;
 	csw->dCSWTag=currentTag;
 	csw->dCSWDataResidue=remaining;
-	csw->bCSWStatus=status;
 }
 
 uint8_t checkCBW(uint8_t * epBfr,uint8_t transferLength,volatile uint32_t* tag)
@@ -125,7 +127,8 @@ static void MSCDataOutHandler()
 		transferMSC.idx=0;
 		memcpy((uint8_t*)(transferMSC.address+transferMSC.idx),ep1Out.buffer,*ep1Out.ep_buf_ctrl & 0x3FF);
 		usb_msc_handle_received_packet(&transferMSC); //TODO 
-		generateCSW(&currentCSW,MSC_CSW_STATUS_GOOD,0);
+		currentCSW.bCSWStatus=MSC_CSW_STATUS_GOOD;
+		generateCSW(&currentCSW,0);
 		usb_start_in_transfer(&ep1In,(uint8_t*)&currentCSW,sizeof(CSWType));
 	}
 	else
@@ -134,6 +137,7 @@ static void MSCDataOutHandler()
 		if (checkres==1)
 		{
 			// send stall because cbw invalid
+			currentCSW.bCSWStatus=MSC_CSW_STATUS_FAILED;
 		}
 		else if (checkres==2)
 		{
@@ -142,9 +146,13 @@ static void MSCDataOutHandler()
 		else // meaningful cbw found
 		{
 			cbw =(CBWType*)ep1Out.buffer;
+			statusSent=0;
 			switch(*(cbw->CBWCB)) // treat commands separately
 			{
 				case UFI_CMD_READ10:
+					#ifdef USB_DBG
+					printf("SCSI cmd read10\r\n");
+					#endif
 					transferSize = ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))*LOGICAL_BLOCK_SIZE;
 					transferMSC.address=0; //TODO: get address from somewhere, e.g. compute using lba
 					usb_handle_read10_request(&transferMSC, (*(cbw->CBWCB + 2) << 24) + (*(cbw->CBWCB + 3) << 16) + (*(cbw->CBWCB + 4) << 8) + (*(cbw->CBWCB + 5)), ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))); //TODO
@@ -155,6 +163,9 @@ static void MSCDataOutHandler()
 					currentSense=SENSE_NO_SENSE;
 					break;
 				case UFI_CMD_WRITE10:
+					#ifdef USB_DBG
+					printf("SCSI cmd write10\r\n");
+					#endif
 					transferSize = ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))*LOGICAL_BLOCK_SIZE;
 					transferMSC.address=0; //TODO: get address from somewhere, e.g. compute using lba
 					usb_handle_write10_request(&transferMSC,(*(cbw->CBWCB + 2) << 24) + (*(cbw->CBWCB + 3) << 16) + (*(cbw->CBWCB + 4) << 8) + (*(cbw->CBWCB + 5)), ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))); //TODO
@@ -167,6 +178,9 @@ static void MSCDataOutHandler()
 					packetsTransferred=0;
 					currentSense=SENSE_NO_SENSE;
 				case UFI_CMD_READ_FORMAT_CAPACITIES:
+					#ifdef USB_DBG
+					printf("SCSI cmd read format capacities\r\n");
+					#endif
 					for(uint8_t c=0;c<12;c++)
 					{
 						packetBufferIn[c]=0;
@@ -180,6 +194,9 @@ static void MSCDataOutHandler()
 					break;
 					currentSense=SENSE_NO_SENSE;
 				case UFI_CMD_READ_CAPACITY:
+					#ifdef USB_DBG
+					printf("SCSI cmd read capacity\r\n");
+					#endif
 					for(uint8_t c=0;c<8;c++)
 					{
 						packetBufferIn[c]=0;
@@ -191,12 +208,15 @@ static void MSCDataOutHandler()
 					currentSense=SENSE_NO_SENSE;
 					break;
 				case UFI_CMD_INQUIRY:
+					#ifdef USB_DBG
+					printf("SCSI cmd inquiry\r\n");
+					#endif
 					memset(packetBufferIn,sizeof(UFIInquiryDataType),0);
 					inquiry=(UFIInquiryData)packetBufferIn;
-					inquiry->bPeripheralDeviceType=0x1F;
-					inquiry->bRemovableMedia=0;
-					inquiry->bIsoEcmaAnsiVersion=0;
-					inquiry->bResponseDataFormat=1;
+					inquiry->bPeripheralDeviceType=0x0;
+					inquiry->bRemovableMedia=0x80;
+					inquiry->bIsoEcmaAnsiVersion=2;
+					inquiry->bResponseDataFormat=2;
 					inquiry->bAdditionalLength=0x1F;
 					memcpy(inquiry->cVendor,"SR35",sizeof("SR35"));
 					memcpy(inquiry->cProductID,"PiPicoFX",sizeof("PiPicoFX"));
@@ -205,29 +225,45 @@ static void MSCDataOutHandler()
 					currentSense=SENSE_NO_SENSE;
 					break;
 				case UFI_CMD_REQUEST_SENSE:
+					#ifdef USB_DBG
+					printf("SCSI cmd request sense\r\n");
+					#endif
 					generateSenseData(packetBufferIn);
 					usb_start_in_transfer(&ep1In,packetBufferIn,18);
 					currentSense=SENSE_NO_SENSE;
 					break;
 				case SCSI_CMD_MODE_SENSE:
+					#ifdef USB_DBG
+					printf("SCSI cmd mode sense\r\n");
+					#endif
 					memset(packetBufferIn,0,4);
-					*packetBufferIn=3; // data length
-					*(packetBufferIn+1)=0; // medium type
+					*packetBufferIn=4; // data length
+					*(packetBufferIn+1)=3; // medium type
 					*(packetBufferIn+2)=0; // 1 for write protected medium
+					*(packetBufferIn+3)=0;
 					usb_start_in_transfer(&ep1In,packetBufferIn,4);
 					currentSense=SENSE_NO_SENSE;
 					break;
 				case SCSI_CMD_TEST_UNIT_READY:
 					// maybe set sense to SENSE_NOT_READY in case the drive is not ready
+					#ifdef USB_DBG
+					printf("SCSI cmd test unit ready\r\n");
+					#endif
 					currentSense=SENSE_NO_SENSE;
 					break;
 				case SCSI_CMD_START_STOP_UNIT:
+					#ifdef USB_DBG
+					printf("SCSI cmd start stop unit\r\n");
+					#endif
 					// maybe start or stop the unit when removed via the host
 					currentSense=SENSE_NO_SENSE;
 					break;
 				default:
+					#ifdef USB_DBG
+					printf("SCSI cmd illegal\r\n");
+					#endif
 					currentSense=SENSE_ILLEGAL_REQUEST;
-
+					currentCSW.bCSWStatus=MSC_CSW_STATUS_FAILED;
 					break; //unhandled command
 			}
 		}
@@ -241,6 +277,13 @@ static void MSCDataInHandler()
 		usb_msc_handle_sent_packet(&transferMSC); //TODO possibly prepare data to be sent, may block until data is ready
         send_next_packet(&ep1In,&transferMSC);
     }
+	else if(statusSent==0)
+	{
+		// send back status
+		generateCSW(&currentCSW,0);
+		usb_start_in_transfer(&ep1In,(uint8_t*)&currentCSW,sizeof(CSWType));
+		statusSent=1;
+	}
 }
 
 uint8_t handleSetupRequestOut(UsbSetupPacket pck,UsbEndpointConfigurationType * ep)
@@ -248,6 +291,9 @@ uint8_t handleSetupRequestOut(UsbSetupPacket pck,UsbEndpointConfigurationType * 
 	uint8_t handled=0;
 	if(pck->bRequest==0xFF) // device reset
 	{
+		#ifdef USB_DBG
+		printf("msc setup req: reset\r\n");
+		#endif
 		//TODO hardware-specific reset, maybe reinitialize the sd card....
 		usb_msc_handle_reset();
 		handled=1;
@@ -261,8 +307,11 @@ uint8_t handleSetupRequestIn(UsbSetupPacket pck,UsbEndpointConfigurationType * e
 	uint8_t handled=0;
 	if (pck->bRequest == 0xFE) // get max LUN, return 0
 	{
+		#ifdef USB_DBG
+		printf("msc setup req: get max lun\r\n");
+		#endif
 		*packetBufferIn=0;
-		usb_start_in_transfer(ep,(const uint8_t*)packetBufferIn,0);
+		usb_start_in_transfer(ep,(const uint8_t*)packetBufferIn,1);
 		handled=1;
 	}
 	return handled;
