@@ -84,7 +84,6 @@ char const* pipicofxStringDescriptors[] = {
 };
 #endif
 
-#define USB_DBG
 
 #ifdef USB_MSC_DRIVER
 const UsbDeviceDescriptorType pipicofxUsbDeviceDescriptor = {
@@ -130,7 +129,7 @@ const uint8_t status[]={0x0, 0x0};
 char const* pipicofxStringDescriptors[] = {
     "Stonerose35", // 1: Manufacturer 
     "PiPicoFX", // 2: Product
-    "03012023001", // 3: Serial Number
+    "03012023001A", // 3: Serial Number
     "Default Config", // 4: Configuration
 };
 #endif
@@ -460,7 +459,8 @@ void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* t
     {
         usb_start_in_transfer(ep,(const uint8_t*)(th->address+th->idx),th->bMaxPacketSize);
         th->idx=th->len;
-        th->transferInProgress=1; // send a zero-length packet in the end
+        //th->transferInProgress=1; // send a zero-length packet in the end
+        th->transferInProgress=0;
     }
     else
     {
@@ -475,19 +475,17 @@ void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer
     if ((th->idx + th->bMaxPacketSize) > th->len)
     {
         usb_start_out_transfer(ep,th->len-th->idx);
-        th->idx=th->len;
         th->transferInProgress=0;
     } 
     else if ((th->idx + th->bMaxPacketSize) == th->len)
     {
         usb_start_out_transfer(ep,th->bMaxPacketSize);
-        th->idx=th->len;
-        th->transferInProgress=1; // send a zero-length packet in the end
+        //th->transferInProgress=1; // send a zero-length packet in the end
+        th->transferInProgress=0; 
     }
     else
     {
         usb_start_out_transfer(ep,th->bMaxPacketSize);
-        th->idx += th->bMaxPacketSize;
         th->transferInProgress=1;
     }
 }

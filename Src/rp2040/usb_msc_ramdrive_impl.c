@@ -85,6 +85,7 @@ void usb_handle_read10_request(UsbMultipacketTransfer *  transfer, uint32_t bloc
 {
     transfer->address=(uint32_t)msc_disk[blockStart];
     transfer->len=nBlocks*LOGICAL_BLOCK_SIZE;
+    transfer->idx=0;
 }
 
 // prepare for writing a least the minimum of a usb packet and nBlock*blocksize bytes
@@ -93,6 +94,8 @@ void usb_handle_write10_request(UsbMultipacketTransfer *  transfer, uint32_t blo
 {
     transfer->address=(uint32_t)msc_disk[blockStart];
     transfer->len=nBlocks*LOGICAL_BLOCK_SIZE;
+    transfer->idx=0;
+
 }
 
 // called when a reset command comes, do nothing so far
