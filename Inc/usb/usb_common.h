@@ -178,10 +178,10 @@ typedef struct
  * @param ep the endpoint to send the data over
  * @param th the object containing the data for the multipacket transfer
  */
-void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th);
+void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th,uint8_t zeroTerminate);
 
 
-void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th);
+void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th,uint8_t zeroTerminate);
 
 /**
  * @brief initializes the usb device. Specifically configures endpoint0 to be ready to handle the default setup requests

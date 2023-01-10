@@ -211,7 +211,7 @@ void isr_usbctrl_irq5()
                     }
                     else if (transferhandler.transferInProgress==1) // handle multi-packet transfers
                     {
-                        send_next_packet(&ep0In,&transferhandler);
+                        send_next_packet(&ep0In,&transferhandler,1);
                     }
                     else
                     {
@@ -288,7 +288,7 @@ void isr_usbctrl_irq5()
                                 #ifdef USB_DBG
                                 printf("get full configuration descriptor\r\n");
                                 #endif
-                                send_next_packet(&ep0In,&transferhandler);
+                                send_next_packet(&ep0In,&transferhandler,1);
                             }
                             break;
                         case (SETUP_PACKET_DESCR_TYPE_STRING):
@@ -446,7 +446,7 @@ void usb_start_out_transfer(UsbEndpointConfigurationType * ep,uint8_t len)
  * @param ep the endpoint through which the data needs to be sent 
  * @param th the transfer handler denoting the address of the data to send and various status information
  */
-void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th)
+void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th,uint8_t zeroTerminate)
 {
 
     if ((th->idx + th->bMaxPacketSize) > th->len)
@@ -460,7 +460,7 @@ void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* t
         usb_start_in_transfer(ep,(const uint8_t*)(th->address+th->idx),th->bMaxPacketSize);
         th->idx=th->len;
         //th->transferInProgress=1; // send a zero-length packet in the end
-        th->transferInProgress=0;
+        th->transferInProgress=zeroTerminate;
     }
     else
     {
@@ -470,7 +470,7 @@ void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* t
     }
 }
 
-void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th)
+void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th,uint8_t zeroTerminate)
 {
     if ((th->idx + th->bMaxPacketSize) > th->len)
     {
@@ -481,7 +481,7 @@ void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer
     {
         usb_start_out_transfer(ep,th->bMaxPacketSize);
         //th->transferInProgress=1; // send a zero-length packet in the end
-        th->transferInProgress=0; 
+        th->transferInProgress=zeroTerminate; 
     }
     else
     {

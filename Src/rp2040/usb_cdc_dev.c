@@ -93,7 +93,7 @@ void sendOverUsb(void * commBfr,uint8_t blocking)
     transferHandlerCDC.address=(uint32_t)epBfr;
     transferHandlerCDC.idx=0;
     transferHandlerCDC.len=len;
-    send_next_packet(&ep2In,&transferHandlerCDC);
+    send_next_packet(&ep2In,&transferHandlerCDC,0);
     consumeOutputBufferBytes(bfr,len);
 
     if(blocking)
@@ -140,7 +140,7 @@ static void CDCDataInHandler(void)
 {
     if(transferHandlerCDC.transferInProgress==1)
     {
-        send_next_packet(&ep2In,&transferHandlerCDC);
+        send_next_packet(&ep2In,&transferHandlerCDC,0);
     }
 }
 

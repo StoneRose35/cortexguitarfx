@@ -168,7 +168,6 @@
 #include "gpio.h"
 #include "ssd1306_display.h"
 #include "wm8731.h"
-#include "tusb.h"
 #include "usb/usb_common.h"
 #include "usb/usb_cdc.h"
 #include "cs4270_audio_codec.h"

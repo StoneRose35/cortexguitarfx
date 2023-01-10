@@ -12,12 +12,14 @@
 #ifdef USB_MSC_DRIVER
 UsbEndpointConfigurationType ep1In;
 UsbEndpointConfigurationType ep1Out;
-uint8_t packetBufferOut[LOGICAL_BLOCK_SIZE];
 uint8_t packetBufferIn[LOGICAL_BLOCK_SIZE];
-static volatile uint32_t packetBufferOutIdx;
-static volatile uint8_t packetsTransferred;
 static volatile uint32_t currentTag;
-UsbMultipacketTransfer transferMSC = {
+UsbMultipacketTransfer transferMSCIn = {
+	.len=0,
+	.idx=0,
+	.transferInProgress=0
+};
+UsbMultipacketTransfer transferMSCOut = {
 	.len=0,
 	.idx=0,
 	.transferInProgress=0
@@ -118,29 +120,43 @@ static void MSCDataOutHandler()
 	uint16_t tl = *(ep1Out.ep_buf_ctrl) & 0x3FF;
 	uint8_t checkres=0;
 	volatile CBWType * cbw;
-	uint32_t transferSize;
 	UFIInquiryData inquiry;
+	#ifdef USB_DBG
 	uint8_t chrbfr[8];
-	if(transferMSC.idx < transferMSC.len && transferMSC.transferInProgress==1)
+	#endif
+	if(transferMSCOut.idx < transferMSCOut.len)
 	{
-		memcpy((uint8_t*)(transferMSC.address+transferMSC.idx),ep1Out.buffer,*ep1Out.ep_buf_ctrl & 0x3FF);
-		usb_msc_handle_received_packet(&transferMSC); //TODO do something with the received packet, should block until the usb controller is ready to receive another packet
-		if(transferMSC.idx + transferMSC.bMaxPacketSize > transferMSC.len)
+		memcpy((uint8_t*)(transferMSCOut.address+transferMSCOut.idx),ep1Out.buffer,*ep1Out.ep_buf_ctrl & 0x3FF);
+		usb_msc_handle_received_packet(&transferMSCOut); //TODO do something with the received packet, should block until the usb controller is ready to receive another packet
+		if(transferMSCOut.idx + transferMSCOut.bMaxPacketSize > transferMSCOut.len)
 		{
-			transferMSC.idx = transferMSC.len;
+			transferMSCOut.idx = transferMSCOut.len;
 		}
 		else
 		{
-			transferMSC.idx += transferMSC.bMaxPacketSize;
+			transferMSCOut.idx += transferMSCOut.bMaxPacketSize;
 		}
-		receive_next_packet(&ep1Out,&transferMSC);
+		if(transferMSCOut.idx != transferMSCOut.len)
+		{
+			receive_next_packet(&ep1Out,&transferMSCOut,0);
+		}
+		else
+		{
+			transferMSCOut.len=0;
+			transferMSCOut.idx=0;
+			transferMSCOut.transferInProgress=0;
+			generateCSW(&currentCSW,0);
+			usb_start_in_transfer(&ep1In,(uint8_t*)&currentCSW,sizeof(CSWType));
+			statusSent=1;
+		}
 	}
-	else if (transferMSC.idx == transferMSC.len && transferMSC.len != 0 && transferMSC.transferInProgress==0)
+	else if (transferMSCOut.idx == transferMSCOut.len && transferMSCOut.len != 0)
 	{
-		transferMSC.len=0;
-		transferMSC.idx=0;
-		memcpy((uint8_t*)(transferMSC.address+transferMSC.idx),ep1Out.buffer,*ep1Out.ep_buf_ctrl & 0x3FF);
-		usb_msc_handle_received_packet(&transferMSC); //TODO 
+		transferMSCOut.len=0;
+		transferMSCOut.idx=0;
+		transferMSCOut.transferInProgress=0;
+		memcpy((uint8_t*)(transferMSCOut.address+transferMSCOut.idx),ep1Out.buffer,*ep1Out.ep_buf_ctrl & 0x3FF);
+		usb_msc_handle_received_packet(&transferMSCOut); //TODO 
 		currentCSW.bCSWStatus=MSC_CSW_STATUS_GOOD;
 		generateCSW(&currentCSW,0);
 		usb_start_in_transfer(&ep1In,(uint8_t*)&currentCSW,sizeof(CSWType));
@@ -160,9 +176,10 @@ static void MSCDataOutHandler()
 		}
 		else // meaningful cbw found
 		{
-			char chrbfr[8];
+			#ifdef USB_DBG
 			uint8_t nblocks;
 			uint8_t blockstart;
+			#endif
 			cbw =(CBWType*)ep1Out.buffer;
 			statusSent=0;
 			switch(*(cbw->CBWCB)) // treat commands separately
@@ -180,22 +197,20 @@ static void MSCDataOutHandler()
 					printf(chrbfr);
 					printf("\r\n");
 					#endif
-					usb_handle_read10_request(&transferMSC, (*(cbw->CBWCB + 2) << 24) + (*(cbw->CBWCB + 3) << 16) + (*(cbw->CBWCB + 4) << 8) + (*(cbw->CBWCB + 5)), ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))); //TODO
-					transferMSC.bMaxPacketSize=PACKET_SIZE_EP2;
-					send_next_packet(&ep1In,&transferMSC);
+					usb_handle_read10_request(&transferMSCIn, (*(cbw->CBWCB + 2) << 24) + (*(cbw->CBWCB + 3) << 16) + (*(cbw->CBWCB + 4) << 8) + (*(cbw->CBWCB + 5)), ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))); //TODO
+					transferMSCIn.bMaxPacketSize=PACKET_SIZE_EP2;
+					send_next_packet(&ep1In,&transferMSCIn,0);
 					currentSense=SENSE_NO_SENSE;
 					break;
 				case UFI_CMD_WRITE10:
 					#ifdef USB_DBG
 					printf("SCSI cmd write10\r\n");
 					#endif
-					transferSize = ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))*LOGICAL_BLOCK_SIZE;
-					usb_handle_write10_request(&transferMSC,(*(cbw->CBWCB + 2) << 24) + (*(cbw->CBWCB + 3) << 16) + (*(cbw->CBWCB + 4) << 8) + (*(cbw->CBWCB + 5)), ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))); //TODO
-					transferMSC.bMaxPacketSize=PACKET_SIZE_EP2;
-					receive_next_packet(&ep1Out,&transferMSC);
-					packetBufferOutIdx=0;
-					packetsTransferred=0;
+					usb_handle_write10_request(&transferMSCOut,(*(cbw->CBWCB + 2) << 24) + (*(cbw->CBWCB + 3) << 16) + (*(cbw->CBWCB + 4) << 8) + (*(cbw->CBWCB + 5)), ((*(cbw->CBWCB + 7) << 8) + *(cbw->CBWCB+8))); //TODO
+					transferMSCOut.bMaxPacketSize=PACKET_SIZE_EP2;
+					receive_next_packet(&ep1Out,&transferMSCOut,0);
 					currentSense=SENSE_NO_SENSE;
+					break;
 				case UFI_CMD_READ_FORMAT_CAPACITIES:
 					#ifdef USB_DBG
 					//printf("SCSI cmd read format capacities\r\n");
@@ -210,8 +225,8 @@ static void MSCDataOutHandler()
 					packetBufferIn[14]=(LOGICAL_BLOCK_SIZE & 0xFF00) >> 8;
 					packetBufferIn[15]=(LOGICAL_BLOCK_SIZE & 0xFF);
 					usb_start_in_transfer(&ep1In,packetBufferIn,16);
-					break;
 					currentSense=SENSE_NO_SENSE;
+					break;
 				case UFI_CMD_READ_CAPACITY:
 					#ifdef USB_DBG
 					//printf("SCSI cmd read capacity\r\n");
@@ -305,10 +320,10 @@ static void MSCDataOutHandler()
 
 static void MSCDataInHandler()
 {
-	if(transferMSC.transferInProgress==1)
+	if(transferMSCIn.transferInProgress==1)
     {
-		usb_msc_handle_sent_packet(&transferMSC); //TODO possibly prepare data to be sent, may block until data is ready
-		send_next_packet(&ep1In,&transferMSC);
+		usb_msc_handle_sent_packet(&transferMSCIn); //TODO possibly prepare data to be sent, may block until data is ready
+		send_next_packet(&ep1In,&transferMSCIn,0);
     }
 	else if(statusSent==0)
 	{
@@ -317,8 +332,8 @@ static void MSCDataInHandler()
 		generateCSW(&currentCSW,0);
 		usb_start_in_transfer(&ep1In,(uint8_t*)&currentCSW,sizeof(CSWType));
 		statusSent=1;
-		transferMSC.len=0;
-		transferMSC.idx=0;
+		transferMSCIn.len=0;
+		transferMSCIn.idx=0;
 	}
 	else // start listening again
 	{
