@@ -262,10 +262,10 @@ int main(void)
 	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
 	#endif
 	#ifdef CS4270
-	//setupCS4270();
+	setupCS4270();
 	#endif
 
-	//initSsd1306Display();
+	initSsd1306Display();
 
 	initDebugLed();
 	initRotaryEncoder(switchesPins,2);
@@ -277,17 +277,17 @@ int main(void)
      *
 	 */
 
-	//initRoundRobinReading(); // internal adc for reading parameters
-	//piPicoFxUiSetup(&piPicoUiController);
-	//ssd1306ClearDisplay();
-	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	//{
-	//	if ((uint32_t)fxPrograms[c]->setup != 0)
-	//	{
-	//		fxPrograms[c]->setup(fxPrograms[c]->data);
-	//	}
-	//}
-	//drawUi(&piPicoUiController);
+	initRoundRobinReading(); // internal adc for reading parameters
+	piPicoFxUiSetup(&piPicoUiController);
+	ssd1306ClearDisplay();
+	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
+	{
+		if ((uint32_t)fxPrograms[c]->setup != 0)
+		{
+			fxPrograms[c]->setup(fxPrograms[c]->data);
+		}
+	}
+	drawUi(&piPicoUiController);
 	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 
@@ -307,7 +307,7 @@ int main(void)
 	#ifdef WM8731
 	initI2SSlave();
 	#else
-	//initI2SSlave();
+	initI2SSlave();
 	#endif
 	
     /* Loop forever */
@@ -318,10 +318,6 @@ int main(void)
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
-
-		//tud_task(); // tinyusb device task
-		//cdc_task(&usbCommBuffer);
-		
 		cliApiTask(&bufferedInput);
 	}
 }
