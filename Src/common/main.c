@@ -176,6 +176,7 @@
 #include "apiHandler.h"
 #include "bufferedInputHandler.h"
 #include "stringFunctions.h"
+#include "fastExpLog.h"
 #include "charDisplay.h"
 #include "rotaryEncoder.h"
 #include "cliApiTask.h"

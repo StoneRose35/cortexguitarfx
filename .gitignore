@@ -9,6 +9,7 @@
 /tools/elf2uf2
 /tools/pioasm
 /tools/pioasm_src/gen/*
+/tools/*.c
 /Inc/gen/*.h
 /Doc/gen/*
 /Doc/.idea

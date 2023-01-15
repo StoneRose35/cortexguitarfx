@@ -273,7 +273,7 @@ static void MSCDataOutHandler()
 					memset(packetBufferIn,0,4);
 					*packetBufferIn=4; // data length
 					*(packetBufferIn+1)=3; // medium type
-					*(packetBufferIn+2)=0; // 1 for write protected medium
+					*(packetBufferIn+2)=1; // 1 for write protected medium, 0 for read/write access
 					*(packetBufferIn+3)=0;
 					usb_start_in_transfer(&ep1In,packetBufferIn,4);
 					currentSense=SENSE_NO_SENSE;

@@ -10,7 +10,7 @@ or if you're browsing through the code at https://github.com/StoneRose35/cortexg
 you can edit this file, however it will not be persisted when turning of the device.\
 "
 
-uint8_t msc_disk[TOTAL_SIZE_IN_BLOCKS][LOGICAL_BLOCK_SIZE] =
+const uint8_t msc_disk[TOTAL_SIZE_IN_BLOCKS][LOGICAL_BLOCK_SIZE] =
 {
   // Taken from TinyUSB MSC CDC example
   //------------- Block0: Boot Sector -------------//
