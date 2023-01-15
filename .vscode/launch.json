@@ -131,7 +131,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": ["./audiosamples/tele_neck_strumming_maxxed.wav", "8", "4000", "4095","0"],
+            "args": ["-v", "1", "1","2", "3","4", "5"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],

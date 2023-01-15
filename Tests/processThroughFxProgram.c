@@ -30,47 +30,35 @@ int32_t float2int(float a)
     return (int32_t)a;
 }
 
-int main(int argc, char ** argv)
+
+
+uint32_t processOffline(int argc,char ** argv,char * jsonBfr)
 {
     uint32_t byteCnt=0;
-    WavFileType wavFileIn;
-    WavFileType wavFileOut;
-    int16_t sample[2];
-    int16_t dataOut;
     char filenameOut[256];
     char filenameIn[256];
-    char paramDisplay[64];
-    size_t fnameLength;
-    uint16_t params[8]={0,0,0,0,0,0,0,0};
     uint8_t fxProgramNr;
-    printf("Offline FxProgram Processor v0.1\r\n\r\n");
-    if (argc == 1)
-    {
-        printf("Useage: processThroughFxProgram <fileIn.wav> <fxProgram> <param1> <param2> <param3> (<param4>..)\r\n");
-        printf("processing hard-coded values\r\n");
-        params[0]=FX_PROGRAM_PARAM1_VAL;
-        params[1]=FX_PROGRAM_PARAM2_VAL;
-        params[2]=FX_PROGRAM_PARAM3_VAL;
-        fxProgramNr=SELECTED_FX_PROGRAM;
-        strcpy(filenameIn,"./audiosamples/guit_riff_16bit.wav");
-        strcpy(filenameOut,"./audiosamples/guit_riff_16bit_proc.wav");
-    }
-    else
-    {
-        strcpy(filenameIn,argv[1]);
-        strcpy(filenameOut,argv[1]);
-        fnameLength = strlen(filenameOut);
-        filenameOut[fnameLength-4]=0;
-        strcat(filenameOut,"_proc.wav");
-        fxProgramNr = (uint8_t)atoi(argv[2]);
-        for (uint8_t c=3;c<argc;c++)
-        {
-            params[c-3]=(uint16_t)atoi(argv[c]);
-        }
+    int16_t dataOut;
+    size_t fnameLength;
+    WavFileType wavFileIn;
+    WavFileType wavFileOut;
+    char paramDisplay[64];
+    uint16_t params[8]={0,0,0,0,0,0,0,0};
+    int16_t sample[2];
+    uint32_t jsonStringPtr=0;
 
+    strcpy(filenameIn,argv[2]);
+    strcpy(filenameOut,argv[2]);
+    fnameLength = strlen(filenameOut);
+    filenameOut[fnameLength-4]=0;
+    strcat(filenameOut,"_proc.wav");
+    fxProgramNr = (uint8_t)atoi(argv[3]);
+    for (uint8_t c=4;c<argc;c++)
+    {
+        params[c-4]=(uint16_t)atoi(argv[c]);
     }
-    printf("processing file %s\r\n",filenameIn);
-    printf("\tFx Program: %s\r\n",fxPrograms[fxProgramNr]->name);
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"inputFile\": \"%s\",",filenameIn);
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"\"FxProgram\": \"%s\",\r\n",fxPrograms[fxProgramNr]->name);
     size_t fnamelen = strlen(filenameIn);
     strcpy(filenameOut+fnamelen-4,"_proc.wav");
     openWavFile(filenameIn,&wavFileIn);
@@ -82,6 +70,7 @@ int main(int argc, char ** argv)
             fxPrograms[c]->setup(fxPrograms[c]->data);
         }
     }
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"\"parameters\":[");
     for (uint8_t c=0;c<fxPrograms[fxProgramNr]->nParameters;c++)
     {
         if (fxPrograms[fxProgramNr]->parameters[c].control == 0)
@@ -89,32 +78,38 @@ int main(int argc, char ** argv)
             zeroString(paramDisplay,64);
             fxPrograms[fxProgramNr]->parameters[c].setParameter(params[0],fxPrograms[fxProgramNr]->data);
             fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
-
-            printf("\tParameter 1: %s\r\n",paramDisplay);
+            jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"nr\": 0,\"value\": \"%s\"}, \r\n",paramDisplay);
         }
         else if (fxPrograms[fxProgramNr]->parameters[c].control == 1)
         {
             zeroString(paramDisplay,64);
             fxPrograms[fxProgramNr]->parameters[c].setParameter(params[1],fxPrograms[fxProgramNr]->data);
             fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
-            printf("\tParameter 2: %s\r\n",paramDisplay);
+            jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"nr\": 1, \"value\": \"%s\"}, \r\n",paramDisplay);
         }
         else if (fxPrograms[fxProgramNr]->parameters[c].control == 2)
         {
             zeroString(paramDisplay,64);           
             fxPrograms[fxProgramNr]->parameters[c].setParameter(params[2],fxPrograms[fxProgramNr]->data);
             fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
-            printf("\tParameter 3: %s\r\n",paramDisplay);   
+            jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"nr\": 2, \"value\": \"%s\"}, \r\n",paramDisplay);
         }
         else
         {
             zeroString(paramDisplay,64);           
             fxPrograms[fxProgramNr]->parameters[c].setParameter(params[c],fxPrograms[fxProgramNr]->data);
             fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
-            printf("\tParameter %d (opt): %s\r\n",c+1,paramDisplay);   
+            jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"nr\": %d, \"value\": \"%s\"}, \r\n",c+1,paramDisplay);
         }
 
     }
+    if(fxPrograms[fxProgramNr]->nParameters > 0)
+    {
+        jsonStringPtr -=4;
+        *(jsonBfr + jsonStringPtr) = 0;
+    }
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"]}");
+
     while(byteCnt < wavFileIn.dataSize+TAIL_TIME)
     {
         if (byteCnt < wavFileIn.dataSize)
@@ -144,4 +139,148 @@ int main(int argc, char ** argv)
     writeWavFile(&wavFileOut);
     fclose(wavFileIn.filePointer);
     fclose(wavFileOut.filePointer);
+    return jsonStringPtr;
+}
+
+uint32_t getOverview(int args,char ** argv,char * jsonBfr)
+{
+    uint32_t jsonStringPtr=0;
+
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"programs\": [");
+    for (uint16_t c=0;c<N_FX_PROGRAMS;c++)
+    {
+        if (fxPrograms[c]->setup != 0)
+        {
+            fxPrograms[c]->setup(fxPrograms[c]->data);
+        }
+        jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"\"%s\", ",fxPrograms[c]->name);
+    }
+    jsonStringPtr -= 2;
+    *(jsonBfr + jsonStringPtr) = 0;
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"]}");
+    return jsonStringPtr;
+}
+
+uint32_t getParamNames(int args,char ** argv,char * jsonBfr)
+{
+    uint32_t jsonStringPtr=0;
+    uint8_t fxProgramNr;
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"parameterNames\":[");
+    for (uint16_t c=0;c<N_FX_PROGRAMS;c++)
+    {
+        if (fxPrograms[c]->setup != 0)
+        {
+            fxPrograms[c]->setup(fxPrograms[c]->data);
+        }
+        fxPrograms[c]->name;
+    }
+    fxProgramNr = (uint8_t)atoi(argv[2]);
+    for (uint8_t c=0;c<fxPrograms[fxProgramNr]->nParameters;c++)
+    {
+        jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"name\": \"%s\",\"control\": %d}, \r\n",fxPrograms[fxProgramNr]->parameters[c].name,fxPrograms[fxProgramNr]->parameters[c].control);
+
+    }
+    if(fxPrograms[fxProgramNr]->nParameters > 0)
+    {
+        jsonStringPtr -= 4;
+        *(jsonBfr + jsonStringPtr) = 0;
+    }
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"]}");
+    return jsonStringPtr;
+}
+
+uint32_t getParamValues(int argc,char ** argv,char * jsonBfr)
+{
+
+    uint32_t byteCnt=0;
+    char filenameOut[256];
+    char filenameIn[256];
+    uint8_t fxProgramNr;
+    int16_t dataOut;
+    size_t fnameLength;
+    WavFileType wavFileIn;
+    WavFileType wavFileOut;
+    char paramDisplay[64];
+    uint16_t params[8]={0,0,0,0,0,0,0,0};
+    int16_t sample[2];
+    uint32_t jsonStringPtr=0;
+
+    strcpy(filenameIn,argv[2]);
+    strcpy(filenameOut,argv[2]);
+    fnameLength = strlen(filenameOut);
+    filenameOut[fnameLength-4]=0;
+    strcat(filenameOut,"_proc.wav");
+    fxProgramNr = (uint8_t)atoi(argv[2]);
+    for (uint8_t c=3;c<argc;c++)
+    {
+        params[c-3]=(uint16_t)atoi(argv[c]);
+    }
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"parameterValues\":[");
+
+    for (uint16_t c=0;c<N_FX_PROGRAMS;c++)
+    {
+        if (fxPrograms[c]->setup != 0)
+        {
+            fxPrograms[c]->setup(fxPrograms[c]->data);
+        }
+    }
+    for (uint8_t c=0;c<fxPrograms[fxProgramNr]->nParameters;c++)
+    {
+        zeroString(paramDisplay,64);
+        fxPrograms[fxProgramNr]->parameters[c].setParameter(params[c],fxPrograms[fxProgramNr]->data);
+        fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
+        jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"control\": %d,\"name\": \"%s\",\"value\": \"%s\"}, \r\n",
+            fxPrograms[fxProgramNr]->parameters[c].control,
+            fxPrograms[fxProgramNr]->parameters[c].name,
+            paramDisplay);
+    }
+    if (fxPrograms[fxProgramNr]->nParameters > 0)
+    {
+        jsonStringPtr -= 4;
+        *(jsonBfr + jsonStringPtr) = 0;
+    }
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"]}");
+    return jsonStringPtr;
+}
+
+int main(int argc, char ** argv)
+{
+    char jsonBfr[2048];
+    uint32_t charsWritten;
+    
+    if (argc == 1)
+    {
+        printf("Offline FxProgram Processor v0.1\r\n\r\n");
+        printf("Commands\r\n\r\n");
+        printf("Processes Wave file, returns the parameters used in a json structure\r\n");
+        printf("\t-p <fileIn.wav> <fxProgram> <param1> <param2> <param3> (<param4>..)\r\n\r\n");
+        printf("Returns an Overview of all Fx Programs in a json structure\r\n");
+        printf("\t-p\r\n\r\n");
+        printf("Returns the Parameter Names and Control assignment from prgram Nr <fxProgram>\r\n");
+        printf("\t-n <fxProgram>\r\n\r\n");
+        printf("Returns the Parameter Values as displayed for program <fxProgram> and the parameters <param1>, <param2> etc..\r\n");
+        printf("all parameter values must be defined\r\n");
+        printf("\t-v <fxProgram> <param1> <param2> <param3> (<param4>..)\r\n\r\n");
+    }
+    else
+    {
+        if (strcmp(argv[1],"-p")==0) // -p: process
+        {
+            charsWritten = processOffline(argc,argv,jsonBfr);
+        }
+        else if (strcmp(argv[1],"-o")==0) // -o: overview, return all programs in a json array
+        {
+            charsWritten = getOverview(argc,argv,jsonBfr);
+        }
+        else if (strcmp(argv[1],"-n")==0) // get parameter names and controls
+        {
+            charsWritten = getParamNames(argc,argv,jsonBfr);
+        }
+        else if (strcmp(argv[1],"-v")==0) // get parameter values
+        {
+            charsWritten = getParamValues(argc,argv,jsonBfr);
+        }
+        printf("%s",jsonBfr);
+    }
+    
 }
