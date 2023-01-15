@@ -3,7 +3,7 @@
 
 /**
  * @brief feedback interpolation values for
- * delay lines of 31, 67, 101, 113 samples
+ * delay lines of 2011, 2551, 3163, 4093 samples
  * and tau values (time when signal is at 0.001) of 0.1, 0.73333333,1.36666667,2.        
  * 
  */
