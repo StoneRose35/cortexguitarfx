@@ -193,23 +193,14 @@ uint32_t getParamValues(int argc,char ** argv,char * jsonBfr)
 {
 
     uint32_t byteCnt=0;
-    char filenameOut[256];
-    char filenameIn[256];
     uint8_t fxProgramNr;
     int16_t dataOut;
     size_t fnameLength;
-    WavFileType wavFileIn;
-    WavFileType wavFileOut;
     char paramDisplay[64];
     uint16_t params[8]={0,0,0,0,0,0,0,0};
     int16_t sample[2];
     uint32_t jsonStringPtr=0;
 
-    strcpy(filenameIn,argv[2]);
-    strcpy(filenameOut,argv[2]);
-    fnameLength = strlen(filenameOut);
-    filenameOut[fnameLength-4]=0;
-    strcat(filenameOut,"_proc.wav");
     fxProgramNr = (uint8_t)atoi(argv[2]);
     for (uint8_t c=3;c<argc;c++)
     {
