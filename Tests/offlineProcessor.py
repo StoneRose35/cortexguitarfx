@@ -99,7 +99,7 @@ class OfflineProcessorGui:
             cnt += 2
         pass
 
-    def param_changed(self):
+    def param_changed(self, event):
         args = ["-v", str(self.currentProgram)]
         for s in self.sliders:
             args.append(str(int(s.get())))
