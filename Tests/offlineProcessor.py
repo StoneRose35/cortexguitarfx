@@ -4,6 +4,9 @@ from tkinter import ttk, font
 import os
 import subprocess
 import json
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 import pyaudio
 import wave
 import threading
@@ -56,6 +59,12 @@ class OfflineProcessorGui:
         self.p = pyaudio.PyAudio()
         self.audioplayer_thread = threading.Thread(target=self.play_wav_file)
         self.audio_playing = False
+
+        self.lblSampleTimeText = tk.StringVar(self.w)
+        self.lblSampleTime = tk.Label(self.w, textvariable=self.lblSampleTimeText)
+        self.lblSampleTime.grid(column=0, row=5, padx=15, pady=15, sticky="w")
+
+
 
         self.w.mainloop()
 
@@ -117,12 +126,24 @@ class OfflineProcessorGui:
         for s in self.sliders:
             args.append(str(int(s.get())))
         call_backed(args)
+        wf = wave.open(samplename_proc, "rb")
+        waveform = wf.readframes(-1)
+        waveform = np.frombuffer(waveform, np.int16)
+
+        figure = plt.Figure() #(figsize=(6, 5), dpi=100)
+        ax = figure.add_subplot(111)
+        ax.plot(waveform)
+        ax.set_xticks([])
+        ax.set_yticks([-32768, 0, 32767])
+        ax.yaxis.grid(True, which="major")
+        ax.set_frame_on(False)
+        chart_type = FigureCanvasTkAgg(figure, self.w)
+        chart_type.get_tk_widget().grid(sticky="we", columnspan=3, row=4, padx=15, pady=15)
         if os.path.exists(samplename_proc):
             if self.audioplayer_thread.is_alive():
                 self.audio_playing = False
                 while self.audioplayer_thread.is_alive():
                     time.sleep(0.01)
-
             self.audioplayer_thread = threading.Thread(target=self.play_wav_file, args=[samplename_proc])
             self.audioplayer_thread.start()
 
@@ -136,9 +157,14 @@ class OfflineProcessorGui:
                              channels=wf.getnchannels(),
                              rate=wf.getframerate(),
                              output=True)
+        tottime = wf.getnframes()/wf.getframerate()
+        timeplayed=0
         # Play samples from the wave file (3)
         while len(data := wf.readframes(1024)) and self.audio_playing is True:
             stream.write(data)
+            timeplayed += len(data)
+            time_displ = timeplayed/wf.getframerate()/wf.getnchannels()/wf.getsampwidth()
+            self.lblSampleTimeText.set("{:.1f}/{:.1f}".format(time_displ, tottime))
         # Close stream (4)
         stream.close()
         wf.close()
