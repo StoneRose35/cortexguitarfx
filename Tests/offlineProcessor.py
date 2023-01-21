@@ -15,10 +15,12 @@ import time
 
 class OfflineProcessorGui:
     def __init__(self):
+        subprocess.call(["jack_control", "start"])
         self.w = tk.Tk()
         self.sliders = []
         self.labels = []
         self.currentProgram = -1
+        self.currentSample = None
         bigfont = font.Font(family="helvetica", size=20)
         self.w.option_add("*Font", bigfont)
         self.w.title("PiPicoFX Offline Processor")
@@ -56,6 +58,9 @@ class OfflineProcessorGui:
 
         self.btnStopSample = tk.Button(self.w, text="Stop Audio", command=self.stop_audio)
         self.btnStopSample.grid(column=1, row=3, columnspan=1, sticky="ew", padx=15, pady=15)
+
+        self.btnShowWaveform = tk.Button(self.w, text="Waveform Window", command=self.show_waveform)
+        self.btnShowWaveform.grid(column=2, row=3, columnspan=1, sticky="ew", padx=15, pady=15)
         self.p = pyaudio.PyAudio()
         self.audioplayer_thread = threading.Thread(target=self.play_wav_file)
         self.audio_playing = False
@@ -74,6 +79,7 @@ class OfflineProcessorGui:
             while self.audioplayer_thread.is_alive():
                 time.sleep(0.01)
         self.p.terminate()
+        subprocess.call(["jack_control", "stop"])
 
     def fxprogram_changed(self, event):
 
@@ -119,18 +125,18 @@ class OfflineProcessorGui:
 
     def process_sample(self):
         samplename = "./audiosamples/" + self.cbSamples["values"][self.cbSamples.current()] + ".wav"
-        samplename_proc = "./audiosamples/" + self.cbSamples["values"][self.cbSamples.current()] + "_proc.wav"
-        if os.path.exists(samplename_proc):
-            os.remove(samplename_proc)
+        self.currentSample = "./audiosamples/" + self.cbSamples["values"][self.cbSamples.current()] + "_proc.wav"
+        if os.path.exists(self.currentSample):
+            os.remove(self.currentSample)
         args = ["-p", samplename, str(self.currentProgram)]
         for s in self.sliders:
             args.append(str(int(s.get())))
         call_backed(args)
-        wf = wave.open(samplename_proc, "rb")
+        wf = wave.open(self.currentSample, "rb")
         waveform = wf.readframes(-1)
         waveform = np.frombuffer(waveform, np.int16)
 
-        figure = plt.Figure() #(figsize=(6, 5), dpi=100)
+        figure = plt.Figure()
         ax = figure.add_subplot(111)
         ax.plot(waveform)
         ax.set_xticks([])
@@ -139,12 +145,12 @@ class OfflineProcessorGui:
         ax.set_frame_on(False)
         chart_type = FigureCanvasTkAgg(figure, self.w)
         chart_type.get_tk_widget().grid(sticky="we", columnspan=3, row=4, padx=15, pady=15)
-        if os.path.exists(samplename_proc):
+        if os.path.exists(self.currentSample):
             if self.audioplayer_thread.is_alive():
                 self.audio_playing = False
                 while self.audioplayer_thread.is_alive():
                     time.sleep(0.01)
-            self.audioplayer_thread = threading.Thread(target=self.play_wav_file, args=[samplename_proc])
+            self.audioplayer_thread = threading.Thread(target=self.play_wav_file, args=[self.currentSample])
             self.audioplayer_thread.start()
 
     def stop_audio(self):
@@ -169,6 +175,19 @@ class OfflineProcessorGui:
         stream.close()
         wf.close()
 
+    def show_waveform(self):
+        if self.currentSample is None:
+            return
+        wf = wave.open(self.currentSample, "rb")
+        waveform = wf.readframes(-1)
+        waveform = np.frombuffer(waveform, np.int16)
+        plt.plot(waveform)
+        #plt.xticks([])
+        #plt.yticks([-32768, 0, 32767])
+        #plt.yaxis.grid(True, which="major")
+        #plt.set_frame_on(False)
+        plt.show()
+        wf.close()
 
 def call_backed(arguments):
     cmd = ["./processThroughFxProgram"]
