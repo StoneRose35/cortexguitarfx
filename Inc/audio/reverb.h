@@ -18,6 +18,7 @@ typedef struct
     AllpassType allpasses[4];
     uint16_t delayPointer;
     int16_t feedbackValues[4];
+    int16_t delayPointers[4];
     int16_t mix;
 
 } ReverbType;

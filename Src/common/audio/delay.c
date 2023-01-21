@@ -30,21 +30,22 @@ int16_t delayLineProcessSample(int16_t sampleIn,DelayDataType*data)
     delayIdx = (data->delayLinePtr - data->delayInSamples) & (DELAY_LINE_LENGTH -1);
 
     sampleOut = ((*(data->delayLine +delayIdx)*data->mix) >> 15) + ((sampleIn*(32767 - data->mix)) >> 15);
-    sampleFedBack = sampleOut;
+    sampleFedBack = *(data->delayLine +delayIdx); //sampleOut;
+
     if (data->feedbackFunction != 0)
     {
         sampleFedBack = (int32_t)data->feedbackFunction((int16_t)sampleFedBack,data->feebackData);
     }
-    sampleFedBack = ((data->feedback*sampleFedBack) >> 15);
+    sampleFedBack = ((data->feedback*sampleFedBack) >> 14);
     if (sampleFedBack > 32767)
     {
         sampleFedBack = 32767;
     }
-    else if (sampleFedBack < -32767)
+    else if (sampleFedBack < -32768)
     {
-        sampleFedBack = -32767;
+        sampleFedBack = -32768;
     }
-    *(data->delayLine + data->delayLinePtr) = (int16_t)sampleFedBack;
+    *(data->delayLine + data->delayLinePtr) = (sampleIn>>1) + (((int16_t)sampleFedBack)>>1);
     data->delayLinePtr++;
     data->delayLinePtr &= (DELAY_LINE_LENGTH -1);
     return sampleOut;

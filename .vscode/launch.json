@@ -131,7 +131,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": ["-v", "1", "1","2", "3","4", "5"],
+            "args": ["-p", "./audiosamples/acoustic_drums.wav", "6","3045", "11","4095"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],
