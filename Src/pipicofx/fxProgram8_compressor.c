@@ -2,6 +2,7 @@
 #include "audio/fxprogram/fxProgram.h"
 #include "stringFunctions.h"
 #include "romfunc.h"
+#include "fastExpLog.h"
 
 static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 {
@@ -12,7 +13,7 @@ static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 static void fxProgramP1Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->compressor.attack = val << 3;
+    pData->compressor.attack = (val>>4)+1;
 }
 
 static void fxProgramP1Display(void*data,char*res)
@@ -22,7 +23,7 @@ static void fxProgramP1Display(void*data,char*res)
     float dval;
     int32_t ival;
     int16_t i16val;
-    attackFloat = int2float(pData->compressor.attack)+ 0.1f;
+    attackFloat = int2float(pData->compressor.attack);
     dval = 682655.744f/attackFloat;
     if (dval > 1000.0f)
     {
@@ -44,7 +45,7 @@ static void fxProgramP1Display(void*data,char*res)
 static void fxProgramP2Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->compressor.release = val << 3;
+    pData->compressor.release = (val>>4)+1;
 }
 
 static void fxProgramP2Display(void*data,char*res)
@@ -77,10 +78,10 @@ static void fxProgramP2Display(void*data,char*res)
 static void fxProgramP3Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    uint16_t enumVal = val >> 9;
-    if (enumVal > 4)
+    uint16_t enumVal = (val >> 9) + 1;
+    if (enumVal > 5)
     {
-        enumVal=4;
+        enumVal=5;
     }
     pData->compressor.gainFunction.gainReduction = enumVal;
 }
@@ -97,7 +98,7 @@ static void fxProgramP3Display(void*data,char*res)
 
     for(uint8_t c=0;c<16;c++)
     {
-        *(res+c)=*(dstrings[pData->compressor.gainFunction.gainReduction] + c);
+        *(res+c)=*(dstrings[pData->compressor.gainFunction.gainReduction-1] + c);
     }
 }
 
@@ -109,8 +110,11 @@ static void fxProgramP4Callback(uint16_t val,void*data)
 
 static void fxProgramP4Display(void*data,char*res)
 {
+    int16_t dbval;
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    Int16ToChar(pData->compressor.gainFunction.threshhold,res);
+    dbval = asDb(pData->compressor.gainFunction.threshhold);
+    decimalInt16ToChar(dbval,res,1);
+    appendToString(res," dB");
 }
 
 

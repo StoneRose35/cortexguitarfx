@@ -52,7 +52,9 @@
                 "-I./Tests/inc",
                 "-fdiagnostics-color=always",
                 "-g",
-                "./Tests/processThroughFxProgram.c", "./Src/common/audio/*.c","./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "./Tests/processThroughFxProgram.c", "./Src/common/audio/*.c",
+                "./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "./Src/common/math/*.c",
                 "-o",
                 "./Tests/processThroughFxProgram", "-lm"
             ],

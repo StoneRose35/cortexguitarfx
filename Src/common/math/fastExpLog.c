@@ -1,15 +1,5 @@
 #include "fastExpLog.h"
 
-int16_t fastlog(int16_t  x)
-{
-    return *(logtable + (uint16_t)x);
-}
-
-
-int16_t fastexp(int16_t x)
-{
-    return *(exptable + (uint16_t)x);
-}
 
 
 /**
@@ -27,7 +17,7 @@ int16_t asDb(int16_t x)
     }
     else
     {
-        interm = (x-1)*903;
+        interm = (x-32767)*903;
         interm >>= 15;
         return (int16_t)interm;
     }

@@ -1,39 +1,39 @@
 #include "stdint.h"
 #include "audio/compressor.h"
 #include "romfunc.h"
+#include "fastExpLog.h"
 
 int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
 {
-    int16_t sample_reduced;
+    int32_t gainFactor;
     int16_t sampleOut;
-    int32_t sampleInterm;
-    if (avgVolume < comp->gainFunction.threshhold)
+    int32_t sampleInterm=0;
+    int16_t logAvg;
+
+    logAvg = fastlog(avgVolume);
+    if (logAvg < comp->gainFunction.threshhold) // below threshhold, amplification 1
     {
-        sample_reduced = avgVolume;
         sampleInterm=sample;
     }
     else if (comp->gainFunction.gainReduction > 4)
     {
-        sample_reduced =  comp->gainFunction.threshhold;
-        sampleInterm=sample*sample_reduced;
+        gainFactor = fastexp(comp->gainFunction.threshhold)*32767;
+        gainFactor /=avgVolume;
         if (avgVolume != 0)
         {
-            sampleInterm = sampleInterm/avgVolume;
+            sampleInterm = (sample*gainFactor) >> 15;  // sampleInterm/avgVolume;
         }
     }
     else
     {
-        sample_reduced =  comp->gainFunction.threshhold + ((avgVolume-comp->gainFunction.threshhold) >> (comp->gainFunction.gainReduction));
-        sampleInterm=sample*sample_reduced;
+        gainFactor =  fastexp(comp->gainFunction.threshhold + ((logAvg-comp->gainFunction.threshhold) >> (comp->gainFunction.gainReduction)))*32767;
+        gainFactor /=avgVolume;
         if (avgVolume != 0)
         {
-            sampleInterm = sampleInterm/avgVolume;
+            sampleInterm = (sample*gainFactor) >> 15;
         }
     }
-
-
     sampleOut=(int16_t)sampleInterm;
-
     return sampleOut;
 }
 

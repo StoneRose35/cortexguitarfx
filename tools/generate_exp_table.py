@@ -11,6 +11,13 @@ if __name__ == "__main__":
 const int16_t exptable[]= {
 
 """
+        epilogue = """
+int16_t fastexp(int16_t x)
+{
+    return *(exptable + (uint16_t)x);
+}
+
+"""
         qfact =  np.floor(-32767/np.log10(1./32768.)*1000000.)/1000000.
         f.write(descstr)
         vals = range(0,32768,1)
@@ -29,4 +36,5 @@ const int16_t exptable[]= {
                 f.write("\r\n")
                 #print("")
         f.write("\r\n};\r\n")
+        f.write(epilogue)
         f.close()
