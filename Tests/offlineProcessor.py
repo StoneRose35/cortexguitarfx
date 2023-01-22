@@ -11,6 +11,7 @@ import pyaudio
 import wave
 import threading
 import time
+import queue
 
 
 class OfflineProcessorGui:
@@ -69,8 +70,8 @@ class OfflineProcessorGui:
         self.lblSampleTime = tk.Label(self.w, textvariable=self.lblSampleTimeText)
         self.lblSampleTime.grid(column=0, row=5, padx=15, pady=15, sticky="w")
 
-
-
+        self.the_queue = queue.Queue()
+        self.listen_for_playback_update()
         self.w.mainloop()
 
         # stop audio if playing
@@ -149,9 +150,17 @@ class OfflineProcessorGui:
             if self.audioplayer_thread.is_alive():
                 self.audio_playing = False
                 while self.audioplayer_thread.is_alive():
-                    time.sleep(0.01)
+                    time.sleep(0.1)
             self.audioplayer_thread = threading.Thread(target=self.play_wav_file, args=[self.currentSample])
             self.audioplayer_thread.start()
+
+    def listen_for_playback_update(self):
+        try:
+            res = self.the_queue.get(block=True, timeout=0)
+            self.lblSampleTimeText.set(res)
+        except queue.Empty:
+            pass
+        self.w.after(10, self.listen_for_playback_update)
 
     def stop_audio(self):
         self.audio_playing = False
@@ -165,12 +174,15 @@ class OfflineProcessorGui:
                              output=True)
         tottime = wf.getnframes()/wf.getframerate()
         timeplayed=0
+        time_displ_old = 0
         # Play samples from the wave file (3)
         while len(data := wf.readframes(1024)) and self.audio_playing is True:
             stream.write(data)
             timeplayed += len(data)
             time_displ = timeplayed/wf.getframerate()/wf.getnchannels()/wf.getsampwidth()
-            self.lblSampleTimeText.set("{:.1f}/{:.1f}".format(time_displ, tottime))
+            if time_displ >= time_displ_old+0.1:
+                self.the_queue.put("{:.1f}/{:.1f}".format(time_displ, tottime))
+                time_displ_old=time_displ
         # Close stream (4)
         stream.close()
         wf.close()
