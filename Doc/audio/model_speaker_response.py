@@ -1,4 +1,4 @@
-import scipy.io
+import scipy.io.wavfile
 import scipy.fft
 import scipy.interpolate
 import numpy as np
@@ -254,13 +254,13 @@ class IrOptimizer:
     def __init__(self,n_stages):
         self.optim_data = []
         self.bounds=[]
-        self.bound_limit = 2.0
+        self.bound_limit = 1.0
         for q in range(n_stages):
             self.optim_data += [1., 0., 0.,0. ,0.]
-            self.bounds += [(-self.bound_limit,self.bound_limit),
-                            (-self.bound_limit,self.bound_limit),
-                            (-self.bound_limit,self.bound_limit),
-                            (-self.bound_limit,self.bound_limit),
+            self.bounds += [(-self.bound_limit*2.,self.bound_limit*2.),
+                            (-self.bound_limit*2.,self.bound_limit*2.),
+                            (-self.bound_limit*2.,self.bound_limit*2.),
+                            (-self.bound_limit*2.,self.bound_limit*2.),
                             (-self.bound_limit,self.bound_limit)]
         self.optim_data = np.array(self.optim_data)
         self.ir_spec = []
@@ -362,7 +362,7 @@ if __name__ == "__main__":
 
     ir_files = ["resources/soundwoofer/Hiwatt Maxwatt M412 SM57 2.wav", "resources/soundwoofer/Fender Frontman 212 AKG D112.wav", "resources/soundwoofer/Vox AC15C1 SM57 1.wav"]
     optimizer = IrOptimizer(3)
-    optimizer.load_ir(ir_files[2])
+    optimizer.load_ir(ir_files[1])
 
     shortened_ir = optimizer.ir
     shortened_ir[64:] = 0
@@ -382,9 +382,10 @@ if __name__ == "__main__":
     plt.show()
 
 
-    res = scipy.optimize.minimize(optimizer.get_diff,optimizer.optim_data,method='Nelder-Mead',
-                                  bounds=optimizer.bounds,callback=optimizer.iterator_callback,options = {"fatol":0.000001,'xatol': 0.000001})
+    res = scipy.optimize.minimize(optimizer.get_diff,optimizer.optim_data,method='Powell',
+                                  bounds=optimizer.bounds,callback=optimizer.iterator_callback,options = {"ftol":0.000001,'xtol': 0.000001})
     optimizer.iterator_callback(res.x,True)
     optimizer.optim_data = res.x
     best_sos = optimizer.get_sos()
-    audio.filter_calculations.plot_iir_filter(best_sos,do_plot=True,fs=48000,do_overflow=True,sample_size=None,ftype="Custom",type="Custom")
+    audio.filter_calculations.plot_iir_filter(best_sos, do_plot=True, fs=48000,sample_size=15, do_overflow=False,
+                                              filtertype="Custom", passtype="Custom")

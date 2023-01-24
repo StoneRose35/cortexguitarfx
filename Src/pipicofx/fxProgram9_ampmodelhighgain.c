@@ -24,33 +24,41 @@ static int16_t fxProgramprocessSample(int16_t sampleIn,void*data)
     switch (pData->cabSimType)
     {
         case 0:
-            out = secondOrderIirFilterProcessSample(out,&pData->filter1);
+            out = secondOrderIirFilterProcessSample(out,&pData->customCabIir);
             out >>= 2;
-            out = firFilterProcessSample(out,&pData->filter3);
+            out = firFilterProcessSample(out,&pData->customCabFir);
             break;
         case 1:
+            //out >>= 1;
+            out = secondOrderIirFilterProcessSample(out,&pData->customIir1);
+            out = secondOrderIirFilterProcessSample(out,&pData->customIir2);
+            out = secondOrderIirFilterProcessSample(out,&pData->customIir3);
+            out <<= 2;
+            out = secondOrderIirFilterProcessSample(out,&pData->customIir4);
+            break;
+        case 2:
             out >>= 2;
             out = firFilterProcessSample(out,&pData->hiwattFir);
             break;
-        case 2:
+        case 3:
             out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir1);
             out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir2);
             out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir3);
             break;
-        case 3:
+        case 4:
             out >>= 2;
             out = firFilterProcessSample(out,&pData->frontmanFir);
             break;
-        case 4:
+        case 5:
             out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir1);
             out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir2);
             out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir3);
             break;
-        case 5:
+        case 6:
             out >>= 2;
             out = firFilterProcessSample(out,&pData->voxAC15Fir);
             break;
-        case 6:
+        case 7:
             out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
             out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
             out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
@@ -143,7 +151,11 @@ static void fxProgramParam4Display(void*data,char*res) // modulation type
 static void fxProgramParam5Callback(uint16_t val,void*data) // cab type
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
-    pData->cabSimType = val >> 9;
+    pData->cabSimType = val >> 8;
+    if (pData->cabSimType > 8)
+    {
+        pData->cabSimType=8;
+    }
 }
 
 static void fxProgramParam5Display(void*data,char*res) // cab type
@@ -158,7 +170,7 @@ static void fxProgramParam5Display(void*data,char*res) // cab type
 static void fxProgramSetup(void*data)
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
-    initfirFilter(&pData->filter3);
+    initfirFilter(&pData->customCabFir);
     initfirFilter(&pData->frontmanFir);
     initfirFilter(&pData->hiwattFir);
     initfirFilter(&pData->voxAC15Fir);
@@ -172,62 +184,143 @@ static void fxProgramSetup(void*data)
 FxProgram9DataType fxProgram9data = {
     /* butterworth lowpass @ 6000Hz */
     /* butterworth lowpass @ 6000Hz */
-    .filter1 = {
-        	.coeffB = {3199, 6398, 3199},
-            .coeffA = {-30893, 10922},
+    .customCabIir = {
+        	//.coeffB = {3199, 6398, 3199},
+            //.coeffA = {-30893, 10922},
+            .coeffB = {1599, 3199, 1599},
+            .coeffA = {-15446, 5461},
             .w= {0,0,0}, 
-            .bitRes = 16
+            .bitRes = 16,
+
+            .y1=0,
+            .y2=0,
+            .x1=0,
+            .x2=0,
+            .acc=0
     },
-    .filter3 = {
+    .customCabFir = {
         .coefficients = {0x62c, 0x674, 0x7d6, 0xbc4, 0x1312, 0x1ea7, 0x2e33, 0x3b3a, 0x3a9e, 0x29bf, 0x15f5, 0x878, 0xf984, 0xebee, 0xe813, 0xe93e, 0xec34, 0xf3d3, 0xfd12, 0x312, 0x5bf, 0x6eb, 0x5da, 0x487, 0x614, 0x771, 0x837, 0x784, 0x299, 0xfc8e, 0xf9f8, 0xfbd5, 0x2b, 0x44c, 0x599, 0x2f3, 0x43, 0x2, 0xfe5b, 0xfc3c, 0xfd4d, 0xb7, 0x4ac, 0x823, 0xa3b, 0xa6a, 0x915, 0x74c, 0x69c, 0x6e5, 0x73e, 0x6cc, 0x4bf, 0x215, 0xffae, 0xfd9b, 0xfde5, 0xffd2, 0x222, 0x3cd, 0x50d, 0x5fa, 0x659, 0x61f}
+    },
+    .customIir1 = {
+        .bitRes=15,
+        .coeffA={-28250, 13700},
+        .coeffB={229,459,229},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
+    },
+    .customIir2 = {
+        .bitRes=15,
+        .coeffA={-29836,14408},
+        .coeffB={119,239,119},
+        .w={0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
+    },
+    .customIir3 = {
+        .bitRes=15,
+        .coeffA={-32700,16325},
+        .coeffB={2591,-5183,2591},
+        .w={0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
+    },
+    .customIir4 = {
+        .bitRes=15,
+        .coeffA={-31856,15497},
+        .coeffB={15934,-31868,15934},
+        .w={0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .hiwattFir = {
         .coefficients= {-42, -42, -6, 317, 1371, 3572, 7006, 11147, 14461, 14434, 9110, 4, -7520, -9233, -8098, -6638, -4065, -601, 2424, 3345, 1940, 242, 302, 976, 809, 424, -56, -633, -650, -448, -767, -1168, -598, 952, 2050, 1294, -1130, -3011, -3906, -3785, -2258, -467, 841, 1033, 81, -771, -368, 398, 469, 505, 527, -281, -1373, -2394, -3074, -2888, -2175, -1570, -877, 258, 821, 194, -528, -772}
         },
     .hiwattIir1 = 
-    { // gain: 0.516
+    { 
         .bitRes = 16,
-        .coeffA = {264, -7532},
-        .coeffB = {16923, 11321, -3276},
-        .w = {0,0,0}
+        .coeffA = {6429, -5692},
+        .coeffB = {29801,3278,-8070},
+        .w = {0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .hiwattIir2 = 
-    { // gain: 0.75
+    { 
         .bitRes = 16,
-        .coeffA = {-2243, 967},
-        .coeffB = {24688, 4010, 4376},
-        .w = {0,0,0}
+        .coeffA = {3428,3068},
+        .coeffB = {4426,5564, 871},
+        .w = {0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .hiwattIir3 = 
-    { // gain: 0.11
+    { 
         .bitRes = 16,
-        .coeffA = {-145, -7285},
-        .coeffB = {3736, 5240, 3361},
-        .w = {0,0,0}
+        .coeffA = {-9664, 597},
+        .coeffB = {945,1897,1442},
+        .w = {0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .frontmanFir = {
         .coefficients = {-513, -1756, -3336, -5308, -7784, -9918, -9872, -6752, -2173, 1032, 1765, 1104, 18, 210, 2189, 4246, 4499, 2834, 138, -2553, -4127, -3345, 241, 4895, 7840, 7047, 3855, 1730, 986, -265, -2714, -4937, -5139, -3073, -59, 2420, 3183, 2875, 2107, -511, -4239, -5117, -1723, 3057, 5753, 5872, 5194, 4838, 5248, 6182, 4671, 1171, -1765, -2505, -1594, -619, -843, -1589, -749, 2533, 6338, 6855, 3017, -236}
     },
     .frontmanIir1 = 
-    { // gain: 0.14
+    { 
         .bitRes = 16,
-        .coeffA = {4753, -7562},
-        .coeffB = {4649, 893, 5816},
-        .w = {0,0,0}
+        .coeffA = {2047, -5184},
+        .coeffB = {1059,1088, 980},
+        .w = {0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .frontmanIir2 = 
-    { // gain: 1.005
+    { 
         .bitRes = 16,
-        .coeffA = {-7357, -1143},
-        .coeffB = {32931, 5701, -17718},
-        .w = {0,0,0}
+        .coeffA = {-618 -463},
+        .coeffB = {30203,1518, -8099},
+        .w = {0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .frontmanIir3 = 
-    { // gain: 0.179
+    { 
         .bitRes = 16,
-        .coeffA = {-6330, 3379},
-        .coeffB = {5892, 8922, 4388},
-        .w = {0,0,0}
+        .coeffA = {81, 149},
+        .coeffB = {4980,4891, -161},
+        .w = {0,0,0},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .voxAC15Fir = {
         .coefficients = {-1110, -3127, -5900, -8409, -10180, -10897, -12238, -13579, -10051, -88, 7780, 6320, 468, -2894, -2063, 35, 2166, 2992, 2402, 1810, 2334, 2426, -195, -2013, 2505, 5798, 2919, 1492, 579, -925, -373, 1467, 2484, 2947, 3693, 3601, 1725, 241, 410, 1402, 2221, 2607, 2216, 776, -954, -1518, -677, 129, 1350, 3138, 130, -1561, -88, 646, 888, 1493, 1431, 811, 1202, 1587, 390, 548, 1266, 56}
@@ -255,6 +348,7 @@ FxProgram9DataType fxProgram9data = {
     },
     .cabNames = {
         "Custom             ",
+        "Custom IIR         ",
         "Hiwatt M412     (F)", 
         "Hiwatt M412     (I)",
         "Fender Frontman (F)",
@@ -313,7 +407,7 @@ FxProgramType fxProgram9 = {
         {
             .name="Cab Type       ",
             .control=0xFF,
-            .increment=512,
+            .increment=256,
             .rawValue=0,
             .setParameter=&fxProgramParam5Callback,
             .getParameterValue=0,

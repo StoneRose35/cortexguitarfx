@@ -78,15 +78,20 @@ typedef struct {
     int16_t highpassCutoff;
     uint8_t nWaveshapers;
     int16_t highpass_out,highpass_old_out,highpass_old_in;
-    const char cabNames[8][24];
+    const char cabNames[9][24];
     const char waveShaperNames[4][24];
     uint8_t modType;
     uint8_t cabSimType;
     MultiWaveShaperDataType waveshaper1;
-    FirFilterType filter3;
-    SecondOrderIirFilterType filter1;
     DelayDataType * delay;
     ReverbType reverb;
+    FirFilterType customCabFir;
+    SecondOrderIirFilterType customCabIir;
+
+    SecondOrderIirFilterType customIir1;
+    SecondOrderIirFilterType customIir2;
+    SecondOrderIirFilterType customIir3;
+    SecondOrderIirFilterType customIir4;
 
     FirFilterType hiwattFir;
     SecondOrderIirFilterType hiwattIir1;

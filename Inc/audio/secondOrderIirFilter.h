@@ -4,6 +4,8 @@
 typedef struct 
 {
     int32_t w[3];
+    int16_t x1,x2,y1,y2;
+    int32_t acc;
     const int32_t coeffA[2];
     const int32_t coeffB[3];
     uint8_t bitRes;
