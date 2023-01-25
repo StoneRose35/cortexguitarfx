@@ -276,6 +276,7 @@ class IrOptimizer:
         ir_spec = scipy.fft.fft(ir)
         self.ir_spec_full = ir_spec
         ir_spec = ir_spec[:halflen]
+        delta_f = 48000 / 2 / len(ir_spec)
         ir_spec = ir_spec / max(abs(ir_spec))
         self.ir_spec = ir_spec
         self.ir = ir
@@ -285,6 +286,7 @@ class IrOptimizer:
         h_tot = np.ones(halflen)
         w = np.linspace(0, 48000. / 2., halflen)
         delta_gain = 0
+        delta_poles = 0
         for idx in range(int(len(opt_data) / 5)):
             b = opt_data[idx*5:idx*5 + 3]
             a = np.array([1.])
@@ -293,9 +295,10 @@ class IrOptimizer:
             h_tot = h_tot * h
             z, p, k = scipy.signal.tf2zpk(b, a)
             delta_gain += abs(1.-k)*4.
-        #respdiff = map(lambda x, y: abs(x - y), self.ir_spec, h_tot)
+            if abs(p[0]) > 1. or abs(p[1]) > 1.:
+                delta_poles += 1000.0
         respdiff = map(lambda x, y: abs(abs(x) - abs(y)), self.ir_spec, h_tot)
-        respdiff = sum(respdiff) + delta_gain
+        respdiff = sum(respdiff) + delta_poles  # + delta_gain
 
         return respdiff
 
@@ -362,7 +365,7 @@ if __name__ == "__main__":
 
     ir_files = ["resources/soundwoofer/Hiwatt Maxwatt M412 SM57 2.wav", "resources/soundwoofer/Fender Frontman 212 AKG D112.wav", "resources/soundwoofer/Vox AC15C1 SM57 1.wav"]
     optimizer = IrOptimizer(3)
-    optimizer.load_ir(ir_files[1])
+    optimizer.load_ir(ir_files[2])
 
     shortened_ir = optimizer.ir
     shortened_ir[64:] = 0
@@ -380,7 +383,6 @@ if __name__ == "__main__":
     plt.plot(20.*np.log10(abs(np.array(spec_shorted[:halflen]))),"-g")
     plt.xscale("log")
     plt.show()
-
 
     res = scipy.optimize.minimize(optimizer.get_diff,optimizer.optim_data,method='Powell',
                                   bounds=optimizer.bounds,callback=optimizer.iterator_callback,options = {"ftol":0.000001,'xtol': 0.000001})

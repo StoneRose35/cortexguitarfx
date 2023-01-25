@@ -189,9 +189,6 @@ FxProgram9DataType fxProgram9data = {
             //.coeffA = {-30893, 10922},
             .coeffB = {1599, 3199, 1599},
             .coeffA = {-15446, 5461},
-            .w= {0,0,0}, 
-            .bitRes = 16,
-
             .y1=0,
             .y2=0,
             .x1=0,
@@ -202,7 +199,6 @@ FxProgram9DataType fxProgram9data = {
         .coefficients = {0x62c, 0x674, 0x7d6, 0xbc4, 0x1312, 0x1ea7, 0x2e33, 0x3b3a, 0x3a9e, 0x29bf, 0x15f5, 0x878, 0xf984, 0xebee, 0xe813, 0xe93e, 0xec34, 0xf3d3, 0xfd12, 0x312, 0x5bf, 0x6eb, 0x5da, 0x487, 0x614, 0x771, 0x837, 0x784, 0x299, 0xfc8e, 0xf9f8, 0xfbd5, 0x2b, 0x44c, 0x599, 0x2f3, 0x43, 0x2, 0xfe5b, 0xfc3c, 0xfd4d, 0xb7, 0x4ac, 0x823, 0xa3b, 0xa6a, 0x915, 0x74c, 0x69c, 0x6e5, 0x73e, 0x6cc, 0x4bf, 0x215, 0xffae, 0xfd9b, 0xfde5, 0xffd2, 0x222, 0x3cd, 0x50d, 0x5fa, 0x659, 0x61f}
     },
     .customIir1 = {
-        .bitRes=15,
         .coeffA={-28250, 13700},
         .coeffB={229,459,229},
         .y1=0,
@@ -212,10 +208,8 @@ FxProgram9DataType fxProgram9data = {
         .acc=0
     },
     .customIir2 = {
-        .bitRes=15,
         .coeffA={-29836,14408},
         .coeffB={119,239,119},
-        .w={0,0,0},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -223,10 +217,8 @@ FxProgram9DataType fxProgram9data = {
         .acc=0
     },
     .customIir3 = {
-        .bitRes=15,
         .coeffA={-32700,16325},
         .coeffB={2591,-5183,2591},
-        .w={0,0,0},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -234,10 +226,8 @@ FxProgram9DataType fxProgram9data = {
         .acc=0
     },
     .customIir4 = {
-        .bitRes=15,
         .coeffA={-31856,15497},
         .coeffB={15934,-31868,15934},
-        .w={0,0,0},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -249,10 +239,8 @@ FxProgram9DataType fxProgram9data = {
         },
     .hiwattIir1 = 
     { 
-        .bitRes = 16,
-        .coeffA = {6429, -5692},
-        .coeffB = {29801,3278,-8070},
-        .w = {0,0,0},
+        .coeffA = {-16557, 7532},
+        .coeffB =  {-319, -722, -382},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -261,10 +249,8 @@ FxProgram9DataType fxProgram9data = {
     },
     .hiwattIir2 = 
     { 
-        .bitRes = 16,
         .coeffA = {3428,3068},
         .coeffB = {4426,5564, 871},
-        .w = {0,0,0},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -273,10 +259,8 @@ FxProgram9DataType fxProgram9data = {
     },
     .hiwattIir3 = 
     { 
-        .bitRes = 16,
-        .coeffA = {-9664, 597},
-        .coeffB = {945,1897,1442},
-        .w = {0,0,0},
+        .coeffA = {2860, 1804},
+        .coeffB = {-10189, -4775, -2987},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -288,10 +272,8 @@ FxProgram9DataType fxProgram9data = {
     },
     .frontmanIir1 = 
     { 
-        .bitRes = 16,
-        .coeffA = {2047, -5184},
-        .coeffB = {1059,1088, 980},
-        .w = {0,0,0},
+        .coeffA = {-16836, 5299},
+        .coeffB = {-148, -389, -436},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -300,10 +282,8 @@ FxProgram9DataType fxProgram9data = {
     },
     .frontmanIir2 = 
     { 
-        .bitRes = 16,
-        .coeffA = {-618 -463},
-        .coeffB = {30203,1518, -8099},
-        .w = {0,0,0},
+        .coeffA = {-2990, -1681},
+        .coeffB = {-25230, -12670, 2490},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -312,10 +292,8 @@ FxProgram9DataType fxProgram9data = {
     },
     .frontmanIir3 = 
     { 
-        .bitRes = 16,
-        .coeffA = {81, 149},
-        .coeffB = {4980,4891, -161},
-        .w = {0,0,0},
+        .coeffA = {-3343, -4287},
+        .coeffB = {-7552, 3249, 6865},
         .y1=0,
         .y2=0,
         .x1=0,
@@ -326,25 +304,31 @@ FxProgram9DataType fxProgram9data = {
         .coefficients = {-1110, -3127, -5900, -8409, -10180, -10897, -12238, -13579, -10051, -88, 7780, 6320, 468, -2894, -2063, 35, 2166, 2992, 2402, 1810, 2334, 2426, -195, -2013, 2505, 5798, 2919, 1492, 579, -925, -373, 1467, 2484, 2947, 3693, 3601, 1725, 241, 410, 1402, 2221, 2607, 2216, 776, -954, -1518, -677, 129, 1350, 3138, 130, -1561, -88, 646, 888, 1493, 1431, 811, 1202, 1587, 390, 548, 1266, 56}
     },
     .voxAC15Iir1 = {
-        // gain: 0.966
-        .bitRes = 16,
-        .coeffB = {31668, -922, 6985},
-        .coeffA = {2752, -1786},
-        .w = {0,0,0}
+        .coeffB = {-465, -1525, -1652},
+        .coeffA = {-10492, -1432},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .voxAC15Iir2 = {
-        // gain: 1.00
-        .bitRes = 16,
-        .coeffB = {32767, -956, -7750},
-        .coeffA = {517, 8698},
-        .w = {0,0,0}
+        .coeffB = {-12044, 17013, 3125},
+        .coeffA = {-5755, 4143},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .voxAC15Iir3 = {
-        // gain: 0.08
-        .bitRes = 16,
-        .coeffB = {2674, 5068, 3204},
-        .coeffA = {-6259, -14319},
-        .w = {0,0,0}
+        .coeffB = {-13053, -3329, -548},
+        .coeffA = {-1159, -1059},
+        .y1=0,
+        .y2=0,
+        .x1=0,
+        .x2=0,
+        .acc=0
     },
     .cabNames = {
         "Custom             ",
