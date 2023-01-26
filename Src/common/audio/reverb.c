@@ -56,7 +56,7 @@ int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass)
     int16_t sampleOut;
     sampleOut = ((allpass->coefficient*sampleIn) >> 15) + *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & 0x3FF));
     // allpass->oldValues
-    *(allpass->delayLine + allpass->delayPtr) = sampleIn - ((allpass->coefficient*sampleOut) >> 15);
+    *(allpass->delayLine + allpass->delayPtr) = sampleIn - ((allpass->coefficient* *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & 0x3FF))) >> 15);
     allpass->delayPtr++;
     allpass->delayPtr &= 0x3FF;
     return sampleOut;

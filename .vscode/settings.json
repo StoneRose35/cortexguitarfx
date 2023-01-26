@@ -31,7 +31,9 @@
         "consolebase.h": "c",
         "usb_cdc.h": "c",
         "usb_rp2040.h": "c",
-        "usb_common.h": "c"
+        "usb_common.h": "c",
+        "delay.h": "c",
+        "reverb2.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false
