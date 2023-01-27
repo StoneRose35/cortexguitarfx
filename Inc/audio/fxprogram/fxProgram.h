@@ -12,11 +12,12 @@
 #include "audio/delay.h"
 #include "audio/compressor.h"
 #include "audio/reverb.h"
+#include "audio/reverb2.h"
 
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 9
+#define N_FX_PROGRAMS 10
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
@@ -58,7 +59,7 @@ typedef struct {
     WaveShaperDataType waveshaper1;
     FirFilterType filter3;
     SecondOrderIirFilterType filter1;
-    DelayDataType * delay;
+    DelayDataType delay;
 } FxProgram1DataType;
 #else
 typedef struct {
@@ -83,7 +84,7 @@ typedef struct {
     uint8_t modType;
     uint8_t cabSimType;
     MultiWaveShaperDataType waveshaper1;
-    DelayDataType * delay;
+    DelayDataType delay;
     ReverbType reverb;
     FirFilterType customCabFir;
     SecondOrderIirFilterType customCabIir;
@@ -190,7 +191,7 @@ typedef struct
 
 typedef struct 
 {
-    DelayDataType * delay;
+    DelayDataType delay;
 } FxProgram6DataType;
 
 
@@ -234,6 +235,12 @@ typedef struct
 } FxProgram11DataType;
 
 
+typedef struct 
+{
+    Reverb2Type reverb;
+} FxProgram12DataType;
+
+
 
 extern FxProgramType fxProgram1;
 extern FxProgramType fxProgram2;
@@ -246,6 +253,7 @@ extern FxProgramType fxProgram8;
 extern FxProgramType fxProgram9;
 extern FxProgramType fxProgram10;
 extern FxProgramType fxProgram11;
+extern FxProgramType fxProgram12;
 
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 

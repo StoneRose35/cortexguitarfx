@@ -64,15 +64,14 @@ int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass)
 
 void initReverb(ReverbType*reverbData,int16_t reverbTime)
 {
-    DelayDataType * delaySingleton = getDelayData();
-    initDelay(delaySingleton);
+    int16_t * delayMemoryPointer = getDelayMemoryPointer();
     for(uint8_t c=0;c<4;c++)
     {
-        reverbData->delayPointers[c]=c*4096;
+        reverbData->delayPointers[c]=delayMemoryPointer + c*4096;
     }
     for(uint8_t c=0;c<3;c++)
     {
-        reverbData->allpasses[c].delayLine = (int16_t*)(((int16_t*)delaySingleton->delayLine)+4*4096+c*1024); 
+        reverbData->allpasses[c].delayLine = (int16_t*)(delayMemoryPointer+4*4096+c*1024); 
         reverbData->allpasses[c].oldValues=0;
         reverbData->allpasses[c].coefficient=phaseshifts[c];
         reverbData->allpasses[c].delayPtr=0;
@@ -87,19 +86,18 @@ int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData)
     int16_t sampleOut;
     int16_t reverbSignal;
 
-    DelayDataType * delaySingleton = getDelayData();
-
     reverbSignal = 0;
 
     
     for (uint8_t c=0;c<4;c++)
     {
-        reverbSignal += delaySingleton->delayLine[c*4096 + ((reverbData->delayPointer-delayInSamples[c]) & 0xFFF)] >> 2;
+        reverbSignal += reverbData->delayPointers[c][(reverbData->delayPointer-delayInSamples[c]) & 0xFFF] >> 2;
     }
 
     for (uint8_t rc=0;rc < 4;rc++)
     {
-        delaySingleton->delayLine[rc*4096 + (reverbData->delayPointer & 0xFFF)] = (sampleIn>>1) + ((delaySingleton->delayLine[rc*4096 + ((reverbData->delayPointer-delayInSamples[rc]) & 0xFFF)]*(reverbData->feedbackValues[rc])) >> 16);
+        reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF] = (sampleIn>>1) + 
+        ((reverbData->delayPointers[rc][(reverbData->delayPointer-delayInSamples[rc]) & 0xFFF]*(reverbData->feedbackValues[rc])) >> 16);
     }
     reverbData->delayPointer++;
     

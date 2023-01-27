@@ -49,7 +49,7 @@ int16_t getSineValue(uint32_t phase)
  */
 void initSineChorus(SineChorusType*data,int8_t instanceNr)
 {
-    data->delayBuffer = (int16_t*)(((uintptr_t)(getDelayData()->delayLine))+4096*instanceNr);
+    data->delayBuffer = (int16_t*)(((uintptr_t)(getDelayMemoryPointer()))+4096*instanceNr);
     for(uint16_t c=0;c<SINE_CHORUS_DELAY_SIZE;c++)
     {
         *(data->delayBuffer + c)=0;

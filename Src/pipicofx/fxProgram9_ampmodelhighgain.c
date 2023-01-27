@@ -69,7 +69,7 @@ static int16_t fxProgramprocessSample(int16_t sampleIn,void*data)
     }
     if (pData->modType==0)
     {
-        out = delayLineProcessSample(out, pData->delay);
+        out = delayLineProcessSample(out, &pData->delay);
     }
     else
     {
@@ -111,9 +111,9 @@ static void fxProgramParam2Display(void*data,char*res)
 static void fxProgramParam3Callback(uint16_t val,void*data) // delay/reverb intensity
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
-    pData->delay->delayInSamples = 2400 + (val << 3);
-    pData->delay->mix = val << 2; // up to 100%
-    pData->delay->feedback = (1<< 14);
+    pData->delay.delayInSamples = 2400 + (val << 3);
+    pData->delay.mix = val << 2; // up to 100%
+    pData->delay.feedback = (1<< 14);
 
     setReverbTime(500 + (val>>2),&pData->reverb);
     pData->reverb.mix = val << 2;
@@ -123,7 +123,7 @@ static void fxProgramParam3Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
-    dVal=pData->delay->mix/164;
+    dVal=pData->delay.mix/164;
     Int16ToChar(dVal,res);
     appendToString(res,"%");
 }
@@ -175,8 +175,7 @@ static void fxProgramSetup(void*data)
     initfirFilter(&pData->hiwattFir);
     initfirFilter(&pData->voxAC15Fir);
     initMultiWaveShaper(&pData->waveshaper1,&multiWaveshaper1);
-    pData->delay = getDelayData();
-    initDelay(pData->delay);
+    initDelay(&pData->delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
     initReverb(&pData->reverb,500);
 }
 

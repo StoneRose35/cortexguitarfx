@@ -26,7 +26,7 @@ static int16_t fxProgram1processSample(int16_t sampleIn,void*data)
     out = secondOrderIirFilterProcessSample(out,&pData->filter1);
     out >>= 2;
     out = firFilterProcessSample(out,&pData->filter3);
-    out = delayLineProcessSample(out, pData->delay);
+    out = delayLineProcessSample(out, &pData->delay);
     return out;
 }
 
@@ -64,16 +64,16 @@ static void fxProgram1Param2Display(void*data,char*res)
 static void fxProgram1Param3Callback(uint16_t val,void*data) // delay intensity
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
-    pData->delay->delayInSamples = 2400 + (val << 3);
-    pData->delay->mix = val << 2; // up to 100%
-    pData->delay->feedback = (1<< 14);
+    pData->delay.delayInSamples = 2400 + (val << 3);
+    pData->delay.mix = val << 2; // up to 100%
+    pData->delay.feedback = (1<< 14);
 }
 
 static void fxProgram1Param3Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
-    dVal=pData->delay->mix/164;
+    dVal=pData->delay.mix/164;
     Int16ToChar(dVal,res);
     for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
     {
@@ -91,8 +91,7 @@ static void fxProgram1Setup(void*data)
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
     initfirFilter(&pData->filter3);
     initWaveShaper(&pData->waveshaper1,&waveShaperDefaultOverdrive);
-    pData->delay = getDelayData();
-    initDelay(pData->delay);
+    initDelay(&pData->delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
 }
 
 

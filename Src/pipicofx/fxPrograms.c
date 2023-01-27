@@ -13,5 +13,6 @@ FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     &fxProgram11, // sine chorus
     &fxProgram6, // delay
     &fxProgram10, // reverb
+    &fxProgram12, // allpass reverb
     &fxProgram3 // Off
     };
