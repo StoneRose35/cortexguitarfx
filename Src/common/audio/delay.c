@@ -61,7 +61,7 @@ int16_t getDelayedSample(DelayDataType*data)
     int16_t sampleOut;
 
     delayIdx = (data->delayLinePtr - data->delayInSamples) & (data->delayBufferLength -1);
-    sampleOut = ((*(data->delayLine +delayIdx)) >> 15) ;
+    sampleOut = *(data->delayLine +delayIdx);
 
     return sampleOut;
 }

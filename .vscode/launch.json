@@ -131,7 +131,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": ["-p", "./audiosamples/geezer_mc_harris_soul.wav", "1","2103", "2615","0","3917","334"],
+            "args": ["-p", "./audiosamples/unitPulse.wav", "8", "367", "1335"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],

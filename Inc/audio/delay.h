@@ -11,7 +11,7 @@ typedef struct
     uint32_t delayLinePtr;
     int32_t delayInSamples;
     int16_t feedback; 
-    uint16_t delayBufferLength;
+    uint32_t delayBufferLength;
     int16_t mix;
     feedbackProcessor feedbackFunction;
     void * feebackData;

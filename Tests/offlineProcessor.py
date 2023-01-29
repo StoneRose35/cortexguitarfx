@@ -70,6 +70,10 @@ class OfflineProcessorGui:
         self.lblSampleTime = tk.Label(self.w, textvariable=self.lblSampleTimeText)
         self.lblSampleTime.grid(column=0, row=5, padx=15, pady=15, sticky="w")
 
+        self.entCommandLineText = tk.StringVar(self.w)
+        self.entCommandLine = ttk.Entry(self.w, textvariable=self.entCommandLineText)
+        self.entCommandLine.grid(column=0, row=6, padx=15, pady=15, sticky="ew", columnspan=3)
+
         self.the_queue = queue.Queue()
         self.listen_for_playback_update()
         self.w.mainloop()
@@ -132,6 +136,7 @@ class OfflineProcessorGui:
         args = ["-p", samplename, str(self.currentProgram)]
         for s in self.sliders:
             args.append(str(int(s.get())))
+        self.entCommandLineText.set("{}".format(args).replace("'", "\""))
         call_backed(args)
         wf = wave.open(self.currentSample, "rb")
         waveform = wf.readframes(-1)
@@ -173,7 +178,7 @@ class OfflineProcessorGui:
                              rate=wf.getframerate(),
                              output=True)
         tottime = wf.getnframes()/wf.getframerate()
-        timeplayed=0
+        timeplayed = 0
         time_displ_old = 0
         # Play samples from the wave file (3)
         while len(data := wf.readframes(1024)) and self.audio_playing is True:
@@ -182,7 +187,7 @@ class OfflineProcessorGui:
             time_displ = timeplayed/wf.getframerate()/wf.getnchannels()/wf.getsampwidth()
             if time_displ >= time_displ_old+0.1:
                 self.the_queue.put("{:.1f}/{:.1f}".format(time_displ, tottime))
-                time_displ_old=time_displ
+                time_displ_old = time_displ
         # Close stream (4)
         stream.close()
         wf.close()
@@ -194,12 +199,9 @@ class OfflineProcessorGui:
         waveform = wf.readframes(-1)
         waveform = np.frombuffer(waveform, np.int16)
         plt.plot(waveform)
-        #plt.xticks([])
-        #plt.yticks([-32768, 0, 32767])
-        #plt.yaxis.grid(True, which="major")
-        #plt.set_frame_on(False)
         plt.show()
         wf.close()
+
 
 def call_backed(arguments):
     cmd = ["./processThroughFxProgram"]

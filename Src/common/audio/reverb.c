@@ -54,11 +54,11 @@ void setReverbTime(int16_t reverbTime,ReverbType*reverbData)
 int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass)
 {
     int16_t sampleOut;
-    sampleOut = ((allpass->coefficient*sampleIn) >> 15) + *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & 0x3FF));
+    sampleOut = ((allpass->coefficient*sampleIn) >> 15) + *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize));
     // allpass->oldValues
-    *(allpass->delayLine + allpass->delayPtr) = sampleIn - ((allpass->coefficient* *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & 0x3FF))) >> 15);
+    *(allpass->delayLine + allpass->delayPtr) = sampleIn - ((allpass->coefficient* *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))) >> 15);
     allpass->delayPtr++;
-    allpass->delayPtr &= 0x3FF;
+    allpass->delayPtr &= allpass->bufferSize;
     return sampleOut;
 }
 
@@ -75,6 +75,7 @@ void initReverb(ReverbType*reverbData,int16_t reverbTime)
         reverbData->allpasses[c].oldValues=0;
         reverbData->allpasses[c].coefficient=phaseshifts[c];
         reverbData->allpasses[c].delayPtr=0;
+        reverbData->allpasses[c].bufferSize=0x3FF;
         reverbData->allpasses[c].delayInSamples=allpassDelays[c];
     }
     setReverbTime(reverbTime,reverbData);

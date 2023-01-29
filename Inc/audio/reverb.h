@@ -10,6 +10,7 @@ typedef struct
     uint16_t delayPtr;
     uint16_t delayInSamples;
     int16_t oldValues;
+    uint16_t bufferSize; 
     int16_t * delayLine;
 } AllpassType;
 
