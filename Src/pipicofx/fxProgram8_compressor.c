@@ -7,7 +7,9 @@
 static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    return compressorProcessSample(sampleIn,&pData->compressor);
+    sampleIn = compressorProcessSample(sampleIn,&pData->compressor);
+    sampleIn = gainStageProcessSample(sampleIn,&pData->makeupGain);
+    return sampleIn;
 }
 
 static void fxProgramP1Callback(uint16_t val,void*data) 
@@ -118,24 +120,65 @@ static void fxProgramP4Display(void*data,char*res)
 }
 
 
+static void fxProgramP5Callback(uint16_t val,void*data) 
+{
+    FxProgram8DataType * pData=(FxProgram8DataType*)data;
+    pData->makeupGain.gain = val + 256;
+}
+
+static void fxProgramP5Display(void*data,char*res)
+{
+    FxProgram8DataType * pData=(FxProgram8DataType*)data;
+    uint32_t dval;
+    dval = pData->makeupGain.gain*100;
+    dval >>= 8;
+    decimalInt16ToChar((int16_t)dval,res,2);
+}
+
 FxProgram8DataType fxProgram8Data =
 {
     .compressor.attack = 400,
     .compressor.release=400,
     .compressor.currentAvg=0,
     .compressor.gainFunction.gainReduction=0,
-    .compressor.gainFunction.threshhold=32767
+    .compressor.gainFunction.threshhold=32767,
+    .makeupGain.gain=0x100,
+    .makeupGain.offset=0
 };
 
 
 FxProgramType fxProgram8 = {
     .data = (void*)&fxProgram8Data,
     .name = "Compressor             ",
-    .nParameters=4,
+    .nParameters=5,
     .parameters = {
         {
+            .name="Threshhold     ",
+            .control=0x0,
+            .getParameterDisplay=&fxProgramP4Display,
+            .setParameter=&fxProgramP4Callback,
+            .increment=64,
+            .rawValue=0
+        },
+        {
+            .name="Ratio          ",
+            .control=1,
+            .getParameterDisplay=&fxProgramP3Display,
+            .setParameter=&fxProgramP3Callback,
+            .increment=512,
+            .rawValue=0
+        },
+        {
+            .name="Makeup Gain    ",
+            .control=2,
+            .getParameterDisplay=&fxProgramP5Display,
+            .setParameter=&fxProgramP5Callback,
+            .increment=64,
+            .rawValue=0,
+        },
+        {
             .name="Attack         ",
-            .control=0,
+            .control=0xff,
             .getParameterDisplay=&fxProgramP1Display,
             .setParameter=&fxProgramP1Callback,
             .increment=64,
@@ -143,28 +186,14 @@ FxProgramType fxProgram8 = {
         },
         {
             .name="Release        ",
-            .control=1,
+            .control=0xff,
             .getParameterDisplay=&fxProgramP2Display,
             .setParameter=&fxProgramP2Callback,
             .increment=64,
             .rawValue=0,
         },
-        {
-            .name="Ratio          ",
-            .control=2,
-            .getParameterDisplay=&fxProgramP3Display,
-            .setParameter=&fxProgramP3Callback,
-            .increment=512,
-            .rawValue=0
-        },
-        {
-            .name="Threshhold     ",
-            .control=0xFF,
-            .getParameterDisplay=&fxProgramP4Display,
-            .setParameter=&fxProgramP4Callback,
-            .increment=64,
-            .rawValue=0
-        }
+
+
     },
     .processSample=&fxProgramProcessSample,
     .setup=0

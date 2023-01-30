@@ -7,10 +7,10 @@ typedef struct
     int16_t gain; // 256 is unity gain
     int16_t offset; // full range
     /* data */
-} gainStageData;
+} GainStageDataType;
 
-void initGainstage(gainStageData*data);
+void initGainstage(GainStageDataType*data);
 
-int16_t gainStageProcessSample(int16_t sampleIn,gainStageData*data);
+int16_t gainStageProcessSample(int16_t sampleIn,GainStageDataType*data);
 
 #endif

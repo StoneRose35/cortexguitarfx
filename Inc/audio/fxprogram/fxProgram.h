@@ -126,7 +126,7 @@ typedef struct {
 
 #ifndef FLOAT_AUDIO
 typedef struct {
-    gainStageData gainStage;
+    GainStageDataType gainStage;
     uint8_t cabSimType;
     uint8_t nWaveshapers;
     uint8_t waveshaperType;
@@ -200,7 +200,7 @@ typedef struct
     WaveShaperDataType waveshaper1;
     WaveShaperDataType waveshaper2;
     WaveShaperDataType waveshaper3;
-    gainStageData gainStage;
+    GainStageDataType gainStage;
     CompressorDataType compressor;
     int16_t highpass_out,highpass_old_out,highpass_old_in;
     const char cabNames[4][24];
@@ -220,7 +220,8 @@ typedef struct
 typedef struct 
 {
     CompressorDataType compressor;
-} FxProgram8DataType;
+    GainStageDataType makeupGain;
+}  FxProgram8DataType;
 
 
 typedef struct
