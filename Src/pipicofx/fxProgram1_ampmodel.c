@@ -30,6 +30,12 @@ static int16_t fxProgram1processSample(int16_t sampleIn,void*data)
     return out;
 }
 
+static int16_t analogDelayFeedbackFunction(int16_t sampleIn,void*fbkFilterData)
+{
+    FirstOrderIirType* tData = (FirstOrderIirType*)fbkFilterData;
+    return firstOrderIirLowpassProcessSample(sampleIn,tData);
+}
+
 
 static void fxProgram1Param1Callback(uint16_t val,void*data) // highpass cutoff before the nonlinear stage
 {
@@ -64,9 +70,9 @@ static void fxProgram1Param2Display(void*data,char*res)
 static void fxProgram1Param3Callback(uint16_t val,void*data) // delay intensity
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
-    pData->delay.delayInSamples = 2400 + (val << 3);
+    pData->delay.delayInSamples = 9600 + (val << 2);
     pData->delay.mix = val << 2; // up to 100%
-    pData->delay.feedback = (1<< 14);
+    pData->delay.feedback = (1<< 13);
 }
 
 static void fxProgram1Param3Display(void*data,char*res)
@@ -92,14 +98,17 @@ static void fxProgram1Setup(void*data)
     initfirFilter(&pData->filter3);
     initWaveShaper(&pData->waveshaper1,&waveShaperDefaultOverdrive);
     initDelay(&pData->delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
+    pData->delay.feebackData = (void*)&pData->feedbackFilter;
 }
 
 
 FxProgram1DataType fxProgram1data = {
     /* butterworth lowpass @ 6000Hz */
     .filter1 = {
-        	.coeffB = {3199, 6398, 3199},
-            .coeffA = {-30893, 10922},
+        	//.coeffB = {3199, 6398, 3199},
+            //.coeffA = {-30893, 10922},
+            .coeffB = {1599, 3199, 1599},
+            .coeffA = {-15446, 5461},
             .x1=0,
             .x2=0,
             .y1=0,
@@ -113,7 +122,11 @@ FxProgram1DataType fxProgram1data = {
     .highpass_old_out=0,
     .highpass_out=0,
     .highpassCutoff = 31000,
-    .nWaveshapers = 1
+    .nWaveshapers = 1,
+    .feedbackFilter.alpha=14000,
+    .feedbackFilter.oldXVal=0,
+    .feedbackFilter.oldVal=0,
+    .delay.feedbackFunction=&analogDelayFeedbackFunction
 };
 FxProgramType fxProgram1 = {
     .name = "Amp-Simulator        ",
