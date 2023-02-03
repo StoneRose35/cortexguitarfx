@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "audio/waveShaper.h"
 #include "audio/secondOrderIirFilter.h"
+#include "audio/firstOrderIirFilter.h"
 #include "audio/firFilter.h"
 #include "audio/simpleChorus.h"
 #include "audio/sineChorus.h"
@@ -60,6 +61,7 @@ typedef struct {
     FirFilterType filter3;
     SecondOrderIirFilterType filter1;
     DelayDataType delay;
+    FirstOrderIirType feedbackFilter;
 } FxProgram1DataType;
 #else
 typedef struct {
