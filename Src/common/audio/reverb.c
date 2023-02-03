@@ -54,9 +54,28 @@ void setReverbTime(int16_t reverbTime,ReverbType*reverbData)
 int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass)
 {
     int16_t sampleOut;
-    sampleOut = ((allpass->coefficient*sampleIn) >> 15) + *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize));
+    int32_t sampleInterm;
+    sampleInterm = ((allpass->coefficient*sampleIn) >> 15) + (*(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize)) >> 1);
+    if (sampleInterm > 32767)
+    {
+        sampleInterm = 32767;
+    }
+    else if (sampleInterm < -32768)
+    {
+        sampleInterm = -32768;
+    }
+    sampleOut = (int16_t)sampleInterm;
     // allpass->oldValues
-    *(allpass->delayLine + allpass->delayPtr) = sampleIn - ((allpass->coefficient* *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))) >> 15);
+    sampleInterm = sampleIn - ((allpass->coefficient* *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))) >> 15);
+    if (sampleInterm > 32767)
+    {
+        sampleInterm = 32767;
+    }
+    else if (sampleInterm < -32768)
+    {
+        sampleInterm = -32768;
+    }
+    *(allpass->delayLine + allpass->delayPtr) = (int16_t)sampleInterm;
     allpass->delayPtr++;
     allpass->delayPtr &= allpass->bufferSize;
     return sampleOut;

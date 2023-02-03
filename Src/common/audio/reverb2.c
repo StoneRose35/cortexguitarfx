@@ -33,7 +33,7 @@ int16_t reverb2ProcessSample(int16_t sampleIn,Reverb2Type*reverbData)
 {
     int16_t sampleOut;
     int16_t reverbSignal=0;
-    int32_t processSignal = (sampleIn >> 1) + ((reverbData->decay*reverbData->outs[3])>> 16);
+    int32_t processSignal = (sampleIn >> 0) + ((reverbData->decay*reverbData->outs[3])>> 15);
     if (processSignal > 32767)
     {
         processSignal = 32767;
@@ -46,9 +46,9 @@ int16_t reverb2ProcessSample(int16_t sampleIn,Reverb2Type*reverbData)
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[1]);
     addSampleToDelayline(processSignal,reverbData->delaylines+0);
     reverbData->outs[0] = getDelayedSample(reverbData->delaylines+0);
-    reverbSignal +=  reverbData->outs[0] >> 2;
+    reverbSignal +=  reverbData->outs[0] >> 0;
 
-    processSignal = (sampleIn >> 1) + ((reverbData->decay*reverbData->outs[0])>> 16);
+    processSignal = (sampleIn >> 0) + ((reverbData->decay*reverbData->outs[0])>> 15);
     if (processSignal > 32767)
     {
         processSignal = 32767;
@@ -61,9 +61,9 @@ int16_t reverb2ProcessSample(int16_t sampleIn,Reverb2Type*reverbData)
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[3]);
     addSampleToDelayline(processSignal,reverbData->delaylines+1);
     reverbData->outs[1] = getDelayedSample(reverbData->delaylines+1);
-    reverbSignal += reverbData->outs[1] >> 2;
+    reverbSignal += reverbData->outs[1] >> 0;
 
-    processSignal = (sampleIn >> 1) + ((reverbData->decay*reverbData->outs[1])>> 16);
+    processSignal = (sampleIn >> 0) + ((reverbData->decay*reverbData->outs[1])>> 15);
     if (processSignal > 32767)
     {
         processSignal = 32767;
@@ -76,9 +76,9 @@ int16_t reverb2ProcessSample(int16_t sampleIn,Reverb2Type*reverbData)
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[5]);
     addSampleToDelayline(processSignal,reverbData->delaylines+2);
     reverbData->outs[2] = getDelayedSample(reverbData->delaylines+2);
-    reverbSignal += reverbData->outs[2] >> 2;
+    reverbSignal += reverbData->outs[2] >> 0;
 
-    processSignal = (sampleIn >> 1) + ((reverbData->decay*reverbData->outs[2])>> 16);
+    processSignal = (sampleIn >> 0) + ((reverbData->decay*reverbData->outs[2])>> 15);
     if (processSignal > 32767)
     {
         processSignal = 32767;
@@ -91,7 +91,7 @@ int16_t reverb2ProcessSample(int16_t sampleIn,Reverb2Type*reverbData)
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[7]);
     addSampleToDelayline(processSignal,reverbData->delaylines+3);
     reverbData->outs[3] = getDelayedSample(reverbData->delaylines+3);
-    reverbSignal += reverbData->outs[3] >> 2;  
+    reverbSignal += reverbData->outs[3] >> 0;  
 
     sampleOut = ((((1 << 15) - reverbData->mix)*sampleIn) >> 15) + ((reverbData->mix*reverbSignal) >> 15);
     return sampleOut;  
