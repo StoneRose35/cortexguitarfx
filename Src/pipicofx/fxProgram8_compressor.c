@@ -138,12 +138,12 @@ static void fxProgramP5Display(void*data,char*res)
 FxProgram8DataType fxProgram8Data =
 {
     .compressor.attack = 400,
-    .compressor.release=400,
-    .compressor.currentAvg=0,
-    .compressor.gainFunction.gainReduction=0,
-    .compressor.gainFunction.threshhold=32767,
-    .makeupGain.gain=0x100,
-    .makeupGain.offset=0
+    .compressor.release = 400,
+    .compressor.currentAvg = 0,
+    .compressor.gainFunction.gainReduction = 0,
+    .compressor.gainFunction.threshhold = 32767,
+    .makeupGain.gain = 0x100,
+    .makeupGain.offset = 0
 };
 
 
