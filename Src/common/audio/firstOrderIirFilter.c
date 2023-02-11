@@ -10,7 +10,8 @@ void initFirstOrderIirFilter(FirstOrderIirType*data)
 int16_t firstOrderIirLowpassProcessSample(int16_t sampleIn,FirstOrderIirType*data)
 {
     //y[n] = alpha*y[n-1] + (1 - alpha)*x[n]
-    data->oldVal = ((data->alpha*data->oldVal) >> 15) + ((((1 << 15) - data->alpha)*sampleIn) >> 15);
+    //data->oldVal = ((data->alpha*data->oldVal) >> 15) + ((((1 << 15) - data->alpha)*sampleIn) >> 15);
+    data->oldVal = sampleIn + ((data->alpha*(data->oldVal - sampleIn)) >> 15);
     return data->oldVal;
 }
 

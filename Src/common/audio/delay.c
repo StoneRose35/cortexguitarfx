@@ -1,5 +1,5 @@
 #include "audio/delay.h"
-
+#include "audio/audiotools.h"
  
  int16_t delayMemory[DELAY_LINE_LENGTH];
 
@@ -41,14 +41,8 @@ int16_t delayLineProcessSample(int16_t sampleIn,DelayDataType*data)
         sampleFedBack = (int32_t)data->feedbackFunction((int16_t)sampleFedBack,data->feebackData);
     }
     sampleFedBack = ((data->feedback*sampleFedBack) >> 14);
-    if (sampleFedBack > 32767)
-    {
-        sampleFedBack = 32767;
-    }
-    else if (sampleFedBack < -32768)
-    {
-        sampleFedBack = -32768;
-    }
+
+    sampleFedBack = clip(sampleFedBack);
     *(data->delayLine + data->delayLinePtr) = (sampleIn>>1) + (((int16_t)sampleFedBack)>>1);
     data->delayLinePtr++;
     data->delayLinePtr &= (data->delayBufferLength -1);

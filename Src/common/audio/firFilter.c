@@ -1,4 +1,5 @@
 #include "audio/firFilter.h"
+#include "audio/audiotools.h"
 #ifdef RP2040_FEATHER
 #include "multicore.h"
 #include "gpio.h"
@@ -25,7 +26,7 @@ void addSample(int16_t sampleIn,FirFilterType*data)
 
 int16_t firFilterProcessSample(int16_t sampleIn,FirFilterType*data)
 {
-    volatile int16_t firstHalf,secondHalf;
+    int32_t firstHalf,secondHalf;
     addSample(sampleIn,data);
     #ifdef RP2040_FEATHER
     while ((*SIO_FIFO_ST & ( 1 << SIO_FIFO_ST_RDY_LSB)) == 0);
@@ -34,18 +35,18 @@ int16_t firFilterProcessSample(int16_t sampleIn,FirFilterType*data)
     secondHalf = processSecondHalf(data);
     // wait for core1 to be finished, core 1 sends the result of the second half back
     while ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_VLD_LSB)) != (1 << SIO_FIFO_ST_VLD_LSB));
-    firstHalf = (int16_t)(*SIO_FIFO_RD & 0xFFFF);
+    firstHalf = *SIO_FIFO_RD;
     #else
     secondHalf = processSecondHalf(data);
     firstHalf = processFirstHalf(data);
     #endif
     firstHalf += secondHalf;
-    //firstHalf=secondHalf;
-    return firstHalf;
+    firstHalf = clip(firstHalf);
+    return (int16_t)firstHalf;
 }
 
 
-int16_t processFirstHalf(FirFilterType*data)
+int32_t processFirstHalf(FirFilterType*data)
 {
     int32_t res=0;
     uint8_t runningPtr=(data->delayPointer+1) & (data->filterLength-1);
@@ -56,10 +57,10 @@ int16_t processFirstHalf(FirFilterType*data)
         runningPtr &= (data->filterLength-1);
     }
     res >>= 15;
-    return (int16_t)res;
+    return res;
 }
 
-int16_t processSecondHalf(FirFilterType*data)
+int32_t processSecondHalf(FirFilterType*data)
 {
     int32_t res=0;
     uint8_t runningPtr=(data->delayPointer+1+(data->filterLength>>1)) & (data->filterLength-1);
@@ -70,5 +71,5 @@ int16_t processSecondHalf(FirFilterType*data)
         runningPtr &= (data->filterLength-1);
     }
     res >>= 15;
-    return (int16_t)res;
+    return res;
 }

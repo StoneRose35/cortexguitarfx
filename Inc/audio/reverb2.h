@@ -3,11 +3,13 @@
 #include "stdint.h"
 #include "reverb.h"
 #include "delay.h"
+#include "firstOrderIirFilter.h"
 
 typedef struct 
 {
     AllpassType aps[8];
     DelayDataType delaylines[4];
+    FirstOrderIirType lowpass;
     int16_t mix;
     int16_t decay;
     int16_t outs[4];

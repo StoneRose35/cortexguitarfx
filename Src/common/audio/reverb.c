@@ -1,5 +1,6 @@
 #include "audio/reverb.h"
 #include "audio/delay.h"
+#include "audio/audiotools.h"
 
 /**
  * @brief feedback interpolation values for
@@ -10,18 +11,18 @@
 
 const int16_t feedback[4][4] = {
 {
-0x715, 0x5642, 0x6791, 0x6ec0, 
+0xdc6, 0x5e71, 0x6cbb, 0x727e, 
 },{
-0x341, 0x4d95, 0x61d8, 0x6a88, 
+0xdb1, 0x5e5e, 0x6caf, 0x7276, 
 },{
-0x159, 0x44ce, 0x5bbc, 0x65f1, 
+0xd93, 0x5e42, 0x6c9e, 0x7269, 
 },{
-0x5a, 0x3953, 0x532d, 0x5f57, 
+0xd6c, 0x5e1c, 0x6c86, 0x7259, 
 },};
 
 const int16_t taus[4] = {100, 733,1366,2000}; 
-const uint16_t delayInSamples[4] = {2011, 2551, 3163, 4093};
-const uint16_t allpassDelays[3] = {1021,337,115};
+const uint16_t delayInSamples[4] = {1549, 1553, 1559, 1567};
+const uint16_t allpassDelays[3] = {307,311,313};
 const int16_t phaseshifts[4]= {22937,22937,22937,22937};
 
 int16_t getFeedback(uint8_t delayLineIndex,int16_t tau)
@@ -55,27 +56,12 @@ int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass)
 {
     int16_t sampleOut;
     int32_t sampleInterm;
-    sampleInterm = ((allpass->coefficient*sampleIn) >> 15) + (*(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize)) >> 1);
-    if (sampleInterm > 32767)
-    {
-        sampleInterm = 32767;
-    }
-    else if (sampleInterm < -32768)
-    {
-        sampleInterm = -32768;
-    }
-    sampleOut = (int16_t)sampleInterm;
+    sampleInterm = sampleIn - (((*(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize)))*allpass->coefficient) >> 15);
+    *(allpass->delayLine + allpass->delayPtr) = (int16_t)clip(sampleInterm);
     // allpass->oldValues
-    sampleInterm = sampleIn - ((allpass->coefficient* *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))) >> 15);
-    if (sampleInterm > 32767)
-    {
-        sampleInterm = 32767;
-    }
-    else if (sampleInterm < -32768)
-    {
-        sampleInterm = -32768;
-    }
-    *(allpass->delayLine + allpass->delayPtr) = (int16_t)sampleInterm;
+    sampleInterm = ((allpass->coefficient*sampleInterm) >> 15) + *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize));
+    sampleInterm=clip(sampleInterm);
+    sampleOut = (int16_t)sampleInterm;
     allpass->delayPtr++;
     allpass->delayPtr &= allpass->bufferSize;
     return sampleOut;
@@ -105,6 +91,7 @@ int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData)
 {
     int16_t sampleOut;
     int16_t reverbSignal;
+    int32_t sampleInterm;
 
     reverbSignal = 0;
 
@@ -116,8 +103,9 @@ int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData)
 
     for (uint8_t rc=0;rc < 4;rc++)
     {
-        reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF] = (sampleIn>>1) + 
-        ((reverbData->delayPointers[rc][(reverbData->delayPointer-delayInSamples[rc]) & 0xFFF]*(reverbData->feedbackValues[rc])) >> 16);
+        sampleInterm = sampleIn + 
+        ((reverbData->delayPointers[rc][(reverbData->delayPointer-delayInSamples[rc]) & 0xFFF]*(reverbData->feedbackValues[rc])) >> 15);
+        reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF] = (int16_t)clip(sampleInterm);
     }
     reverbData->delayPointer++;
     

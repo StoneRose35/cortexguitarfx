@@ -1,5 +1,5 @@
 #include "audio/gainstage.h"
-
+#include "audio/audiotools.h"
 
 void initGainstage(GainStageDataType*data)
 {
@@ -14,17 +14,7 @@ int16_t gainStageProcessSample(int16_t sampleIn,GainStageDataType*data)
     sampleWord = sampleWord* data->gain;
     sampleWord >>= 8;
     sampleWord = sampleWord + data->offset;
-    if( sampleWord < -32768)
-    {
-        sampleOut = -32768;
-    }
-    else if (sampleWord > 32767)
-    {
-        sampleOut = 32767;
-    }
-    else
-    {
-        sampleOut=(int16_t)(sampleWord & 0xFFFF);
-    }
+
+    sampleOut = (int16_t)clip(sampleWord);
     return sampleOut;
 }

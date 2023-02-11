@@ -131,7 +131,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": ["-p", "./audiosamples/unitPulse.wav", "8", "367", "1335"],
+            "args": ["-p", "./audiosamples/tele_neck_strumming.wav", "8", "3961", "4095"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],
