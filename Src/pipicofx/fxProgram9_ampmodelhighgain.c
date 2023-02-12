@@ -25,7 +25,7 @@ static int16_t fxProgramprocessSample(int16_t sampleIn,void*data)
     {
         case 0:
             out = secondOrderIirFilterProcessSample(out,&pData->customCabIir);
-            out >>= 2;
+            out >>= 1;
             out = firFilterProcessSample(out,&pData->customCabFir);
             break;
         case 1:

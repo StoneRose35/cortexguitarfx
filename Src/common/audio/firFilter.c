@@ -27,6 +27,7 @@ void addSample(int16_t sampleIn,FirFilterType*data)
 int16_t firFilterProcessSample(int16_t sampleIn,FirFilterType*data)
 {
     int32_t firstHalf,secondHalf;
+    volatile uint32_t* audioStatePtr = getAudioStatePtr();
     addSample(sampleIn,data);
     #ifdef RP2040_FEATHER
     while ((*SIO_FIFO_ST & ( 1 << SIO_FIFO_ST_RDY_LSB)) == 0);
@@ -41,7 +42,7 @@ int16_t firFilterProcessSample(int16_t sampleIn,FirFilterType*data)
     firstHalf = processFirstHalf(data);
     #endif
     firstHalf += secondHalf;
-    firstHalf = clip(firstHalf);
+    firstHalf = clip(firstHalf,audioStatePtr);
     return (int16_t)firstHalf;
 }
 

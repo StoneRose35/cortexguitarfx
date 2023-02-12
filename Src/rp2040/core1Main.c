@@ -2,8 +2,10 @@
 #include "dma.h"
 #include "multicore.h"
 #include "core1Main.h"
+#include "gpio.h"
 #include "ssd1306_display.h"
 #include "audio/firFilter.h"
+#include "audio/audiotools.h"
 #include "audio/fxprogram/fxProgram.h"
 #include "pipicofx/pipicofxui.h"
 #include "adc.h"
@@ -21,7 +23,6 @@ extern volatile uint32_t task;
 extern volatile int16_t avgOutOld,avgInOld;
 extern volatile uint8_t fxProgramIdx;
 extern volatile uint32_t cpuLoad;
-extern volatile uint32_t audioState;
 extern PiPicoFxUiType piPicoUiController;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
@@ -33,6 +34,7 @@ uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
+volatile uint32_t * audioStatePtr;
 #define UI_DMIN 1
 #define ADC_LOWPASS 2
 
@@ -52,10 +54,13 @@ void isr_sio_irq_proc1_irq16() // only fires when a fir computation has to be ma
 
 void core1Main()
 {
-
+    audioStatePtr = getAudioStatePtr();
     *SIO_FIFO_ST = (1 << 2);
     *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
     *NVIC_ISER = (1 << 16); //enable interrupt for adc and sio of proc1 
+
+    setAsOuput(CLIPPING_LED_INPUT);
+    setAsOuput(CLIPPING_LED_OUTPUT);
 
     for(;;)
     {
@@ -108,6 +113,24 @@ void core1Main()
             avgOldOutBfr = avgOutOld >> 8;
             cpuLoadBfr = (cpuLoad >> 1);
             updateAudioUi(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
+            if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
+            {
+                setPin(CLIPPING_LED_INPUT,1);
+                *audioStatePtr &= ~(1 << AUDIO_STATE_INPUT_CLIPPED);
+            }
+            else
+            {
+                setPin(CLIPPING_LED_INPUT,0);
+            }
+            if ((*audioStatePtr & (1 << AUDIO_STATE_OUTPUT_CLIPPED)) == (1 << AUDIO_STATE_OUTPUT_CLIPPED))
+            {
+                setPin(CLIPPING_LED_OUTPUT,1);
+                *audioStatePtr &= ~(1 << AUDIO_STATE_OUTPUT_CLIPPED);
+            }
+            else
+            {
+                setPin(CLIPPING_LED_OUTPUT,0);
+            }
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
         switchVals[0] = getSwitchValue(0);

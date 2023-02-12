@@ -12,6 +12,7 @@
 #include "hardware/rp2040_registers.h"
 #include "timer.h"
 #include "pipicofx/pipicofxui.h"
+#include "audio/audiotools.h"
 
 int16_t* audioBufferPtr;
 #ifndef I2S_INPUT
@@ -25,13 +26,13 @@ int16_t inputSample, inputSampleOther;
 
 extern volatile uint8_t sendState;
 extern volatile uint32_t task;
-extern volatile uint32_t audioState;
 extern uint32_t ticStart,ticEnd;
 extern uint16_t bufferCnt;
 volatile int16_t avgOut=0,avgIn=0;
 extern int16_t avgOutOld,avgInOld;
 extern uint32_t cpuLoad;
 extern PiPicoFxUiType piPicoUiController;
+volatile uint32_t * audioStatePtr;
 
 void initDMA()
 {
@@ -42,6 +43,7 @@ void initDMA()
 
 	// enable the dma interrupt by default
 	*NVIC_ISER = (1 << 11);
+	audioStatePtr=getAudioStatePtr();
 }
 
 
@@ -77,11 +79,11 @@ void isr_dma_irq0_irq11()
 
 		if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
 		{
-			audioState &= ~(1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
+			*getAudioStatePtr() &= ~(1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
 		}
 		else
 		{
-			audioState  |= (1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
+			*getAudioStatePtr()  |= (1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
 		}
 
 		ticStart = getTimeLW();
@@ -111,9 +113,13 @@ void isr_dma_irq0_irq11()
 			{
 				avgIn = inputSample;
 			}
+			if ((avgIn & (0x7FFF - 0x3)) == (0x7FFF - 0x3)) // give a little margin to prematurely indicate clipping
+			{
+				*audioStatePtr |= (1 << AUDIO_STATE_INPUT_CLIPPED);
+			}
 			avgInOld = ((AVERAGING_LOWPASS_CUTOFF*avgIn) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgInOld) >> 15);
 
-			inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);//fxPrograms[fxProgramIdx]->processSample(inputSample,fxPrograms[fxProgramIdx]->data);
+			inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
 
 
 			if (inputSample < 0)

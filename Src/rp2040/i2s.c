@@ -8,7 +8,7 @@
 #include "i2s.h"
 #include "adc.h"
 #include "hardware/rp2040_registers.h"
-
+#include "audio/audiotools.h"
 
 
 static int16_t i2sDoubleBuffer[AUDIO_BUFFER_SIZE*2*2];
@@ -17,7 +17,7 @@ static int16_t i2sDoubleBufferIn[AUDIO_BUFFER_SIZE*2*2];
 #endif
 static volatile  uint32_t dbfrPtr; 
 static volatile uint32_t dbfrInputPtr;
-volatile uint32_t audioState;
+
 
 
 void isr_pio1_irq0_irq9()
@@ -35,7 +35,7 @@ void initI2S()
     uint16_t instr_mem_cnt = 0;
 	uint16_t first_instr_pos;
 
-	audioState = 0;
+	*getAudioStatePtr() = 0;
  
     first_instr_pos = instr_mem_cnt;
     // disable optional side-set, set wrap top and wrap bottom
@@ -180,7 +180,7 @@ void initI2S()
 		// __asm__("nop"); 
 		*PIO1_CTRL |= ((1 << 0) << PIO_CTRL_CLKDIV_RESTART_LSB) | (1 << (PIO_CTRL_SM_ENABLE_LSB+0)) | ((1 << 0) << PIO_CTRL_SM_RESTART_LSB);
 	#endif
-	audioState = (1 << AUDIO_STATE_ON);
+	*getAudioStatePtr() = (1 << AUDIO_STATE_ON);
 }
 
 
@@ -189,7 +189,7 @@ void initI2SSlave()
     uint16_t instr_mem_cnt = 0;
 	uint16_t first_instr_pos;
 
-	audioState = 0;
+	*getAudioStatePtr() = 0;
  
     first_instr_pos = instr_mem_cnt;
     // set wrap top and wrap bottom, set jump pin
@@ -293,7 +293,7 @@ void enableAudioEngine()
 	#ifdef I2S_INPUT
 	*DMA_CH3_CTRL_TRIG |= (1 << DMA_CH3_CTRL_TRIG_EN_LSB);
 	#endif
-	audioState = (1 << AUDIO_STATE_ON);
+	*getAudioStatePtr() = (1 << AUDIO_STATE_ON);
 }
 
 void disableAudioEngine()
@@ -302,7 +302,7 @@ void disableAudioEngine()
 	#ifdef I2S_INPUT
 	*DMA_CH3_CTRL_TRIG &= ~(1 << DMA_CH3_CTRL_TRIG_EN_LSB);
 	#endif
-	audioState = 0;
+	*getAudioStatePtr() = 0;
 }
 
 int16_t* getEditableAudioBuffer()

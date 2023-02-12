@@ -27,6 +27,9 @@
 #define I2S_MCLK_PIN 8
 #define I2S_DEBUG_PIN 6
 
+#define CLIPPING_LED_INPUT 16
+#define CLIPPING_LED_OUTPUT 17
+
 // GPIO number where the neopixel is attached
 // Integrated Neopixel on RP2040 Feather: 16
 // Integrated Neopixel on RP2040 Itsybitsy: 17
