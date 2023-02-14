@@ -34,7 +34,7 @@ uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
-volatile uint32_t * audioStatePtr;
+static volatile uint32_t * audioStatePtr;
 #define UI_DMIN 1
 #define ADC_LOWPASS 2
 

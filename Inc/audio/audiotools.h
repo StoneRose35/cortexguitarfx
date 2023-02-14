@@ -30,7 +30,7 @@ inline int32_t clip(int32_t sample,volatile uint32_t*audioStatePtr)
     }
 }
 #else
-int32_t clip(int32_t sample,uint32_t *);
+int32_t clip(int32_t sample,volatile uint32_t *);
 #endif
 
 volatile uint32_t * getAudioStatePtr(); 

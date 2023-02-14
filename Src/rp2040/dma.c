@@ -32,7 +32,7 @@ volatile int16_t avgOut=0,avgIn=0;
 extern int16_t avgOutOld,avgInOld;
 extern uint32_t cpuLoad;
 extern PiPicoFxUiType piPicoUiController;
-volatile uint32_t * audioStatePtr;
+static volatile uint32_t * audioStatePtr;
 
 void initDMA()
 {
