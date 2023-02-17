@@ -41,3 +41,8 @@
 /schematics/guitarpreamp/report.txt
 /schematics/guitarpreamp_sim/guitarpreamp_sim-backups/*
 /schematics/guitarpreamp_sim/TL072.301
+/schematics/mic_extension_board/mic_extension_board-backups/*
+/schematics/mic_extension_board/*.xml
+/schematics/mic_extension_board/*.csv
+/schematics/mic_extension_board/fp-info-cache
+/schematics/mic_extension_board/mic_extension_board
