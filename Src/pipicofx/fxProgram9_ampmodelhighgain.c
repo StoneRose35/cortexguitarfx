@@ -345,7 +345,8 @@ FxProgram9DataType fxProgram9data = {
     .highpass_old_out=0,
     .highpass_out=0,
     .highpassCutoff = 31000,
-    .nWaveshapers = 1
+    .nWaveshapers = 1,
+    .reverb.paramNr=0
 };
 FxProgramType fxProgram9 = {
     .name = "Amp High Gain       ",

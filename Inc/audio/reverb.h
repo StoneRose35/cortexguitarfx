@@ -22,12 +22,14 @@ typedef struct
     int16_t feedbackValues[4];
     int16_t * delayPointers[4];
     int16_t mix;
+    uint8_t paramNr;
 } ReverbType;
 
 int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData);
 void initReverb(ReverbType*reverbData,int16_t);
 void setReverbTime(int16_t reverbTime,ReverbType*reverbData);
 int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass,volatile uint32_t*);
+const char * getReverbParameterSetName(ReverbType*reverbData);
 #else
 
 typedef struct 

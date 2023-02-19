@@ -38,6 +38,21 @@ static void fxProgramParam2Display(void*data,char*res)
 }
 
 
+static void fxProgramParam3Callback(uint16_t val,void*data) // Parameter
+{
+    FxProgram10DataType* pData= (FxProgram10DataType*)data;
+    pData->reverb.paramNr=(val >> 10);
+    initReverb(&pData->reverb,pData->reverbTime);
+}
+
+static void fxProgramParam3Display(void*data,char*res)
+{
+    FxProgram10DataType* pData= (FxProgram10DataType*)data;
+    *res=0;
+    appendToString(res,getReverbParameterSetName(&pData->reverb));
+}
+
+
 static void fxProgramSetup(void*data)
 {
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
@@ -46,12 +61,13 @@ static void fxProgramSetup(void*data)
 
 FxProgram10DataType fxProgram10data=
 {
-    .reverbTime=300
+    .reverbTime=300,
+    .reverb.paramNr=0
 };
 
 FxProgramType fxProgram10 = {
     .name = "Reverb                 ",
-    .nParameters=2,
+    .nParameters=3,
     .parameters = {
         {
             .name = "Time           ",
@@ -70,6 +86,15 @@ FxProgramType fxProgram10 = {
             .getParameterDisplay=&fxProgramParam2Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam2Callback
+        },
+        {
+            .name = "ParameterSet   ",
+            .control=2,
+            .increment=1024,
+            .rawValue=0,
+            .getParameterDisplay=&fxProgramParam3Display,
+            .getParameterValue=0,
+            .setParameter=&fxProgramParam3Callback
         }
     },
     .processSample = &fxProgramprocessSample,
