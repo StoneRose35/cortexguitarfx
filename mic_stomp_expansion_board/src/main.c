@@ -3,9 +3,23 @@
 
 #define I2C_ADDRESS 10
 
-volatile int footswitchstate;
+volatile int footswitchstate=0, footswitchstateOld=0;
 volatile int ledState=0, ledStateOld=0;
+
 //int transmissionOngoing = 0;
+
+void sendStompSwitchesState(void);
+void startDebounceTimer(void);
+
+
+void startDebounceTimer(void)
+{
+	TCNT0 = 0;
+	TCCR0B = 4; // divide by 256
+	OCR0A = 117; // compare match after roughly 30ms
+	TIMSK0 = 2; // output compare a enabled
+}
+
 int main(void)
 {
 	DDRB = 0x0;
@@ -16,12 +30,22 @@ int main(void)
 	// initialize i2c to listen to address 10
 	TWAR = (I2C_ADDRESS << 1);
 	TWCR |= (1 << TWIE);
+	sei();
 	while(1)
 	{
 		footswitchstate = PINB & 0x7;	
+		if (footswitchstateOld != footswitchstate)
+		{
+			if (TCCR0B == 0) // counter didn't run, change is valid
+			{
+				footswitchstateOld = footswitchstate;
+				startDebounceTimer();
+			}
+		}
 		if (ledState != ledStateOld)
 		{
-			
+			PORTC |= (ledState & 0xF);
+			PORTD |= ((ledState >> 4) & 0x3); 
 			ledStateOld = ledState;
 		}	
 	}
@@ -29,7 +53,7 @@ int main(void)
 
 void sendStompSwitchesState(void)
 {
-	TWDR = footswitchstate & 0xFF;
+	TWDR = footswitchstateOld & 0xFF;
 	TWCR &= ~(1 >> TWEA);
 	TWCR |= (1 << TWINT) | (1 << TWEN);
 }
@@ -64,4 +88,10 @@ ISR ( TWI_vect )
 	{
 		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
 	}
+}
+
+
+ISR ( TIMER0_COMPA_vect )
+{
+	TCCR0B = 0;
 }
