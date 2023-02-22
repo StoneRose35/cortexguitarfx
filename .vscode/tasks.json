@@ -11,7 +11,8 @@
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "detail": "Main Builder: generates the UF2-Firmware to put onto the Raspberry Pi Pico"
         },
         {
             "label": "Build tests",
