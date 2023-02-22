@@ -107,6 +107,8 @@ def design_iir_filter(rs=20, fc=None, fs=48000, do_overflow=True, sample_size=16
         second_order_section = signal.cheby1(order, rs, fc, analog=False, btype=passtype, output='sos', fs=fs)
     elif filtertype == "butter":
         second_order_section = signal.butter(order, fc, analog=False, btype=passtype, output='sos', fs=fs)
+    elif filtertype == "ellip":
+        second_order_section = signal.ellip(order, 0.5, 0.5, fc, analog=False, btype=passtype, output='sos', fs=fs)
     else:
         second_order_section = [[1., 0., 0.], [1., 0., 0.]]
     return second_order_section
@@ -245,19 +247,34 @@ def plot_iir_filter(second_order_section, do_plot=True, fs=48000, do_overflow=Tr
             cnt+=1
             fsize=1.
             font_size=8.
-            axs3.text(0.02, 16 - 1 * fsize,"Second-Order Section {}/{}".format(cnt, len(second_order_section)), fontsize=font_size)
-            axs3.text(0.02,16-3*fsize,"Filter Type: \n    " + filter_type_displ,fontsize=font_size)
+            f_descr_text = ""
+            f_descr_text += "Second-Order Section {}/{}\n".format(cnt, len(second_order_section))
+            f_descr_text += "Filter Type: \n    " + filter_type_displ + "\n"
             freq_atten_displ = "Cutoff / Attenuation: \n    {}Hz".format(fc)
-            if passtype!= "butter":
-                freq_atten_displ += ", Attenuation: {}dB".format(rs)
-            axs3.text(0.02, 16 - 5 * fsize, freq_atten_displ,fontsize=font_size)
-            axs3.text(0.02,16-7*fsize,"B coefficients: \n    {}".format(bvals),fontsize=font_size)
-            axs3.text(0.02,16-9*fsize,"A coefficients: \n    {}".format(avals),fontsize=font_size)
-            axs3.text(0.02, 16-11*fsize, "bit resolution: \n    {}".format(sample_size),fontsize=font_size)
-            axs3.text(0.02, 16-13*fsize, "gain: \n    {:.6f}".format(k),fontsize=font_size)
-            axs3.tick_params(bottom=False, labelbottom=False, labelleft=False, left=False)
-            axs3.set_ylim([0,16])
+            if passtype != "butter":
+                freq_atten_displ += ", Attenuation: {}dB\n".format(rs)
+            else:
+                freq_atten_displ += "\n"
+            f_descr_text += freq_atten_displ
+            f_descr_text += "B coefficients: \n    {}\n".format(bvals)
+            f_descr_text += "A coefficients: \n    {}\n".format(avals)
+            f_descr_text += "bit resolution: \n    {}\n".format(sample_size)
+            f_descr_text += "gain: \n    {:.6f}".format(k)
+            axs3.text(0.02, 0.2, f_descr_text,
+                      fontsize=font_size)
 
+            #axs3.text(0.02, 16 - 1 * fsize,"Second-Order Section {}/{}".format(cnt, len(second_order_section)), fontsize=font_size)
+            #axs3.text(0.02,16-3*fsize,"Filter Type: \n    " + filter_type_displ,fontsize=font_size)
+            #freq_atten_displ = "Cutoff / Attenuation: \n    {}Hz".format(fc)
+            #if passtype!= "butter":
+            #    freq_atten_displ += ", Attenuation: {}dB".format(rs)
+            #axs3.text(0.02, 16 - 5 * fsize, freq_atten_displ,fontsize=font_size)
+            #axs3.text(0.02,16-7*fsize,"B coefficients: \n    {}".format(bvals),fontsize=font_size)
+            #axs3.text(0.02,16-9*fsize,"A coefficients: \n    {}".format(avals),fontsize=font_size)
+            #axs3.text(0.02, 16-11*fsize, "bit resolution: \n    {}".format(sample_size),fontsize=font_size)
+            #axs3.text(0.02, 16-13*fsize, "gain: \n    {:.6f}".format(k),fontsize=font_size)
+            axs3.tick_params(bottom=False, labelbottom=False, labelleft=False, left=False)
+            axs3.set_ylim([0, 16])
 
             axs6=fig.add_subplot(gs[1,1])
             circle_angles=np.linspace(0,2.*np.pi,512)
@@ -286,6 +303,7 @@ def design_and_plot_iir_filter(do_plot=True, rs=20, fc=None, fs=48000, do_overfl
                             filtertype=type, passtype=ftype)
     plot_iir_filter(sos, do_plot=do_plot, fs=fs, do_overflow=do_overflow, sample_size=sample_size, scaling=scaling,
                     fc=fc, filtertype=ftype, passtype=type, rs=rs)
+    return sos
 
 
 def plot_sos_frequency_response(sosections,fs=48000,nfreqs=512):
@@ -316,10 +334,10 @@ def design_and_plot_oversampling_lowpass_cheby(do_plot=False, to_integer=True, r
     order = 2
     sample_size = 16
     f0 = fc/(fs*oversampling)*2.
-    bd, ad = signal.cheby2(order,rs, f0, analog=False, btype=ftype, output='ba')
+    [bd, ad] = signal.cheby2(order, rs, f0, analog=False, btype=ftype, output='ba')
 
     bvals = np.array(bd * ((1 << (sample_size-1)) - 1)).astype(int)
-    avals = np.array(ad*((1 << (sample_size-1)) -1)).astype(int)
+    avals = np.array(ad*((1 << (sample_size-1)) - 1)).astype(int)
     if do_plot is True:
         print("B coefficients: {}".format(bvals))
         print("A coefficients: {}".format(avals))
@@ -327,20 +345,18 @@ def design_and_plot_oversampling_lowpass_cheby(do_plot=False, to_integer=True, r
         wz, hz = signal.freqz(bd, ad)
 
         freqs = wz*(fs*oversampling)/2./np.pi
-        plt.subplot(2,1,1)
-        plt.plot(freqs,20.*np.log10(abs(hz)))
-        #plt.axis([20,(fs*oversampling)/2,-60,0])
-        #plt.xscale("log")
-        plt.subplot(2,1,2)
-        plt.plot(freqs,np.unwrap(np.arctan2(np.real(hz),np.imag(hz)))*180./np.pi)
-        #plt.xscale("log")
+        plt.subplot(2, 1, 1)
+        plt.plot(freqs, 20.*np.log10(abs(hz)))
+        plt.subplot(2, 1, 2)
+        plt.plot(freqs, np.unwrap(np.arctan2(np.real(hz), np.imag(hz)))*180./np.pi)
         plt.show()
     if to_integer is True:
-        return avals,bvals
+        return avals, bvals
     else:
-        return ad,bd
+        return ad, bd
 
-def design_and_plot_oversampling_lowpass_butter(do_plot=False,to_integer=True,oversampling=2,fc=None):
+
+def design_and_plot_oversampling_lowpass_butter(do_plot=False, to_integer=True, oversampling=2, fc=None):
     ftype = 'lowpass'
     fs = 48000
     if fc is None:
@@ -349,10 +365,10 @@ def design_and_plot_oversampling_lowpass_butter(do_plot=False,to_integer=True,ov
     sample_size = 16
 
     f0 = fc/(fs*oversampling)*2.
-    bd, ad = signal.butter(order, f0, analog=False, btype=ftype, output='ba')
+    [bd, ad] = signal.butter(order, f0, analog=False, btype=ftype, output='ba')
 
     bvals = np.array(bd * ((1 << (sample_size-1)) - 1)).astype(int)
-    avals = np.array(ad*((1 << (sample_size-1)) -1)).astype(int)
+    avals = np.array(ad*((1 << (sample_size-1)) - 1)).astype(int)
     if do_plot is True:
         print("B coefficients: {}".format(bvals))
         print("A coefficients: {}".format(avals))
@@ -360,16 +376,16 @@ def design_and_plot_oversampling_lowpass_butter(do_plot=False,to_integer=True,ov
         wz, hz = signal.freqz(bd, ad)
 
         freqs = wz*(fs*oversampling)/2./np.pi
-        plt.subplot(2,1,1)
-        plt.plot(freqs,20.*np.log10(abs(hz)))
-        plt.axis([20,(fs*oversampling)/2,-60,0])
+        plt.subplot(2, 1, 1)
+        plt.plot(freqs, 20.*np.log10(abs(hz)))
+        plt.axis([20, (fs*oversampling)/2, -60, 0])
         # plt.xscale("log")
-        plt.subplot(2,1,2)
-        plt.plot(freqs,np.unwrap(np.arctan2(np.real(hz),np.imag(hz)))*180./np.pi)
+        plt.subplot(2, 1, 2)
+        plt.plot(freqs, np.unwrap(np.arctan2(np.real(hz), np.imag(hz)))*180./np.pi)
         # plt.xscale("log")
         plt.show()
     if to_integer is True:
-        return avals,bvals
+        return avals, bvals
     else:
         return ad, bd
 
@@ -438,17 +454,17 @@ if __name__ == "__main__":
     filter_order = scipy.signal.cheb1ord(200./24000., 20./24000, 1, 50, analog=False)
     # manual modeling attempt of a guitar speaker using 4 iir filters
     iirfilters = []
-    sos = design_iir_filter(6, 3500, filtertype="cheby1", passtype="lowpass")
-    design_and_plot_iir_filter(True, rs=6, fc=3500, do_overflow=False, sample_size=15, type="cheby1", ftype="lowpass")
+    sos = design_and_plot_iir_filter(True, rs=6, fc=3500, do_overflow=False,
+                                     sample_size=15, type="cheby1", ftype="lowpass")
     iirfilters.append([sos[0][:3], sos[0][3:]])
-    sos = design_iir_filter(6, 2500, filtertype="cheby1", passtype="lowpass")
-    design_and_plot_iir_filter(True, rs=6, fc=2500, do_overflow=False, sample_size=15, type="cheby1", ftype="lowpass")
+    sos = design_and_plot_iir_filter(True, rs=6, fc=2500, do_overflow=False,
+                                     sample_size=15, type="cheby1", ftype="lowpass")
     iirfilters.append([sos[0][:3], sos[0][3:]])
-    sos = design_iir_filter(16, 120, filtertype="cheby1", passtype="highpass")
-    design_and_plot_iir_filter(True, rs=16, fc=120, do_overflow=False, sample_size=15, type="cheby1", ftype="highpass")
+    sos = design_and_plot_iir_filter(True, rs=16, fc=120, do_overflow=False,
+                                     sample_size=15, type="cheby1", ftype="highpass")
     iirfilters.append([sos[0][:3], sos[0][3:]])
-    sos = design_iir_filter(2, 300, filtertype="butter", passtype="highpass")
-    design_and_plot_iir_filter(True, rs=2, fc=300, do_overflow=False, sample_size=15, type="butter", ftype="highpass")
+    sos = design_and_plot_iir_filter(True, rs=2, fc=300, do_overflow=False,
+                                     sample_size=15, type="butter", ftype="highpass")
     iirfilters.append([sos[0][:3], sos[0][3:]])
 
     plot_sos_frequency_response(iirfilters)
