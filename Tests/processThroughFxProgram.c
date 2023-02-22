@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
-
+#include "math.h"
 
 #define SELECTED_FX_PROGRAM 1
 #define FX_PROGRAM_PARAM1_VAL 200 // amp model 2: gain 
@@ -28,6 +28,11 @@ float int2float(int32_t a)
 int32_t float2int(float a)
 {
     return (int32_t)a;
+}
+
+float fln(float a)
+{
+    return logf(a);
 }
 
 

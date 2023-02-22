@@ -15,6 +15,20 @@ int16_t firstOrderIirLowpassProcessSample(int16_t sampleIn,FirstOrderIirType*dat
     return data->oldVal;
 }
 
+int16_t firstOlderIirDualCoeffLPProcessSample(int16_t sampleIn,FirstOrderIirDualCoeffLPType*data)
+{
+    if (sampleIn > data->oldVal)
+    {
+        data->oldVal = sampleIn + ((data->alphaRising*(data->oldVal - sampleIn)) >> 15);
+        return data->oldVal;
+    }
+    else
+    {
+        data->oldVal = sampleIn + ((data->alphaFalling*(data->oldVal - sampleIn)) >> 15);
+        return data->oldVal;
+    }
+}
+
 int16_t firstOrderIirHighpassProcessSample(int16_t sampleIn,FirstOrderIirType*data)
 {
     //y[n] = 0.5*(1+alpha)*(x[n] - x[n-1])  + alpha*y[n-1]

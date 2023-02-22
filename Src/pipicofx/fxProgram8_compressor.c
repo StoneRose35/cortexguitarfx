@@ -15,66 +15,43 @@ static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 static void fxProgramP1Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->compressor.attack = (val>>4)+1;
+    pData->compressor.avgLowpass.alphaRising = (1 << 15) - 2 - (val >> 6);
 }
 
 static void fxProgramP1Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     float attackFloat;
-    float dval;
+    float t60;
     int32_t ival;
     int16_t i16val;
-    attackFloat = int2float(pData->compressor.attack);
-    dval = 682655.744f/attackFloat;
-    if (dval > 1000.0f)
-    {
-        dval = dval/1000.0f;
-        ival = float2int(dval);
-        i16val = (int16_t)ival;
-        Int16ToChar(i16val,res);
-        appendToString(res," ms");
-    }
-    else
-    {
-        ival = float2int(dval);
-        i16val = (int16_t)ival;
-        Int16ToChar(i16val,res);
-        appendToString(res," us");
-    }
+    attackFloat = int2float(pData->compressor.avgLowpass.alphaRising)/32767.0f;
+    t60=-0.143911568f/fln(attackFloat); // -3*ln(10)/(ln(attack)*f_sample)*1000., result in t60 in ms
+    ival = float2int(t60);
+    i16val = (int16_t)ival;
+    Int16ToChar(i16val,res);
+    appendToString(res," ms");
 }
 
 static void fxProgramP2Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->compressor.release = (val>>4)+1;
+    pData->compressor.avgLowpass.alphaFalling = (1 << 15) - 2 - (val >> 6);
 }
 
 static void fxProgramP2Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     float releaseFloat;
-    float dval;
+    float t60;
     int32_t ival;
     int16_t i16val;
-    releaseFloat = int2float(pData->compressor.release)+ 0.1f;
-    dval = 682655.744f/releaseFloat;
-    if (dval > 1000.0f)
-    {
-        dval = dval/1000.0f;
-        ival = float2int(dval);
-        i16val = (int16_t)ival;
-        Int16ToChar(i16val,res);
-        appendToString(res," ms");
-    }
-    else
-    {
-        ival = float2int(dval);
-        i16val = (int16_t)ival;
-        Int16ToChar(i16val,res);
-        appendToString(res," us");
-    }
-
+    releaseFloat = int2float(pData->compressor.avgLowpass.alphaFalling)/32767.0f;
+    t60=-0.143911568f/fln(releaseFloat); // -3*ln(10)/(ln(release)*f_sample)*1000., result in t60 in ms
+    ival = float2int(t60);
+    i16val = (int16_t)ival;
+    Int16ToChar(i16val,res);
+    appendToString(res," ms");
 }
 
 static void fxProgramP3Callback(uint16_t val,void*data) 
@@ -137,8 +114,10 @@ static void fxProgramP5Display(void*data,char*res)
 
 FxProgram8DataType fxProgram8Data =
 {
-    .compressor.attack = 400,
-    .compressor.release = 400,
+    .compressor.avgLowpass.alphaFalling = 10,
+    .compressor.avgLowpass.alphaRising = 10,
+    .compressor.avgLowpass.oldVal = 0,
+    .compressor.avgLowpass.oldXVal = 0,
     .compressor.currentAvg = 0,
     .compressor.gainFunction.gainReduction = 0,
     .compressor.gainFunction.threshhold = 32767,

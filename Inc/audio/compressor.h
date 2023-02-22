@@ -1,5 +1,6 @@
 #ifndef COMPRESSOR_H_
 #define COMPRESSOR_H_
+#include "firstOrderIirFilter.h"
 
 typedef struct 
 {
@@ -10,10 +11,9 @@ typedef struct
 
 typedef struct 
 {
-    int16_t attack; // maximum change in 20.83333 us, attack time is 32768/attack*20.83us
-    int16_t release;
-    int16_t currentAvg;
     GainFunctionType gainFunction;
+    FirstOrderIirDualCoeffLPType avgLowpass;
+    int16_t currentAvg;
 } CompressorDataType;
 
 
