@@ -1,19 +1,8 @@
 #ifndef _REVERB_H_
 #define _REVERB_H_
 #include "stdint.h"
-
+#include "audio/reverbUtils.h"
 #ifndef FLOAT_AUDIO
-
-typedef struct 
-{
-    int16_t coefficient;
-    uint16_t delayPtr;
-    uint16_t delayInSamples;
-    int16_t oldValues;
-    uint16_t bufferSize; 
-    int16_t * delayLineIn;
-    int16_t * delayLineOut;
-} AllpassType;
 
 typedef struct 
 {
@@ -25,20 +14,9 @@ typedef struct
     uint8_t paramNr;
 } ReverbType;
 
-
-typedef struct 
-{
-    int16_t * delayPointers[4];
-    int16_t delayTimes[4];
-    int16_t delayPointer;
-} HadamardDiffuserType;
-
-
 int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData);
 void initReverb(ReverbType*reverbData,int16_t);
 void setReverbTime(int16_t reverbTime,ReverbType*reverbData);
-int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass,volatile uint32_t*);
-void hadamardDiffuserProcessArray(int16_t * channels,HadamardDiffuserType*data);
 const char * getReverbParameterSetName(ReverbType*reverbData);
 #else
 

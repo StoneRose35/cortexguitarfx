@@ -1,4 +1,5 @@
 #include "audio/reverb2.h"
+#include "audio/reverbUtils.h"
 #include "audio/delay.h"
 #include "audio/firstOrderIirFilter.h"
 #include "audio/audiotools.h"
