@@ -1,4 +1,5 @@
 #include "audio/reverb3.h"
+#include "audio/reverbUtils.h"
 
 const int16_t diffuserTimes[4]={293, 353, 419, 487};
 void initReverb3(Reverb3Type*data)

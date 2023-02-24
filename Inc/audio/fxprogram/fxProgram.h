@@ -14,6 +14,7 @@
 #include "audio/compressor.h"
 #include "audio/reverb.h"
 #include "audio/reverb2.h"
+#include "audio/reverb3.h"
 
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
@@ -243,6 +244,12 @@ typedef struct
     Reverb2Type reverb;
 } FxProgram12DataType;
 
+typedef struct 
+{
+    int16_t mix;
+    Reverb3Type reverb;
+} FxProgram13DataType;
+
 
 
 extern FxProgramType fxProgram1;
@@ -257,6 +264,7 @@ extern FxProgramType fxProgram9;
 extern FxProgramType fxProgram10;
 extern FxProgramType fxProgram11;
 extern FxProgramType fxProgram12;
+extern FxProgramType fxProgram13;
 
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
