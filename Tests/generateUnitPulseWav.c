@@ -7,7 +7,7 @@ int main(int argc,char**argv)
     createWavFile("audiosamples/unitPulse.wav",&wavFile,TOTLENGTH);
     for (uint32_t c=0;c<TOTLENGTH/2;c++)
     {
-        if (c<2)
+        if (c<1)
         {
             wavFile.data[c]=32767;
         }
