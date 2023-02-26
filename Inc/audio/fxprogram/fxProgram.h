@@ -15,11 +15,12 @@
 #include "audio/reverb.h"
 #include "audio/reverb2.h"
 #include "audio/reverb3.h"
+#include "audio/threebandeq.h"
 
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-#define N_FX_PROGRAMS 11
+#define N_FX_PROGRAMS 12
 
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
@@ -250,6 +251,10 @@ typedef struct
     Reverb3Type reverb;
 } FxProgram13DataType;
 
+typedef struct
+{
+    ThreeBandEQType eq;
+} FxProgram14DataType;
 
 
 extern FxProgramType fxProgram1;
@@ -265,7 +270,7 @@ extern FxProgramType fxProgram10;
 extern FxProgramType fxProgram11;
 extern FxProgramType fxProgram12;
 extern FxProgramType fxProgram13;
-
+extern FxProgramType fxProgram14;
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
 #endif
