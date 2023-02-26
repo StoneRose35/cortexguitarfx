@@ -23,28 +23,28 @@ int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass,volatile uint
 }
 
 
-void hadamardDiffuserProcessArray(int16_t * channels,HadamardDiffuserType*data)
+void hadamardDiffuserProcessArray(int32_t * channels,HadamardDiffuserType*data,volatile uint32_t * audioStatePtr)
 {
     int32_t sum_first, sum_second;
     int32_t diff_first, diff_second;
     for(uint8_t c=0;c<4;c++)
     {
-        data->delayPointers[c][data->delayPointer] = channels[c];
+        data->delayPointers[c][data->delayPointer] = clip(channels[c],audioStatePtr);
     }
 
-    sum_first = (data->delayPointers[0][(data->delayPointer - data->delayTimes[0]) & 0x1FF] ) +
-                (data->delayPointers[1][(data->delayPointer - data->delayTimes[1]) & 0x1FF] ); 
-    sum_second = (data->delayPointers[2][(data->delayPointer - data->delayTimes[2]) & 0x1FF] ) +
-                (data->delayPointers[3][(data->delayPointer - data->delayTimes[3]) & 0x1FF] );   
-    diff_first = (data->delayPointers[0][(data->delayPointer - data->delayTimes[0]) & 0x1FF] ) -
-                (data->delayPointers[1][(data->delayPointer - data->delayTimes[1]) & 0x1FF] );  
-    diff_second = (data->delayPointers[2][(data->delayPointer - data->delayTimes[2]) & 0x1FF] ) -
-                (data->delayPointers[3][(data->delayPointer - data->delayTimes[3]) & 0x1FF] );                       
-    channels[0] = (sum_first + sum_second) >> 2;
-    channels[1] = (diff_first + diff_second) >> 2;
-    channels[2] = (sum_first - sum_second) >> 2;
-    channels[3] = (diff_first + diff_second) >> 2;
+    sum_first = (data->delayPointers[0][(data->delayPointer - data->delayTimes[0]) & (data->diffusorSize -1)] ) +
+                (data->delayPointers[1][(data->delayPointer - data->delayTimes[1]) & (data->diffusorSize -1)] ); 
+    sum_second = (data->delayPointers[2][(data->delayPointer - data->delayTimes[2]) & (data->diffusorSize -1)] ) +
+                (data->delayPointers[3][(data->delayPointer - data->delayTimes[3]) & (data->diffusorSize -1)] );   
+    diff_first = (data->delayPointers[0][(data->delayPointer - data->delayTimes[0]) & (data->diffusorSize -1)] ) -
+                (data->delayPointers[1][(data->delayPointer - data->delayTimes[1]) & (data->diffusorSize -1)] );  
+    diff_second = (data->delayPointers[2][(data->delayPointer - data->delayTimes[2]) & (data->diffusorSize -1)] ) -
+                (data->delayPointers[3][(data->delayPointer - data->delayTimes[3]) & (data->diffusorSize -1)] );                       
+    channels[0] = (sum_first + sum_second) >> 1;
+    channels[1] = (diff_first + diff_second) >> 1;
+    channels[2] = (sum_first - sum_second) >> 1;
+    channels[3] = (diff_first + diff_second) >> 1;
 
     data->delayPointer++;
-    data->delayPointer &= 0x1FF;
+    data->delayPointer &= (data->diffusorSize -1);
 }

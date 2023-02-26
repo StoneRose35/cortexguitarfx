@@ -18,9 +18,10 @@ typedef struct
     int16_t * delayPointers[4];
     int16_t delayTimes[4];
     int16_t delayPointer;
+    uint16_t diffusorSize;
 } HadamardDiffuserType;
 
 int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass,volatile uint32_t*);
-void hadamardDiffuserProcessArray(int16_t * channels,HadamardDiffuserType*data);
+void hadamardDiffuserProcessArray(int32_t * channels,HadamardDiffuserType*data,volatile uint32_t * audioStatePtr);
 
 #endif

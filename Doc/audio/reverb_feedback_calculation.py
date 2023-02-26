@@ -65,6 +65,7 @@ if __name__ == "__main__":
     delay_time_max = 8/300
     tau_min = 0.1
     tau_max = 2.0
+    print("min delay time {:.1f}ms, max delay time {:.1f}ms".format(delay_time_min*1000.0, delay_time_max*1000.0))
     print("computing delay times for the main delay section")
     delaytimes = compute_delaytimes(f_sample=f_sample,n_max=delayline_length,n_delays=n_delays,
                         max_delay_time=delay_time_max,min_delay_time=delay_time_min)
@@ -72,10 +73,11 @@ if __name__ == "__main__":
         compute_taus(delaytimes,n_delays=n_delays, tau_min=tau_min, tau_max=tau_max)
     
     print("computing delay lengths for the diffuser")
-    delay_time_min = 1.8/300
-    delay_time_max = 3.4/300
+    delay_time_min = 2/1000
+    delay_time_max = 54/1000
     n_delays = 4
-    delayline_length = 512
+    delayline_length = 2048
+    print("min delay time {:.1f}ms, max delay time {:.1f}ms".format(delay_time_min*1000.0, delay_time_max*1000.0))
     delaytimes = compute_delaytimes(f_sample=f_sample,n_max=delayline_length,n_delays=n_delays,
                         max_delay_time=delay_time_max,min_delay_time=delay_time_min)
 
