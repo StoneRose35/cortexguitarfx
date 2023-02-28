@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define I2C_ADDRESS 10
+#define I2C_ADDRESS 23
 
 volatile int footswitchstate=0, footswitchstateOld=0;
 volatile int ledState=0, ledStateOld=0;

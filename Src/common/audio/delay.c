@@ -11,6 +11,15 @@ int16_t * getDelayMemoryPointer()
 }
 
 
+void clearDelayLine()
+{
+    uint32_t* delayMemPtr=(uint32_t*)getDelayMemoryPointer();
+    for(uint32_t c=0;c<(DELAY_LINE_LENGTH>>1);c++)
+    {
+        *(delayMemPtr+c)=0;
+    }
+}
+
 void initDelay(DelayDataType*data,int16_t *  memoryPointer,uint32_t bufferLength)
 {
     data->delayLine = memoryPointer;

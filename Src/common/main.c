@@ -210,7 +210,16 @@ volatile int16_t avgOutOld=0,avgInOld=0;
 volatile uint16_t bufferCnt=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
-const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
+volatile uint8_t programsActivated=0;
+const uint8_t programs[3]={0,1,2};
+volatile uint8_t programsToInitialize[3];
+
+// 0: done
+// 1: change request
+// 2: fade out
+// 3: in bypass / change in progress
+// 4: fade in
+volatile uint8_t programChangeState;
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
@@ -269,7 +278,6 @@ int main(void)
 	initSsd1306Display();
 
 	initDebugLed();
-	initRotaryEncoder(switchesPins,2);
 
 
 	/*

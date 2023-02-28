@@ -29,5 +29,6 @@ void addSampleToDelayline(int16_t sampleIn,DelayDataType*data);
 
 int16_t * getDelayMemoryPointer();
 
+__attribute__ ((section (".ramfunc"))) void clearDelayLine();
 
 #endif

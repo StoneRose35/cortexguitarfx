@@ -6,10 +6,12 @@
 #include "ssd1306_display.h"
 #include "audio/firFilter.h"
 #include "audio/audiotools.h"
+#include "audio/delay.h"
 #include "audio/fxprogram/fxProgram.h"
 #include "pipicofx/pipicofxui.h"
 #include "adc.h"
 #include "rotaryEncoder.h"
+#include "stompswitches.h"
 //#include "i2s.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
@@ -23,6 +25,10 @@ extern volatile uint32_t task;
 extern volatile int16_t avgOutOld,avgInOld;
 extern volatile uint8_t fxProgramIdx;
 extern volatile uint32_t cpuLoad;
+extern volatile uint8_t programsActivated;
+extern volatile uint8_t programChangeState;
+extern volatile uint8_t programsToInitialize[3];
+extern const uint8_t programs[3];
 extern PiPicoFxUiType piPicoUiController;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
@@ -34,9 +40,12 @@ uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
+uint8_t stompSwitchState;
 static volatile uint32_t * audioStatePtr;
 #define UI_DMIN 1
 #define ADC_LOWPASS 2
+
+const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 
 void isr_sio_irq_proc1_irq16() // only fires when a fir computation has to be made
 {
@@ -55,6 +64,11 @@ void isr_sio_irq_proc1_irq16() // only fires when a fir computation has to be ma
 void core1Main()
 {
     audioStatePtr = getAudioStatePtr();
+
+    // initalized the rotary encoder and the switches so that core 1 handler the interrupts of the ui elements
+    initRotaryEncoder(switchesPins,2);
+    initStompSwitchesInterface();
+
     *SIO_FIFO_ST = (1 << 2);
     *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
     *NVIC_ISER = (1 << 16); //enable interrupt for adc and sio of proc1 
@@ -133,6 +147,12 @@ void core1Main()
             }
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
+
+        /*
+         *
+         * UI Switches Callback
+         * 
+        */
         switchVals[0] = getSwitchValue(0);
         if ((switchVals[0] & 1) > 0)
         {
@@ -160,5 +180,40 @@ void core1Main()
            rotaryCallback(encoderDelta,&piPicoUiController);
            clearStickyIncrementDelta();
        }
+
+       /*
+        *
+        * Stomp Switches Callback
+        * 
+       */
+        for (uint8_t c=0;c<3;c++)
+        {
+            stompSwitchState = getStompSwitchState(c);
+            if ((stompSwitchState & (1 << 1)) != 0 && ((programsActivated >> c) & 1)==0) // switch pressed an program not activated 
+            {
+                // initialize program change
+                programsActivated = 1 << c;
+                programsToInitialize[c] = 1;
+                programChangeState = 1;
+                c=3;
+                clearStompSwitchStickyPressed(c);
+            }
+        }
+        if (programChangeState == 3)
+        {
+            clearDelayLine();
+            for (uint8_t c=0;c<3;c++)
+            {
+                if (programsToInitialize[c] != 0)
+                {
+                    if (fxPrograms[programs[c]]->setup != 0)
+                    {
+                        fxPrograms[programs[c]]->setup(fxPrograms[programs[c]]->data);
+                    }
+                    programsToInitialize[c]=0;
+                }
+            }
+            programChangeState = 4;
+        }
     }
 }

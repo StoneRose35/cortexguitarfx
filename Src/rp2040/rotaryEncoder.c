@@ -126,7 +126,6 @@ void isr_io_irq_bank0_irq13()
             }
         }
     }
-
 }
 
 void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)

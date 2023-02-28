@@ -5,10 +5,29 @@
 #include "hardware/regs/pads_bank0.h"
 #include "hardware/regs/i2c.h"
 #include "hardware/rp2040_registers.h"
+#include "hardware/regs/m0plus.h"
 #include "i2c.h"
+
 
 static inline void read_reg(volatile uint32_t* reg)
 {}
+
+static volatile void(*irqHandler)(uint8_t data,uint8_t address)=0;
+
+void isr_i2c0_irq23()
+{
+    if(irqHandler!=0)
+    {
+        irqHandler(*I2C_IC_DATA_CMD & 0xFF,*I2C_IC_TAR &0xFF);
+    }
+    read_reg(I2C_IC_CLR_RX_DONE);
+}
+
+
+void registerI2C0IRQ(void(*handler)(uint8_t data,uint8_t address))
+{
+    irqHandler = handler;
+}
 
 void initI2c(uint8_t slaveAdress)
 {
@@ -60,7 +79,25 @@ void initI2c(uint8_t slaveAdress)
     // set slave address
     *I2C_IC_TAR = slaveAdress;
 
+    // mask all interrupts except receive done
+    *I2C_IC_INTR_MASK = (1 << I2C_IC_INTR_MASK_M_RX_DONE_LSB);
+
+    //enable the interrupt
+    *NVIC_ISER = (1 << 23);
+
     //enable i2c
+    *I2C_ENABLE_IC |= (1 << I2C_IC_ENABLE_ENABLE_LSB);
+}
+
+void setTargetAddress(uint8_t address)
+{
+    // wait until transmission is done
+    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_TFNF_LSB))==0);
+    // disable i2c
+    *I2C_ENABLE_IC &= ~(1 << I2C_IC_ENABLE_ENABLE_LSB);
+
+    *I2C_IC_TAR = address;
+
     *I2C_ENABLE_IC |= (1 << I2C_IC_ENABLE_ENABLE_LSB);
 }
 
@@ -123,5 +160,21 @@ uint8_t masterReceive(uint8_t lastCmd)
     // read back value
     res = (uint8_t)*I2C_IC_DATA_CMD;
     return res;
+}
 
+void startMasterReceive(uint8_t lastCmd)
+{
+    if (lastCmd !=0)
+    {
+        *I2C_IC_DATA_CMD = (1 << I2C_IC_DATA_CMD_STOP_LSB) | (1 << I2C_IC_DATA_CMD_CMD_LSB);
+    }
+    else
+    {
+        *I2C_IC_DATA_CMD = (1 << I2C_IC_DATA_CMD_CMD_LSB);
+    }
+}
+
+uint8_t getTargetAddress()
+{
+    return (uint8_t)*I2C_IC_TAR;
 }

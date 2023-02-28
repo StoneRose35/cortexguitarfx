@@ -20,7 +20,7 @@ uint16_t* audioBufferInputPtr;
 #else
 int16_t* audioBufferInputPtr;
 #endif
-int16_t inputSample, inputSampleOther;
+int16_t inputSample, outputSample;
 
 #define AVERAGING_LOWPASS_CUTOFF 10
 
@@ -31,8 +31,10 @@ extern uint16_t bufferCnt;
 volatile int16_t avgOut=0,avgIn=0;
 extern int16_t avgOutOld,avgInOld;
 extern uint32_t cpuLoad;
+extern volatile uint8_t programChangeState;
 extern PiPicoFxUiType piPicoUiController;
 static volatile uint32_t * audioStatePtr;
+int16_t fadeCounter;
 
 void initDMA()
 {
@@ -119,8 +121,38 @@ void isr_dma_irq0_irq11()
 			}
 			avgInOld = ((AVERAGING_LOWPASS_CUTOFF*avgIn) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgInOld) >> 15);
 
-			inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
-
+			if (programChangeState != 3) // processing
+			{
+				outputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
+			}
+			else
+			{
+				outputSample = 0;
+			}
+			if (programChangeState == 2)// fadeout
+			{
+				outputSample = ((32767 - fadeCounter)*inputSample >> 15) + ((fadeCounter*outputSample) >> 15);
+				fadeCounter -= 256;
+				if (fadeCounter < 0)
+				{
+					fadeCounter = 0;
+					programChangeState=3;
+				}
+			}
+			else if (programChangeState==4) // fadein
+			{
+				outputSample = ((32767 - fadeCounter)*inputSample >> 15) + ((fadeCounter*outputSample) >> 15);
+				fadeCounter += 256;
+				if (fadeCounter < 0) // overrun
+				{
+					programChangeState = 0;
+				}
+			}
+			if (programChangeState == 1)
+			{
+				fadeCounter = 32767;
+				programChangeState = 2;
+			}
 
 			if (inputSample < 0)
 			{
@@ -132,11 +164,12 @@ void isr_dma_irq0_irq11()
 			}
 			avgOutOld = ((AVERAGING_LOWPASS_CUTOFF*avgOut) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgOutOld) >> 15);
 
-			*((uint32_t*)audioBufferPtr+c) = ((uint16_t)inputSample << 16) | (0xFFFF & (uint16_t)inputSample); 
+			*((uint32_t*)audioBufferPtr+c) = ((uint16_t)outputSample << 16) | (0xFFFF & (uint16_t)outputSample); 
 
 		}
 		task &= ~((1 << TASK_PROCESS_AUDIO_INPUT)); 
 		bufferCnt++;
+
 
 		ticEnd = getTimeLW();
 		if(ticEnd > ticStart)
