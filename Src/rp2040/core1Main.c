@@ -211,6 +211,8 @@ void core1Main()
                         fxPrograms[programs[c]]->setup(fxPrograms[programs[c]]->data);
                     }
                     programsToInitialize[c]=0;
+                    piPicoUiController.currentProgramIdx = programs[c];
+                    piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
                 }
             }
             programChangeState = 4;
