@@ -10,9 +10,9 @@ CC=arm-none-eabi-gcc
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
 OPT=-Og
-DEFINES=-DDEBUG -DSTM32 -DNUCLEO_F446ZE -DSTM32F4 -DSTM32F446ZETx -DI2S_INPUT -DFLOAT_AUDIO
-CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen
-LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -T./STM32F446ZETX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+DEFINES=-DDEBUG -DSTM32 -DSTM32F7 -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO
+CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc -I./Inc/gen
+LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary
 
@@ -20,7 +20,7 @@ all: $(PROJECT).bin
 
 #RP2040_OBJS := $(patsubst Src/rp2040/%.c,out/%.o,$(wildcard Src/rp2040/*.c))
 #RP2040_OBJS_ASM := $(patsubst Src/rp2040/%.S,out/%.o,$(wildcard Src/rp2040/*.S))
-STM32F446_OBJS := $(patsubst Src/stm32f446/%.c,out/%.o,$(wildcard Src/stm32f446/*.c))
+STM32H750_OBJS := $(patsubst Src/stm32h750/%.c,out/%.o,$(wildcard Src/stm32h750/*.c))
 COMMON_OBJS := $(patsubst Src/common/%.c,out/%.o,$(wildcard Src/common/*.c))
 AUDIO_OBJS := $(patsubst Src/common/audio/%.c,out/%.o,$(wildcard Src/common/audio/*.c))
 AUDIO_FX_OBJS := $(patsubst Src/pipicofx/%.c,out/%.o,$(wildcard Src/pipicofx/*.c))
@@ -33,7 +33,7 @@ ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 
 #all_rp2040: $(RP2040_OBJS) $(RP2040_OBJS_ASM)
-all_stm32f446: $(STM32F446_OBJS)
+all_stm32h750: $(STM32H750_OBJS)
 all_common: $(COMMON_OBJS)
 all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS)
 all_graphics: $(GRAPHICS_OBJS)
@@ -57,14 +57,14 @@ Inc/gen/compilationInfo.h: Inc/gen
 	echo "const char * COMPILATIONINFO=\"compiled on " `date` " using \\\\r\\\\n " `arm-none-eabi-gcc --version | sed -z 's/\n/\\\\\\\\r\\\\\\\\n/g'` "\";" > Inc/gen/compilationInfo.h
 
 # generate the startup file
-out/stm32f446_startup.o: Startup/startup_stm32f446zetx.s
-	$(CC) $(CARGS) -c  $< -o ./out/stm32f446_startup.o
+out/stm32h750_startup.o: Startup/startup_stm32h750ibkx.s
+	$(CC) $(CARGS) -c  $< -o ./out/stm32h750_startup.o
 
-out/helpers.o: Src/stm32f446/helpers.s	
+out/helpers.o: Src/stm32h750/helpers.s	
 	$(CC) $(CARGS) -c  $< -o ./out/helpers.o
 
-# stm32f446-specific libraries
-out/%.o: Src/stm32f446/%.c $(ASSET_IMAGES) 
+# stm32h750-specific libraries
+out/%.o: Src/stm32h750/%.c $(ASSET_IMAGES) 
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # common libs
@@ -112,7 +112,7 @@ Inc/images/%.h: Assets/%.png
 	./tools/helper_scripts.py -convertImg $^
 
 # main linking and generating flashable content
-$(PROJECT).elf: out/stm32f446_startup.o out/helpers.o all_stm32f446 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
+$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
 $(PROJECT).bin: $(PROJECT).elf
