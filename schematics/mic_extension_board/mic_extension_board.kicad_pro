@@ -399,8 +399,9 @@
         "microvia_drill": 0.1,
         "name": "Vsupply",
         "nets": [
+          "+12V",
           "+9V",
-          "Vref"
+          "AC"
         ],
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
