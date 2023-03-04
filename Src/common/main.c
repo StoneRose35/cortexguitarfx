@@ -178,7 +178,7 @@
 #include "stringFunctions.h"
 #include "fastExpLog.h"
 #include "charDisplay.h"
-#include "rotaryEncoder.h"
+#include "rotEncoderSwitchPower.h"
 #include "cliApiTask.h"
 #include "i2s.h"
 #include "i2c.h"

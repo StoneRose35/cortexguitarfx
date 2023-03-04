@@ -11,10 +11,6 @@
 // ***************
 #define RP2040_LED_PIN (25) // 13 on rp2040 feather, 25 on rpi pico boards
 
-#define DS18B20_PIN 2
-
-#define HEATER  6 // heating element controlled using pwm
-
 #define I2C_SCL 5
 #define I2C_SDA 4
 
@@ -30,26 +26,31 @@
 #define CLIPPING_LED_INPUT 16
 #define CLIPPING_LED_OUTPUT 17
 
-// GPIO number where the neopixel is attached
-// Integrated Neopixel on RP2040 Feather: 16
-// Integrated Neopixel on RP2040 Itsybitsy: 17
-#ifdef ITSYBITSY
-#define NEOPIXEL_PIN 17
-#define NEOPIXEL_POWER_PIN 16
-#else
-#define NEOPIXEL_PIN 16
-#endif
-
-#define REMOTESWITCH_PIN 14 // 433 MHz radio-controller switch, reverse-engineered
-
 // rotary encoder combined with a push switch
 #define ENCODER_1 7
 #define ENCODER_2 6
 #define ENTER_SWITCH 22
 #define EXIT_SWITCH 20
+#define POWERSENSE 13
 
-// backlight for lcd display
-#define BACKLIGHT 8
+// driver for ssd1306-based display (128*64 pixel oled display interfaced using spi)
+#define SSD1306_CS_DISPLAY 21
+#define SSD1306_SCK 18
+#define SSD1306_MOSI 19
+#define SSD1306_DISPLAY_CD 14
+#define SSD1306_DISPLAY_RESET 15
+
+// pin definitions for two uart ports
+#define UART_USB_RX 1
+#define UART_USB_TX 0
+
+// -----------------------------------------------------------------------------------------
+
+#define UART_BT_RX 9
+#define UART_BT_TX 8
+
+// debug pin
+#define DEBUG_PIN_1 2
 
 // 1.8" Color TFT LCD display with MicroSD Card Breakout - ST7735R
 // one spi sharing connection to a ST7735 display and  an sd card
@@ -62,21 +63,24 @@
 #define DISPLAY_CD 25
 #define DISPLAY_BACKLIGHT 8 
 
-// driver for ssd1306-based display (128*64 pixel oled display interfaced using spi)
-#define SSD1306_CS_DISPLAY 21
-#define SSD1306_SCK 18
-#define SSD1306_MOSI 19
-#define SSD1306_DISPLAY_CD 14
-#define SSD1306_DISPLAY_RESET 15
+#define REMOTESWITCH_PIN 14 // 433 MHz radio-controller switch, reverse-engineered
 
-// pin definitions for two uart ports
-#define UART_USB_RX 1
-#define UART_USB_TX 0
-#define UART_BT_RX 9
-#define UART_BT_TX 8
+#define DS18B20_PIN 2
 
-// debug pin
-#define DEBUG_PIN_1 2
+#define HEATER  6 // heating element controlled using pwm
+
+// backlight for lcd display
+#define BACKLIGHT 8
+
+// GPIO number where the neopixel is attached
+// Integrated Neopixel on RP2040 Feather: 16
+// Integrated Neopixel on RP2040 Itsybitsy: 17
+#ifdef ITSYBITSY
+#define NEOPIXEL_PIN 17
+#define NEOPIXEL_POWER_PIN 16
+#else
+#define NEOPIXEL_PIN 16
+#endif
 
 // ****************************************
 // * other device-specific configurations *
@@ -329,6 +333,12 @@ typedef struct {
 #define ENCODER_2_INTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*ENCODER_2) & 0xFFE0) >> 3)))
 #define ENCODER_2_EDGE_LOW (((4*ENCODER_2) & 0x1F)+2)
 #define ENCODER_2_EDGE_HIGH (((4*ENCODER_2) & 0x1F)+3)
+
+#define POWERSENSE_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*POWERSENSE))
+#define POWERSENSE_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*POWERSENSE))
+#define POWERSENSE_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC0_INTE0_OFFSET + (((4*POWERSENSE) & 0xFFE0) >> 3)))
+#define POWERSENSE_INTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*POWERSENSE) & 0xFFE0) >> 3)))
+#define POWERSENSE_EDGE_LOW (((4*POWERSENSE) & 0x1F)+2)
 
 #define SWITCH_PIN_CNTR  ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*SWITCH))
 #define SWITCH_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*SWITCH))

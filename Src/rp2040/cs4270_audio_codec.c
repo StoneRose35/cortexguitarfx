@@ -9,12 +9,19 @@
 #include "cs4270_audio_codec.h"
 
 
-uint8_t cs4270Write(uint16_t data)
+static uint8_t cs4270Write(uint16_t data)
 {
     uint8_t res=0;
     res += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
     res += masterTransmit((uint8_t)(data&0xFF),1);
     return res;
+}
+
+void cs4270PowerDown()
+{
+    uint16_t regdata;
+    regdata = (CS4270_R2 << 8) | (1 << CS4270_R2_PDN_Pos); // power down
+    cs4270Write(regdata);
 }
 
 void setupCS4270()

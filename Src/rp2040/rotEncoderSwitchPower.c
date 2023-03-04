@@ -1,11 +1,12 @@
 
-#include "rotaryEncoder.h"
+#include "rotEncoderSwitchPower.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/io_bank0.h"
 #include "hardware/regs/pads_bank0.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/regs/sio.h"
 #include "hardware/rp2040_registers.h"
+#include "cs4270_audio_codec.h"
 #include "systick.h"
 
 static uint32_t oldtickenc,oldtickswitch;
@@ -101,9 +102,14 @@ void isr_io_irq_bank0_irq13()
         }
         lastTrigger = 1;
     }
+    else if ((*POWERSENSE_INTR & (1 << POWERSENSE_EDGE_LOW)) == (1 << POWERSENSE_EDGE_LOW))
+    {
+        *POWERSENSE_INTR |= (1 << POWERSENSE_EDGE_LOW);
+        cs4270PowerDown();
+    }
 
-
-    for (uint8_t c=0;c<8;c++)
+    // UI switches 
+    for (uint8_t c=0;c<3;c++)
     {
         switchIntAddress = (uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*switchPins[c]) & 0xFFE0) >> 3)); 
         if ((*switchIntAddress & (1 << (((4*switchPins[c]) & 0x1F)+3))) == (1 << (((4*switchPins[c]) & 0x1F)+3)))
@@ -126,6 +132,8 @@ void isr_io_irq_bank0_irq13()
             }
         }
     }
+
+
 }
 
 void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
@@ -162,7 +170,13 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         *switchInteAddress |= (1 << (((4*pins[c]) & 0x1F)+2)) | (1 << (((4*pins[c]) & 0x1F)+3)); // (1 << SWITCH_EDGE_HIGH) | (1 << SWITCH_EDGE_LOW);
         switchPins[c]=pins[c];
     }
-    //*SWITCH_INTE |= (1 << SWITCH_EDGE_HIGH) | (1 << SWITCH_EDGE_LOW);
+
+    // powersense config
+    *POWERSENSE_PAD_CNTR &= ~ ((1 << PADS_BANK0_GPIO0_PDE_LSB) | (1 << PADS_BANK0_GPIO0_PDE_LSB));
+    *POWERSENSE_PIN_CNTR = 5;
+    *POWERSENSE_INTE |= (1 << POWERSENSE_EDGE_LOW); 
+
+
     *NVIC_ISER = (1 << 13);
 
     //read old tick values

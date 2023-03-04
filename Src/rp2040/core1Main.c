@@ -10,7 +10,7 @@
 #include "audio/fxprogram/fxProgram.h"
 #include "pipicofx/pipicofxui.h"
 #include "adc.h"
-#include "rotaryEncoder.h"
+#include "rotEncoderSwitchPower.h"
 #include "stompswitches.h"
 //#include "i2s.h"
 #include "hardware/regs/addressmap.h"

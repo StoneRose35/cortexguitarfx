@@ -18,4 +18,6 @@
 
 void setupCS4270();
 
+void cs4270PowerDown();
+
 #endif
