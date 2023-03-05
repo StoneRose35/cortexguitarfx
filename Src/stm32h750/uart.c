@@ -1,6 +1,6 @@
 #include "stdint.h"
 #include "uart.h"
-#include "stm32f446/stm32f446xx.h"
+#include "stm32h750/stm32h750xx.h"
 #include "bufferedInputHandler.h"
 #include "system.h"
 

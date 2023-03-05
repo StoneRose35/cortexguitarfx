@@ -7,7 +7,7 @@
 #endif
 
 #ifdef STM32
-#include "stm32f446/helpers.h"
+#include "stm32h750/helpers.h"
 #else
 float convolve(const float * coefficients,float*data,uint32_t offset)
 {

@@ -43,7 +43,10 @@
         "stm32f446_cfg_pins.h": "c",
         "float.h": "c",
         "reverb.h": "c",
-        "stm32f446xx.h": "c"
+        "stm32f446xx.h": "c",
+        "stm32h750xx.h": "c",
+        "stm32h750_cfg_pins.h": "c",
+        "helpers.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

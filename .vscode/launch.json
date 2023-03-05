@@ -19,7 +19,7 @@
             "runToEntryPoint": "main",
             "showDevDebugOutput": "parsed",
             "servertype": "stlink",
-            "svdFile": "STM32F446.svd"
+            "svdFile": "STM32H750x.svd"
         },
         {
             "name": "Debug Tests",

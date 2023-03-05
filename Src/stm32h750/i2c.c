@@ -1,6 +1,6 @@
 #include "i2c.h"
-#include "stm32f446/stm32f446xx.h"
-#include "stm32f446/stm32f446_cfg_pins.h"
+#include "stm32h750/stm32h750xx.h"
+#include "stm32h750/stm32h750_cfg_pins.h"
 
 static volatile uint8_t slave_address;
 

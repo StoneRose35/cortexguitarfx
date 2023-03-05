@@ -1,5 +1,5 @@
 #include "timer.h"
-#include "stm32f446/stm32f446xx.h"
+#include "stm32h750/stm32h750xx.h"
 
 // timer 5 as a 1MHz/us timer
 
