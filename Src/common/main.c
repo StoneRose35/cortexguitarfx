@@ -95,49 +95,49 @@ int main(void)
 	 * Initialize Hardware components
 	 * 
 	 * */
-    setupClock();
+    //setupClock();
 	initSystickTimer();
 	initDatetimeClock();
 	initUart(57600);
-	initDMA();
-	initTimer();
-	initAdc();
-	initI2c(26); // 26 for wm8731, 72 for cs4270
+	//initDMA();
+	//initTimer();
+	//initAdc();
+	//initI2c(26); // 26 for wm8731, 72 for cs4270
 	
 	/*
 	 *
 	 * Initialise Component-specific drivers
 	 * 
 	 * */
-	initSsd1306Display();
-	setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
-	initRotaryEncoder(switchesPins,2);
-	encoderVal=getEncoderValue();
-    initDebugLed();
+	//initSsd1306Display();
+	//setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
+	//initRotaryEncoder(switchesPins,2);
+	//encoderVal=getEncoderValue();
+    //initDebugLed();
 
 	/*
      *
      * Initialize Background Services
      *
 	 */
-	initCliApi();
-	initRoundRobinReading(); // internal adc for reading parameters
-	context |= (1 << CONTEXT_USB);
-	printf("Microsys v1.0 running\r\n");
-	piPicoFxUiSetup(&piPicoUiController);
-	ssd1306ClearDisplay();
-	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	{
-		if ((uint32_t)fxPrograms[c]->setup != 0)
-		{
-			fxPrograms[c]->setup(fxPrograms[c]->data);
-		}
-	}
-	drawUi(&piPicoUiController);
+	//initCliApi();
+	//initRoundRobinReading(); // internal adc for reading parameters
+	//context |= (1 << CONTEXT_USB);
+	//printf("Microsys v1.0 running\r\n");
+	//piPicoFxUiSetup(&piPicoUiController);
+	//ssd1306ClearDisplay();
+	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
+	//{
+	//	if ((uint32_t)fxPrograms[c]->setup != 0)
+	//	{
+	//		fxPrograms[c]->setup(fxPrograms[c]->data);
+	//	}
+	//}
+	//drawUi(&piPicoUiController);
 
 
     /* enable audio engine last (when fx programs have been set up)*/
-    initI2S();
+    //initI2S();
 
 
     /* Loop forever */
@@ -146,7 +146,7 @@ int main(void)
 
 
 		//cliApiTask(task);
-	
+        /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
@@ -221,6 +221,7 @@ int main(void)
            rotaryCallback(encoderVal,&piPicoUiController);
            encoderValOld=encoderVal;
        }
+       */
 	
 	}
 }

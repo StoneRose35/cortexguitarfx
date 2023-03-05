@@ -10,6 +10,9 @@ void setupClock()
     while ((RCC->CR & RCC_CR_HSERDY)==0);
 
 
+    // enable sysconfig
+    RCC->APB4ENR |= (1 << RCC_APB4ENR_SYSCFGEN_Pos);
+
     // switch to external oscillator
     cfgr = RCC->CFGR;
     cfgr &= ~(3 << RCC_CFGR_SW_Pos);
@@ -17,47 +20,52 @@ void setupClock()
     RCC->CFGR = cfgr;
     while ((RCC->CFGR & (RCC_CFGR_SWS_HSE)) == 0);
 
-    // set voltage scale to one and enable over-drive mode to achieve 180MHz
-    RCC->APB1ENR |= (1 << RCC_APB1ENR_PWREN_Pos);
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");    
-    __asm__("nop");
-    cfgr = PWR->CR;
-    cfgr |= (3 << PWR_CR_VOS_Pos);
-    while ((PWR->CR & PWR_CSR_VOSRDY)==0);
+    
+    PWR->D3CR |= (3 << PWR_D3CR_VOS_Pos); // set scale 1 to d3 domain power
+    while((PWR->D3CR & (1 << PWR_D3CR_VOSRDY_Pos)) == 0); // wait until ready
+    SYSCFG->PWRCR |= (1 << SYSCFG_PWRCR_ODEN_Pos); // enable overdrive, we want to build stuff for rock&metal guitar after all :-)
+    while ((PWR->D3CR& (1 << PWR_D3CR_VOSRDY_Pos)) == 0); // wait till ready
 
-    // configure and enable pll for 180 MHz systemclock
-    RCC->PLLCFGR = (4 << RCC_PLLCFGR_PLLM_Pos) | (180 << RCC_PLLCFGR_PLLN_Pos) | (0 << RCC_PLLCFGR_PLLP_Pos) | (1 << RCC_PLLCFGR_PLLSRC_Pos);
-    RCC->CR |= (1 << RCC_CR_PLLON_Pos);
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");    
-    __asm__("nop");
-    cfgr = PWR->CR;
-    cfgr |= (1 << PWR_CR_ODEN_Pos);
-    PWR->CR =cfgr;
-    while((PWR->CSR & (1 << PWR_CSR_ODRDY_Pos))==0);
-    PWR->CR |= (1 << PWR_CR_ODSWEN_Pos);
-    while((PWR->CSR & (1 << PWR_CSR_ODSWRDY_Pos))==0);
+    // set pll source to HSE (2), set divider m1 (clock input for pll) to 4
+    RCC->PLLCKSELR |= (2 << RCC_PLLCKSELR_PLLSRC) | (4 << RCC_PLLCKSELR_DIVM1_Pos);
+
+
+    // configure and enable pll for 480 MHz cpu clock
+    RCC->PLL1DIVR = (240 << RCC_PLL1DIVR_N1_Pos) |
+                    (2 << RCC_PLL1DIVR_P1_Pos) |
+                    (5 << RCC_PLL1DIVR_Q1_Pos) |
+                    (2 << RCC_PLL1DIVR_R1_Pos);
+    RCC->PLLCFGR = (RCC_PLLCFGR_PLL1RGE_2 << RCC_PLLCFGR_PLL1RGE_Pos);
+
+    RCC->CR |= (1 << RCC_CR_PLL1ON_Pos);
 
     // wait for pll to be ready
-    while ((RCC->CR & RCC_CR_PLLRDY) == 0);
+    while ((RCC->CR & RCC_CR_PLL1RDY) == 0);
 
-    // setup peripheral clock by defining the respective dividers
-    // divide apb1 by 4 (resulting in 45MHz) and apb2 by 2 (resulting in 90 MHz)
-    // divide HSE by 8 to get 1MHz RTC Input
-    RCC->CFGR |= (5 << RCC_CFGR_PPRE1_Pos) | (4 << RCC_CFGR_PPRE2_Pos) | (8 << RCC_CFGR_RTCPRE_Pos);
+    // set dividers for the various buses
+    // D1 domain
+    RCC->D1CFGR = 0x8 | (4 << RCC_D1CFGR_D1PPRE_Pos); // HPRE = 2, D1PPRE=2
+    // D2 Domain
+    RCC->D2CFGR = (4 << RCC_D2CFGR_D2PPRE2_Pos) | (4 << RCC_D2CFGR_D2PPRE1_Pos); // D2PPRRE1 =2, D2PPRE2=2
+    // D3 Domain
+    RCC->D3CFGR = (4 << RCC_D3CFGR_D3PPRE_Pos);
+
+    // divide by 16 to get 1MHz RTC
+    RCC->CFGR |= (16 << RCC_CFGR_RTCPRE_Pos);
 
     // adapt flash latency
-    FLASH->ACR |= 5;
+    FLASH->ACR |= 4;
 
     // switch to pll
     cfgr = RCC->CFGR;
-    cfgr &= ~(3 << RCC_CFGR_SW_Pos);
-    cfgr |= (2 << RCC_CFGR_SW_Pos);
+    cfgr &= ~(7 << RCC_CFGR_SW_Pos);
+    cfgr |= (3 << RCC_CFGR_SW_Pos);
     RCC->CFGR = cfgr;
-    while ((RCC->CFGR & (RCC_CFGR_SWS_PLL)) == 0);
+    while ((RCC->CFGR & (RCC_CFGR_SWS_PLL1)) != RCC_CFGR_SWS_PLL1);
+
+
+    // switch on additional pll for
+    // ...
 
 
 }

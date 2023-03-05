@@ -3,7 +3,7 @@
 #include "system.h"
 #include "stm32h750/stm32h750xx.h"
 volatile static uint32_t ticks=0;
-#define AHB_CLOCK 180000000
+#define AHB_CLOCK 480000000
 
 void SysTick_Handler()
 {

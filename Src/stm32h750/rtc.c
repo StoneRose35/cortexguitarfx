@@ -3,12 +3,12 @@
 
 uint8_t initDatetimeClock()
 {
-    RCC->APB1ENR |= (1 << RCC_APB1ENR_PWREN_Pos);
-    PWR->CR |= (1 << PWR_CR_DBP_Pos);
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");    
+    uint32_t reg;
+    // set precaler to 16
+    reg = RCC->CFGR;
+    reg &= (0x3F << RCC_CFGR_RTCPRE_Pos);
+    reg |= (16 << RCC_CFGR_RTCPRE_Pos);
+
     RCC->BDCR = (3 << RCC_BDCR_RTCSEL_Pos) | (1 << RCC_BDCR_RTCEN_Pos); // set hse divided by the prescaler and enable the rtc
     // disable write-protection
     //1. Write ‘0xCA’ into the RTC_WPR register.

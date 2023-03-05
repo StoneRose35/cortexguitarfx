@@ -4,7 +4,7 @@
 #include "bufferedInputHandler.h"
 #include "system.h"
 
-#define APB1_SPEED 45000000
+#define APB2_SPEED 120000000
 
 
 extern uint32_t task;
@@ -15,11 +15,11 @@ CommBufferType usbCommBuffer __attribute__((aligned (256)));
 CommBufferType btCommBuffer;
 
 // irq for uart reception, "USB"-port
-void USART3_IRQHandler()
+void USART1_IRQHandler()
 {
-    if ((USART3->SR & (1 <<USART_SR_RXNE_Pos))== (1 <<USART_SR_RXNE_Pos))
+    if ((USART1->ISR & (1 <<USART_ISR_RXNE_RXFNE_Pos))== (1 <<USART_ISR_RXNE_RXFNE_Pos))
     {
-		usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=USART3->DR& 0xFF;
+		usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=USART1->RDR& 0xFF;
 		usbCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
 		task |= (1 << TASK_USB_CONSOLE_RX);
     }
@@ -35,30 +35,30 @@ void initUart(uint16_t baudrate)
     uint32_t baudrateWord;
     baudrateWord=baudrate;
     // enable clock
-    RCC->APB1ENR |= (1 << RCC_APB1ENR_USART3EN_Pos);
+    RCC->APB2ENR |= (1 << RCC_APB2ENR_USART1EN_Pos);
 
     // define baudrate
-    divider = APB1_SPEED/baudrateWord; 
+    divider = APB2_SPEED/baudrateWord; 
     USART3->BRR = divider & 0xFFFF;
 
     // enable usart, receiver and transmitter and receiver not empty interrupt
-    USART3->CR1 = (1 << USART_CR1_UE_Pos) | (1 << USART_CR1_TE_Pos) | (1 << USART_CR1_RE_Pos) | (1 << USART_CR1_RXNEIE_Pos);
+    USART3->CR1 = (1 << USART_CR1_UE_Pos) | (1 << USART_CR1_TE_Pos) | (1 << USART_CR1_RE_Pos) | (1 << USART_CR1_RXNEIE_RXFNEIE_Pos);
 
     // enable the usart3 interrupt
-    __NVIC_EnableIRQ(USART3_IRQn);
+    __NVIC_EnableIRQ(USART1_IRQn);
 
-    // wire up pd8 (uart3 tx) and pd9 (uart3 rx)
-    RCC->AHB1ENR |= (1 << RCC_AHB1ENR_GPIODEN_Pos);
-    regbfr = GPIOD->MODER;
-    regbfr &= ~((3 << (8*2)) | (3 << (9*2)));
-    regbfr |= (2 << (8*2)) | (2 << (9*2));
+    // wire up pb14(tx) and pb15 (rx)
+    RCC->AHB4ENR |= (1 << RCC_AHB4ENR_GPIOBEN_Pos);
+    regbfr = GPIOB->MODER;
+    regbfr &= ~((3 << (14*2)) | (3 << (15*2)));
+    regbfr |= (2 << (14*2)) | (2 << (15*2));
     GPIOD->MODER = regbfr;
 
-    GPIOD->PUPDR &= ~((3 << (8*2)) | (3 << (9*2)));
-    regbfr = GPIOD->AFR[1];
-    regbfr &= ~((0xF << 0) | (0xF << 4));
-    regbfr |= ((7 << 0) | (7 << 4));
-    GPIOD->AFR[1] = regbfr; // define alternate funtion 7 for pin 8 and 9 
+    GPIOD->PUPDR &= ~((3 << (14*2)) | (3 << (15*2)));
+    regbfr = GPIOB->AFR[1];
+    regbfr &= ~((0xF << 24) | (0xF << 28));
+    regbfr |= ((4 << 24) | (4 << 28));
+    GPIOD->AFR[1] = regbfr; // define alternate funtion 7 for pin 14 and 15
 }
 
 void initBTUart(uint16_t baudrate)
@@ -76,9 +76,9 @@ void initBTUart(uint16_t baudrate)
  */
 uint8_t sendCharAsyncUsb()
 {
-	if (usbCommBuffer.outputBufferWriteCnt != usbCommBuffer.outputBufferReadCnt && ((USART3->SR & USART_SR_TXE)== USART_SR_TXE))
+	if (usbCommBuffer.outputBufferWriteCnt != usbCommBuffer.outputBufferReadCnt && ((USART1->ISR & USART_ISR_TXE_TXFNF_Pos)== USART_ISR_TXE_TXFNF_Pos))
 	{
-		USART3->DR = *(usbCommBuffer.outputBuffer+usbCommBuffer.outputBufferWriteCnt);
+		USART1->TDR = *(usbCommBuffer.outputBuffer+usbCommBuffer.outputBufferWriteCnt);
 		usbCommBuffer.outputBufferWriteCnt++;
         usbCommBuffer.outputBufferWriteCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
         return 0;

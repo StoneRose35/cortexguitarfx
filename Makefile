@@ -112,7 +112,9 @@ Inc/images/%.h: Assets/%.png
 	./tools/helper_scripts.py -convertImg $^
 
 # main linking and generating flashable content
-$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
+#$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
+#	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
+$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
 $(PROJECT).bin: $(PROJECT).elf
