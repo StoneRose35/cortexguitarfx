@@ -4,5 +4,6 @@
 #define __SOFT_FP__
 void enableFpu()
 {
-	SCB->CPACR = 0xF << 20;
+	SCB->CPACR |= ((3UL << 10*2) |             /* set CP10 Full Access               */
+                 (3UL << 11*2)  );           /* set CP11 Full Access               */
 }

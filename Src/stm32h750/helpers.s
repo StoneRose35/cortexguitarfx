@@ -1,7 +1,7 @@
 
 .syntax unified
-.cpu cortex-m4
-.fpu fpv4-sp-d16
+.cpu cortex-m7
+.fpu fpv5-d16
 .thumb
   
 
