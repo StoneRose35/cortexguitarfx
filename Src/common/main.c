@@ -95,7 +95,7 @@ int main(void)
 	 * Initialize Hardware components
 	 * 
 	 * */
-    //setupClock();
+    setupClock();
 	initSystickTimer();
 	initDatetimeClock();
 	initUart(57600);
