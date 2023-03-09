@@ -4,7 +4,7 @@
 #include "bufferedInputHandler.h"
 #include "system.h"
 
-#define APB1_SPEED 120000000
+#define APB2_SPEED 120000000
 
 
 extern uint32_t task;
@@ -35,17 +35,17 @@ void initUart(uint16_t baudrate)
     uint32_t baudrateWord;
     baudrateWord=baudrate;
     // enable clock
-    RCC->APB1LENR |= (1 << RCC_APB1LENR_USART3EN_Pos);
+    RCC->APB2ENR |= (1 << RCC_APB2ENR_USART1EN_Pos);
 
     // define baudrate
-    divider = APB1_SPEED/baudrateWord; 
-    USART3->BRR = divider & 0xFFFF;
+    divider = APB2_SPEED/baudrateWord; 
+    USART1->BRR = divider & 0xFFFF;
 
     // enable usart, receiver and transmitter and receiver not empty interrupt
-    USART3->CR1 = (1 << USART_CR1_UE_Pos) | (1 << USART_CR1_TE_Pos) | (1 << USART_CR1_RE_Pos) | (1 << USART_CR1_RXNEIE_RXFNEIE_Pos);
+    USART1->CR1 = (1 << USART_CR1_UE_Pos) | (1 << USART_CR1_TE_Pos) | (1 << USART_CR1_RE_Pos) | (1 << USART_CR1_RXNEIE_RXFNEIE_Pos);
 
     // enable the usart3 interrupt
-    __NVIC_EnableIRQ(USART3_IRQn);
+    __NVIC_EnableIRQ(USART1_IRQn);
 
     // wire up pb14(tx) and pb15 (rx)
     RCC->AHB4ENR |= (1 << RCC_AHB4ENR_GPIOBEN_Pos);
