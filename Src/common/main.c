@@ -145,7 +145,7 @@ int main(void)
 	{
 
 
-		//cliApiTask(task);
+		cliApiTask(task);
         /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {

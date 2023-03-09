@@ -8,6 +8,10 @@ uint8_t initDatetimeClock()
     reg = RCC->CFGR;
     reg &= (0x3F << RCC_CFGR_RTCPRE_Pos);
     reg |= (16 << RCC_CFGR_RTCPRE_Pos);
+    RCC->CFGR = reg;
+
+    // enable writing the backup domain register 
+    PWR->CR1 |= (1 << PWR_CR1_DBP_Pos);
 
     RCC->BDCR = (3 << RCC_BDCR_RTCSEL_Pos) | (1 << RCC_BDCR_RTCEN_Pos); // set hse divided by the prescaler and enable the rtc
     // disable write-protection

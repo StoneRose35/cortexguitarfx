@@ -5,7 +5,7 @@ void setupClock()
 {
     uint32_t cfgr;
     // switch on external oscillator
-    RCC->CR |= (1 << RCC_CR_HSEBYP_Pos);
+    RCC->CR &= ~(1 << RCC_CR_HSEBYP_Pos);
     RCC->CR |= (1 << RCC_CR_HSEON_Pos);
     while ((RCC->CR & RCC_CR_HSERDY)==0);
 
@@ -16,7 +16,7 @@ void setupClock()
     // switch to external oscillator
     cfgr = RCC->CFGR;
     cfgr &= ~(3 << RCC_CFGR_SW_Pos);
-    cfgr |= (1 << RCC_CFGR_SW_Pos);
+    cfgr |= (2 << RCC_CFGR_SW_Pos);
     RCC->CFGR = cfgr;
     while ((RCC->CFGR & (RCC_CFGR_SWS_HSE)) == 0);
 
@@ -27,7 +27,7 @@ void setupClock()
     while ((PWR->D3CR& (1 << PWR_D3CR_VOSRDY_Pos)) == 0); // wait till ready
 
     // set pll source to HSE (2), set divider m1 (clock input for pll) to 4
-    RCC->PLLCKSELR |= (2 << RCC_PLLCKSELR_PLLSRC) | (4 << RCC_PLLCKSELR_DIVM1_Pos);
+    RCC->PLLCKSELR = (2 << RCC_PLLCKSELR_PLLSRC_Pos) | (4 << RCC_PLLCKSELR_DIVM1_Pos);
 
 
     // configure and enable pll for 480 MHz cpu clock
@@ -35,7 +35,7 @@ void setupClock()
                     (2 << RCC_PLL1DIVR_P1_Pos) |
                     (5 << RCC_PLL1DIVR_Q1_Pos) |
                     (2 << RCC_PLL1DIVR_R1_Pos);
-    RCC->PLLCFGR = (RCC_PLLCFGR_PLL1RGE_2 << RCC_PLLCFGR_PLL1RGE_Pos);
+    RCC->PLLCFGR |= (RCC_PLLCFGR_PLL1RGE_2 << RCC_PLLCFGR_PLL1RGE_Pos);
 
     RCC->CR |= (1 << RCC_CR_PLL1ON_Pos);
 

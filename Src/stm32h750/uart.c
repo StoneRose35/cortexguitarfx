@@ -4,7 +4,7 @@
 #include "bufferedInputHandler.h"
 #include "system.h"
 
-#define APB2_SPEED 120000000
+#define APB1_SPEED 120000000
 
 
 extern uint32_t task;
@@ -15,11 +15,11 @@ CommBufferType usbCommBuffer __attribute__((aligned (256)));
 CommBufferType btCommBuffer;
 
 // irq for uart reception, "USB"-port
-void USART1_IRQHandler()
+void USART3_IRQHandler()
 {
-    if ((USART1->ISR & (1 <<USART_ISR_RXNE_RXFNE_Pos))== (1 <<USART_ISR_RXNE_RXFNE_Pos))
+    if ((USART3->ISR & (1 <<USART_ISR_RXNE_RXFNE_Pos))== (1 <<USART_ISR_RXNE_RXFNE_Pos))
     {
-		usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=USART1->RDR& 0xFF;
+		usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=USART3->RDR& 0xFF;
 		usbCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
 		task |= (1 << TASK_USB_CONSOLE_RX);
     }
@@ -35,30 +35,30 @@ void initUart(uint16_t baudrate)
     uint32_t baudrateWord;
     baudrateWord=baudrate;
     // enable clock
-    RCC->APB2ENR |= (1 << RCC_APB2ENR_USART1EN_Pos);
+    RCC->APB1LENR |= (1 << RCC_APB1LENR_USART3EN_Pos);
 
     // define baudrate
-    divider = APB2_SPEED/baudrateWord; 
+    divider = APB1_SPEED/baudrateWord; 
     USART3->BRR = divider & 0xFFFF;
 
     // enable usart, receiver and transmitter and receiver not empty interrupt
     USART3->CR1 = (1 << USART_CR1_UE_Pos) | (1 << USART_CR1_TE_Pos) | (1 << USART_CR1_RE_Pos) | (1 << USART_CR1_RXNEIE_RXFNEIE_Pos);
 
     // enable the usart3 interrupt
-    __NVIC_EnableIRQ(USART1_IRQn);
+    __NVIC_EnableIRQ(USART3_IRQn);
 
     // wire up pb14(tx) and pb15 (rx)
     RCC->AHB4ENR |= (1 << RCC_AHB4ENR_GPIOBEN_Pos);
     regbfr = GPIOB->MODER;
     regbfr &= ~((3 << (14*2)) | (3 << (15*2)));
     regbfr |= (2 << (14*2)) | (2 << (15*2));
-    GPIOD->MODER = regbfr;
+    GPIOB->MODER = regbfr;
 
-    GPIOD->PUPDR &= ~((3 << (14*2)) | (3 << (15*2)));
+    GPIOB->PUPDR &= ~((3 << (14*2)) | (3 << (15*2)));
     regbfr = GPIOB->AFR[1];
     regbfr &= ~((0xF << 24) | (0xF << 28));
     regbfr |= ((4 << 24) | (4 << 28));
-    GPIOD->AFR[1] = regbfr; // define alternate funtion 7 for pin 14 and 15
+    GPIOB->AFR[1] = regbfr; // define alternate funtion 7 for pin 14 and 15
 }
 
 void initBTUart(uint16_t baudrate)
