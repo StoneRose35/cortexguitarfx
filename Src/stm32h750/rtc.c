@@ -6,7 +6,7 @@ uint8_t initDatetimeClock()
     uint32_t reg;
     // set precaler to 16
     reg = RCC->CFGR;
-    reg &= (0x3F << RCC_CFGR_RTCPRE_Pos);
+    reg &= ~(0x3F << RCC_CFGR_RTCPRE_Pos);
     reg |= (16 << RCC_CFGR_RTCPRE_Pos);
     RCC->CFGR = reg;
 

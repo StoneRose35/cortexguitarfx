@@ -21,21 +21,29 @@ void setupClock()
     while ((RCC->CFGR & (RCC_CFGR_SWS_HSE)) == 0);
 
     
-    PWR->D3CR |= (3 << PWR_D3CR_VOS_Pos); // set scale 1 to d3 domain power
-    while((PWR->D3CR & (1 << PWR_D3CR_VOSRDY_Pos)) == 0); // wait until ready
+    PWR->CR3 = (1 << PWR_CR3_SCUEN_Pos)| (1 << PWR_CR3_LDOEN_Pos);
+    while((PWR->CSR1 & (1 << PWR_CSR1_ACTVOSRDY_Pos)) == 0);
+    cfgr = PWR->D3CR;
+    cfgr &= ~(3 << PWR_D3CR_VOS_Pos);
+    cfgr |= (3 << PWR_D3CR_VOS_Pos); // set scale 1 to d3 domain power
+    PWR->D3CR = cfgr;
+    //while((PWR->D3CR & (1 << PWR_D3CR_VOSRDY_Pos)) == 0); // wait until ready
+    __asm("nop");
     SYSCFG->PWRCR |= (1 << SYSCFG_PWRCR_ODEN_Pos); // enable overdrive, we want to build stuff for rock&metal guitar after all :-)
     while ((PWR->D3CR& (1 << PWR_D3CR_VOSRDY_Pos)) == 0); // wait till ready
 
     // set pll source to HSE (2), set divider m1 (clock input for pll) to 4
-    RCC->PLLCKSELR = (2 << RCC_PLLCKSELR_PLLSRC_Pos) | (4 << RCC_PLLCKSELR_DIVM1_Pos);
+    // m2 to 1 and m3 to 6
+    RCC->PLLCKSELR = (2 << RCC_PLLCKSELR_PLLSRC_Pos) | (4 << RCC_PLLCKSELR_DIVM1_Pos) | (1 << RCC_PLLCKSELR_DIVM2_Pos) | (6 << RCC_PLLCKSELR_DIVM3_Pos);
 
 
     // configure and enable pll for 480 MHz cpu clock
-    RCC->PLL1DIVR = (240 << RCC_PLL1DIVR_N1_Pos) |
-                    (2 << RCC_PLL1DIVR_P1_Pos) |
-                    (5 << RCC_PLL1DIVR_Q1_Pos) |
-                    (2 << RCC_PLL1DIVR_R1_Pos);
-    RCC->PLLCFGR |= (RCC_PLLCFGR_PLL1RGE_2 << RCC_PLLCFGR_PLL1RGE_Pos);
+    RCC->PLL1DIVR = ((240-1) << RCC_PLL1DIVR_N1_Pos) |
+                    ((2-1) << RCC_PLL1DIVR_P1_Pos) |
+                    ((5-1) << RCC_PLL1DIVR_Q1_Pos) |
+                    ((2-1) << RCC_PLL1DIVR_R1_Pos);
+    RCC->PLLCFGR |= (2 << RCC_PLLCFGR_PLL1RGE_Pos) | (1 << RCC_PLLCFGR_PLL2FRACEN_Pos) | 
+                    (2 << RCC_PLLCFGR_PLL2RGE_Pos) | (1 << RCC_PLLCFGR_PLL3RGE_Pos);
 
     RCC->CR |= (1 << RCC_CR_PLL1ON_Pos);
 
@@ -65,7 +73,26 @@ void setupClock()
 
 
     // switch on additional pll for
-    // ...
+    // FMC and SAI1
+    RCC->PLL2DIVR = ((12-1) << RCC_PLL2DIVR_N2_Pos) | 
+                    ((8-1) << RCC_PLL2DIVR_P2_Pos) |
+                    ((2-1) << RCC_PLL2DIVR_Q2_Pos) |
+                    ((1-1) << RCC_PLL2DIVR_R2_Pos);
+    RCC->PLL2FRACR = 4096 << RCC_PLL2FRACR_FRACN2_Pos;
+
+    RCC->PLL3DIVR = ((295-1) << RCC_PLL2DIVR_N2_Pos) | 
+                    ((16-1) << RCC_PLL2DIVR_P2_Pos) |
+                    ((4-1) << RCC_PLL2DIVR_Q2_Pos) |
+                    ((32-1) << RCC_PLL2DIVR_R2_Pos);
+    RCC->CR |= (1 << RCC_CR_PLL2ON_Pos) | (1 << RCC_CR_PLL3ON_Pos);
+    
+    while(((RCC->CR & (1 << RCC_CR_PLL2RDY_Pos))==0) || ((RCC->CR & (1 << RCC_CR_PLL3RDY_Pos))==0));
+
+    // select pll2, r divider from the FMC
+    RCC->D1CCIPR = (2 << RCC_D1CCIPR_FMCSEL_Pos);
+
+    // select pll3 for the sai 1
+    RCC->D2CCIP1R = (2 << RCC_D2CCIP1R_SAI1SEL_Pos);
 
 
 }

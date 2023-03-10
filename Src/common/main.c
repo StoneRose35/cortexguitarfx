@@ -120,10 +120,10 @@ int main(void)
      * Initialize Background Services
      *
 	 */
-	//initCliApi();
+	initCliApi();
 	//initRoundRobinReading(); // internal adc for reading parameters
-	//context |= (1 << CONTEXT_USB);
-	//printf("Microsys v1.0 running\r\n");
+	context |= (1 << CONTEXT_USB);
+	printf("Microsys v1.1 running on DaisySeed 1.1\r\n");
 	//piPicoFxUiSetup(&piPicoUiController);
 	//ssd1306ClearDisplay();
 	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
@@ -143,8 +143,6 @@ int main(void)
     /* Loop forever */
 	for(;;)
 	{
-
-
 		cliApiTask(task);
         /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))

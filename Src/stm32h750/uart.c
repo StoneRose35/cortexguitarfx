@@ -4,7 +4,7 @@
 #include "bufferedInputHandler.h"
 #include "system.h"
 
-#define APB2_SPEED 120000000
+#define APB2_SPEED 80000000
 
 
 extern uint32_t task;
@@ -15,11 +15,11 @@ CommBufferType usbCommBuffer __attribute__((aligned (256)));
 CommBufferType btCommBuffer;
 
 // irq for uart reception, "USB"-port
-void USART3_IRQHandler()
+void USART1_IRQHandler()
 {
-    if ((USART3->ISR & (1 <<USART_ISR_RXNE_RXFNE_Pos))== (1 <<USART_ISR_RXNE_RXFNE_Pos))
+    if ((USART1->ISR & (1 <<USART_ISR_RXNE_RXFNE_Pos))== (1 <<USART_ISR_RXNE_RXFNE_Pos))
     {
-		usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=USART3->RDR& 0xFF;
+		usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=USART1->RDR& 0xFF;
 		usbCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
 		task |= (1 << TASK_USB_CONSOLE_RX);
     }
@@ -44,7 +44,7 @@ void initUart(uint16_t baudrate)
     // enable usart, receiver and transmitter and receiver not empty interrupt
     USART1->CR1 = (1 << USART_CR1_UE_Pos) | (1 << USART_CR1_TE_Pos) | (1 << USART_CR1_RE_Pos) | (1 << USART_CR1_RXNEIE_RXFNEIE_Pos);
 
-    // enable the usart3 interrupt
+    // enable the usart1 interrupt
     __NVIC_EnableIRQ(USART1_IRQn);
 
     // wire up pb14(tx) and pb15 (rx)
@@ -76,7 +76,7 @@ void initBTUart(uint16_t baudrate)
  */
 uint8_t sendCharAsyncUsb()
 {
-	if (usbCommBuffer.outputBufferWriteCnt != usbCommBuffer.outputBufferReadCnt && ((USART1->ISR & USART_ISR_TXE_TXFNF_Pos)== USART_ISR_TXE_TXFNF_Pos))
+	if (usbCommBuffer.outputBufferWriteCnt != usbCommBuffer.outputBufferReadCnt && ((USART1->ISR & (1 << USART_ISR_TXE_TXFNF_Pos))== (1 << USART_ISR_TXE_TXFNF_Pos)))
 	{
 		USART1->TDR = *(usbCommBuffer.outputBuffer+usbCommBuffer.outputBufferWriteCnt);
 		usbCommBuffer.outputBufferWriteCnt++;
