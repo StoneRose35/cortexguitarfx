@@ -80,10 +80,10 @@ void setupClock()
                     ((1-1) << RCC_PLL2DIVR_R2_Pos);
     RCC->PLL2FRACR = 4096 << RCC_PLL2FRACR_FRACN2_Pos;
 
-    RCC->PLL3DIVR = ((295-1) << RCC_PLL2DIVR_N2_Pos) | 
-                    ((16-1) << RCC_PLL2DIVR_P2_Pos) |
-                    ((4-1) << RCC_PLL2DIVR_Q2_Pos) |
-                    ((32-1) << RCC_PLL2DIVR_R2_Pos);
+    RCC->PLL3DIVR = ((295-1) << RCC_PLL3DIVR_N3_Pos) | 
+                    ((16-1) << RCC_PLL3DIVR_P3_Pos) |
+                    ((4-1) << RCC_PLL3DIVR_Q3_Pos) |
+                    ((32-1) << RCC_PLL3DIVR_R3_Pos);
     RCC->CR |= (1 << RCC_CR_PLL2ON_Pos) | (1 << RCC_CR_PLL3ON_Pos);
     
     while(((RCC->CR & (1 << RCC_CR_PLL2RDY_Pos))==0) || ((RCC->CR & (1 << RCC_CR_PLL3RDY_Pos))==0));

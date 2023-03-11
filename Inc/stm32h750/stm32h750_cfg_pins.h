@@ -3,6 +3,8 @@
 // * pin numbers *
 // ***************
 
+// A  B  C  D  E  F  G  H  
+// 0  1  2  3  4  5  6  7 
 #define ENCODER_1 (1*16+4) //PB4 since TIM3 with channel 1 and channel 2 is used
 #define ENCODER_2 (1*16+5) //PB5 since TIM3 with channel 1 and channel 2 is used
 #define ENTER_SWITCH (3*16+14) // PD14
@@ -24,8 +26,8 @@
 #define I2S_BCLK2 (1*16+10) // PB10 I2S2 SCK
 #define I2S_LRCLK2 (1*16+12) // PB12 I2S2 LRCLK
 // i2c interface
-#define I2C_SDA (1*16+9) // PB9
-#define I2C_SCL (1*16+6) // PB6
+#define I2C_SDA (1*16+1) // PB11
+#define I2C_SCL (7*16+4) // PH4
 
 //cs4270 reset line
 #define CS4270_RESET (0*16+0)
