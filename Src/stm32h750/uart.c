@@ -4,7 +4,7 @@
 #include "bufferedInputHandler.h"
 #include "system.h"
 
-#define APB2_SPEED 80000000
+#define APB2_SPEED 120000000
 
 
 extern uint32_t task;
