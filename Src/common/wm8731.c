@@ -27,8 +27,8 @@ void setupWm8731(uint8_t sampledepth,uint8_t samplerate)
     const uint16_t registerData5 = WM8731_R5;
     wm8731_write(registerData5);
 
-    // R7: interface format: set sample depth and i2s format and master mode
-    const uint16_t registerData7 = WM8731_R7 | (2 << FORMAT_LSB) | (sampledepth << IWL_LSB) | (1 << MS_LSB);
+    // R7: interface format: set sample depth and i2s format and slave mode
+    const uint16_t registerData7 = WM8731_R7 | (2 << FORMAT_LSB) | (sampledepth << IWL_LSB) | (0 << MS_LSB);
     wm8731_write(registerData7);
 
 
@@ -48,9 +48,9 @@ void setupWm8731(uint8_t sampledepth,uint8_t samplerate)
     }
     wm8731_write(sampleRateConf);
 
-    //R6: enable line in, adc, dac, output oscillator, power on
+    //R6: enable line in, adc, dac, power on
     const uint16_t registerData6 = WM8731_R6 |
-                    (1 << MICPD_LSB) | (1 << CLK_OUTPD_LSB);
+                    (1 << MICPD_LSB) | (1 << CLK_OUTPD_LSB) | (1 << OSCPD_LSB);
     wm8731_write(registerData6);
 
     //R9: activate interface
