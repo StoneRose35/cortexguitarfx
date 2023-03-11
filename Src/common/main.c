@@ -17,6 +17,7 @@
 #include "datetimeClock.h"
 #include "uart.h"
 #include "dma.h"
+#include "fmc.h"
 #include "pio.h"
 #include "adc.h"
 #include "timer.h"
@@ -80,6 +81,20 @@ uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
 
+uint32_t tickStart, tickEnd;
+char chrbfr[16];
+
+#define DELAY_MEM_SIZE (0x7FFFFF)
+__attribute__ ((section (".sdram_bss")))
+volatile float huge_delay_memory[DELAY_MEM_SIZE] ;
+
+void zero_delay_memory()
+{
+    for(uint32_t c=0;c<DELAY_MEM_SIZE;c++)
+    {
+        huge_delay_memory[c] =0.0f;
+    }
+}
 
 /**
  * @brief the main entry point, should never exit
@@ -99,10 +114,11 @@ int main(void)
 	initSystickTimer();
 	initDatetimeClock();
 	initUart(57600);
-	//initDMA();
+	initDMA();
+    initFmcSdram();
 	//initTimer();
 	//initAdc();
-	//initI2c(26); // 26 for wm8731, 72 for cs4270
+	initI2c(26); // 26 for wm8731, 72 for cs4270
 	
 	/*
 	 *
@@ -139,11 +155,20 @@ int main(void)
     /* enable audio engine last (when fx programs have been set up)*/
     //initI2S();
 
+    tickStart=getTickValue();
+    zero_delay_memory();
+    tickEnd=getTickValue();
+
+    printf("zeroing delay memory took ");
+    UInt32ToChar((tickEnd-tickStart)*10,chrbfr);
+    printf(chrbfr);
+    printf(" ms\r\n");
 
     /* Loop forever */
 	for(;;)
 	{
 		cliApiTask(task);
+        huge_delay_memory[56] =0.986f;
         /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {

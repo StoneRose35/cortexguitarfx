@@ -14,6 +14,7 @@
             "executable": "./out/microsys_audio.elf",
             "name": "Debug with ST-Link",
             "request": "launch",
+            "interface": "jtag",
             "preLaunchTask": "Build using make",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
