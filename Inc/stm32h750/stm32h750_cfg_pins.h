@@ -26,7 +26,7 @@
 #define I2S_BCLK2 (1*16+10) // PB10 I2S2 SCK
 #define I2S_LRCLK2 (1*16+12) // PB12 I2S2 LRCLK
 // i2c interface
-#define I2C_SDA (1*16+1) // PB11
+#define I2C_SDA (1*16+11) // PB11
 #define I2C_SCL (7*16+4) // PH4
 
 //cs4270 reset line
