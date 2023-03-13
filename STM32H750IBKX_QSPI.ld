@@ -169,7 +169,7 @@ SECTIONS
 
   . = ALIGN(4);
 
-  .qspi_data (NOLOAD):
+  .qspi_data :
   {
     . = ALIGN(4);
 		_sqspi_data = .;

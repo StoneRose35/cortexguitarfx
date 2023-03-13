@@ -88,6 +88,9 @@ char chrbfr[16];
 __attribute__ ((section (".sdram_bss")))
 volatile float huge_delay_memory[DELAY_MEM_SIZE] ;
 
+__attribute__ ((section (".qspi_data")))
+const uint32_t mybigdata[]= {6,45,5,8,5,5,3,56,56,8,6,4,4,3,56,5,34,5,56,86,7,75,43,34,65,678,56,};
+
 void zero_delay_memory()
 {
     for(uint32_t c=0;c<DELAY_MEM_SIZE;c++)
@@ -126,7 +129,7 @@ int main(void)
 	 * 
 	 * */
 	//initSsd1306Display();
-	//setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
+	setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
 	//initRotaryEncoder(switchesPins,2);
 	//encoderVal=getEncoderValue();
     //initDebugLed();
@@ -168,7 +171,12 @@ int main(void)
 	for(;;)
 	{
 		cliApiTask(task);
-        huge_delay_memory[56] =0.986f;
+
+        for (uint8_t c=0;c<27;c++)
+        {
+            huge_delay_memory[56-c] =(float)mybigdata[c];
+        }
+
         /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
