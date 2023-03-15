@@ -12,12 +12,23 @@
         {
             "cwd": "${workspaceFolder}",
             "executable": "./out/microsys_audio.elf",
-            "name": "Debug with ST-Link",
+            "name": "Program&Debug with ST-Link",
             "request": "launch",
             "interface": "jtag",
             "preLaunchTask": "Build using make",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
+            "showDevDebugOutput": "parsed",
+            "servertype": "stlink",
+            "svdFile": "STM32H750x.svd"
+        },
+        {
+            "cwd": "${workspaceFolder}",
+            "executable": "./out/microsys_audio.elf",
+            "name": "Debug with ST-Link",
+            "request": "attach",
+            "interface": "jtag",
+            "type": "cortex-debug",
             "showDevDebugOutput": "parsed",
             "servertype": "stlink",
             "svdFile": "STM32H750x.svd"
@@ -45,46 +56,6 @@
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
-            ]
-        },
-        {
-            "cwd": "${workspaceRoot}",
-            "name": "Launch via Picoprobe",
-            "preLaunchTask": "Build using make",
-            "executable": "./out/microsys_audio.elf",
-            "request": "launch",
-            "type": "cortex-debug",
-            "servertype": "openocd",
-            "gdbPath": "gdb-multiarch",
-            "device": "RP2040",
-            "configFiles": [
-                "interface/picoprobe.cfg",
-                "target/rp2040.cfg"
-            ],
-            "svdFile": "/home/philipp/pico/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
-            "runToEntryPoint": "main",
-            "searchDir": [
-                "/home/philipp/pico/openocd/tcl"
-            ]
-        },
-        {
-            "cwd": "${workspaceRoot}",
-            "name": "Launch via RaspberryPi SWD",
-            "preLaunchTask": "Build using make",
-            "executable": "./out/microsys_audio.elf",
-            "request": "launch",
-            "type": "cortex-debug",
-            "servertype": "openocd",
-            "gdbPath": "gdb-multiarch",
-            "device": "RP2040",
-            "configFiles": [
-                "interface/raspberrypi-swd.cfg",
-                "target/rp2040.cfg"
-            ],
-            "svdFile": "/home/pi/pico/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
-            "runToEntryPoint": "main",
-            "searchDir": [
-                "/usr/local/share/openocd/scripts"
             ]
         },
         {

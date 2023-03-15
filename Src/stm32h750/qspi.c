@@ -23,6 +23,7 @@ typedef struct
     const uint8_t af;
 } QspiPinType;
 
+#define QUADSPI_DR_BYTE (*((uint8_t*)(&QUADSPI->DR)))
 
 const QspiPinType qspiPins[6] = {
     { //io 0
@@ -100,30 +101,56 @@ void setQspiGpio(const QspiPinType * pinType)
 
 void waitForStatus(uint32_t maskr,uint32_t matchr)
 {
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
         // read status register until flag SR_WIP is cleared 
     QUADSPI->PSMKR = maskr;
     QUADSPI->PSMAR = matchr;
     QUADSPI->PIR = 0x10;
-    QUADSPI->DLR = 1; // one byte of data
+    QUADSPI->DLR = 1-1; // one byte of data
     QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
-                | (READ_STATUS_REG_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
                 | (2 << QUADSPI_CCR_FMODE_Pos) // automatic status polling  
-                | (1 << QUADSPI_CCR_DMODE_Pos); // data mode: data one line
+                | (1 << QUADSPI_CCR_DMODE_Pos) 
+                | READ_STATUS_REG_CMD;
     while((QUADSPI->SR & (1 << QUADSPI_SR_SMF_Pos)) ==0);
+    QUADSPI->FCR = (1 << QUADSPI_FCR_CSMF_Pos);
 }
 
 void writeEnable()
 {
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     // write enable
-    QUADSPI->DLR = 0; 
-    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
-    | (WRITE_ENABLE_CMD << QUADSPI_CCR_INSTRUCTION_Pos);
-    while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) | WRITE_ENABLE_CMD;
+    QUADSPI->FCR = (1 << QUADSPI_FCR_CTCF_Pos);
 }
 
+void writeEnableQpi()
+{
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) | WRITE_ENABLE_CMD;
+    QUADSPI->FCR = (1 << QUADSPI_FCR_CTCF_Pos);
+}
+
+void readManufacturerId(uint8_t * data)
+{
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->DLR = 3-1;
+    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) 
+                | (1 << QUADSPI_CCR_DMODE_Pos) 
+                | (1 << QUADSPI_CCR_FMODE_Pos)
+                | (READ_JEDEC_ID);
+    for (uint8_t c=0;c<3;c++)
+    {
+        while((QUADSPI->SR & ((1 << QUADSPI_SR_TCF_Pos) | (1 << QUADSPI_SR_FTF_Pos)))==0);
+        *(data+c)=QUADSPI_DR_BYTE;
+    }
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->FCR = (1 << QUADSPI_FCR_CTCF_Pos);
+}
 void initQspi()
 {
-    uint32_t reg;
+    uint8_t reg;
+    uint8_t deviceId[5];
+
     RCC->AHB3ENR |= (1 << RCC_AHB3ENR_QSPIEN_Pos);
 
     // wire up pins
@@ -136,82 +163,86 @@ void initQspi()
         setQspiGpio(&qspiPins[c]);
     }
 
-    // configure & switch on controller
-    QUADSPI->DCR |= (23  << QUADSPI_DCR_FSIZE_Pos) 
-            | ((2-1) << QUADSPI_DCR_CSHT_Pos);
-
+    QUADSPI->CR &=~(0x1F << QUADSPI_CR_FTHRES_Pos);
+    QUADSPI->CR |= (3 << QUADSPI_CR_FTHRES_Pos);
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+// configure & switch on controller
     QUADSPI->CR |= (1 << QUADSPI_CR_PRESCALER_Pos)
-                | ((1-1) << QUADSPI_CR_FTHRES_Pos)
                 | (0 << QUADSPI_CR_SSHIFT_Pos)
                 | (0 << QUADSPI_CR_FSEL_Pos)
                 | (0 << QUADSPI_CR_DFM_Pos)
-                | (1 << QUADSPI_CR_APMS_Pos) // stop autopolling on match
-                | (1 << QUADSPI_CR_EN_Pos);
+                | (1 << QUADSPI_CR_APMS_Pos); // stop autopolling on match
+
+
+    
+    QUADSPI->DCR |= (22  << QUADSPI_DCR_FSIZE_Pos) 
+            | ((2-1) << QUADSPI_DCR_CSHT_Pos);
+
+    QUADSPI->CR |= (1 << QUADSPI_CR_EN_Pos);
+
+    // ---------------
+    // Exit Quad Mode
+    // ---------------
+    QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
+                | (EXIT_QUAD_CMD );
 
     // -----------
     // Reset Memory
     // -----------
     // reset enable
-    QUADSPI->DLR = 0;
-    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
-                | (RESET_ENABLE_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
-                | (0 << QUADSPI_CCR_FMODE_Pos); 
-    while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0); 
+    QUADSPI->CCR = ((1 << QUADSPI_CCR_IMODE_Pos) | RESET_ENABLE_CMD);
+    QUADSPI->FCR = (1 << QUADSPI_FCR_CTCF_Pos);
 
     // reset memory
-    QUADSPI->DLR = 0;
-    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
-                | (RESET_MEMORY_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
-                | (0 << QUADSPI_CCR_FMODE_Pos);
-    while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->CCR = ((1 << QUADSPI_CCR_IMODE_Pos) | RESET_MEMORY_CMD);
+    QUADSPI->FCR = (1 << QUADSPI_FCR_CTCF_Pos);
 
     // read status register until flag SR_WIP is cleared 
     waitForStatus(IS25LP064A_SR_WIP,0);
 
+    readManufacturerId(deviceId);
+
     // --------------------------
     // Configure the dummy cycles
     // --------------------------
-    QUADSPI->DLR = 1;
-    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
-                | (SET_READ_PARAM_REG_CMD << QUADSPI_CCR_INSTRUCTION_Pos) 
-                | (1 << QUADSPI_CCR_DMODE_Pos)
-                | (0 << QUADSPI_CCR_FMODE_Pos);    
-    QUADSPI->DR = 0b11110000;
-    while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->DLR = 1-1;
+    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) | (1 << QUADSPI_CCR_DMODE_Pos) | SET_READ_PARAM_REG_CMD;
+    QUADSPI_DR_BYTE = (uint8_t)0b11110000;
+    
+    QUADSPI->FCR = (1 << QUADSPI_FCR_CTCF_Pos);
+
 
 
     // -------------------------
     // Enable Quad Mode
     // -------------------------
-    QUADSPI->DLR = 1;
-    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
-            | (READ_STATUS_REG_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
-            | (1 << QUADSPI_CCR_DMODE_Pos) // data mode: data one line$
-            | (1 << QUADSPI_CCR_FMODE_Pos); // indirect read
-    while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
-    reg = QUADSPI->DR;
+    while((QUADSPI->SR & ((1 << QUADSPI_SR_TCF_Pos) | (1 << QUADSPI_SR_FTF_Pos)))==0);
+    QUADSPI->DLR = 1-1;
+    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos)
+                |(1 << QUADSPI_CCR_DMODE_Pos)
+                |(1 << QUADSPI_CCR_FMODE_Pos)
+                | READ_STATUS_REG_CMD;
+    reg = QUADSPI_DR_BYTE;
     if ((reg & IS25LP064A_SR_QE)==0)
     {
         // write enable
         writeEnable();
-
-        QUADSPI->DLR = 1;
-        QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
-                | (WRITE_STATUS_REG_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
-                | (1 << QUADSPI_CCR_DMODE_Pos) // data mode: data one line$
-                | (0 << QUADSPI_CCR_FMODE_Pos);
-        QUADSPI->DR = reg | IS25LP064A_SR_QE;
-        while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+        while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+        QUADSPI->DLR = 1-1;
+        QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos)|(1 << QUADSPI_CCR_DMODE_Pos) | (WRITE_STATUS_REG_CMD);
+        QUADSPI_DR_BYTE = reg | IS25LP064A_SR_QE;
         waitForStatus(IS25LP064A_SR_QE,IS25LP064A_SR_QE);
     }
 
     // send out QPIEN
     // from this point on only quad commands are allowed
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     QUADSPI->DLR = 0; 
-    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
-    | (ENTER_QUAD_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
-    | (0 << QUADSPI_CCR_FMODE_Pos);
-    while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) | (ENTER_QUAD_CMD);
+
 }
 
 
@@ -220,8 +251,8 @@ void QspiProgramPage(uint32_t address,uint8_t*data)
 {
     uint16_t c;
 
-    writeEnable();
-    QUADSPI->DLR = 256;
+    writeEnableQpi();
+    QUADSPI->DLR = 256-1;
     QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
             | (PAGE_PROG_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
             | (3 << QUADSPI_CCR_DMODE_Pos) // data mode: data on four lines
@@ -232,8 +263,8 @@ void QspiProgramPage(uint32_t address,uint8_t*data)
     QUADSPI->AR = address;
     for(c=0;c<256;c++)
     {
+        while((QUADSPI->SR & (1 << QUADSPI_SR_FTF_Pos))!=0);
         QUADSPI->DR = data[c];
-        while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     }
     waitForStatus(IS25LP064A_SR_WIP,0);
 }
@@ -241,7 +272,7 @@ void QspiProgramPage(uint32_t address,uint8_t*data)
 // erases a sector of 4 kbytes
 void QspiEraseSector(uint32_t address)
 {
-    writeEnable();
+    writeEnableQpi();
     QUADSPI->DLR = 0;
     QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
             | (SECTOR_ERASE_QPI_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
@@ -267,8 +298,8 @@ void QspiRead(uint32_t address,uint32_t nBytes,uint8_t * data)
     QUADSPI->AR = address;
     for(uint32_t c=0;c<nBytes;c++)
     {
+        while((QUADSPI->SR & (1 << QUADSPI_SR_FTF_Pos))!=0);
         *(data+c) = QUADSPI->DR;
-        while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     }
 }
 
@@ -276,22 +307,21 @@ void setMemoryMappedMode()
 {
     // disable qpi mode
     // since the first instruction will be in single line
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0); 
     QUADSPI->DLR = 0;
     QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
-            | (EXIT_QUAD_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
-            | (0 << QUADSPI_CCR_FMODE_Pos); // indirect write
+            | (EXIT_QUAD_CMD);
     while((QUADSPI->CR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
 
     // define a read quad io command
+    QUADSPI->ABR = 0xA0;
     QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on one line
             | (QUAD_INOUT_FAST_READ_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
             | (3 << QUADSPI_CCR_DMODE_Pos) // data mode: data on four lines
             | (6 << QUADSPI_CCR_DCYC_Pos) // 6 dummy cycles
             | (2 << QUADSPI_CCR_ADSIZE_Pos) // 24 bit address
             | (3 << QUADSPI_CCR_ADMODE_Pos) // address over 4 data lines
-            | (2 << QUADSPI_CCR_FMODE_Pos) // memory-mapped mode
+            | (3 << QUADSPI_CCR_FMODE_Pos) // memory-mapped mode
+            | (1 << QUADSPI_CCR_SIOO_Pos) // instruction only during first command
             | (3 << QUADSPI_CCR_ABMODE_Pos);
-    QUADSPI->ABR = 0xA0;
-
-
 }

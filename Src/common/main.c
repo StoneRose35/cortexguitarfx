@@ -18,7 +18,7 @@
 #include "uart.h"
 #include "dma.h"
 #include "fmc.h"
-#include "pio.h"
+#include "qspi.h"
 #include "adc.h"
 #include "timer.h"
 #include "gpio.h"
@@ -119,6 +119,7 @@ int main(void)
 	initUart(57600);
 	initDMA();
     initFmcSdram();
+    initQspi();
 	//initTimer();
 	//initAdc();
 	initI2c(26); // 26 for wm8731, 72 for cs4270
@@ -174,7 +175,7 @@ int main(void)
 
         for (uint8_t c=0;c<27;c++)
         {
-            huge_delay_memory[56-c] =(float)mybigdata[c];
+            huge_delay_memory[56-c] =((float)(c/2.32f))*((float)(c/2.32f));
         }
 
         /*
