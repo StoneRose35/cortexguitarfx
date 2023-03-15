@@ -219,7 +219,7 @@ volatile uint8_t programsToInitialize[3];
 // 2: fade out
 // 3: in bypass / change in progress
 // 4: fade in
-volatile uint8_t programChangeState;
+volatile uint8_t programChangeState=0;
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
@@ -319,6 +319,7 @@ int main(void)
 	initI2SSlave();
 	#endif
 	
+	DebugLedOn();
     /* Loop forever */
 	for(;;)
 	{

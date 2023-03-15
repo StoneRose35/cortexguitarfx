@@ -78,6 +78,7 @@ void core1Main()
 
     for(;;)
     {
+        /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
@@ -146,13 +147,14 @@ void core1Main()
                 setPin(CLIPPING_LED_OUTPUT,0);
             }
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
-        }
+        }*/
 
         /*
          *
          * UI Switches Callback
          * 
         */
+        /*
         switchVals[0] = getSwitchValue(0);
         if ((switchVals[0] & 1) > 0)
         {
@@ -180,12 +182,14 @@ void core1Main()
            rotaryCallback(encoderDelta,&piPicoUiController);
            clearStickyIncrementDelta();
        }
+       */
 
        /*
         *
         * Stomp Switches Callback
         * 
        */
+        /*
         for (uint8_t c=0;c<3;c++)
         {
             stompSwitchState = getStompSwitchState(c);
@@ -216,6 +220,6 @@ void core1Main()
                 }
             }
             programChangeState = 4;
-        }
+        }*/
     }
 }

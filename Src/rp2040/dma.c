@@ -1,6 +1,7 @@
 
 #include "dma.h"
 #include "neopixelDriver.h"
+#include "debugLed.h"
 #include "i2s.h"
 #include "adc.h"
 #include "gpio.h"
@@ -35,6 +36,7 @@ extern volatile uint8_t programChangeState;
 extern PiPicoFxUiType piPicoUiController;
 static volatile uint32_t * audioStatePtr;
 int16_t fadeCounter;
+uint32_t debugLedCntr = 0;
 
 void initDMA()
 {
@@ -177,6 +179,13 @@ void isr_dma_irq0_irq11()
 			cpuLoad = ticEnd-ticStart;
 			cpuLoad = cpuLoad*196; //*256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
 			cpuLoad = cpuLoad >> 8;
+		}
+
+		debugLedCntr++;
+		if (debugLedCntr>=1500)
+		{
+			debugLedCntr=0;
+			DebugLedToggle();
 		}
 	}
 	return;
