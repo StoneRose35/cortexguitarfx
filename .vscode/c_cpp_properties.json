@@ -1,16 +1,41 @@
 {
     "configurations": [
         {
-            "name": "c on linux",
+            "name": "c on arm",
             "intelliSenseMode": "clang-arm",
             "includePath": [
                 "Inc/RpiPico",
                 "Inc"
             ],
             "defines": [
-                "I2S_INPUT", "DEBUG", "STM32", "STM32F7", "STM32H750xx", "FLOAT_AUDIO"
+                "I2S_INPUT",
+                "DEBUG",
+                "STM32",
+                "STM32F7",
+                "STM32H750xx",
+                "FLOAT_AUDIO"
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "compileCommands": ".vscode/compile_commands.json",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "configurationProvider": "ms-vscode.cmake-tools"
+        },
+        {
+            "name": "c on linux x86_64",
+            "intelliSenseMode": "linux-gcc-x64",
+            "includePath": [
+                "Inc"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "compileCommands": ".vscode/compile_commands.json",

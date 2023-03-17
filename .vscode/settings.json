@@ -46,7 +46,8 @@
         "stm32f446xx.h": "c",
         "stm32h750xx.h": "c",
         "stm32h750_cfg_pins.h": "c",
-        "helpers.h": "c"
+        "helpers.h": "c",
+        "termios.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false
