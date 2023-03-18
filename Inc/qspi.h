@@ -23,10 +23,12 @@
 //#define QUAD_IN_PAGE_PROG_CMD 0x32 
 #define PAGE_PROG_CMD 0x02
 #define SECTOR_ERASE_QPI_CMD 0x20
+#define CHIP_ERASE_QPI_CMD 0xC7
 #define QUAD_INOUT_FAST_READ_CMD 0xEB   
 
 void initQspi();
 void QspiEraseSector(uint32_t address);
+void QspiEraseChip();
 void QspiRead(uint32_t address,uint32_t nBytes,uint8_t * data);
 void QspiProgramPage(uint32_t address,uint8_t*data);
 void setMemoryMappedMode();

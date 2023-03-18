@@ -140,10 +140,10 @@ int main(void)
      * Initialize Background Services
      *
 	 */
-	initCliApi();
+	//initCliApi();
 	//initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
-	printf("Microsys v1.1 running on DaisySeed 1.1\r\n");
+	//printf("Microsys v1.1 running on DaisySeed 1.1\r\n");
 	//piPicoFxUiSetup(&piPicoUiController);
 	//ssd1306ClearDisplay();
 	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
@@ -163,10 +163,10 @@ int main(void)
     zero_delay_memory();
     tickEnd=getTickValue();
 
-    printf("zeroing delay memory took ");
-    UInt32ToChar((tickEnd-tickStart)*10,chrbfr);
-    printf(chrbfr);
-    printf(" ms\r\n");
+    //printf("zeroing delay memory took ");
+    //UInt32ToChar((tickEnd-tickStart)*10,chrbfr);
+    //printf(chrbfr);
+    //printf(" ms\r\n");
 
     /* Loop forever */
 	for(;;)

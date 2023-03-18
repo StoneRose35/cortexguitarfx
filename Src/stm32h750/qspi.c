@@ -252,6 +252,7 @@ void QspiProgramPage(uint32_t address,uint8_t*data)
     uint16_t c;
 
     writeEnableQpi();
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     QUADSPI->DLR = 256-1;
     QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
             | (PAGE_PROG_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
@@ -273,20 +274,28 @@ void QspiProgramPage(uint32_t address,uint8_t*data)
 void QspiEraseSector(uint32_t address)
 {
     writeEnableQpi();
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     QUADSPI->DLR = 0;
     QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
             | (SECTOR_ERASE_QPI_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
-            | (3 << QUADSPI_CCR_DMODE_Pos) // data mode: data on four lines
-            | (0 << QUADSPI_CCR_DCYC_Pos) // 0 dummy cycles
             | (2 << QUADSPI_CCR_ADSIZE_Pos) // 24 bit address
-            | (3 << QUADSPI_CCR_ADMODE_Pos) // address over 4 data lines
-            | (0 << QUADSPI_CCR_FMODE_Pos);
+            | (3 << QUADSPI_CCR_ADMODE_Pos); // address over 4 data lines
     QUADSPI->AR = address;
+    waitForStatus(IS25LP064A_SR_WIP,0);
+}
+
+void QspiEraseChip()
+{
+    writeEnableQpi();
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
+            | (CHIP_ERASE_QPI_CMD << QUADSPI_CCR_INSTRUCTION_Pos);
     waitForStatus(IS25LP064A_SR_WIP,0);
 }
 
 void QspiRead(uint32_t address,uint32_t nBytes,uint8_t * data)
 {
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     QUADSPI->DLR = nBytes;
     QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
             | (SECTOR_ERASE_QPI_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
