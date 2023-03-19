@@ -16,12 +16,13 @@ static int32_t i2sDoubleBufferIn[AUDIO_BUFFER_SIZE*2*2];
 #endif
 static volatile  uint32_t dbfrPtr; 
 static volatile uint32_t dbfrInputPtr;
-volatile uint32_t audioState;
+
 extern uint32_t task;
 extern float avgInOld, avgOutOld;
 extern uint32_t cpuLoad;
 extern PiPicoFxUiType piPicoUiController;
 uint16_t bufferCnt;
+volatile uint32_t audioState;
 
 int32_t *  audioBufferPtr;
 int32_t *  audioBufferInputPtr;
@@ -55,7 +56,7 @@ void DMA2_Stream2_IRQHandler() // adc
     {
     
 		ticStart = getTimeLW();
-        DebugLedOn();
+        //DebugLedOn();
         audioBufferPtr = getEditableAudioBufferHiRes();
         audioBufferInputPtr = getInputAudioBufferHiRes();
         for (uint32_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
@@ -81,7 +82,10 @@ void DMA2_Stream2_IRQHandler() // adc
             }
             avgInOld = AVERAGING_LOWPASS_CUTOFF*avgIn + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgInOld);
 
-            inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
+            if (audioState & (1 << AUDIO_STATE_ON))
+            {
+                inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
+            }
 
 
             if (inputSample < 0.0f)
@@ -114,7 +118,7 @@ void DMA2_Stream2_IRQHandler() // adc
 			cpuLoad = cpuLoad*196; // *256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
 			cpuLoad = cpuLoad >> 8;
 		}
-        DebugLedOff();
+        //DebugLedOff();
     }
 }
 
@@ -214,13 +218,18 @@ void initI2S()
     // enable i2s devices
     SPI1->I2SCFGR |= (1 << SPI_I2SCFGR_I2SE_Pos);
     SPI2->I2SCFGR |= (1 << SPI_I2SCFGR_I2SE_Pos);
+
+    enableAudioEngine();
 }
 
 void enableAudioEngine()
 {
-
+    audioState |= (1 << AUDIO_STATE_ON);
 }
-void disableAudioEngine();
+void disableAudioEngine()
+{
+    audioState &= ~(1 << AUDIO_STATE_ON);
+}
 void toggleAudioBuffer()
 {}
 int32_t* getEditableAudioBufferHiRes()

@@ -28,6 +28,7 @@
 #include "consoleBase.h"
 #include "apiHandler.h"
 #include "bufferedInputHandler.h"
+#include "qspiFlasher.h"
 #include "stringFunctions.h"
 #include "charDisplay.h"
 #include "rotaryEncoder.h"
@@ -173,11 +174,19 @@ int main(void)
 	{
 		cliApiTask(task);
 
-        for (uint8_t c=0;c<27;c++)
+        if(getQspiStatus()==0)
         {
-            huge_delay_memory[56-c] =((float)(c/2.32f))*((float)(c/2.32f));
+            for (uint8_t c=0;c<27;c++)
+            {
+                huge_delay_memory[56-c] =((float)(c/2.32f))*((float)(c/2.32f)) +(float)mybigdata[c%16];
+            }
         }
 
+        if ((task & (1 << TASK_FLASH_QSPI)) != 0)
+        {
+            flashingTask();
+            task &= ~(1 << TASK_FLASH_QSPI);
+        }
         /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {

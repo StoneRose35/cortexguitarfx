@@ -32,5 +32,11 @@ void QspiEraseChip();
 void QspiRead(uint32_t address,uint32_t nBytes,uint8_t * data);
 void QspiProgramPage(uint32_t address,uint8_t*data);
 void setMemoryMappedMode();
-
+void endMemoryMappedMode();
+void setQspiStatus(uint8_t status);
+uint8_t getQspiStatus();
+void startQpiMode();
+void endQpiMode();
+uint8_t readStatusRegister();
+uint8_t readStatusRegisterQpi();
 #endif

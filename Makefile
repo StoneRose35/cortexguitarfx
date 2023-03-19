@@ -15,11 +15,11 @@ CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-
 LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 LARGS_QSPI=-g -nostdlib -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_QSPI.ld -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
-CPYARGS=-Obinary
+CPYARGS=-Obinary --remove-section=.qspi*
 CPYARGS_QSPIBIN=-Obinary --only-section=.qspi* 
-#--change-section-address .qspi*=0
+DEBUGGER_UART=/dev/ttyACM0
 
-all: $(PROJECT).elf
+all: out/$(PROJECT).bin out/$(PROJECT)_qspi.bin
 
 #RP2040_OBJS := $(patsubst Src/rp2040/%.c,out/%.o,$(wildcard Src/rp2040/*.c))
 #RP2040_OBJS_ASM := $(patsubst Src/rp2040/%.S,out/%.o,$(wildcard Src/rp2040/*.S))
@@ -35,7 +35,6 @@ SERVICES_OBJS := $(patsubst Src/services/%.c,out/%.o,$(wildcard Src/services/*.c
 ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 
-#all_rp2040: $(RP2040_OBJS) $(RP2040_OBJS_ASM)
 all_stm32h750: $(STM32H750_OBJS)
 all_common: $(COMMON_OBJS)
 all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS)
@@ -114,20 +113,31 @@ out/%.o: Src/services/%.c $(ASSET_IMAGES)
 Inc/images/%.h: Assets/%.png
 	./tools/helper_scripts.py -convertImg $^
 
+# qspi uploader tool
+tools/qspi_uart_uploader:
+	gcc -Og tools/qspi_uart_uploader.c -o tools/qspi_uart_uploader
+
 # main linking and generating flashable content
 #$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
 #	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
-$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps
+out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
-$(PROJECT)_qspi.elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps
+out/$(PROJECT)_qspi.elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps
 	$(CC) $(LARGS_QSPI) -o ./out/$(PROJECT)_qspi.elf ./out/*.o 
 
-$(PROJECT).bin: $(PROJECT).elf
+out/$(PROJECT).bin: out/$(PROJECT).elf
 	@$(OBJCPY) $(CPYARGS) ./out/$(PROJECT).elf ./out/$(PROJECT).bin
 
-$(PROJECT)_qspi.bin: $(PROJECT)_qspi.elf
+out/$(PROJECT)_qspi.bin: out/$(PROJECT)_qspi.elf
 	@$(OBJCPY) $(CPYARGS_QSPIBIN) -- ./out/$(PROJECT)_qspi.elf ./out/$(PROJECT)_qspi.bin
+
+program_qspi: out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
+	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
+
+program_flash: out/$(PROJECT).bin
+	st-flash write out/$(PROJECT).bin 0x8000000
+
 
 # *************************************************************
 #

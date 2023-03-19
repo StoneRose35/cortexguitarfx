@@ -48,7 +48,8 @@
         "stm32h750_cfg_pins.h": "c",
         "helpers.h": "c",
         "termios.h": "c",
-        "systemchoice.h": "c"
+        "systemchoice.h": "c",
+        "stm32h7xx.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

@@ -3,15 +3,9 @@
 #include "stm32h750/stm32h750xx.h"
 #include "bufferedInputHandler.h"
 #include "system.h"
-#include "qspi.h"
+#include "qspiFlasher.h"
 
 #define APB2_SPEED 120000000
-
-
-#define QSPI_PROGRAMMER_IDLE 0
-#define QSPI_PROGRAMMER_IDENTIFIER_RECEIVED 1
-#define QSPI_PROGRAMMER_LENGTH_RECEIVED 2
-
 
 extern uint32_t task;
 extern uint8_t context; // used by printf to decide where a certain information should be output
@@ -20,30 +14,26 @@ extern uint8_t context; // used by printf to decide where a certain information 
 //CommBufferType btCommBuffer;
 
 
-uint8_t uartInputBfr[256];
-uint32_t uartInputBfrCntr=0;
-uint32_t uartSendBfrCntr=0;
-const uint8_t qspiProgrammerIdentifier[] = {0x23, 0xed, 0x12, 0xf3, 0x11, 0x6a, 0xc,0xa2};
-const uint8_t ack[] = {'A', 'C', 'K'};
-// 0: idle, 1: identifier received, 2: length received, 3: data package received
-volatile uint32_t qspiFlashingState=0;
-volatile uint32_t qspiPageCntr=0;
-union datalength
-{
-    uint32_t binFileLength;
-    uint8_t data[4];
-};
-union datalength dl;
 
-void sendAck()
+void sendBlocking(const uint8_t * data,uint32_t dlength)
 {
-    while(uartSendBfrCntr < 3)
+    uint32_t c=0;
+    while(c < dlength)
     {
-        while((UART1->ISR & USART_ISR_TXE_TXFNF)==0);
-        UART1->TDR = ack[uartSendBfrCntr++];
+        while((USART1->ISR & USART_ISR_TXE_TXFNF)==0);
+        USART1->TDR = data[c++];
     }
-    uartSendBfrCntr=0;
+    while((USART1->ISR & USART_ISR_TXE_TXFNF)==0);
+}
 
+void receiveBlocking(uint8_t * data,uint32_t dlength)
+{
+    uint32_t c=0;
+    while (c < dlength)
+    {
+        while((USART1->ISR & (1 << USART_ISR_RXNE_RXFNE_Pos))==0);
+        data[c++] = USART1->RDR & 0xFF;
+    }
 }
 
 // irq for uart reception, "USB"-port
@@ -54,61 +44,7 @@ void USART1_IRQHandler()
 	    //usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=USART1->RDR& 0xFF;
 		//usbCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
 		//task |= (1 << TASK_USB_CONSOLE_RX);
-        switch(qspiFlashingState)
-        {
-            case QSPI_PROGRAMMER_IDLE:
-                uartInputBfr[uartInputBfrCntr] = USART1->RDR& 0xFF;
-                if (uartInputBfr[uartInputBfrCntr] != qspiProgrammerIdentifier[uartInputBfrCntr])
-                {
-                    uartInputBfrCntr = 0;
-                }
-                else
-                {
-                    uartInputBfrCntr++;
-                }
-                if (uartInputBfrCntr == 8)
-                {
-                    qspiFlashingState=QSPI_PROGRAMMER_IDENTIFIER_RECEIVED;
-                    uartInputBfrCntr = 0;
-                    sendAck();
-                }
-                break;
-            case QSPI_PROGRAMMER_IDENTIFIER_RECEIVED:
-                dl.data[uartInputBfrCntr++] = USART1->RDR& 0xFF;
-                if (uartInputBfrCntr==4)
-                {
-                    qspiFlashingState = QSPI_PROGRAMMER_LENGTH_RECEIVED;
-
-                    // call chip erase
-                    QspiEraseChip();
-                    sendAck();
-                    uartInputBfrCntr=0;
-                }
-                break;
-            case QSPI_PROGRAMMER_LENGTH_RECEIVED:
-                uartInputBfr[uartInputBfrCntr++] = USART1->RDR& 0xFF;
-                if (uartInputBfrCntr == 256 || (qspiPageCntr==(dl.binFileLength >> 8) 
-                    && uartInputBfrCntr == (dl.binFileLength - (qspiPageCntr << 8))))
-                {
-                    // call program page
-                    QspiProgramPage((qspiPageCntr << 8), uartInputBfr);
-                    if (uartInputBfrCntr==256)
-                    {
-                        qspiPageCntr++;
-                        if ((dl.binFileLength - (qspiPageCntr << 8))==0)
-                        {
-                            qspiFlashingState=QSPI_PROGRAMMER_IDLE;
-                        }
-                    }
-                    else
-                    {
-                        qspiFlashingState=QSPI_PROGRAMMER_IDLE;
-                    }
-                    uartInputBfrCntr=0;
-                    sendAck();
-                }
-                break;
-        }
+        processUartReception(USART1->RDR& 0xFF);
     }
 }
 

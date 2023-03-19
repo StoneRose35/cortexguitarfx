@@ -10,14 +10,19 @@ union datalength
     __uint32_t binFileLength;
     __uint8_t data[4];
 };
-#define ACK_TIMEOUT 10
-void writeUartArray(int fd,const __uint8_t * data, __uint32_t len)
+#define ACK_TIMEOUT 1000
+int writeUartArray(int fd,const __uint8_t * data, __uint32_t len)
 {
+
     for(__uint32_t c=0;c<len;c++)
     {
-        write(fd,data+c,1);
+        if (write(fd,data+c,1)!=1)
+        {
+            return 1;
+        }
+        tcdrain(fd);
     }
-    tcdrain(fd);
+    return 0;
 }
 
 int waitForAck(int fd)
@@ -36,7 +41,7 @@ int waitForAck(int fd)
     }
     for (__uint8_t c=0;c<3;c++)
     {
-        if(*(databuffer+cnt)!=*(ack+c))
+        if(*(databuffer+c)!=*(ack+c))
         {
             return 1;        
         }
@@ -123,7 +128,14 @@ int main(int argc,char ** argv)
 
     // main workflow
     const __uint8_t identifier[] = {0x23, 0xed, 0x12, 0xf3, 0x11, 0x6a, 0xc,0xa2};
-    writeUartArray(uploader,identifier,sizeof(identifier));
+    if (writeUartArray(uploader,identifier,sizeof(identifier))!=0)
+    {
+        printf("writing identifier failed\r\n");
+        close(uploader);
+        fclose(binfile);
+        return 1;
+    }
+    printf("waiting for identifier ACK\r\n");
     if (waitForAck(uploader)!=0)
     {
         printf("identifier not acknowledged\r\n");
@@ -138,11 +150,24 @@ int main(int argc,char ** argv)
     fseek(binfile, 0L, SEEK_SET);
     union datalength dl;
     dl.binFileLength = flength;
-    writeUartArray(uploader,dl.data,4);
-    waitForAck(uploader);
-
+    if (writeUartArray(uploader,dl.data,4)!=0)
+    {
+        printf("writing bin file length failed\r\n");
+        close(uploader);
+        fclose(binfile);
+        return 1;
+    }
+    printf("waiting for bin file length ACK\r\n");
+    if (waitForAck(uploader)!=0)
+    {
+        printf("bin file length not acknowledged\r\n");
+        close(uploader);
+        fclose(binfile);
+        return 1;
+    }
     // send pages, wait for ack after each page
-    __uint32_t nPages = flength >> 8;
+    __uint32_t nPages = (flength >> 8)+1;
+    printf("writing %d pages\r\n",nPages);
     size_t nChars;
     for(__uint16_t c=0;c<nPages;c++)
     {
@@ -154,13 +179,30 @@ int main(int argc,char ** argv)
         {
             nChars=256;
         }
-        fread(pageBuffer,nChars,1,binfile);
-        writeUartArray(uploader,pageBuffer,nChars);
-        waitForAck(uploader);
-        printf("\rPage (%d/%d) written      ",c,nPages);
+        if (fread(pageBuffer,nChars,1,binfile)!=1)
+        {
+            printf("failed reading %lu bytes from bin file\r\n",nChars);
+            return 1;
+        }
+        printf("writing page %d\r\n",c);
+        if (writeUartArray(uploader,pageBuffer,nChars)!=0)
+        {
+            printf("writing page %hu failed\r\n",c);
+            close(uploader);
+            fclose(binfile);
+            return 1;
+        }
+        if (waitForAck(uploader)!=0)
+        {
+            printf("ACK for page %hu failed\r\n",c);
+            close(uploader);
+            fclose(binfile);
+            return 1;
+        }
+        printf("\rPage (%d/%d) written      ",c+1,nPages);
     }
 
-    printf("flashing successful\r\n");
+    printf("\r\nflashing successful!\r\n");
 
     return 0;
 }

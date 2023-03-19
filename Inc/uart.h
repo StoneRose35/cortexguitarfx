@@ -68,6 +68,8 @@ void initBTUart(uint16_t baudrate);
 uint8_t sendCharAsyncUsb();
 uint8_t sendCharAsyncBt();
 
+void sendBlocking(const uint8_t * data,uint32_t dlength);
+void receiveBlocking(uint8_t * data,uint32_t dlength);
 
 #endif /* UART_H_ */
 

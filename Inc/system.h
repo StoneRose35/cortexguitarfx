@@ -77,6 +77,7 @@
 #define TASK_PROCESS_AUDIO_INPUT 5 //<! audio input buffer has been filled, process it
 #define TASK_UPDATE_POTENTIOMETER_VALUES 6  //<! potentiometer values have been read --> update
 #define TASK_UPDATE_AUDIO_UI 7
+#define TASK_FLASH_QSPI 8
 #define CONTEXT_USB 0 //!<bit position: if set output of prints is routed to the USB console
 #define CONTEXT_BT 1 //!<bit position: if set output of prints is routed to the bluetooth console
 
