@@ -15,6 +15,7 @@
 #define READ_STATUS_REG_CMD 0x05
 #define READ_MANUFACTURER_DEVICE_ID 0x90
 #define READ_JEDEC_ID 0x9F
+#define READ_JEDEC_ID_QPI 0xAF
 #define WRITE_STATUS_REG_CMD 0x01
 #define SET_READ_PARAM_REG_CMD 0xC0
 #define WRITE_ENABLE_CMD 0x06
@@ -26,11 +27,21 @@
 #define CHIP_ERASE_QPI_CMD 0xC7
 #define QUAD_INOUT_FAST_READ_CMD 0xEB   
 
+
+
 void initQspi();
-void QspiEraseSector(uint32_t address);
+void waitForStatusQpi(uint32_t maskr,uint32_t matchr);
+void waitForStatus(uint32_t maskr,uint32_t matchr);
+void writeEnable();
+void writeEnableQpi();
+void readManufacturerId(uint8_t * data);
+void readManufacturerIdQpi(uint8_t * data);
+void QspiEraseSectorQpi(uint32_t address);
 void QspiEraseChip();
+void QspiEraseChipQpi();
 void QspiRead(uint32_t address,uint32_t nBytes,uint8_t * data);
 void QspiProgramPage(uint32_t address,uint8_t*data);
+void QspiProgramPageQpi(uint32_t address,uint8_t*data);
 void setMemoryMappedMode();
 void endMemoryMappedMode();
 void setQspiStatus(uint8_t status);

@@ -66,12 +66,9 @@ void processUartReception(uint8_t receivedByte)
 void flashingTask()
 {
     uint32_t bytesReceived=0;
-    volatile uint8_t reg;
     // call chip erase
     setQspiStatus(2);
     endMemoryMappedMode();
-    startQpiMode();
-    reg = readStatusRegisterQpi();
     QspiEraseChip();
     sendAck();
     uartInputBfrCntr=0;
