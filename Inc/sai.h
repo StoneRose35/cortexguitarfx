@@ -1,5 +1,5 @@
-#ifndef _I2S_H_
-#define _I2S_H_
+#ifndef _SAI_H_
+#define _SAI_H_
 #include <stdint.h>
 
 #define F_SAMPLING 48000
@@ -9,7 +9,7 @@
 #define AUDIO_STATE_BUFFER_UNDERRUN 1
 #define AUDIO_STATE_ON 0
 
-void initI2S();
+void initSAI();
 void enableAudioEngine();
 void disableAudioEngine();
 void toggleAudioBuffer();

@@ -1,4 +1,4 @@
-#include "i2s.h"
+#include "sai.h"
 #include "adc.h"
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
@@ -10,9 +10,9 @@
 #define AVERAGING_LOWPASS_CUTOFF 0.0001f
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 256
 
-static int32_t i2sDoubleBuffer[AUDIO_BUFFER_SIZE*2*2];
+static int32_t i2sDoubleBuffer[AUDIO_BUFFER_SIZE*4*2];
 #ifdef I2S_INPUT
-static int32_t i2sDoubleBufferIn[AUDIO_BUFFER_SIZE*2*2];
+static int32_t i2sDoubleBufferIn[AUDIO_BUFFER_SIZE*4*2];
 #endif
 static volatile  uint32_t dbfrPtr; 
 static volatile uint32_t dbfrInputPtr;
@@ -30,7 +30,7 @@ int32_t inputSampleInt,inputSampleInt2;
 float inputSample, avgIn, avgOut;
 uint32_t ticStart, ticEnd;
 
-void DMA2_Stream2_IRQHandler() // adc
+void DMA1_Stream0_IRQHandler() // adc
 {
     if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
     {
@@ -123,7 +123,7 @@ void DMA2_Stream2_IRQHandler() // adc
 }
 
 
-void DMA1_Stream4_IRQHandler() // dac
+void DMA1_Stream1_IRQHandler() // dac
 {
     if ((task & (1 << TASK_PROCESS_AUDIO)) == 0)
     {
@@ -152,7 +152,7 @@ static void config_i2s_pin(uint8_t pinnr,uint8_t af)
     uint32_t port;
     uint32_t regbfr;
     port = pinnr >> 4;
-    RCC->AHB1ENR |= (1 << port);
+    RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
     regbfr = gpio->MODER;
     regbfr &= ~(3 << ((pinnr & 0xF)<<1));
@@ -165,60 +165,78 @@ static void config_i2s_pin(uint8_t pinnr,uint8_t af)
     gpio->AFR[(pinnr & 0xF)>>3] = regbfr; 
 }
 
-void initI2S()
+void initSAI()
 {
 
-    //SPI1 to adc, spi2 to dac
-    RCC->APB1ENR |= (1 << RCC_APB1ENR_SPI2EN_Pos);
-    RCC->APB2ENR |= (1 << RCC_APB2ENR_SPI1EN_Pos);
+    //sai1 for adc and dac
+    RCC->APB2ENR |= (1 << RCC_APB2ENR_SAI1EN_Pos);
+    //RCC->APB2ENR |= (1 << RCC_APB2ENR_SPI1EN_Pos);
 
     //configure pins
-    config_i2s_pin(I2S_BCLK,5);
-    config_i2s_pin(I2S_LRCLK,5);
-    config_i2s_pin(I2S_BCLK2,5);
-    config_i2s_pin(I2S_LRCLK2,5);
-    config_i2s_pin(I2S_DIN,5);
-    config_i2s_pin(I2S_DOUT,7);
+    config_i2s_pin(I2S_BCLK,6);
+    config_i2s_pin(I2S_LRCLK,6);
+    config_i2s_pin(I2S_DIN,6);
+    config_i2s_pin(I2S_DOUT,6);
+    config_i2s_pin(I2S_MCLK,6);
 
 
-    // configure i2s/spi interface
-    // i2s2 is transmitter, i2s1 is  receiver
-    SPI1->CR2 |= (1 << SPI_CR2_RXDMAEN_Pos);
-    SPI2->CR2 |= (1 << SPI_CR2_TXDMAEN_Pos);
-    SPI1->I2SCFGR = (1 << SPI_I2SCFGR_I2SMOD_Pos) | (1 << SPI_I2SCFGR_DATLEN_Pos) | 
-                    (1 << SPI_I2SCFGR_CHLEN_Pos) | (1 << SPI_I2SCFGR_I2SCFG_Pos);
-    SPI2->I2SCFGR = (1 << SPI_I2SCFGR_I2SMOD_Pos) | (1 << SPI_I2SCFGR_DATLEN_Pos) | 
-                    (1 << SPI_I2SCFGR_CHLEN_Pos) | (0 << SPI_I2SCFGR_I2SCFG_Pos); 
+    // configure sai1 
+    // block a is master receiver, block b is slave transmitter
+    SAI1_Block_A->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
+                    | (1 << SAI_xCR1_MODE_Pos) // master receiver
+                    | ((75-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
+    SAI1_Block_A->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
+    SAI1_Block_A->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
+                        | (1 << SAI_xFRCR_FSOFF_Pos); // fs is asserted one bit before the first slot
+    SAI1_Block_A->SLOTR = (3 << SAI_xSLOTR_SLOTEN_Pos)  // enable slot 0 and 1
+                        | ((2-1) << SAI_xSLOTR_NBSLOT_Pos) // two slots
+                        | (2 << SAI_xSLOTR_SLOTSZ_Pos); // slot size is 32 bit
+
+    SAI1_Block_B->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
+                    | (2 << SAI_xCR1_MODE_Pos) // slave transmitter
+                    | (1 << SAI_xCR1_SYNCEN_Pos) // synchonous with other audio subblock
+                    | ((75-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
+    SAI1_Block_B->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
+    SAI1_Block_B->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
+                        | (1 << SAI_xFRCR_FSOFF_Pos); // fs is asserted one bit before the first slot
+    SAI1_Block_B->SLOTR = (3 << SAI_xSLOTR_SLOTEN_Pos)  // enable slot 0 and 1
+                        | ((2-1) << SAI_xSLOTR_NBSLOT_Pos) // two slots
+                        | (2 << SAI_xSLOTR_SLOTSZ_Pos); // slot size is 32 bit
+
+    // enable dma for both subblocks
+    SAI1_Block_A->CR1 |= (1 << SAI_xCR1_DMAEN_Pos);
+    SAI1_Block_B->CR1 |= (1 << SAI_xCR1_DMAEN_Pos);
+
+
 
     // configure DMA streams
-    // ADC: DMA2, Stream 2, Channel 3 (SPI1_RX)
-    // DAC: DMA1, Stream 4,Channel 0 (SPI2_TX)
-    DMA2_Stream2->PAR=(uint32_t)&(SPI1->DR);
-    DMA2_Stream2->M0AR=(uint32_t)i2sDoubleBufferIn;
-    DMA2_Stream2->M1AR=(uint32_t)i2sDoubleBufferIn;
-    DMA2_Stream2->CR = (2 << DMA_SxCR_MSIZE_Pos) | (1 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
-                       (1 << DMA_SxCR_CIRC_Pos) | (3 << DMA_SxCR_CHSEL_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
+
+    DMA1_Stream0->PAR=(uint32_t)&(SAI1_Block_A->DR);
+    DMA1_Stream0->M0AR=(uint32_t)i2sDoubleBufferIn;
+    DMA1_Stream0->M1AR=(uint32_t)i2sDoubleBufferIn;
+    DMA1_Stream0->CR = (2 << DMA_SxCR_MSIZE_Pos) | (2 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
+                       (1 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
                        (1 << DMA_SxCR_HTIE_Pos);
-    DMA2_Stream2->NDTR=AUDIO_BUFFER_SIZE<<3; //*2 since SPI->DR is 16bits and memory address is 32bits, *2 (stereo), *2 (double buffer)
-    NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
-    DMA1_Stream4->PAR=(uint32_t)&(SPI2->DR);
-    DMA1_Stream4->M0AR=(uint32_t)i2sDoubleBuffer;
-    DMA1_Stream4->M1AR=(uint32_t)i2sDoubleBuffer;
-    DMA1_Stream4->CR = (2 << DMA_SxCR_MSIZE_Pos) | (1 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
-                (1 << DMA_SxCR_CIRC_Pos) | (0 << DMA_SxCR_CHSEL_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
+    DMA1_Stream0->NDTR=AUDIO_BUFFER_SIZE<<3; //samples*2 (stereo), *4 (because of 24bit stored in 32 bit words)
+    DMAMUX1_Channel0->CCR = ((87-1) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 A
+    DMA1_Stream0->CR |= (1 << DMA_SxCR_EN_Pos);
+    NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+
+    DMA1_Stream1->PAR=(uint32_t)&(SAI1_Block_B->DR);
+    DMA1_Stream1->M0AR=(uint32_t)i2sDoubleBuffer;
+    DMA1_Stream1->M1AR=(uint32_t)i2sDoubleBuffer;
+    DMA1_Stream1->CR = (2 << DMA_SxCR_MSIZE_Pos) | (2 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
+                (1 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
                 (1 << DMA_SxCR_HTIE_Pos) | (1 << DMA_SxCR_DIR_Pos);
-    DMA1_Stream4->NDTR=AUDIO_BUFFER_SIZE<<3; //*2 since SPI->DR is 16bits and memory address is 32bits, *2 (stereo), *2 (double buffer)
-    NVIC_EnableIRQ(DMA1_Stream4_IRQn);
-
-    //enable DMA Streams
-    DMA2_Stream2->CR |= (1 << DMA_SxCR_EN_Pos);
-    DMA1_Stream4->CR |= (1 << DMA_SxCR_EN_Pos);
+    DMA1_Stream1->NDTR=AUDIO_BUFFER_SIZE<<3; 
+    DMAMUX1_Channel0->CCR = ((88-1) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 B
+    NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+    DMA1_Stream1->CR |= (1 << DMA_SxCR_EN_Pos);
 
     // enable i2s devices
-    SPI1->I2SCFGR |= (1 << SPI_I2SCFGR_I2SE_Pos);
-    SPI2->I2SCFGR |= (1 << SPI_I2SCFGR_I2SE_Pos);
-
+    SAI1_Block_A->CR1 |= (1 << SAI_xCR1_SAIEN_Pos);
+    SAI1_Block_B->CR1 |= (1 << SAI_xCR1_SAIEN_Pos);
     enableAudioEngine();
 }
 

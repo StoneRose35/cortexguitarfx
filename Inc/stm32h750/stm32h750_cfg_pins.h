@@ -19,12 +19,13 @@
 
 
 // i2s interface
-#define I2S_BCLK (0*16+5) // PA5 I2S1 SCK
-#define I2S_LRCLK (0*16+4) // PA4 I2S1 LRCLK
-#define I2S_DOUT (2*16+1) // PC1 I2S2 SD
-#define I2S_DIN (0*16+7) // PA7 I2S1 SD
-#define I2S_BCLK2 (1*16+10) // PB10 I2S2 SCK
-#define I2S_LRCLK2 (1*16+12) // PB12 I2S2 LRCLK
+#define I2S_BCLK (4*16+5) // PE5  SCK
+#define I2S_LRCLK (4*16+4) // PE4 LRCLK
+#define I2S_DOUT (4*16+3) // PC1 sai 1: transmitter
+#define I2S_DIN (4*16+6) // PE6 sai 1: receiver
+#define I2S_MCLK (4*16+2) // PE2 MCLK
+//#define I2S_BCLK2 (1*16+10) // PB10 I2S2 SCK
+//#define I2S_LRCLK2 (1*16+12) // PB12 I2S2 LRCLK
 // i2c interface
 #define I2C_SDA (1*16+11) // PB11
 #define I2C_SCL (7*16+4) // PH4

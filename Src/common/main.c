@@ -33,7 +33,7 @@
 #include "charDisplay.h"
 #include "rotaryEncoder.h"
 #include "cliApiTask.h"
-#include "i2s.h"
+#include "sai.h"
 #include "i2c.h"
 #include "wm8731.h"
 #include "audio/sineplayer.h"
@@ -121,7 +121,7 @@ int main(void)
 	initDMA();
     initFmcSdram();
     initQspi();
-	//initTimer();
+	initTimer();
 	//initAdc();
 	initI2c(26); // 26 for wm8731, 72 for cs4270
 	
@@ -158,7 +158,7 @@ int main(void)
 
 
     /* enable audio engine last (when fx programs have been set up)*/
-    //initI2S();
+    initSAI();
 
     tickStart=getTickValue();
     zero_delay_memory();
