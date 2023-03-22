@@ -230,7 +230,7 @@ void initSAI()
                 (1 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
                 (1 << DMA_SxCR_HTIE_Pos) | (1 << DMA_SxCR_DIR_Pos);
     DMA1_Stream1->NDTR=AUDIO_BUFFER_SIZE<<3; 
-    DMAMUX1_Channel0->CCR = ((88-1) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 B
+    DMAMUX1_Channel1->CCR = ((88-1) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 B
     NVIC_EnableIRQ(DMA1_Stream1_IRQn);
     DMA1_Stream1->CR |= (1 << DMA_SxCR_EN_Pos);
 
