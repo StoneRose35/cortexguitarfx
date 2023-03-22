@@ -187,6 +187,7 @@ int main(void)
             flashingTask();
             task &= ~(1 << TASK_FLASH_QSPI);
         }
+        
         /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
