@@ -6,7 +6,10 @@
             "type": "shell",
             "command": "make clean_objs; make -j8 all",
             "problemMatcher": [],
-            "group": "build"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "Clean using make",
@@ -149,7 +152,7 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             },
             "detail": "Vom Debugger generierte Aufgabe."
         }

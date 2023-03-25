@@ -34,7 +34,10 @@ void setupClock()
 
     // set pll source to HSE (2), set divider m1 (clock input for pll) to 4
     // m2 to 1 and m3 to 6
-    RCC->PLLCKSELR = (2 << RCC_PLLCKSELR_PLLSRC_Pos) | (4 << RCC_PLLCKSELR_DIVM1_Pos) | (1 << RCC_PLLCKSELR_DIVM2_Pos) | (5 << RCC_PLLCKSELR_DIVM3_Pos);
+    RCC->PLLCKSELR = (2 << RCC_PLLCKSELR_PLLSRC_Pos) 
+                    | (4 << RCC_PLLCKSELR_DIVM1_Pos) 
+                    | (1 << RCC_PLLCKSELR_DIVM2_Pos) 
+                    | (5 << RCC_PLLCKSELR_DIVM3_Pos);
 
 
     // configure and enable pll for 480 MHz cpu clock
@@ -80,9 +83,9 @@ void setupClock()
                     ((1-1) << RCC_PLL2DIVR_R2_Pos);
     RCC->PLL2FRACR = 4096 << RCC_PLL2FRACR_FRACN2_Pos;
 
-// residual: 0.00MHz, m3: 5, n3: 288, f_vco: 922, f_pll: 922, p3: 1, mckdiv: 75.0
+// residual: 0.00MHz, m3: 5, n3: 288, f_vco: 922, f_pll: 922, p3: 3, mckdiv: 25.0
     RCC->PLL3DIVR = ((288-1) << RCC_PLL3DIVR_N3_Pos) | 
-                    ((1-1) << RCC_PLL3DIVR_P3_Pos) |
+                    ((3-1) << RCC_PLL3DIVR_P3_Pos) |
                     ((4-1) << RCC_PLL3DIVR_Q3_Pos) |
                     ((32-1) << RCC_PLL3DIVR_R3_Pos);
     RCC->CR |= (1 << RCC_CR_PLL2ON_Pos) | (1 << RCC_CR_PLL3ON_Pos);

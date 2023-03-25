@@ -12,9 +12,10 @@ if __name__ == "__main__":
                     f_pll = f_hse/div_m3*div_n3/div_p3
                     if f_pll >= f_audio:
                         mckdiv = np.floor(f_pll/f_audio)
-                        res = np.abs(f_pll - mckdiv*f_audio)
-                        if res < residual:
-                            residual = res
-                            print("residual: {:.2f}MHz, m3: {}, n3: {}, f_vco: {:.0f}, f_pll: {:.0f}, p3: {}, mckdiv: {}"
-                                  .format(res,div_m3,div_n3,f_vco,f_pll,div_p3,mckdiv))
+                        if mckdiv < 64:
+                            res = np.abs(f_pll - mckdiv*f_audio)
+                            if res < residual:
+                                residual = res
+                                print("residual: {:.2f}MHz, m3: {}, n3: {}, f_vco: {:.0f}, f_pll: {:.0f}, p3: {}, mckdiv: {}"
+                                    .format(res,div_m3,div_n3,f_vco,f_pll,div_p3,mckdiv))
     

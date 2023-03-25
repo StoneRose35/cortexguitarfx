@@ -10,9 +10,9 @@
 #define AVERAGING_LOWPASS_CUTOFF 0.0001f
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 256
 
-static int32_t i2sDoubleBuffer[AUDIO_BUFFER_SIZE*4*2];
+static int32_t i2sDoubleBuffer[AUDIO_BUFFER_SIZE*2*2];
 #ifdef I2S_INPUT
-static int32_t i2sDoubleBufferIn[AUDIO_BUFFER_SIZE*4*2];
+static int32_t i2sDoubleBufferIn[AUDIO_BUFFER_SIZE*2*2];
 #endif
 static volatile  uint32_t dbfrPtr; 
 static volatile uint32_t dbfrInputPtr;
@@ -22,7 +22,7 @@ extern float avgInOld, avgOutOld;
 extern uint32_t cpuLoad;
 extern PiPicoFxUiType piPicoUiController;
 uint16_t bufferCnt;
-volatile uint32_t audioState;
+volatile uint32_t audioState=0;
 
 int32_t *  audioBufferPtr;
 int32_t *  audioBufferInputPtr;
@@ -30,7 +30,7 @@ int32_t inputSampleInt,inputSampleInt2;
 float inputSample, avgIn, avgOut;
 uint32_t ticStart, ticEnd;
 
-void DMA1_Stream0_IRQHandler() // adc
+void DMA1_Stream0_IRQHandler(void) // adc
 {
     if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
     {
@@ -40,17 +40,32 @@ void DMA1_Stream0_IRQHandler() // adc
     {
         audioState  |= (1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
     }
-    if ((DMA2->LISR & DMA_LISR_TCIF2) != 0)
+
+
+    if ((DMA1->LISR & DMA_LISR_TCIF0) != 0) // receiver trasfer complete
     {
         dbfrInputPtr = AUDIO_BUFFER_SIZE*2;
-        DMA2->LIFCR = (1 << DMA_LIFCR_CTCIF2_Pos); 
+        DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF1_Pos); 
     }
-    else if ((DMA2->LISR & DMA_LISR_HTIF2) != 0)
+    if ((DMA1->LISR & DMA_LISR_HTIF0) != 0) // receiver half transfer
     {
         dbfrInputPtr=0;
-        DMA2->LIFCR = (1 << DMA_LIFCR_CHTIF2_Pos); 
+        DMA1->LIFCR = (1 << DMA_LIFCR_CHTIF1_Pos); 
     }
-    task |= (1 << TASK_PROCESS_AUDIO_INPUT);
+
+    // wait for a trasmitter flag to be set
+    while (((DMA1->LISR & DMA_LISR_TCIF1) == 0) && ((DMA1->LISR & DMA_LISR_HTIF1) == 0));
+    if ((DMA1->LISR & DMA_LISR_TCIF1) != 0)
+    {
+        dbfrPtr = AUDIO_BUFFER_SIZE*2;
+        DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF1_Pos); 
+    }
+    if ((DMA1->LISR & DMA_LISR_HTIF1) != 0)
+    {
+        dbfrPtr=0;
+        DMA1->LIFCR = (1 << DMA_LIFCR_CHTIF1_Pos); 
+    }
+    task |= (1 << TASK_PROCESS_AUDIO_INPUT) | (1 << TASK_PROCESS_AUDIO);
 
     if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
     {
@@ -123,29 +138,6 @@ void DMA1_Stream0_IRQHandler() // adc
 }
 
 
-void DMA1_Stream1_IRQHandler() // dac
-{
-    if ((task & (1 << TASK_PROCESS_AUDIO)) == 0)
-    {
-        audioState &= ~(1 << AUDIO_STATE_BUFFER_UNDERRUN);
-    }
-    else
-    {
-        audioState  |= (1 << AUDIO_STATE_BUFFER_UNDERRUN);
-    }
-    if ((DMA1->HISR & DMA_HISR_TCIF4) != 0)
-    {
-        dbfrPtr = AUDIO_BUFFER_SIZE*2;
-        DMA1->HIFCR = (1 << DMA_HIFCR_CTCIF4_Pos); 
-    }
-    else if ((DMA1->HISR & DMA_HISR_HTIF4) != 0)
-    {
-        dbfrPtr=0;
-        DMA1->HIFCR = (1 << DMA_HIFCR_CHTIF4_Pos); 
-    }
-    task |= (1 << TASK_PROCESS_AUDIO);
-}
-
 static void config_i2s_pin(uint8_t pinnr,uint8_t af)
 {
     GPIO_TypeDef *gpio;
@@ -169,6 +161,7 @@ void initSAI()
 {
 
     //sai1 for adc and dac
+    RCC->APB2ENR &= ~(1 << RCC_APB2ENR_SAI1EN_Pos);
     RCC->APB2ENR |= (1 << RCC_APB2ENR_SAI1EN_Pos);
     //RCC->APB2ENR |= (1 << RCC_APB2ENR_SPI1EN_Pos);
 
@@ -184,10 +177,11 @@ void initSAI()
     // block a is master receiver, block b is slave transmitter
     SAI1_Block_A->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (1 << SAI_xCR1_MODE_Pos) // master receiver
-                    | ((75-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
+                    | ((25-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
     SAI1_Block_A->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
     SAI1_Block_A->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
-                        | (1 << SAI_xFRCR_FSOFF_Pos); // fs is asserted one bit before the first slot
+                        | (1 << SAI_xFRCR_FSOFF_Pos)
+                        | ((64 -1) << SAI_xFRCR_FRL_Pos); // fs is asserted one bit before the first slot
     SAI1_Block_A->SLOTR = (3 << SAI_xSLOTR_SLOTEN_Pos)  // enable slot 0 and 1
                         | ((2-1) << SAI_xSLOTR_NBSLOT_Pos) // two slots
                         | (2 << SAI_xSLOTR_SLOTSZ_Pos); // slot size is 32 bit
@@ -195,7 +189,7 @@ void initSAI()
     SAI1_Block_B->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (2 << SAI_xCR1_MODE_Pos) // slave transmitter
                     | (1 << SAI_xCR1_SYNCEN_Pos) // synchonous with other audio subblock
-                    | ((75-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
+                    | ((25-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
     SAI1_Block_B->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
     SAI1_Block_B->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
                         | (1 << SAI_xFRCR_FSOFF_Pos); // fs is asserted one bit before the first slot
@@ -218,10 +212,10 @@ void initSAI()
                        (1 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
                        (1 << DMA_SxCR_HTIE_Pos);
 
-    DMA1_Stream0->NDTR=AUDIO_BUFFER_SIZE<<3; //samples*2 (stereo), *4 (because of 24bit stored in 32 bit words)
-    DMAMUX1_Channel0->CCR = ((87-1) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 A
-    DMA1_Stream0->CR |= (1 << DMA_SxCR_EN_Pos);
-    NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+    DMA1_Stream0->NDTR=AUDIO_BUFFER_SIZE<<1; //samples*2 (stereo),
+    DMAMUX1_Channel0->CCR = ((87) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 A
+    
+
 
     DMA1_Stream1->PAR=(uint32_t)&(SAI1_Block_B->DR);
     DMA1_Stream1->M0AR=(uint32_t)i2sDoubleBuffer;
@@ -229,15 +223,20 @@ void initSAI()
     DMA1_Stream1->CR = (2 << DMA_SxCR_MSIZE_Pos) | (2 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
                 (1 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
                 (1 << DMA_SxCR_HTIE_Pos) | (1 << DMA_SxCR_DIR_Pos);
-    DMA1_Stream1->NDTR=AUDIO_BUFFER_SIZE<<3; 
-    DMAMUX1_Channel1->CCR = ((88-1) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 B
-    NVIC_EnableIRQ(DMA1_Stream1_IRQn);
-    DMA1_Stream1->CR |= (1 << DMA_SxCR_EN_Pos);
+    DMA1_Stream1->NDTR=AUDIO_BUFFER_SIZE<<1; 
+    DMAMUX1_Channel1->CCR = ((88) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 B
 
     // enable i2s devices
+    NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+
+    DMA1_Stream0->CR |= (1 << DMA_SxCR_EN_Pos); 
+    DMA1_Stream1->CR |= (1 << DMA_SxCR_EN_Pos);
+
     SAI1_Block_A->CR1 |= (1 << SAI_xCR1_SAIEN_Pos);
     SAI1_Block_B->CR1 |= (1 << SAI_xCR1_SAIEN_Pos);
-    enableAudioEngine();
+
+
+    //enableAudioEngine();
 }
 
 void enableAudioEngine()
