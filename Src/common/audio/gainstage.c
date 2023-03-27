@@ -31,6 +31,7 @@ void initGainstage(gainStageData*data)
     data->offset=0.0f;
 }
 
+__attribute__ ((section (".qspi_code")))
 float gainStageProcessSample(float sampleIn,gainStageData*data)
 {
     float sampleOut;

@@ -41,6 +41,7 @@ void setBitMask(uint8_t resolution,BitCrusherDataType*data)
     data->bitmask = ~(data->bitmask);
 }
 
+__attribute__ ((section (".qspi_code")))
 float bitCrusherProcessSample(float sampleIn,BitCrusherDataType*data)
 {
     int32_t isample;

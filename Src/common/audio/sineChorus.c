@@ -52,6 +52,7 @@ void initSineChorus(SineChorusType*data)
     data->lfoPhaseinc=data->frequency*4*256*SINE_CHORUS_LFO_DIVIDER/4800000;
 }
 
+__attribute__ ((section (".qspi_code")))
 float sineChorusProcessSample(float sampleIn,SineChorusType*data)
 {
     uint16_t delayPtr;
@@ -75,6 +76,7 @@ float sineChorusProcessSample(float sampleIn,SineChorusType*data)
         return sampleOut;
 }
 
+__attribute__ ((section (".qspi_code")))
 float sineChorusInterpolatedProcessSample(float sampleIn,SineChorusType*data)
 {
     uint16_t delayPtr,delayPtrNext;

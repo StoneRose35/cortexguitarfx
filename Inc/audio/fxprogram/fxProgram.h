@@ -133,7 +133,7 @@ typedef struct {
     uint8_t nWaveshapers;
     uint8_t waveshaperType;
     float highpass_out,highpass_old_out,highpass_old_in;
-    const char cabNames[6][24];
+    const char cabNames[6][24] ;
     const char waveShaperNames[4][24];
     FirFilterType hiwattFir;
     MultiWaveShaperDataType waveshaper1;
@@ -168,6 +168,7 @@ typedef struct
     DelayDataType * delay;
 } FxProgram6DataType;
 
+//typedef constantchar __attribute__ ((section (".qspi_data"))) char[4][24];
 
 typedef struct
 {

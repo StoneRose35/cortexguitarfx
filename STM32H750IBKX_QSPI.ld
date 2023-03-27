@@ -174,7 +174,7 @@ SECTIONS
     . = ALIGN(4);
 		_sqspi_data = .;
 
-		PROVIDE(__qspi_data_start_start = _sqspi_data);
+		PROVIDE(__qspi_data_start = _sqspi_data);
 		*(.qspi_data)
 		*(.qspi_data*)
 		. = ALIGN(4);
@@ -182,6 +182,23 @@ SECTIONS
 
 		PROVIDE(__qspi_data_end = _eqspi_data);
   } > QSPIFLASH
+
+    . = ALIGN(4);
+
+  .qspi_code :
+  {
+    . = ALIGN(4);
+		_sqspi_code = .;
+
+		PROVIDE(__qspi_code_start = _sqspi_code);
+		*(.qspi_code)
+		*(.qspi_code*)
+		. = ALIGN(4);
+		_eqspi_code = .;
+
+		PROVIDE(__qspi_code_end = _eqspi_code);
+  } > RAM_D1 AT> QSPIFLASH
+
   . = ALIGN(4);
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :

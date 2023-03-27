@@ -1,6 +1,6 @@
 #include "audio/delay.h"
 
- 
+__attribute__ ((section (".sdram_bss")))
 DelayDataType singletonDelay;
 
 DelayDataType * getDelayData()
@@ -22,6 +22,8 @@ void initDelay(DelayDataType*data)
     data->feedbackFunction=0;
     data->feebackData=0;
 }
+
+__attribute__ ((section (".qspi_code")))
 float delayLineProcessSample(float sampleIn,DelayDataType*data)
 {
     uint32_t delayIdx;

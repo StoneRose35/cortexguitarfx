@@ -72,6 +72,7 @@ void initReverb(ReverbType*reverbData,float reverbTime)
     reverbData->delayPointer=0;
 }
 
+__attribute__ ((section (".qspi_code")))
 float reverbProcessSample(float sampleIn,ReverbType*reverbData)
 {
     float sampleOut;

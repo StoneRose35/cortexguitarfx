@@ -110,6 +110,7 @@ float processSecondHalf(FirFilterType*data)
     return 0.0f;
 }
 
+__attribute__ ((section (".qspi_code")))
 float firFilterProcessSample(float sampleIn,FirFilterType*data)
 {
     addSample(sampleIn,data);

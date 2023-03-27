@@ -85,20 +85,11 @@ uint16_t adcChannel=0;
 uint32_t tickStart, tickEnd;
 char chrbfr[16];
 
-#define DELAY_MEM_SIZE (0x7FFFFF)
-__attribute__ ((section (".sdram_bss")))
-volatile float huge_delay_memory[DELAY_MEM_SIZE] ;
+
 
 __attribute__ ((section (".qspi_data")))
 const uint32_t mybigdata[]= {6,45,5,8,5,5,3,56,56,8,6,4,4,3,56,5,34,5,56,86,7,75,43,34,65,678,56,};
 
-void zero_delay_memory()
-{
-    for(uint32_t c=0;c<DELAY_MEM_SIZE;c++)
-    {
-        huge_delay_memory[c] =0.0f;
-    }
-}
 
 /**
  * @brief the main entry point, should never exit
@@ -122,7 +113,7 @@ int main(void)
     initFmcSdram();
     initQspi();
 	initTimer();
-	//initAdc();
+	initAdc();
 	initI2c(26); // 26 for wm8731, 72 for cs4270
 	
 	/*
@@ -130,11 +121,11 @@ int main(void)
 	 * Initialise Component-specific drivers
 	 * 
 	 * */
-	//initSsd1306Display();
+	initSsd1306Display();
 	setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
 	initRotaryEncoder(switchesPins,2);
 	encoderVal=getEncoderValue();
-    //initDebugLed();
+    initDebugLed();
 
 	/*
      *
@@ -142,45 +133,28 @@ int main(void)
      *
 	 */
 	//initCliApi();
-	//initRoundRobinReading(); // internal adc for reading parameters
+	initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
 	//printf("Microsys v1.1 running on DaisySeed 1.1\r\n");
-	//piPicoFxUiSetup(&piPicoUiController);
-	//ssd1306ClearDisplay();
-	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	//{
-	//	if ((uint32_t)fxPrograms[c]->setup != 0)
-	//	{
-	//		fxPrograms[c]->setup(fxPrograms[c]->data);
-	//	}
-	//}
-	//drawUi(&piPicoUiController);
-
+	piPicoFxUiSetup(&piPicoUiController);
+	ssd1306ClearDisplay();
+	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
+	{
+		if ((uint32_t)fxPrograms[c]->setup != 0)
+		{
+			fxPrograms[c]->setup(fxPrograms[c]->data);
+		}
+	}
+	drawUi(&piPicoUiController);
 
     /* enable audio engine last (when fx programs have been set up)*/
     initSAI();
 
-    tickStart=getTickValue();
-    zero_delay_memory();
-    tickEnd=getTickValue();
-
-    //printf("zeroing delay memory took ");
-    //UInt32ToChar((tickEnd-tickStart)*10,chrbfr);
-    //printf(chrbfr);
-    //printf(" ms\r\n");
 
     /* Loop forever */
 	for(;;)
 	{
 		cliApiTask(task);
-
-        if(getQspiStatus()==0)
-        {
-            for (uint8_t c=0;c<27;c++)
-            {
-                huge_delay_memory[56-c] =((float)(c/2.32f))*((float)(c/2.32f)) +(float)mybigdata[c%16];
-            }
-        }
 
         if ((task & (1 << TASK_FLASH_QSPI)) != 0)
         {
@@ -188,7 +162,7 @@ int main(void)
             task &= ~(1 << TASK_FLASH_QSPI);
         }
         
-        /*
+        
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
@@ -263,7 +237,7 @@ int main(void)
            rotaryCallback(encoderVal,&piPicoUiController);
            encoderValOld=encoderVal;
        }
-       */
+       
 	
 	}
 }

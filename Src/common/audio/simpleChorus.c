@@ -87,7 +87,7 @@ void initSimpleChorus(SimpleChorusType*data)
     data->lfoPhaseinc=data->frequency*4*256*SIMPLE_CHORUS_LFO_DIVIDER/4800000;
 }
 
-
+__attribute__ ((section (".qspi_code")))
 float simpleChorusProcessSample(float sampleIn,SimpleChorusType*data)
 {
     uint16_t delayPtr;

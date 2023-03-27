@@ -1,7 +1,7 @@
 #ifndef _DELAY_H_
 #define _DELAY_H_
 #include <stdint.h>
-#define DELAY_LINE_LENGTH 16384
+#define DELAY_LINE_LENGTH (0x7FFFFF)
 
 #ifndef FLOAT_AUDIO
 typedef int16_t(*feedbackProcessor)(int16_t,void*);

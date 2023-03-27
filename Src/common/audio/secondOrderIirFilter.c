@@ -61,6 +61,7 @@ int16_t secondOrderIirFilterProcessSample(int16_t sampleIn,SecondOrderIirFilterT
 }
 #else
 
+__attribute__ ((section (".qspi_code")))
 float secondOrderIirFilterProcessSample(float sampleIn,SecondOrderIirFilterType*data)
 {
     float out;

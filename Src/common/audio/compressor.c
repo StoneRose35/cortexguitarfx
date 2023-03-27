@@ -142,6 +142,7 @@ void setRelease(int32_t releaseInUs,CompressorDataType*data)
     data->release= 20.833f/releaseFloat;
 }
 
+__attribute__ ((section (".qspi_code")))
 float compressorProcessSample(float sampleIn,CompressorDataType*data)
 {
     float absSample;

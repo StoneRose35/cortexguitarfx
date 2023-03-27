@@ -1,7 +1,7 @@
 #include "audio/oversamplingWaveshaper.h"
 #include "audio/secondOrderIirFilter.h"
 #include <stdint.h>
-#include "i2s.h"
+#include "sai.h"
 
 // oversampling factor as power of two
 #define OVERSAMPLING_FACTOR 2 
@@ -36,6 +36,8 @@ void  applyOversamplingDistortion(uint16_t*data,OversamplingWaveshaperDataType* 
         }
     }
 }
+
+__attribute__ ((section (".qspi_code")))
 int16_t  OversamplingDistortionProcessSample(int16_t sample,OversamplingWaveshaperDataType* waveshaper)
 {
     int32_t osVal1, osVal2, osVal3, osVal4;
