@@ -39,8 +39,8 @@ void ssd1306SendCommand(uint8_t cmd)
     gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF)+16)); // cs low
     gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
     short_nop_delay();
-    SPI3->DR=cmd;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
+    SPI1->TXDR=cmd;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
     short_nop_delay();
     gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // cs high
 }
@@ -52,8 +52,8 @@ void ssd1306SendData(const uint8_t*data,uint8_t l)
     short_nop_delay();
     for(uint8_t c=0;c<l;c++)
     {
-        SPI3->DR=*(data+c);
-        while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
+        SPI1->TXDR=*(data+c);
+        while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
     }
     short_nop_delay();
     gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // cs high
@@ -63,7 +63,7 @@ void initSsd1306Display()
 {
     uint32_t port;
     uint32_t regbfr;
-    RCC->APB1ENR |= (1 << RCC_APB1ENR_SPI3EN_Pos);
+    RCC->APB2ENR |= (1 << RCC_APB2ENR_SPI1EN_Pos);
 
     port = SSD1306_CD >> 4;
     RCC->AHB1ENR |= (1 << port);
@@ -109,15 +109,21 @@ void initSsd1306Display()
 
     gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // chip select high
 
-    config_spi_pin(SSD1306_MISO,6);
-    config_spi_pin(SSD1306_MOSI,7);
-    config_spi_pin(SSD1306_SCK,6);
+    config_spi_pin(SSD1306_MISO,5);
+    config_spi_pin(SSD1306_MOSI,5);
+    config_spi_pin(SSD1306_SCK,5);
 
-    regbfr = SPI3->CR1;
-    regbfr &= ~(7 << SPI_CR1_BR_Pos);
-    regbfr |= (3 << SPI_CR1_BR_Pos) | (1 << SPI_CR1_MSTR_Pos) | (1 << SPI_CR1_SSM_Pos) | (1 << SPI_CR1_SSI_Pos); // 45MHz/32=1.40625 MHz, Master, software slave select
-    SPI3->CR1 = regbfr;
-    SPI3->CR1 |= (1 << SPI_CR1_SPE_Pos);
+    regbfr = SPI1->CR1;
+    regbfr |= (1 << SPI_CR1_SSI_Pos); // software slave select
+    SPI1->CR1 = regbfr;
+
+    regbfr = SPI1->CFG1;
+    regbfr |= (3 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos); // 8 bits, 120MKz/16 as SPI clock
+    SPI1->CFG1 = regbfr;
+
+    SPI1->CFG2 |= (1 << SPI_CFG2_MASTER_Pos) | (1 << SPI_CFG2_SSM_Pos);
+
+    SPI1->CR1 |= (1 << SPI_CR1_SPE_Pos);
 
     
 
@@ -149,8 +155,8 @@ void initSsd1306Display()
 
 void ssd1306_nop()
 {
-    SPI3->DR =0xE3;
-    while ((SPI3->SR & (1 << SPI_SR_BSY_Pos))!=0); 
+    SPI1->TXDR =0xE3;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))!=0); 
 }
 
 
@@ -231,34 +237,34 @@ void ssd1306DisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * i
     gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low: command
 
     // set vertical addressing mode
-    SPI3->DR = 0x20;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0); 
-    SPI3->DR = 0x02;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);
+    SPI1->TXDR = 0x20;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
+    SPI1->TXDR = 0x02;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
 
     // set column address
-    SPI3->DR = 0x21;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);
-    SPI3->DR =px;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);    
-    SPI3->DR =px+sx;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);  
+    SPI1->TXDR = 0x21;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
+    SPI1->TXDR =px;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);    
+    SPI1->TXDR =px+sx;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);  
 
     // set page address
-    SPI3->DR = 0x22;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);
-    SPI3->DR =py;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);    
-    SPI3->DR =py+sy;
-    while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);        
+    SPI1->TXDR = 0x22;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
+    SPI1->TXDR =py;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);    
+    SPI1->TXDR =py+sy;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);        
 
     uint16_t c=0;
     gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
     while(c<sx*sy)
     {
-        SPI3->DR = *(img + c);
+        SPI1->TXDR = *(img + c);
         c++;
-        while ((SPI3->SR & (1 << SPI_SR_TXE_Pos))==0);
+        while ((SPI3->SR & (1 << SPI_SR_TXC_Pos))==0);
     }
 }
 

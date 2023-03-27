@@ -34,12 +34,12 @@
 #define CS4270_RESET (0*16+0)
 
 //ssd1306 display interfaced using spi
-#define SSD1306_SCK (2*16+10) // PC10
-#define SSD1306_MOSI (1*16+2) // PB2
-#define SSD1306_MISO (2*16+11) // PC11
-#define SSD1306_CD (0*16+6) // PA6
-#define SSD1306_RESET (2*16+6) //PC6
-#define SSD1306_CS (2*16+8) //PC8
+#define SSD1306_SCK (6*16+11) // PG11
+#define SSD1306_MOSI (1*16+5) // PB5
+#define SSD1306_MISO (1*16+4) // PB4
+#define SSD1306_CD (1*16+8) // PB8
+#define SSD1306_RESET (1*16+9) //PB9
+#define SSD1306_CS (6*16+10) //PG10
 
 
 
