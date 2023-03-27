@@ -132,8 +132,8 @@ int main(void)
 	 * */
 	//initSsd1306Display();
 	setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
-	//initRotaryEncoder(switchesPins,2);
-	//encoderVal=getEncoderValue();
+	initRotaryEncoder(switchesPins,2);
+	encoderVal=getEncoderValue();
     //initDebugLed();
 
 	/*

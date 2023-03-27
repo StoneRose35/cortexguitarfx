@@ -5,10 +5,10 @@
 
 // A  B  C  D  E  F  G  H  
 // 0  1  2  3  4  5  6  7 
-#define ENCODER_1 (1*16+4) //PB4 since TIM3 with channel 1 and channel 2 is used
-#define ENCODER_2 (1*16+5) //PB5 since TIM3 with channel 1 and channel 2 is used
-#define ENTER_SWITCH (3*16+14) // PD14
-#define EXIT_SWITCH (3*16+15) // PD15
+#define ENCODER_1 (0*16+6) //PA6 since TIM3 with channel 1 and channel 2 is used
+#define ENCODER_2 (0*16+7) //PA7 since TIM3 with channel 1 and channel 2 is used
+#define ENTER_SWITCH (2*16+1) // PC1
+#define EXIT_SWITCH (2*16+4) // PC4
 
 // adc pins used by the three potentiometer, refer to the datasheet for a list of possible options
 // 

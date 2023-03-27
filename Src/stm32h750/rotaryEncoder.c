@@ -18,7 +18,7 @@ void processExternalInterrupt()
     GPIO_TypeDef * gpio;
     for (uint8_t c=0;c<8;c++)
     {
-        if ((EXTI->PR & (1 << (switchPins[c] & 0xF)))!= 0)
+        if ((EXTI->PR1 & (1 << (switchPins[c] & 0xF)))!= 0)
         {
             gpio = (GPIO_TypeDef*)(GPIOA_BASE + (switchPins[c] >> 4)*0x400);
             if (oldTickSwitches[c] + ROTARY_ENCODER_DEBOUNCE < getTickValue())
@@ -34,7 +34,7 @@ void processExternalInterrupt()
                 }
                 oldTickSwitches[c]=getTickValue();
             }
-            EXTI->PR = (1 << (switchPins[c] & 0xF));
+            EXTI->PR1 = (1 << (switchPins[c] & 0xF));
         }
     }
 }
@@ -116,11 +116,11 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     GPIO_TypeDef * gpio;
     
     // enable syscfg to define external interrupts
-    RCC->APB2ENR |= (1 << RCC_APB2ENR_SYSCFGEN_Pos);
+    RCC->APB4ENR |= (1 << RCC_APB4ENR_SYSCFGEN_Pos);
     
     // enable the gpio port (A-H) to which the pin belongs
     port = ENCODER_1 >> 4;
-    RCC->AHB1ENR |= (1 << port);
+    RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
 
     // set as input with pullup enabled
@@ -139,7 +139,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
 
     // enable the gpio port (A-H) to which the pin belongs
     port = ENCODER_2 >> 4;
-    RCC->AHB1ENR |= (1 << port);
+    RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
 
     // set as input with pullup enabled
@@ -158,7 +158,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
 
 
     // enable timer3
-    RCC->APB1ENR |= (1 << RCC_APB1ENR_TIM3EN_Pos);
+    RCC->APB1LENR |= (1 << RCC_APB1LENR_TIM3EN_Pos);
     TIM3->SMCR |= (3 << TIM_SMCR_SMS_Pos); // encoder mode 3
     TIM3->CCMR1 |= (1 << TIM_CCMR1_CC1S_Pos) | (1 << TIM_CCMR1_CC2S_Pos) | 
                    (7 << TIM_CCMR1_IC1F_Pos) | (7 << TIM_CCMR1_IC2F_Pos)  ; 
@@ -190,9 +190,9 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         regbfr &= ~(0xF << ((pins[c] & 0x3) << 2) );
         regbfr |= ((pins[c] >> 4) << ((pins[c] & 0x3) << 2) );
         SYSCFG->EXTICR[((pins[c] &0xF) >>2)] = regbfr;
-        EXTI->IMR |= (1 << (pins[c] & 0xF));
-        EXTI->FTSR |= (1 << (pins[c] & 0xF));
-        EXTI->RTSR |= (1 << (pins[c] & 0xF));
+        EXTI->IMR1 |= (1 << (pins[c] & 0xF));
+        EXTI->FTSR1 |= (1 << (pins[c] & 0xF));
+        EXTI->RTSR1 |= (1 << (pins[c] & 0xF));
         switchPins[c]=pins[c];
         switchVals[c]=0;
         enableExternalInterrupt(pins[c]);
