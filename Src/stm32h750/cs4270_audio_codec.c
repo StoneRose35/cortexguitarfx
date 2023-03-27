@@ -21,7 +21,7 @@ void init_cs4270_audio_codec()
     uint16_t regdata;
 
     port = CS4270_RESET >> 4;
-    RCC->AHB1ENR |= (1 << port);
+    RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
     regbfr = gpio->MODER;
     regbfr &= ~(3 << ((CS4270_RESET & 0xF)<<1));
