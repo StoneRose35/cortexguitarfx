@@ -104,8 +104,12 @@ FxProgram1DataType fxProgram1data = {
     .highpassCutoff = 0.9460737f,
     .nWaveshapers = 1
 };
+
+__attribute__((section (".qspi_data")))
+static const char pname[]  = "Amp-Simulator        ";
+
 FxProgramType fxProgram1 = {
-    .name = "Amp-Simulator        ",
+    .name = pname,
     .nParameters = 3,
     .parameters = {
         {
@@ -139,4 +143,4 @@ FxProgramType fxProgram1 = {
     .processSample = &fxProgram1processSample,
     .setup = &fxProgram1Setup,
     .data = (void*)&fxProgram1data
-};
+} ;

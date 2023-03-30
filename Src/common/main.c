@@ -87,9 +87,6 @@ char chrbfr[16];
 
 
 
-__attribute__ ((section (".qspi_data")))
-const uint32_t mybigdata[]= {6,45,5,8,5,5,3,56,56,8,6,4,4,3,56,5,34,5,56,86,7,75,43,34,65,678,56,};
-
 
 /**
  * @brief the main entry point, should never exit

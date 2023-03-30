@@ -78,9 +78,9 @@ void DMA1_Stream0_IRQHandler(void) // adc
         {
             
             // convert raw input to float
-            inputSampleInt2 = *(audioBufferInputPtr + c);
-            inputSampleInt = ((int32_t)((((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF) << 16) 
-                              | (((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF0000L) >> 16))) >> 8;  
+            inputSampleInt = *(audioBufferInputPtr + c);
+            //inputSampleInt = ((int32_t)((((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF) << 16) 
+                              //| (((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF0000L) >> 16))) >> 8;  
                               // flip halfwords, then shift right by 8bits since input data is 24bit left-aligned
             inputSample=(float)inputSampleInt;
             inputSample /= 8388608.0f;
@@ -114,7 +114,7 @@ void DMA1_Stream0_IRQHandler(void) // adc
             avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
 
             inputSampleInt=((int32_t)(inputSample*8388608.0f));
-            inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);
+            //inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);
             *(audioBufferPtr+c) = inputSampleInt;  
             *(audioBufferPtr+c+1) = inputSampleInt;
         }

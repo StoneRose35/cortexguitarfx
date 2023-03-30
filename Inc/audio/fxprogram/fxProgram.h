@@ -41,7 +41,7 @@ typedef struct {
 } FxProgramParameterType;
 
 typedef struct {
-    const char name[FXPROGRAM_NAME_MAXLEN];
+    const char* const name;
     FxProgramParameterType parameters[FXPROGRAM_MAX_PARAMETERS];
     const processSampleCallback processSample;
     const setupCallback setup;

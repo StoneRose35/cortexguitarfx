@@ -26,6 +26,10 @@ typedef struct
 // 0: ready, 1: to be configured, 2: flashing in progress
 static volatile uint8_t qspiStatus=1;
 
+extern uint32_t*  _siqspicode;
+extern uint32_t* _sqspi_code;
+extern uint32_t* _eqspi_code;
+
 #define QUADSPI_DR_BYTE (*((uint8_t*)(&QUADSPI->DR)))
 
 const QspiPinType qspiPins[6] = {
@@ -107,6 +111,7 @@ void setQspiGpio(const QspiPinType * pinType)
 void initQspi()
 {
     volatile uint8_t reg;
+    volatile uint32_t cnt;
 
     RCC->AHB3ENR |= (1 << RCC_AHB3ENR_QSPIEN_Pos);
 
@@ -175,6 +180,13 @@ void initQspi()
         waitForStatus(IS25LP064A_SR_QE,IS25LP064A_SR_QE);
     }
     setMemoryMappedMode();
+
+    // copy qsp code section from qspi to ram
+    while (((uint32_t)_sqspi_code)+ (cnt << 2) < (uint32_t)_eqspi_code)
+    {
+        *(_sqspi_code + cnt) = *(_siqspicode + cnt);
+        cnt++; 
+    }
 }
 
 
@@ -208,6 +220,7 @@ void waitForStatusQpi(uint32_t maskr,uint32_t matchr)
                 | READ_STATUS_REG_CMD;
     while((QUADSPI->SR & (1 << QUADSPI_SR_SMF_Pos)) ==0);
     QUADSPI->FCR = (1 << QUADSPI_FCR_CSMF_Pos);
+
 }
 
 
