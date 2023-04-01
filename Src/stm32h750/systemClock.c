@@ -83,9 +83,9 @@ void setupClock()
                     ((1-1) << RCC_PLL2DIVR_R2_Pos);
     RCC->PLL2FRACR = 4096 << RCC_PLL2FRACR_FRACN2_Pos;
 
-// residual: 0.00MHz, m3: 5, n3: 288, f_vco: 922, f_pll: 922, p3: 3, mckdiv: 25.0
-    RCC->PLL3DIVR = ((288-1) << RCC_PLL3DIVR_N3_Pos) | 
-                    ((3-1) << RCC_PLL3DIVR_P3_Pos) |
+// residual: 0.000000MHz, m3: 5, n3: 192, f_vco: 614, f_pll: 25, p3: 25, mckdiv: 2.0
+    RCC->PLL3DIVR = ((192-1) << RCC_PLL3DIVR_N3_Pos) | 
+                    ((25-1) << RCC_PLL3DIVR_P3_Pos) |
                     ((4-1) << RCC_PLL3DIVR_Q3_Pos) |
                     ((32-1) << RCC_PLL3DIVR_R3_Pos);
     RCC->CR |= (1 << RCC_CR_PLL2ON_Pos) | (1 << RCC_CR_PLL3ON_Pos);

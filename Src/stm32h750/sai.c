@@ -177,10 +177,11 @@ void initSAI()
     // block a is master receiver, block b is slave transmitter
     SAI1_Block_A->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (1 << SAI_xCR1_MODE_Pos) // master receiver
-                    | ((25-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
+                    | ((2-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
     SAI1_Block_A->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
     SAI1_Block_A->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
                         | (1 << SAI_xFRCR_FSOFF_Pos)
+                        | ((32-1) << SAI_xFRCR_FSALL_Pos)
                         | ((64 -1) << SAI_xFRCR_FRL_Pos); // fs is asserted one bit before the first slot
     SAI1_Block_A->SLOTR = (3 << SAI_xSLOTR_SLOTEN_Pos)  // enable slot 0 and 1
                         | ((2-1) << SAI_xSLOTR_NBSLOT_Pos) // two slots
@@ -189,9 +190,11 @@ void initSAI()
     SAI1_Block_B->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (2 << SAI_xCR1_MODE_Pos) // slave transmitter
                     | (1 << SAI_xCR1_SYNCEN_Pos) // synchonous with other audio subblock
-                    | ((25-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
+                    | ((2-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
     SAI1_Block_B->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
     SAI1_Block_B->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
+                        | ((32-1) << SAI_xFRCR_FSALL_Pos)
+                        |  ((64 -1) << SAI_xFRCR_FRL_Pos)
                         | (1 << SAI_xFRCR_FSOFF_Pos); // fs is asserted one bit before the first slot
     SAI1_Block_B->SLOTR = (3 << SAI_xSLOTR_SLOTEN_Pos)  // enable slot 0 and 1
                         | ((2-1) << SAI_xSLOTR_NBSLOT_Pos) // two slots
@@ -227,7 +230,6 @@ void initSAI()
     DMAMUX1_Channel1->CCR = ((88) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 B
 
     // enable i2s devices
-    NVIC_EnableIRQ(DMA1_Stream0_IRQn);
 
     DMA1_Stream0->CR |= (1 << DMA_SxCR_EN_Pos); 
     DMA1_Stream1->CR |= (1 << DMA_SxCR_EN_Pos);
@@ -235,16 +237,17 @@ void initSAI()
     SAI1_Block_A->CR1 |= (1 << SAI_xCR1_SAIEN_Pos);
     SAI1_Block_B->CR1 |= (1 << SAI_xCR1_SAIEN_Pos);
 
-
-    //enableAudioEngine();
+    disableAudioEngine();
 }
 
 void enableAudioEngine()
 {
+    NVIC_EnableIRQ(DMA1_Stream0_IRQn);
     audioState |= (1 << AUDIO_STATE_ON);
 }
 void disableAudioEngine()
 {
+    NVIC_DisableIRQ(DMA1_Stream0_IRQn);
     audioState &= ~(1 << AUDIO_STATE_ON);
 }
 void toggleAudioBuffer()
