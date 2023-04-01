@@ -182,9 +182,9 @@ void initQspi()
     setMemoryMappedMode();
 
     // copy qsp code section from qspi to ram
-    while (((uint32_t)_sqspi_code)+ (cnt << 2) < (uint32_t)_eqspi_code)
+    while (((uint32_t)&_sqspi_code)+ (cnt << 2) < (uint32_t)&_eqspi_code)
     {
-        *(_sqspi_code + cnt) = *(_siqspicode + cnt);
+        *((uint32_t*)&_sqspi_code + cnt) = *((uint32_t*)&_siqspicode + cnt);
         cnt++; 
     }
 }

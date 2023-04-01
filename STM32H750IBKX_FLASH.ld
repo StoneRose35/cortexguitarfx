@@ -169,7 +169,7 @@ SECTIONS
 
   . = ALIGN(4);
 
-  _siqspicode = LOADADDR(.qspi_code);
+
 
   .qspi_data (NOLOAD):
   {
@@ -186,6 +186,8 @@ SECTIONS
   } > QSPIFLASH
   . = ALIGN(4);
 
+  _siqspicode = LOADADDR(.qspi_code);
+  
   .qspi_code :
   {
     . = ALIGN(4);
