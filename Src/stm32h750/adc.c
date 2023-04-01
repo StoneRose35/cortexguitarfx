@@ -11,7 +11,7 @@ volatile uint16_t adcChannelValues[3];
 void DMA1_Stream2_IRQHandler() //raised when all 3 adc values have been read
 {
     TIM2->CR1 &= ~(1 << TIM_CR1_CEN_Pos);
-    DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF0_Pos);
+    DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF2_Pos);
     task |= (1 << TASK_UPDATE_POTENTIOMETER_VALUES);
 }
 
@@ -32,11 +32,11 @@ inline void setSampleCycles(uint8_t cycles,uint8_t channel)
 {
     if (channel < 10)
     {
-        ADC1->SMPR2 |= (cycles << (channel*3));
+        ADC1->SMPR1 |= (cycles << (channel*3));
     }
     else
     {
-        ADC1->SMPR1 |= ( cycles << ((channel-10)*3));
+        ADC1->SMPR2 |= ( cycles << ((channel-10)*3));
     }
 }
 
@@ -46,13 +46,18 @@ void initAdc()
     uint32_t port;
 
     RCC->AHB1ENR|= (1 << RCC_AHB1ENR_ADC12EN_Pos);
-    ADC12_COMMON->CCR |= (8 << ADC_CCR_PRESC_Pos); // divide by 32 --> 240Mzh/32= 7.5 MSPS
-    ADC1->SQR1 |= (2 << ADC_SQR1_L_Pos); // 3 conversions per sequence
+    SYSCFG->PMCR |= (1 << SYSCFG_PMCR_BOOSTEN_Pos);
+    // power up sequence
+    ADC1->CR &= ~(1 << ADC_CR_DEEPPWD_Pos);
+    ADC1->CR |= (1 << ADC_CR_ADVREGEN_Pos);
+    while((ADC1->ISR & (1 << 12))==0);
+    ADC1->SQR1 = (2 << ADC_SQR1_L_Pos); // 3 conversions per sequence
     ADC1->SQR1 |= (POT1_CHANNEL << 6) | (POT2_CHANNEL << 12) | (POT3_CHANNEL << 18);
-    ADC1->PCSEL |= (1 << POT1_CHANNEL) | (1 << POT2_CHANNEL) | (POT3_CHANNEL);
-    setSampleCycles(7,POT1_CHANNEL);
-    setSampleCycles(7,POT2_CHANNEL);
-    setSampleCycles(7,POT3_CHANNEL);
+    ADC1->PCSEL = (1 << POT1_CHANNEL) | (1 << POT2_CHANNEL) | (1 << POT3_CHANNEL);
+    setSampleCycles(4,POT1_CHANNEL);
+    setSampleCycles(4,POT2_CHANNEL);
+    setSampleCycles(4,POT3_CHANNEL);    
+
     // discontinuous mode, on rising edge, output compare 2 of timer 2
 
     // enable the port to which the pots are attached
@@ -96,13 +101,15 @@ void initRoundRobinReading()
     DMA1_Stream2->M1AR=(uint32_t)adcChannelValues;
     DMA1_Stream2->CR = (1 << DMA_SxCR_MSIZE_Pos) | (1 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | (1 << DMA_SxCR_TCIE_Pos) | (1 << DMA_SxCR_CIRC_Pos);
     DMA1_Stream2->NDTR=3;
-    DMAMUX1_Channel2->CCR = ((9-1) << DMAMUX_CxCR_DMAREQ_ID_Pos);
+    DMAMUX1_Channel2->CCR = ((9) << DMAMUX_CxCR_DMAREQ_ID_Pos);
     NVIC_EnableIRQ(DMA1_Stream2_IRQn);
     DMA1_Stream2->CR |=(1 << DMA_SxCR_EN_Pos);
 
     // use Timer 2 CC2 as a Trigger source
     ADC1->CFGR |= (1 << ADC_CFGR_EXTEN_Pos) | (3 << ADC_CFGR_EXTSEL_Pos) | (1 << ADC_CFGR_CONT_Pos) | (3 << ADC_CFGR_DMNGT_Pos);
     ADC1->CR |= (1 << ADC_CR_ADEN_Pos);
+    while ((ADC1->ISR & (1 << ADC_ISR_ADRDY_Pos))==0);
+    ADC1->CR |= (1 << ADC_CR_ADSTART_Pos);
 }
 
 void restartAdc()
