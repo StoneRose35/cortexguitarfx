@@ -10,6 +10,7 @@
 static GPIO_TypeDef *gpio_cd;
 static GPIO_TypeDef *gpio_reset;
 static GPIO_TypeDef *gpio_cs;
+#define SPI1_TXDR_BYTE  *((uint8_t*)&SPI1->TXDR) 
 
 static void config_spi_pin(uint8_t pinnr,uint8_t alternateFunction)
 {
@@ -39,7 +40,7 @@ void ssd1306SendCommand(uint8_t cmd)
     gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF)+16)); // cs low
     gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low
     short_nop_delay();
-    SPI1->TXDR=cmd;
+    SPI1_TXDR_BYTE=cmd;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
     short_nop_delay();
     gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // cs high
@@ -52,7 +53,7 @@ void ssd1306SendData(const uint8_t*data,uint8_t l)
     short_nop_delay();
     for(uint8_t c=0;c<l;c++)
     {
-        SPI1->TXDR=*(data+c);
+        SPI1_TXDR_BYTE=*(data+c);
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
     }
     short_nop_delay();
@@ -113,17 +114,25 @@ void initSsd1306Display()
     config_spi_pin(SSD1306_MOSI,5);
     config_spi_pin(SSD1306_SCK,5);
 
+
+    SPI1->CR1 &= ~(1 << SPI_CR1_SPE_Pos);
+
+    SPI1->IFCR = (1 << SPI_IFCR_SUSPC_Pos) | (1 << SPI_IFCR_TIFREC_Pos) | (1 << SPI_IFCR_OVRC_Pos) | (1 << SPI_IFCR_UDRC_Pos);
+
+
     regbfr = SPI1->CR1;
     regbfr |= (1 << SPI_CR1_SSI_Pos); // software slave select
     SPI1->CR1 = regbfr;
 
     regbfr = SPI1->CFG1;
-    regbfr |= (3 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos); // 8 bits, 120MKz/16 as SPI clock
+    regbfr |= (5 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos); // 8 bits, 120MKz/16 as SPI clock
     SPI1->CFG1 = regbfr;
 
     SPI1->CFG2 |= (1 << SPI_CFG2_MASTER_Pos) | (1 << SPI_CFG2_SSM_Pos);
 
     SPI1->CR1 |= (1 << SPI_CR1_SPE_Pos);
+
+    SPI1->CR1 |= (1 << SPI_CR1_CSTART_Pos);
 
     
 
@@ -155,7 +164,7 @@ void initSsd1306Display()
 
 void ssd1306_nop()
 {
-    SPI1->TXDR =0xE3;
+    SPI1_TXDR_BYTE =0xE3;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))!=0); 
 }
 
@@ -237,32 +246,32 @@ void ssd1306DisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * i
     gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF)+16)); // cd low: command
 
     // set vertical addressing mode
-    SPI1->TXDR = 0x20;
+    SPI1_TXDR_BYTE = 0x20;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    SPI1->TXDR = 0x02;
+    SPI1_TXDR_BYTE = 0x02;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
 
     // set column address
-    SPI1->TXDR = 0x21;
+    SPI1_TXDR_BYTE = 0x21;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
-    SPI1->TXDR =px;
+    SPI1_TXDR_BYTE =px;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);    
-    SPI1->TXDR =px+sx;
+    SPI1_TXDR_BYTE =px+sx;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);  
 
     // set page address
-    SPI1->TXDR = 0x22;
+    SPI1_TXDR_BYTE = 0x22;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
-    SPI1->TXDR =py;
+    SPI1_TXDR_BYTE =py;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);    
-    SPI1->TXDR =py+sy;
+    SPI1_TXDR_BYTE =py+sy;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);        
 
     uint16_t c=0;
     gpio_cd->BSRR = (1 << (SSD1306_CD & 0xF)); // cd high: data
     while(c<sx*sy)
     {
-        SPI1->TXDR = *(img + c);
+        SPI1_TXDR_BYTE = *(img + c);
         c++;
         while ((SPI3->SR & (1 << SPI_SR_TXC_Pos))==0);
     }

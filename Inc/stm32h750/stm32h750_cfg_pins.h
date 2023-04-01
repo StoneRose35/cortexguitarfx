@@ -37,8 +37,8 @@
 #define SSD1306_SCK (6*16+11) // PG11
 #define SSD1306_MOSI (1*16+5) // PB5
 #define SSD1306_MISO (1*16+4) // PB4
-#define SSD1306_CD (1*16+8) // PB8
-#define SSD1306_RESET (1*16+9) //PB9
+#define SSD1306_CD (1*16+9) // PB9
+#define SSD1306_RESET (1*16+8) //PB8
 #define SSD1306_CS (6*16+10) //PG10
 
 
