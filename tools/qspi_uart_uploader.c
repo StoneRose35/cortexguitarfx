@@ -179,12 +179,17 @@ int main(int argc,char ** argv)
         {
             nChars=256;
         }
+        if (nChars == 0)
+        {
+            printf("\r\nflashing successful!\r\n");
+            return 0;
+        }
         if (fread(pageBuffer,nChars,1,binfile)!=1)
         {
             printf("failed reading %lu bytes from bin file\r\n",nChars);
             return 1;
         }
-        printf("writing page %d\r\n",c);
+        //printf("\rwriting page %d\r\n",c);
         if (writeUartArray(uploader,pageBuffer,nChars)!=0)
         {
             printf("writing page %hu failed\r\n",c);

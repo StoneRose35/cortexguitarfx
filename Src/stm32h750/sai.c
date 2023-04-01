@@ -177,7 +177,7 @@ void initSAI()
     // block a is master receiver, block b is slave transmitter
     SAI1_Block_A->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (1 << SAI_xCR1_MODE_Pos) // master receiver
-                    | ((2-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
+                    | ((2) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
     SAI1_Block_A->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
     SAI1_Block_A->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
                         | (1 << SAI_xFRCR_FSOFF_Pos)
@@ -190,7 +190,7 @@ void initSAI()
     SAI1_Block_B->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (2 << SAI_xCR1_MODE_Pos) // slave transmitter
                     | (1 << SAI_xCR1_SYNCEN_Pos) // synchonous with other audio subblock
-                    | ((2-1) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
+                    | ((2) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
     SAI1_Block_B->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
     SAI1_Block_B->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
                         | ((32-1) << SAI_xFRCR_FSALL_Pos)

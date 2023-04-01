@@ -74,6 +74,7 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
 uint8_t I2CsendMultiple()
 {
     uint32_t regbfr;
+    uint16_t sCnt=0;
     while ((I2C2->ISR & (1 << I2C_ISR_TXE_Pos))==0);
     
     regbfr = I2C2->CR2;
@@ -81,11 +82,13 @@ uint8_t I2CsendMultiple()
     regbfr |= (slave_address << (I2C_CR2_SADD_Pos+1)) | (1 << I2C_CR2_START_Pos) | (nSend << I2C_CR2_NBYTES_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
     I2C2->CR2 = regbfr;
 
-    while (nSend > 0)
+    while (sCnt < nSend)
     {
-        I2C2->TXDR = sendBfr[nSend--];
+        I2C2->TXDR = sendBfr[sCnt];
+        sCnt++;
         while ((I2C2->ISR & I2C_ISR_TXE)==0);
     }
+    nSend=0;
 
     return 0;
 }

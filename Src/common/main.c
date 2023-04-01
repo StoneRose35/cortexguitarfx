@@ -146,6 +146,7 @@ int main(void)
 
     /* enable audio engine last (when fx programs have been set up)*/
     initSAI();
+    enableAudioEngine();
 
 
     /* Loop forever */
