@@ -5,7 +5,8 @@
 #include "system.h"
 #include "timer.h"
 #include "pipicofx/pipicofxui.h"
-#include "debugLed.h"
+#include "gpio.h"
+#include "stm32h750/daisy_seed_pins.h"
 
 #define AVERAGING_LOWPASS_CUTOFF 0.0001f
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 256
@@ -45,16 +46,18 @@ void DMA1_Stream0_IRQHandler(void) // adc
     if ((DMA1->LISR & DMA_LISR_TCIF0) != 0) // receiver trasfer complete
     {
         dbfrInputPtr = AUDIO_BUFFER_SIZE*2;
-        DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF1_Pos); 
+        DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF0_Pos); 
     }
     if ((DMA1->LISR & DMA_LISR_HTIF0) != 0) // receiver half transfer
     {
         dbfrInputPtr=0;
-        DMA1->LIFCR = (1 << DMA_LIFCR_CHTIF1_Pos); 
+        DMA1->LIFCR = (1 << DMA_LIFCR_CHTIF0_Pos); 
     }
 
     // wait for a trasmitter flag to be set
+    setPin(DS_PIN_29, 1);
     while (((DMA1->LISR & DMA_LISR_TCIF1) == 0) && ((DMA1->LISR & DMA_LISR_HTIF1) == 0));
+    setPin(DS_PIN_29, 0);
     if ((DMA1->LISR & DMA_LISR_TCIF1) != 0)
     {
         dbfrPtr = AUDIO_BUFFER_SIZE*2;
@@ -71,7 +74,6 @@ void DMA1_Stream0_IRQHandler(void) // adc
     {
     
 		ticStart = getTimeLW();
-        //DebugLedOn();
         audioBufferPtr = getEditableAudioBufferHiRes();
         audioBufferInputPtr = getInputAudioBufferHiRes();
         for (uint32_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
@@ -172,6 +174,8 @@ void initSAI()
     config_i2s_pin(I2S_DOUT,6);
     config_i2s_pin(I2S_MCLK,6);
 
+    setAsOutput(DS_PIN_29);
+
 
     // configure sai1 
     // block a is master receiver, block b is slave transmitter
@@ -254,13 +258,13 @@ void toggleAudioBuffer()
 {}
 int32_t* getEditableAudioBufferHiRes()
 {
-    int32_t* res = (int32_t*)((dbfrPtr<<2) + (uint32_t)i2sDoubleBuffer);
+    int32_t* res = (dbfrPtr + i2sDoubleBuffer);
     return res;
 }
 #ifdef I2S_INPUT
 int32_t* getInputAudioBufferHiRes()
 {
-    return (int32_t*)((dbfrInputPtr<<2) + (uint32_t)i2sDoubleBufferIn);
+    return (dbfrInputPtr + i2sDoubleBufferIn);
 }
 void toggleAudioInputBuffer()
 {
