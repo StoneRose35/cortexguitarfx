@@ -1,0 +1,38 @@
+#ifndef _DAISY_SEED_PINS_H_
+#define _DAISY_SEED_PINS_H_
+#include "stdint.h"
+#define STM32_PIN(Port, Pin) ((((Port)-'A')<<4) + Pin)
+
+#define DS_PIN_1 STM32_PIN('B', 12)
+#define DS_PIN_2 STM32_PIN('C', 11)
+#define DS_PIN_3 STM32_PIN('C', 10)
+#define DS_PIN_4 STM32_PIN('C', 9)
+#define DS_PIN_5 STM32_PIN('C', 8)
+#define DS_PIN_6 STM32_PIN('D', 2)
+#define DS_PIN_7 STM32_PIN('C', 12)
+#define DS_PIN_8 STM32_PIN('G', 10)
+#define DS_PIN_9 STM32_PIN('G', 11)
+#define DS_PIN_10 STM32_PIN('B', 4)
+#define DS_PIN_11 STM32_PIN('B', 5)
+#define DS_PIN_12 STM32_PIN('B', 8)
+#define DS_PIN_13 STM32_PIN('B', 9)
+#define DS_PIN_14 STM32_PIN('B', 6)
+#define DS_PIN_15 STM32_PIN('B', 7)
+#define DS_PIN_22 STM32_PIN('C', 0)
+#define DS_PIN_23 STM32_PIN('A', 3)
+#define DS_PIN_24 STM32_PIN('B', 1)
+#define DS_PIN_25 STM32_PIN('A', 7)
+#define DS_PIN_26 STM32_PIN('A', 6)
+#define DS_PIN_27 STM32_PIN('C', 1)
+#define DS_PIN_28 STM32_PIN('C', 4)
+#define DS_PIN_29 STM32_PIN('A', 5)
+#define DS_PIN_30 STM32_PIN('A', 4)
+#define DS_PIN_31 STM32_PIN('A', 1)
+#define DS_PIN_32 STM32_PIN('A', 0)
+#define DS_PIN_33 STM32_PIN('D', 11)
+#define DS_PIN_34 STM32_PIN('G', 9)
+#define DS_PIN_35 STM32_PIN('A', 2)
+#define DS_PIN_36 STM32_PIN('B', 14)
+#define DS_PIN_37 STM32_PIN('B', 15)
+
+#endif
