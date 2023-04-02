@@ -58,24 +58,24 @@ void initAdc()
     setSampleCycles(4,POT2_CHANNEL);
     setSampleCycles(4,POT3_CHANNEL);    
 
-    // discontinuous mode, on rising edge, output compare 2 of timer 2
+    // on rising edge, output compare 2 of timer 2
 
     // enable the port to which the pots are attached
     // and set mode to analog
     port = POT1 >> 4;
-    RCC->AHB1ENR |= (1 << port);
+    RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
     gpio->MODER |= (3 << ((POT1 & 0xF)<<1));
     gpio->PUPDR &= ~(3 << ((POT1 & 0xF)<< 1));
 
     port = POT2 >> 4;
-    RCC->AHB1ENR |= (1 << port);
+    RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
     gpio->MODER |= (3 << ((POT2 & 0xF)<<1));
     gpio->PUPDR &= ~(3 << ((POT2 & 0xF)<< 1));
 
     port = POT3 >> 4;
-    RCC->AHB1ENR |= (1 << port);
+    RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
     gpio->MODER |= (3 << ((POT3 & 0xF)<<1));
     gpio->PUPDR &= ~(3 << ((POT3 & 0xF)<< 1));
