@@ -106,6 +106,7 @@ int main(void)
 	initSystickTimer();
 	initDatetimeClock();
 	initUart(57600);
+    
 	initDMA();
     initFmcSdram();
     initQspi();
@@ -113,22 +114,15 @@ int main(void)
 	initAdc();
 	initI2c(26); // 26 for wm8731, 72 for cs4270
 	
-	/*
-	 *
-	 * Initialise Component-specific drivers
-	 * 
-	 * */
+
+	//Initialise Component-specific drivers
 	initSsd1306Display();
 	setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
 	initRotaryEncoder(switchesPins,2);
 	encoderVal=getEncoderValue();
     initDebugLed();
 
-	/*
-     *
-     * Initialize Background Services
-     *
-	 */
+    //Initialize Background Services
 	//initCliApi();
 	initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
@@ -143,11 +137,12 @@ int main(void)
 		}
 	}
 	drawUi(&piPicoUiController);
-
-    /* enable audio engine last (when fx programs have been set up)*/
+    
+    //enable audio engine last (when fx programs have been set up)
     initSAI();
     enableAudioEngine();
-
+    
+    
 
     /* Loop forever */
 	for(;;)
