@@ -139,7 +139,7 @@ program_flash: out/$(PROJECT).bin
 	st-flash write out/$(PROJECT).bin 0x8000000
 
 program_all: out/$(PROJECT).bin out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
-	st-flash write out/$(PROJECT).bin 0x8000000
+	st-flash --connect-under-reset write out/$(PROJECT).bin 0x8000000
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
 
 # *************************************************************
