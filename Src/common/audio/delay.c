@@ -1,6 +1,8 @@
 #include "audio/delay.h"
 
 __attribute__ ((section (".sdram_bss")))
+float delayLineSdram[DELAY_LINE_LENGTH];
+
 DelayDataType singletonDelay;
 
 DelayDataType * getDelayData()
@@ -14,6 +16,7 @@ DelayDataType * getDelayData()
 
 void initDelay(DelayDataType*data)
 {
+    data->delayLine = (float*)delayLineSdram;
     emptyDelayLine(data->delayLine);
     data->delayInSamples=1;
     data->delayLinePtr=0;
@@ -47,7 +50,7 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
     }
     *(data->delayLine + data->delayLinePtr) = sampleFedBack;
     data->delayLinePtr++;
-    data->delayLinePtr &= (DELAY_LINE_LENGTH -1);
+    data->delayLinePtr &= (DELAY_LINE_LENGTH -1UL);
     return sampleOut;
 }
 
