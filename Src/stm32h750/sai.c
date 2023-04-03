@@ -43,7 +43,7 @@ void DMA1_Stream0_IRQHandler(void) // adc
     }
 
 
-    if ((DMA1->LISR & DMA_LISR_TCIF0) != 0) // receiver trasfer complete
+    if ((DMA1->LISR & DMA_LISR_TCIF0) != 0) // receiver transfer complete
     {
         dbfrInputPtr = AUDIO_BUFFER_SIZE*2;
         DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF0_Pos); 
@@ -54,10 +54,10 @@ void DMA1_Stream0_IRQHandler(void) // adc
         DMA1->LIFCR = (1 << DMA_LIFCR_CHTIF0_Pos); 
     }
 
-    // wait for a trasmitter flag to be set
-    setPin(DS_PIN_29, 1);
+    // wait for a transmitter flag to be set
+    //setPin(DS_PIN_30, 1);
     while (((DMA1->LISR & DMA_LISR_TCIF1) == 0) && ((DMA1->LISR & DMA_LISR_HTIF1) == 0));
-    setPin(DS_PIN_29, 0);
+    //setPin(DS_PIN_30, 0);
     if ((DMA1->LISR & DMA_LISR_TCIF1) != 0)
     {
         dbfrPtr = AUDIO_BUFFER_SIZE*2;
@@ -80,7 +80,8 @@ void DMA1_Stream0_IRQHandler(void) // adc
         {
             
             // convert raw input to float
-            inputSampleInt = *(audioBufferInputPtr + c);
+            inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
+
             //inputSampleInt = ((int32_t)((((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF) << 16) 
                               //| (((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF0000L) >> 16))) >> 8;  
                               // flip halfwords, then shift right by 8bits since input data is 24bit left-aligned
@@ -174,13 +175,14 @@ void initSAI()
     config_i2s_pin(I2S_DOUT,6);
     config_i2s_pin(I2S_MCLK,6);
 
-    setAsOutput(DS_PIN_29);
+    //setAsOutput(DS_PIN_30);
 
 
     // configure sai1 
     // block a is master receiver, block b is slave transmitter
     SAI1_Block_A->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (1 << SAI_xCR1_MODE_Pos) // master receiver
+                    | (1 << SAI_xCR1_CKSTR_Pos) // receive changes on the rising edge
                     | ((2) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
     SAI1_Block_A->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
     SAI1_Block_A->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
@@ -194,6 +196,7 @@ void initSAI()
     SAI1_Block_B->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (2 << SAI_xCR1_MODE_Pos) // slave transmitter
                     | (1 << SAI_xCR1_SYNCEN_Pos) // synchonous with other audio subblock
+                    | (1 << SAI_xCR1_CKSTR_Pos) // send changes on the rising edge
                     | ((2) << SAI_xCR1_MCKDIV_Pos); // clock division for master clock
     SAI1_Block_B->CR2 = (1 << SAI_xCR2_TRIS_Pos); // sd line becomes hiz after the last bit of the slot
     SAI1_Block_B->FRCR = (1 << SAI_xFRCR_FSDEF_Pos) // fs is start and channel side identification
@@ -219,7 +222,7 @@ void initSAI()
                        (1 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
                        (1 << DMA_SxCR_HTIE_Pos);
 
-    DMA1_Stream0->NDTR=AUDIO_BUFFER_SIZE<<1; //samples*2 (stereo),
+    DMA1_Stream0->NDTR=AUDIO_BUFFER_SIZE<<2; //samples*2 (stereo),
     DMAMUX1_Channel0->CCR = ((87) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 A
     
 
@@ -230,7 +233,7 @@ void initSAI()
     DMA1_Stream1->CR = (2 << DMA_SxCR_MSIZE_Pos) | (2 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
                 (1 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) |
                 (1 << DMA_SxCR_HTIE_Pos) | (1 << DMA_SxCR_DIR_Pos);
-    DMA1_Stream1->NDTR=AUDIO_BUFFER_SIZE<<1; 
+    DMA1_Stream1->NDTR=AUDIO_BUFFER_SIZE<<2; 
     DMAMUX1_Channel1->CCR = ((88) << DMAMUX_CxCR_DMAREQ_ID_Pos); //SAI1 B
 
     // enable i2s devices
