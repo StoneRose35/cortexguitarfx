@@ -9,5 +9,5 @@
 
 FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     //&fxProgram1, &fxProgram4, &fxProgram7, &fxProgram2, &fxProgram3, &fxProgram5, &fxProgram6, &fxProgram8
-    &fxProgram3,&fxProgram9,&fxProgram4,&fxProgram2,&fxProgram1,&fxProgram8,&fxProgram5,&fxProgram6,&fxProgram10,&fxProgram11
+    &fxProgram3,&fxProgram6,&fxProgram4,&fxProgram2,&fxProgram1,&fxProgram8,&fxProgram5,&fxProgram9,&fxProgram10,&fxProgram11
 };
