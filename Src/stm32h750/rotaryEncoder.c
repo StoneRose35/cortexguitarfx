@@ -163,7 +163,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     TIM3->CCMR1 |= (1 << TIM_CCMR1_CC1S_Pos) | (1 << TIM_CCMR1_CC2S_Pos) | 
                    (7 << TIM_CCMR1_IC1F_Pos) | (7 << TIM_CCMR1_IC2F_Pos)  ; 
                    // channel 1 to TI1, channel 2 to TI2, apply filtering
-    TIM3->CCER |= (0 << TIM_CCER_CC1NP_Pos) | (0 << TIM_CCER_CC1P_Pos) | (0 << TIM_CCER_CC1E_Pos) |
+    TIM3->CCER = (0 << TIM_CCER_CC1NP_Pos) | (0 << TIM_CCER_CC1P_Pos) | (0 << TIM_CCER_CC1E_Pos) |
                 (0 << TIM_CCER_CC2NP_Pos) | (0 << TIM_CCER_CC2P_Pos) | (0 << TIM_CCER_CC2E_Pos);
     //TIM3->CNT = 0x7FFF;
     TIM3->ARR = 0xFFFF;
@@ -173,7 +173,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     for (uint8_t c=0;c< nswitches;c++)
     {
         port = pins[c] >> 4;
-        RCC->AHB1ENR |= (1 << port);
+        RCC->AHB4ENR |= (1 << port);
         gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
 
         // set as input with pullup enabled
