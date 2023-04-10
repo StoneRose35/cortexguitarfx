@@ -399,7 +399,6 @@
         "microvia_drill": 0.1,
         "name": "Vsupply",
         "nets": [
-          "+12V",
           "+9V",
           "AC"
         ],

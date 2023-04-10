@@ -36,7 +36,8 @@
         "reverb2.h": "c",
         "audiotools.h": "c",
         "reverbutils.h": "c",
-        "fxprogram.h": "c"
+        "fxprogram.h": "c",
+        "iom88.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

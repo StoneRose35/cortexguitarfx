@@ -12,7 +12,7 @@ all: $(PROJECTNAME).hex size
 out:
 	mkdir out
 
-out/%.o: src/%.c
+out/%.o: src/%.c out
 	$(CC) $(CARGS) -c $< -o $@
 
 $(PROJECTNAME).elf: $(OBJS)

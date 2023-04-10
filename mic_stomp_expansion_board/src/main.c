@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/iom88.h>
 
 #define I2C_ADDRESS 23
 
@@ -54,7 +55,7 @@ int main(void)
 void sendStompSwitchesState(void)
 {
 	TWDR = footswitchstateOld & 0xFF;
-	TWCR &= ~(1 >> TWEA);
+	TWCR &= ~(1 << TWEA);
 	TWCR |= (1 << TWINT) | (1 << TWEN);
 }
 

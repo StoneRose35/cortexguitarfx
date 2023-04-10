@@ -23,6 +23,16 @@
                 "databaseFilename": ""
             },
             "configurationProvider": "ms-vscode.cmake-tools"
+        },
+        {
+            "name": "avr gcc",
+            "compilerPath": "/usr/bin/avr-gcc",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
         }
     ],
     "version": 4
