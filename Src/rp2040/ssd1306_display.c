@@ -62,6 +62,13 @@ void initSsd1306Display()
     *SSPDR = 0x0;
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
 
+    // COM remap to vertically flip the display
+    *SSPDR = 0xC8;
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    // columns remap (flip horizontal)
+    *SSPDR = 0xA1;
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+
 
     // send display on command
     *(GPIO_OUT + 2) = (1 << SSD1306_DISPLAY_CD);

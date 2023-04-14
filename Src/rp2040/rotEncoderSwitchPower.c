@@ -166,7 +166,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         *switchRegisterAddress = 5;
 
         // enable edge triggers 
-        switchInteAddress = (uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC0_INTE0_OFFSET + (((4*pins[c]) & 0xFFE0) >> 3));
+        switchInteAddress = (uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*pins[c]) & 0xFFE0) >> 3));
         *switchInteAddress |= (1 << (((4*pins[c]) & 0x1F)+2)) | (1 << (((4*pins[c]) & 0x1F)+3)); // (1 << SWITCH_EDGE_HIGH) | (1 << SWITCH_EDGE_LOW);
         switchPins[c]=pins[c];
     }
