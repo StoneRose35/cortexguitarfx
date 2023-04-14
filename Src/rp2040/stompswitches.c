@@ -6,7 +6,7 @@ driver for a stomp switches interface which communicates it's status over i2c
 
 
 // bit 0: momentary
-// bit 1: stick pressed
+// bit 1: sticky pressed
 // bit 2: sticky released
 static volatile uint8_t switchesState[NR_STOMPSWITCHES];
 
@@ -22,27 +22,6 @@ struct
  uint8_t rawColors;
 }switchesColors;
 
-static void updateSwitches(uint8_t data,uint8_t senderAddress)
-{
-    if (senderAddress==STOMPSWITCHES_I2C_ADDRESS)
-    {
-        for (uint8_t c=0;c<NR_STOMPSWITCHES;c++)
-        {
-            if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) == 0) && (data & (1 << c)) != 0)
-            {
-                switchesState[c] |= (1 << 1); // set sticky pressed
-            }
-            else if (((switchesState[0] & SWITCH_STATE_MOMENTARY_MSK) != 0) && (data & (1 << c)) == 0)
-            {
-                switchesState[c] |= (1 << 2); // set sticky released
-            }
-            // set momentary value
-            switchesState[c] &= ~(1);
-            switchesState[c] |= (data & (1 << c)) >> c;
-        }
-        startMasterReceive(1);      
-    }
-}
 
 uint8_t getStompSwitchState(uint8_t switchNr)
 {
@@ -68,7 +47,7 @@ void sendColors()
     masterTransmit(switchesColors.rawColors,1);
 }
 
-void setColor(uint8_t switchNr,uint8_t clr)
+void setStompswitchColor(uint8_t switchNr,uint8_t clr)
 {
     switch (switchNr)
     {
@@ -85,11 +64,34 @@ void setColor(uint8_t switchNr,uint8_t clr)
     sendColors();
 }
 
+void requestSwitchesUpdate()
+{
+    uint8_t i2cData;
+    i2cData = masterReceive(1);
+    if (i2cData != 0xff)
+    {
+        for (uint8_t c=0;c<NR_STOMPSWITCHES;c++)
+        {
+            if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) == 0) && (i2cData & (1 << c)) == 0)
+            {
+                switchesState[c] |= (1 << 1); // set sticky pressed
+            }
+            else if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) != 0) && (i2cData & (1 << c)) != 0)
+            {
+                switchesState[c] |= (1 << 2); // set sticky released
+            }
+            // set momentary value
+            switchesState[c] &= ~(1);
+            switchesState[c] |= 0x1 ^ ((i2cData & (1 << c)) >> c);
+        }
+    }
+}
+
 void initStompSwitchesInterface()
 {
     // assume that the i2c interface is initialized
     setTargetAddress(STOMPSWITCHES_I2C_ADDRESS);
-    registerI2C0IRQ(&updateSwitches);
+    
 }
 
 

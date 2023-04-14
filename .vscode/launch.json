@@ -56,6 +56,24 @@
         },
         {
             "cwd": "${workspaceRoot}",
+            "name": "Debug via Picoprobe",
+            "executable": "./out/microsys_audio.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "gdbPath": "gdb-multiarch",
+            "device": "RP2040",
+            "configFiles": [
+                "interface/picoprobe.cfg",
+                "target/rp2040.cfg"
+            ],
+            "svdFile": "/home/philipp/pico/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
+            "searchDir": [
+                "/home/philipp/pico/openocd/tcl"
+            ]
+        },
+        {
+            "cwd": "${workspaceRoot}",
             "name": "Launch via RaspberryPi SWD",
             "preLaunchTask": "Build using make",
             "executable": "./out/microsys_audio.elf",

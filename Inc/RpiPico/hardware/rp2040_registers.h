@@ -255,9 +255,12 @@
 #define I2C_IC_DATA_CMD_BYTE ((volatile uint8_t*)(I2C0_BASE +I2C_IC_DATA_CMD_OFFSET))
 #define I2C_IC_INTR_MASK ((volatile uint32_t*)(I2C0_BASE +I2C_IC_INTR_MASK_OFFSET))
 #define I2C_IC_CLR_RX_DONE ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_RX_DONE_OFFSET))
+#define I2C_IC_CLR_INTR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_INTR_OFFSET))
 #define I2C_IC_TXFLR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TXFLR_OFFSET))
+#define I2C_IC_TX_TL ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TX_TL_OFFSET))
 #define I2C_IC_RXFLR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_RXFLR_OFFSET))
-
+#define I2C_IC_RX_TL ((volatile uint32_t*)(I2C0_BASE +I2C_IC_RX_TL_OFFSET))
+#define I2C_IC_DMA_CR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_DMA_CR_OFFSET))
 #define I2C_IC_SS_SCL_HCNT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_SS_SCL_HCNT_OFFSET))
 #define I2C_IC_SS_SCL_LCNT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_SS_SCL_LCNT_OFFSET))
 #define I2C_IC_STATUS ((volatile uint32_t*)(I2C0_BASE +I2C_IC_STATUS_OFFSET))

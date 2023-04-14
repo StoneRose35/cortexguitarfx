@@ -20,7 +20,7 @@ void isr_i2c0_irq23()
     {
         irqHandler(*I2C_IC_DATA_CMD & 0xFF,*I2C_IC_TAR &0xFF);
     }
-    read_reg(I2C_IC_CLR_RX_DONE);
+    read_reg(I2C_IC_CLR_INTR);
 }
 
 
@@ -76,14 +76,19 @@ void initI2c(uint8_t slaveAdress)
     *I2C_IC_SS_SCL_HCNT=480;
     *I2C_IC_SS_SCL_LCNT=564;
 
+    // enable dma signals
+    *I2C_IC_DMA_CR |= (1 << I2C_IC_DMA_CR_RDMAE_LSB) | (1 << I2C_IC_DMA_CR_TDMAE_LSB);
+
+    // enable interrupt
+    //*NVIC_ISER = (1 << 23);
+
+    // set the threshhold levels to 1
+    *I2C_IC_TX_TL = 0;
+    *I2C_IC_RX_TL = 0;
+
     // set slave address
     *I2C_IC_TAR = slaveAdress;
 
-    // mask all interrupts except receive done
-    *I2C_IC_INTR_MASK = (1 << I2C_IC_INTR_MASK_M_RX_DONE_LSB);
-
-    //enable the interrupt
-    *NVIC_ISER = (1 << 23);
 
     //enable i2c
     *I2C_ENABLE_IC |= (1 << I2C_IC_ENABLE_ENABLE_LSB);
@@ -92,7 +97,7 @@ void initI2c(uint8_t slaveAdress)
 void setTargetAddress(uint8_t address)
 {
     // wait until transmission is done
-    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_TFNF_LSB))==0);
+    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_TFE_LSB))==0);
     // disable i2c
     *I2C_ENABLE_IC &= ~(1 << I2C_IC_ENABLE_ENABLE_LSB);
 
@@ -104,8 +109,8 @@ void setTargetAddress(uint8_t address)
 uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
 {
     uint32_t txAbortSrc;
-    // block as long as fifo is full
-    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_TFNF_LSB))==0);
+    // block as long as fifo is not empty
+    while ((*I2C_IC_TXFLR)>15);
 
     // put data
     if (lastCmd !=0)
@@ -145,6 +150,11 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
 uint8_t masterReceive(uint8_t lastCmd)
 {
     uint8_t res;
+    volatile uint8_t abort, rxlvl;
+     read_reg(I2C_IC_CLR_INTR);
+    // block as long as active
+    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_ACTIVITY_LSB))!=0);
+
     if (lastCmd !=0)
     {
         *I2C_IC_DATA_CMD = (1 << I2C_IC_DATA_CMD_STOP_LSB) | (1 << I2C_IC_DATA_CMD_CMD_LSB);
@@ -154,12 +164,25 @@ uint8_t masterReceive(uint8_t lastCmd)
         *I2C_IC_DATA_CMD = (1 << I2C_IC_DATA_CMD_CMD_LSB);
     }
 
-    // wait until transmission is done
-    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_ACTIVITY_LSB))!=0);
+    // wait until byte is received
+    abort = *I2C_IC_CLR_TX_ABRT;
+    rxlvl = *I2C_IC_RXFLR;
+    while (rxlvl==0 && abort == 0)
+    {
+        rxlvl = *I2C_IC_RXFLR;
+        abort = *I2C_IC_CLR_TX_ABRT;
+    }
 
     // read back value
-    res = (uint8_t)*I2C_IC_DATA_CMD;
-    return res;
+    if (rxlvl > 0)
+    {
+        res = *I2C_IC_DATA_CMD_BYTE;
+        return res;
+    }
+    else
+    {
+        return 0xFF;
+    }
 }
 
 void startMasterReceive(uint8_t lastCmd)

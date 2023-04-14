@@ -41,6 +41,9 @@ uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
 uint8_t stompSwitchState;
+
+volatile uint8_t st_sw_clrs[]={0,0,0};
+
 static volatile uint32_t * audioStatePtr;
 #define UI_DMIN 1
 #define ADC_LOWPASS 2
@@ -186,17 +189,29 @@ void core1Main()
         * Stomp Switches Callback
         * 
        */
+       
         for (uint8_t c=0;c<3;c++)
         {
             stompSwitchState = getStompSwitchState(c);
-            if ((stompSwitchState & (1 << 1)) != 0 && ((programsActivated >> c) & 1)==0) // switch pressed an program not activated 
-            {
+            //if ((stompSwitchState & (1 << 1)) != 0 && ((programsActivated >> c) & 1)==0) // switch pressed an program not activated 
+            //{
                 // initialize program change
-                programsActivated = 1 << c;
-                programsToInitialize[c] = 1;
-                programChangeState = 1;
-                c=3;
-                clearStompSwitchStickyPressed(c);
+            //    programsActivated = 1 << c;
+            //    programsToInitialize[c] = 1;
+            //    programChangeState = 1;
+            //    c=3;
+            //    clearStompSwitchStickyPressed(c);
+            //}
+            if ((stompSwitchState & 0x1) != 0 && (st_sw_clrs[c] & 0x80) == 0)
+            {
+                st_sw_clrs[c]++;
+                st_sw_clrs[c] &= 0x3;
+                st_sw_clrs[c] |= 0x80;
+                setStompswitchColor(c,st_sw_clrs[c]& 0x3);
+            }
+            else if ((stompSwitchState & 0x1) == 0 && (st_sw_clrs[c] & 0x80) > 0)
+            {
+                st_sw_clrs[c] &= 0x7F;
             }
         }
         if (programChangeState == 3)
@@ -217,5 +232,6 @@ void core1Main()
             }
             programChangeState = 4;
         }
+        requestSwitchesUpdate();
     }
 }

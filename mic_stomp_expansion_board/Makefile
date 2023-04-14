@@ -31,5 +31,5 @@ clean:
 
 .PHONY: all clean
 
-program:
+program: clean all
 	avrdude -p m88p -c dragon_isp -P usb -U flash:w:$(PROJECTNAME).hex

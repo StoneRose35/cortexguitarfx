@@ -28,9 +28,9 @@ int main(void)
 	DDRD = 0x3;
 	DDRC = 0xF;
 	
-	// initialize i2c to listen to address 10
+	// initialize i2c to listen to address 23
 	TWAR = (I2C_ADDRESS << 1);
-	TWCR |= (1 << TWIE);
+	TWCR |= (1 << TWIE) | (1 << TWEA) | (1 << TWEN);
 	sei();
 	while(1)
 	{
@@ -45,8 +45,8 @@ int main(void)
 		}
 		if (ledState != ledStateOld)
 		{
-			PORTC |= (ledState & 0xF);
-			PORTD |= ((ledState >> 4) & 0x3); 
+			PORTC = (ledState & 0xF);
+			PORTD = ((ledState >> 4) & 0x3); 
 			ledStateOld = ledState;
 		}	
 	}
@@ -67,13 +67,13 @@ ISR ( TWI_vect )
 		// got own address and request to write
 		// wait for command
 		TWCR |= (1 << TWEA) | (1 << TWINT)| (1 << TWEN);
-		//transmissionOngoing = 1;
 	}
 	else if ((TWSR & 0xF8) == 0x80)
 	{
 		// led status data has been received
-		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
 		ledState = TWDR;
+		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
+
 	}
 	else if ((TWSR & 0xF8) == 0xA8)
 	{

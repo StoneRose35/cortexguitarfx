@@ -182,6 +182,7 @@
 #include "cliApiTask.h"
 #include "i2s.h"
 #include "i2c.h"
+#include "stompswitches.h"
 #include "audio/sineplayer.h"
 #include "audio/simpleChorus.h"
 #include "audio/secondOrderIirFilter.h"
@@ -258,10 +259,8 @@ int main(void)
 	#ifdef CS4270
 	initI2c(72); //72 
 	#endif
-	initUSB();
-	initUart(57600,&usbCommBuffer);
-
-	//tud_init(BOARD_TUD_RHPORT);
+	//initUSB();
+	//initUart(57600,&usbCommBuffer);
 
 	/*
 	 *
@@ -318,16 +317,16 @@ int main(void)
 	#else
 	initI2SSlave();
 	#endif
-	
     /* Loop forever */
 	for(;;)
 	{
+
 		if (bufferCnt >= UI_UPDATE_IN_SAMPLE_BUFFERS)
 		{
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
-		cliApiTask(&bufferedInput);
+		//cliApiTask(&bufferedInput);
 	}
 }
 #endif
