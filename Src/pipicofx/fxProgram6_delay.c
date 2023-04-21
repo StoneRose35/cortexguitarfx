@@ -91,7 +91,7 @@ static void fxProgram6Setup(void*data)
 FxProgram6DataType fxProgram6data;
 
 FxProgramType fxProgram6 = {
-    .name = "Delay                ",
+    .name = "Delay",
     .nParameters=3,
     .parameters = {
         {

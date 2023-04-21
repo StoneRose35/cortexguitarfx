@@ -9,7 +9,7 @@ void fxProgram3Setup(void*data)
 {}
 
 FxProgramType fxProgram3 = {
-    .name = "Off                  ",
+    .name = "Off",
     .nParameters=0,
     .processSample = &fxProgram3processSample,
     .setup = &fxProgram3Setup,

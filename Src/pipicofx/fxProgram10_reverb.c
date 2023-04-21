@@ -66,7 +66,7 @@ FxProgram10DataType fxProgram10data=
 };
 
 FxProgramType fxProgram10 = {
-    .name = "Reverb                 ",
+    .name = "Reverb",
     .nParameters=3,
     .parameters = {
         {

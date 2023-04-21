@@ -349,7 +349,7 @@ FxProgram9DataType fxProgram9data = {
     .reverb.paramNr=0
 };
 FxProgramType fxProgram9 = {
-    .name = "Amp High Gain       ",
+    .name = "Amp High Gain",
     .nParameters = 5,
     .parameters = {
         {

@@ -63,7 +63,7 @@ static void fxProgramSetup(void*data)
 FxProgram13DataType fxProgram13data;
 
 FxProgramType fxProgram13 = {
-    .name = "Hadamard Reverb        ",
+    .name = "Hadamard Reverb",
     .nParameters=2,
     .parameters = {
         {

@@ -37,7 +37,7 @@ FxProgram5DataType fxProgram5data = {
 };
 
 FxProgramType fxProgram5 = {
-    .name = "Monstercrusher       ",
+    .name = "Monstercrusher",
     .nParameters=1,
     .parameters = {
         {

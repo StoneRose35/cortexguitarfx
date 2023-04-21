@@ -63,7 +63,7 @@ static void fxProgramParam3Display(void*data,char*res)
 FxProgram14DataType fxProgram14data;
 
 FxProgramType fxProgram14 = {
-    .name = "3-Band Equalizer      ",
+    .name = "3-Band Equalizer",
     .nParameters=3,
     .parameters = {
         {

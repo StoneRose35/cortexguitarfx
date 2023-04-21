@@ -107,7 +107,7 @@ FxProgram11DataType fxProgram11data = {
 };
 
 FxProgramType fxProgram11 = {
-    .name = "Sine Chorus        ",
+    .name = "Sine Chorus",
     .nParameters=5,
     .processSample = &fxProgramprocessSample,
     .parameters = {

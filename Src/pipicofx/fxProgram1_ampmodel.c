@@ -129,7 +129,7 @@ FxProgram1DataType fxProgram1data = {
     .delay.feedbackFunction=&analogDelayFeedbackFunction
 };
 FxProgramType fxProgram1 = {
-    .name = "Amp-Simulator        ",
+    .name = "Amp-Simulator",
     .nParameters = 3,
     .parameters = {
         {

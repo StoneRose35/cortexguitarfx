@@ -45,7 +45,7 @@ static void fxProgramSetup(void*data)
 FxProgram12DataType fxProgram12data;
 
 FxProgramType fxProgram12 = {
-    .name = "Allpass Reverb         ",
+    .name = "Allpass Reverb",
     .nParameters=2,
     .parameters = {
         {

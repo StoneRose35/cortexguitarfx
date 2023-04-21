@@ -73,7 +73,7 @@ FxProgram2DataType fxProgram2data = {
 };
 
 FxProgramType fxProgram2 = {
-    .name = "Vibrato/Chorus       ",
+    .name = "Vibrato/Chorus",
     .nParameters=3,
     .processSample = &fxProgram2processSample,
     .parameters = {

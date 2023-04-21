@@ -128,7 +128,7 @@ FxProgram8DataType fxProgram8Data =
 
 FxProgramType fxProgram8 = {
     .data = (void*)&fxProgram8Data,
-    .name = "Compressor             ",
+    .name = "Compressor",
     .nParameters=5,
     .parameters = {
         {
