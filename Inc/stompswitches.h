@@ -11,6 +11,7 @@ void clearStompSwitchStickyReleased(uint8_t switchNr);
 
 void initStompSwitchesInterface();
 void setStompswitchColor(uint8_t switchNr,uint8_t clr);
+void setStompswitchColorRaw(uint8_t data);
 void requestSwitchesUpdate();
 
  #endif

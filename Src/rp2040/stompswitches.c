@@ -30,12 +30,12 @@ uint8_t getStompSwitchState(uint8_t switchNr)
 
 void clearStompSwitchStickyPressed(uint8_t switchNr)
 {
-    switchesState[switchNr] &= (1 << 1);
+    switchesState[switchNr] &= ~(1 << 1);
 }
 
 void clearStompSwitchStickyReleased(uint8_t switchNr)
 {
-    switchesState[switchNr] &= (1 << 2);
+    switchesState[switchNr] &= ~(1 << 2);
 }
 
 void sendColors()
@@ -61,6 +61,12 @@ void setStompswitchColor(uint8_t switchNr,uint8_t clr)
             switchesColors.colorSwitch2 = clr & 0x3;
             break;
     }
+    sendColors();
+}
+
+void setStompswitchColorRaw(uint8_t data)
+{
+    switchesColors.rawColors = data;
     sendColors();
 }
 

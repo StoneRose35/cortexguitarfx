@@ -7,6 +7,7 @@
 #include "hardware/rp2040_registers.h"
 #include "hardware/regs/m0plus.h"
 #include "i2c.h"
+#include "systick.h"
 
 
 static inline void read_reg(volatile uint32_t* reg)
@@ -150,6 +151,7 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
 uint8_t masterReceive(uint8_t lastCmd)
 {
     uint8_t res;
+    uint32_t systickStart;
     volatile uint8_t abort, rxlvl;
      read_reg(I2C_IC_CLR_INTR);
     // block as long as active
@@ -167,7 +169,8 @@ uint8_t masterReceive(uint8_t lastCmd)
     // wait until byte is received
     abort = *I2C_IC_CLR_TX_ABRT;
     rxlvl = *I2C_IC_RXFLR;
-    while (rxlvl==0 && abort == 0)
+    systickStart = getTickValue();
+    while (rxlvl==0 && abort == 0 && getTickValue() - systickStart < 2)
     {
         rxlvl = *I2C_IC_RXFLR;
         abort = *I2C_IC_CLR_TX_ABRT;
