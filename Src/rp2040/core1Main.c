@@ -42,7 +42,7 @@ uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
 uint8_t stompSwitchState;
 
-volatile uint8_t st_sw_clrs[]={0,0,0};
+const uint8_t stompswitch_progs[]={8,7,1};
 
 static volatile uint32_t * audioStatePtr;
 #define UI_DMIN 1
@@ -78,7 +78,7 @@ void core1Main()
 
     setAsOuput(CLIPPING_LED_INPUT);
     setAsOuput(CLIPPING_LED_OUTPUT);
-
+    setStompswitchColorRaw(0);
     for(;;)
     {
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
@@ -193,25 +193,28 @@ void core1Main()
         for (uint8_t c=0;c<3;c++)
         {
             stompSwitchState = getStompSwitchState(c);
-            //if ((stompSwitchState & (1 << 1)) != 0 && ((programsActivated >> c) & 1)==0) // switch pressed an program not activated 
-            //{
-                // initialize program change
-            //    programsActivated = 1 << c;
-            //    programsToInitialize[c] = 1;
-            //    programChangeState = 1;
-            //    c=3;
-            //    clearStompSwitchStickyPressed(c);
-            //}
-            if ((stompSwitchState & 0x1) != 0 && (st_sw_clrs[c] & 0x80) == 0)
+            if ((stompSwitchState & (1 << 1)) != 0 && piPicoUiController.currentProgramIdx != stompswitch_progs[c]) // switch pressed an program not activated 
             {
-                st_sw_clrs[c]++;
-                st_sw_clrs[c] &= 0x3;
-                st_sw_clrs[c] |= 0x80;
-                setStompswitchColor(c,st_sw_clrs[c]& 0x3);
-            }
-            else if ((stompSwitchState & 0x1) == 0 && (st_sw_clrs[c] & 0x80) > 0)
-            {
-                st_sw_clrs[c] &= 0x7F;
+                switch (piPicoUiController.currentProgramIdx)
+                {
+                    case 8:
+                        setStompswitchColor(0,0);
+                        break;
+                    case 7:
+                        setStompswitchColor(1,0);
+                        break;
+                    case 1:
+                        setStompswitchColor(2,0);
+                        break;                        
+
+                }
+                clearStompSwitchStickyPressed(c);
+                piPicoUiController.currentProgramIdx = stompswitch_progs[c];
+                piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
+                piPicoUiController.currentParameterIdx=0;
+                piPicoUiController.currentParameter = piPicoUiController.currentProgram->parameters;
+                drawUi(&piPicoUiController);
+                setStompswitchColor(c,0x3);
             }
         }
         if (programChangeState == 3)

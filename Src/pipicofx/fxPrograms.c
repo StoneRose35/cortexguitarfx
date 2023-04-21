@@ -7,7 +7,7 @@ FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     
     &fxProgram1, // amp model
     &fxProgram9, // amp model high gain
-    &fxProgram14,
+    &fxProgram14, // eq
     &fxProgram5, // monstercrusher
     &fxProgram8, // compressor
     &fxProgram2, // vibchorus
