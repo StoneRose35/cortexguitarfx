@@ -85,18 +85,17 @@ void initSsd1306Display()
  */
 void setCursor(uint8_t row, uint8_t col)
 {
-    *(GPIO_OUT + 2) = (1 << SSD1306_DISPLAY_CD);
-    // set column, low nibble
-    *SSPDR = ((col+2) & 0x0F);
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-    // set column, high nibble
-    *SSPDR = 0x10 | ((col+2) >> 4);
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
-
+    *(GPIO_OUT + 2) = (1 << SSD1306_DISPLAY_CD);
     // set row / page
     *SSPDR = 0xB0 | row;
-     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
+    // set column, low nibble
+    *SSPDR = ((col+0) & 0x0F);
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
+    // set column, high nibble
+    *SSPDR = 0x10 | ((col+0) >> 4);
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
 
 void ssd1306ClearDisplay()
@@ -209,10 +208,10 @@ void ssd1306DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8
     }
 }
 
-void ssd1306WriteChar(uint8_t row,uint8_t col,char chr)
+void ssd1306WriteChar(char chr)
 {
     uint8_t fontIdx;
-    setCursor(row,col*6);
+
     fontIdx = (uint8_t)chr - ' ';
 
     *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD); // switch to data
@@ -223,27 +222,25 @@ void ssd1306WriteChar(uint8_t row,uint8_t col,char chr)
     }
     *SSPDR = 0x0;
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-    if(col==20) // clear last two columns
-    {
-        *SSPDR = 0x0;
-        while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-        *SSPDR = 0x0;
-        while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-    }
-
 }
 
 void ssd1306WriteText(const char * str,uint8_t posH,uint8_t posV)
 {
     uint8_t cnt = 0;
     uint8_t hCurrent=posH;
+    setCursor(posV,posH*6);
     while(*(str+cnt) != 0)
     {
-        ssd1306WriteChar(posV,hCurrent,*(str+cnt));
-
+        ssd1306WriteChar(*(str+cnt));
         hCurrent += 1;
-
         cnt++;
+    }
+    if (hCurrent==21) // last horizontal position written, clear the last two columns
+    {
+        *SSPDR = 0x0;
+        while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
+        *SSPDR = 0x0;
+        while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
     }
 }
 
@@ -256,14 +253,19 @@ void ssd1306WriteText(const char * str,uint8_t posH,uint8_t posV)
 void ssd1306WriteTextLine(const char * str,uint8_t posV)
 {
     uint8_t cnt=0;
-
+    setCursor(posV,0);
     while(*(str+cnt) != 0)
     {
-        ssd1306WriteChar(posV,cnt,*(str+cnt));
+        ssd1306WriteChar(*(str+cnt));
         cnt++;
     }
     while(cnt < 21)
     {
-        ssd1306WriteChar(posV,cnt++,' ');
+        ssd1306WriteChar(' ');
+        cnt++;
     }
+    *SSPDR = 0x0;
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
+    *SSPDR = 0x0;
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
