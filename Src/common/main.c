@@ -295,7 +295,7 @@ int main(void)
 			fxPrograms[c]->setup(fxPrograms[c]->data);
 		}
 	}
-	drawUi(&piPicoUiController);
+	enterLevel0(&piPicoUiController);
 	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 

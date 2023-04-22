@@ -26,6 +26,7 @@ COMMON_OBJS := $(patsubst Src/common/%.c,out/%.o,$(wildcard Src/common/*.c))
 AUDIO_OBJS := $(patsubst Src/common/audio/%.c,out/%.o,$(wildcard Src/common/audio/*.c))
 MATH_OBJS := $(patsubst Src/common/math/%.c,out/%.o,$(wildcard Src/common/math/*.c))
 AUDIO_FX_OBJS := $(patsubst Src/pipicofx/%.c,out/%.o,$(wildcard Src/pipicofx/*.c))
+AUDIO_FX_UI_OBJS := $(patsubst Src/pipicofx/ui/%.c,out/%.o,$(wildcard Src/pipicofx/ui/*.c))
 GRAPHICS_OBJS := $(patsubst Src/common/graphics/%.c,out/%.o,$(wildcard Src/common/graphics/*.c))
 NEOPIXEL_OBJS := $(patsubst Src/common/neopixel/%.c,out/%.o,$(wildcard Src/common/neopixel/*.c))
 SDCARD_OBJS := $(patsubst Src/common/sdcard/%.c,out/%.o,$(wildcard Src/common/sdcard/*.c))
@@ -36,7 +37,7 @@ ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 all_rp2040: $(RP2040_OBJS) $(RP2040_OBJS_ASM)
 all_common: $(COMMON_OBJS)
-all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS)
+all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS) $(AUDIO_FX_UI_OBJS)
 all_math: $(MATH_OBJS)
 all_graphics: $(GRAPHICS_OBJS)
 all_neopixel: $(NEOPIXEL_OBJS)
@@ -130,6 +131,10 @@ out/%.o: Src/common/math/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 
 # audio fx libs
 out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+# audio fx ui libs
+out/%.o: Src/pipicofx/ui/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # graphics libs
