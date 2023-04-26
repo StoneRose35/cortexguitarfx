@@ -212,7 +212,7 @@ volatile uint16_t bufferCnt=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
 volatile uint8_t programsActivated=0;
-const uint8_t programs[3]={0,1,2};
+const uint8_t stompswitch_progs[]={8,7,1};
 volatile uint8_t programsToInitialize[3];
 
 // 0: done

@@ -10,8 +10,10 @@
 #include "stringFunctions.h"
 #include "stompswitches.h"
 
-extern uint8_t* locksymbol;
-const uint8_t stompswitch_progs[]={8,7,1};
+const uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
+extern volatile uint8_t programsToInitialize[3];
+extern volatile uint8_t programChangeState;
+extern const uint8_t stompswitch_progs[];
 
 static void create(PiPicoFxUiType*data)
 {
@@ -197,7 +199,7 @@ static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)
 {
     if (data->currentProgramIdx != stompswitch_progs[switchNr]) // switch pressed an program not activated 
     {
-        switch (data->currentProgramIdx)
+        /*switch (data->currentProgramIdx)
         {
             case 8:
                 setStompswitchColor(0,0);
@@ -209,13 +211,15 @@ static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)
                 setStompswitchColor(2,0);
                 break;                        
 
-        }
-        data->currentProgramIdx = stompswitch_progs[switchNr];
+        }*/
+        programsToInitialize[switchNr]=1;
+        programChangeState=1;
+        /*data->currentProgramIdx = stompswitch_progs[switchNr];
         data->currentProgram = fxPrograms[data->currentProgramIdx];
         data->currentParameterIdx=0;
         data->currentParameter = data->currentProgram->parameters;
-        create(data);
-        setStompswitchColor(switchNr,0x3);
+        */
+        setStompswitchColorRaw(3 << (switchNr << 1));
     }
 }
 
@@ -252,5 +256,6 @@ void enterLevel0(PiPicoFxUiType*data)
     registerStompswitch2PressedCallback(&stompswitch2Callback);
     registerStompswitch3PressedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
+    registerOnCreateCallback(&create);
     create(data);
 }

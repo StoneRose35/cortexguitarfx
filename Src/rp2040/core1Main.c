@@ -28,7 +28,7 @@ extern volatile uint32_t cpuLoad;
 extern volatile uint8_t programsActivated;
 extern volatile uint8_t programChangeState;
 extern volatile uint8_t programsToInitialize[3];
-extern const uint8_t programs[3];
+extern const uint8_t stompswitch_progs[];
 extern PiPicoFxUiType piPicoUiController;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
@@ -224,42 +224,15 @@ void core1Main()
         stompSwitchState = getStompSwitchState(2);
         if ((stompSwitchState & (1 << 1)) != 0) 
         {
-            clearStompSwitchStickyPressed(1);
+            clearStompSwitchStickyPressed(2);
             onStompSwitch3Pressed(&piPicoUiController);
         }
         if ((stompSwitchState & (1 << 2)) != 0)
         {
-            clearStompSwitchStickyReleased(1);
+            clearStompSwitchStickyReleased(2);
             onStompSwitch3Released(&piPicoUiController);
         }
-        /*
-        for (uint8_t c=0;c<3;c++)
-        {
-            stompSwitchState = getStompSwitchState(c);
-            if ((stompSwitchState & (1 << 1)) != 0 && piPicoUiController.currentProgramIdx != stompswitch_progs[c]) // switch pressed an program not activated 
-            {
-                switch (piPicoUiController.currentProgramIdx)
-                {
-                    case 8:
-                        setStompswitchColor(0,0);
-                        break;
-                    case 7:
-                        setStompswitchColor(1,0);
-                        break;
-                    case 1:
-                        setStompswitchColor(2,0);
-                        break;                        
 
-                }
-                clearStompSwitchStickyPressed(c);
-                piPicoUiController.currentProgramIdx = stompswitch_progs[c];
-                piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
-                piPicoUiController.currentParameterIdx=0;
-                piPicoUiController.currentParameter = piPicoUiController.currentProgram->parameters;
-                drawUi(&piPicoUiController);
-                setStompswitchColor(c,0x3);
-            }
-        }*/
 
         if (programChangeState == 3)
         {
@@ -268,13 +241,14 @@ void core1Main()
             {
                 if (programsToInitialize[c] != 0)
                 {
-                    if (fxPrograms[programs[c]]->setup != 0)
+                    if (fxPrograms[stompswitch_progs[c]]->setup != 0)
                     {
-                        fxPrograms[programs[c]]->setup(fxPrograms[programs[c]]->data);
+                        fxPrograms[stompswitch_progs[c]]->setup(fxPrograms[stompswitch_progs[c]]->data);
                     }
                     programsToInitialize[c]=0;
-                    piPicoUiController.currentProgramIdx = programs[c];
+                    piPicoUiController.currentProgramIdx = stompswitch_progs[c];
                     piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
+                    onCreate(&piPicoUiController);
                 }
             }
             programChangeState = 4;

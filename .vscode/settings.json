@@ -37,7 +37,8 @@
         "audiotools.h": "c",
         "reverbutils.h": "c",
         "fxprogram.h": "c",
-        "iom88.h": "c"
+        "iom88.h": "c",
+        "pipicofx_param_2_scaled.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

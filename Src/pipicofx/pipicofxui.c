@@ -9,7 +9,7 @@
 #include "audio/fxprogram/fxProgram.h"
 #include "stringFunctions.h"
 
-const uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
+
 
 /*
 Callback function pointers
@@ -229,7 +229,7 @@ void onCreate(PiPicoFxUiType*data)
 {
     if (onCreateCallback != 0)
     {
-        onCreate(data);
+        onCreateCallback(data);
     }
 }
 
