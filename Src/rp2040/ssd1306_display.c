@@ -15,6 +15,10 @@
 #include "hardware/regs/spi.h"
 #include "hardware/regs/resets.h"
 #include "hardware/rp2040_registers.h"
+#include "hardware/regs/dma.h"
+
+static volatile uint8_t currentDmaRow;
+static volatile uint8_t * currentFrameBuffer=0;
 
 void initSsd1306Display()
 {
@@ -75,6 +79,9 @@ void initSsd1306Display()
     *SSPDR = 0xAF;
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     waitSysticks(11);
+
+    // enable interrupt on channel4
+    *DMA_INTE0 |= (1 << 4);
 }
 
 /**
@@ -201,7 +208,7 @@ void ssd1306DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8
         *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD);
         for(uint8_t c=0;c<sx;c++)
         {
-            index=c*sy + cc;
+            index=c + cc*sx;
             *SSPDR = img[index];
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
         }
@@ -268,4 +275,33 @@ void ssd1306WriteTextLine(const char * str,uint8_t posV)
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
     *SSPDR = 0x0;
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
+}
+
+void ssd1306WriteLineAsync(volatile uint8_t * data)
+{
+    *DMA_CH4_WRITE_ADDR = (uint32_t)SSPDR;
+	*DMA_CH4_READ_ADDR = (uint32_t)data;
+	*DMA_CH4_TRANS_COUNT = 128;
+	*DMA_CH4_CTRL_TRIG = (16 << DMA_CH4_CTRL_TRIG_TREQ_SEL_LSB) 
+						| (1 << DMA_CH4_CTRL_TRIG_INCR_READ_LSB) 
+						| (0 << DMA_CH4_CTRL_TRIG_DATA_SIZE_LSB) // byte wise transfer
+						| (1 << DMA_CH4_CTRL_TRIG_EN_LSB);
+}
+
+void ssd1306WriteNextLine(void)
+{
+    if (currentDmaRow <8 )
+    {
+        setCursor(currentDmaRow,0);
+        *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD);
+        ssd1306WriteLineAsync(currentFrameBuffer + currentDmaRow*128);
+        currentDmaRow++;
+    }
+}
+
+void ssd1306writeFramebufferAsync(uint8_t * fb)
+{
+    currentDmaRow=0;
+    currentFrameBuffer=fb;
+    ssd1306WriteNextLine();
 }

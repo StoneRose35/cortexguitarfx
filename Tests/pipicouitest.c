@@ -49,10 +49,12 @@ int main(int argc,char** argv)
         testImg.sy=pipicofx_param_1_scaled_streamimg.sy;
         sprintf(fname,testImageFilename,c);
 
+        
         for (uint16_t c=0;c<510;c++)
         {
             testImg.data[c]=pipicofx_param_1_scaled_streamimg.data[c];
         }
+        
 
         fValue = 0.7853981633974483f + 4.71238898038469f*(fValue - F_MIN_VALUE)/(F_MAX_VALUE - F_MIN_VALUE); //fValue is now an angle in radians from 45° to 315°
         // center is at 51/24

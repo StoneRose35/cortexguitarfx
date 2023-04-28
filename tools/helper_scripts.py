@@ -110,9 +110,11 @@ def imageToBWCStream(fname="Rheinisch-Kaltblut-Gespann.png",outfolder=""):
         bwbits = list(map(el_to_bw_pixels, img[row]))
 
         bitpos = c - rownr*8
-        for p in range(img.shape[1]):
-            idx = p*nrows + rownr
-            pixeldata[idx] |= (bwbits[p] << bitpos)
+        ncolumns = img.shape[1]
+        for p in range(ncolumns):
+            bitval = el_to_bw_pixels(img[row][p])
+            idx = p + rownr*ncolumns #p*nrows + rownr
+            pixeldata[idx] |= (bitval << bitpos)
         c += 1
     for el in pixeldata:
         bytearray += hex(el) + ", "

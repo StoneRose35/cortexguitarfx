@@ -102,7 +102,9 @@
             "command": "/usr/bin/gcc-9",
             "args": [
                 "-I./Inc",
+                "-I./Inc/graphics",
                 "-I./Tests/inc",
+                "-I./Inc/fonts",
                 "-fdiagnostics-color=always",
                 "-g",
                 "./Tests/pipicouitest.c", "./Src/common/graphics/bwgraphics.c", "./Tests/libs/*.c", 

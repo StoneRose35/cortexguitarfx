@@ -19,7 +19,9 @@ void ssd1306DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t
 void ssd1306DisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img);
 void ssd1306DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img);
 void ssd1306ClearDisplay();
-
+void ssd1306WriteLineAsync(volatile uint8_t * data);
+void ssd1306WriteNextLine(void);
+void ssd1306writeFramebufferAsync(uint8_t * fb);
 
 
 #endif

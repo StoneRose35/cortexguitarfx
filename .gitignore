@@ -25,6 +25,7 @@
 /Tests/audiosamples/*_proc*
 /Tests/audiosamples/unitPulse.wav
 /Tests/libs/*.bmp
+/Tests/*.bmp
 /Tests/libs/bmplib
 /Src/common/fatLib
 /tools/fattestsmall.img

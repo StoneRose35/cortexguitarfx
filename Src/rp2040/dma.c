@@ -13,6 +13,7 @@
 #include "timer.h"
 #include "pipicofx/pipicofxui.h"
 #include "audio/audiotools.h"
+#include "ssd1306_display.h"
 
 int16_t* audioBufferPtr;
 #ifndef I2S_INPUT
@@ -178,6 +179,11 @@ void isr_dma_irq0_irq11()
 			cpuLoad = cpuLoad*196; //*256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
 			cpuLoad = cpuLoad >> 8;
 		}
+	}
+	else if ((*DMA_INTS0 & (1<<4))==(1 << 4)) // channel 4: one line of display data written
+	{
+		*DMA_INTS0 = (1<<4);
+		ssd1306WriteNextLine();
 	}
 	return;
 }

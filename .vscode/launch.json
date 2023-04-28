@@ -6,7 +6,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": [],
+            "args": ["-convertBwImg", "./pipicofx_param_1_scaled.png"],
             "cwd": "${fileDirname}"
         },
         {
@@ -219,6 +219,31 @@
                 }
             ],
             "preLaunchTask": "compile generateUnitPulseWav",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "gcc-9 - run graphics tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Tests/pipicouitest",
+            "cwd": "${workspaceFolder}/Tests",
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "compile bitmap helper",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

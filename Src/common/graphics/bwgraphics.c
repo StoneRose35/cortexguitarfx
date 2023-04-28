@@ -1,3 +1,4 @@
+#include "graphics/gfxfont.h"
 #include "graphics/bwgraphics.h"
 #include "stdlib.h"
 #ifdef RP2040_FEATHER
@@ -271,24 +272,96 @@ void drawSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img
 	}
 }
 
+uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,GFXfont* font)
+{
+	GFXglyph* glyph;
+	int8_t w,h;
+	int8_t xOffset,yOffset;
+	uint32_t bitOffset=0;
+	uint8_t bitarray=0;
+	c -= (uint8_t)font->first;
+	glyph = font->glyph + c;
+	w = glyph->width;
+	h = glyph->height;
+	xOffset = font->glyph->xOffset;
+	yOffset = font->glyph->yOffset;
+	if ((py + h + yOffset) > 63)
+	{
+		h = 63 - py - yOffset;
+	}
+	if ((px + w + xOffset) > 127)
+	{
+		w = 127 - px - xOffset;
+	}
+	for (int8_t y=0;y<h;y++)
+	{
+		for(int8_t x=0;x<w;x++)
+		{
+			if ((bitOffset & 0x7)==0)
+			{
+				bitarray = *(font->bitmap + glyph->bitmapOffset + bitOffset++);
+			}
+			if (bitarray & 0x80)
+			{
+				setPixel(px+x+xOffset,py+y+yOffset,img);
+			}
+			else
+			{
+				clearPixel(px+x+xOffset,py+y+yOffset,img);
+			}
+			bitarray <<= 1;
+		}
+	}
+	return glyph->xAdvance;
+}
+
+void drawText(uint8_t px, uint8_t py, char * txt,uint16_t txtLength,BwImageBufferType* img,GFXfont* font)
+{
+	uint8_t ppx,ppy;
+	ppx=px;
+	ppy=py;
+	for(uint16_t c=0;c<txtLength;c++)
+	{
+		if (*(txt + c) >= ' ' && *(txt + c) < 127)
+		{
+			ppx += drawChar(ppx,ppy,*(txt+c),img,font);
+		}
+		else if (*(txt + c)=='\r')
+		{
+			ppx=px;
+		} 
+		else if (*(txt + c)=='\n')
+		{
+			ppy += font->yAdvance;
+		}
+		else if (*(txt + c)=='\t')
+		{
+			ppx += drawChar(ppx,ppy,' ',img,font);
+			ppx += drawChar(ppx,ppy,' ',img,font);
+			ppx += drawChar(ppx,ppy,' ',img,font);
+			ppx += drawChar(ppx,ppy,' ',img,font);
+		}
+	}
+}
+
 uint8_t getPixel(int32_t px,int32_t py,BwImageBufferType*img)
 {
-	int32_t bitindex = px*(img->sy) + py;
-	int32_t pageIdx = bitindex >> 3;
-	return *(img->data + pageIdx) & (1 << (bitindex & 0x7)); 
+	int32_t bitindex = py & 0x7;
+	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
+	return *(img->data + pageIdx) & (1 << (bitindex)); 
 }
 
 void setPixel(int32_t px,int32_t py,BwImageBufferType*img)
 {
-	int32_t bitindex = px*(img->sy) + py;
-	int32_t pageIdx = bitindex >> 3;
-	*(img->data + pageIdx) |= (1 << (bitindex & 0x7));
+	int32_t bitindex = py & 0x7;
+	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
+	*(img->data + pageIdx) |= (1 << (bitindex));
 }
 
 void clearPixel(int32_t px,int32_t py,BwImageBufferType*img)
 {
-	int32_t bitindex = px*(img->sy) + py;
-	int32_t pageIdx = bitindex >> 3;
-	*(img->data + pageIdx) &= ~(1 << (bitindex & 0x7));
+	int32_t bitindex = py & 0x7;
+	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
+	*(img->data + pageIdx) &= ~(1 << (bitindex));
 }
 
