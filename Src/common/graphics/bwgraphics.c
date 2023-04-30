@@ -272,42 +272,37 @@ void drawSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img
 	}
 }
 
-uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,GFXfont* font)
+uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFXfont* font)
 {
 	GFXglyph* glyph;
 	int8_t w,h;
 	int8_t xOffset,yOffset;
-	uint32_t bitOffset=0;
+	uint32_t bitArrayOffset=0, bitOffset=0;
 	uint8_t bitarray=0;
 	c -= (uint8_t)font->first;
 	glyph = font->glyph + c;
 	w = glyph->width;
 	h = glyph->height;
-	xOffset = font->glyph->xOffset;
-	yOffset = font->glyph->yOffset;
-	if ((py + h + yOffset) > 63)
-	{
-		h = 63 - py - yOffset;
-	}
-	if ((px + w + xOffset) > 127)
-	{
-		w = 127 - px - xOffset;
-	}
+	xOffset = glyph->xOffset;
+	yOffset = glyph->yOffset;
 	for (int8_t y=0;y<h;y++)
 	{
 		for(int8_t x=0;x<w;x++)
 		{
-			if ((bitOffset & 0x7)==0)
+			if ((bitOffset++ & 0x7)==0)
 			{
-				bitarray = *(font->bitmap + glyph->bitmapOffset + bitOffset++);
+				bitarray = *(font->bitmap + glyph->bitmapOffset + bitArrayOffset++);
 			}
 			if (bitarray & 0x80)
 			{
-				setPixel(px+x+xOffset,py+y+yOffset,img);
-			}
-			else
-			{
-				clearPixel(px+x+xOffset,py+y+yOffset,img);
+				if (px + x + xOffset > 0 && 
+				    px + x + xOffset < img->sx &&
+					py + y + yOffset < img->sy &&
+					py + y + yOffset > 0
+					)
+				{
+					setPixel(px+x+xOffset,py+y+yOffset,img);
+				}
 			}
 			bitarray <<= 1;
 		}
@@ -315,7 +310,7 @@ uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,GFXfont* 
 	return glyph->xAdvance;
 }
 
-void drawText(uint8_t px, uint8_t py, char * txt,uint16_t txtLength,BwImageBufferType* img,GFXfont* font)
+void drawText(uint8_t px, uint8_t py,const char * txt,uint16_t txtLength,BwImageBufferType* img,const GFXfont* font)
 {
 	uint8_t ppx,ppy;
 	ppx=px;

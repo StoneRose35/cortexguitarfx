@@ -1,6 +1,7 @@
 #include "stdint.h"
 #include "./inc/bmplib.h"
 #include "./../Inc/graphics/bwgraphics.h"
+#include "./../Inc/fonts/GFXfonts.h"
 #include "./../Inc/images/pipicofx_param_2_scaled.h"
 #include "./../Inc/images/pipicofx_param_1_scaled.h"
 #include "math.h"
@@ -33,7 +34,45 @@ void bmImageToBitmapStruct(BwImageBufferType*bwImg,BitmapFileHeaderType*bmp)
     }
 }
 
-int main(int argc,char** argv)
+void fontTest(void)
+{
+    BwImageBufferType testImg;
+    BitmapFileHeaderType bmp;
+    const char testtext[]="Hallo";
+    char *  testImageFilename = "screen0.bmp";
+    testImg.sx=128;
+    testImg.sy=64;
+    for (uint8_t c=0;c<0xFF;c++)
+    {
+        *(((uint32_t*)testImg.data) + c)=0;
+    }
+    drawText(12,15,testtext,5,&testImg,&FreeMono12pt7b);
+    bmImageToBitmapStruct(&testImg,&bmp);
+    writeBmp(testImageFilename,&bmp);
+}
+
+void gfxFontDemo(void)
+{
+    BwImageBufferType testImg;
+    BitmapFileHeaderType bmp;
+    const char testtext[]="Megadeth";
+    char fname[32];
+    testImg.sx=128;
+    testImg.sy=64;
+    for (uint8_t f=0;f<(sizeof(gfxfonts)/sizeof(GFXfont*));f++)
+    {
+        for (uint8_t c=0;c<0xFF;c++)
+        {
+            *(((uint32_t*)testImg.data) + c)=0;
+        }
+        sprintf(fname,"%s.bmp",gfxfontNames[f]);
+        drawText(0,32,testtext,5,&testImg,gfxfonts[f]);
+        bmImageToBitmapStruct(&testImg,&bmp);
+        writeBmp(fname,&bmp);
+    }
+}
+
+void potentiometerImageTest()
 {
     float cx,cy,px,py,fValue;
     BwImageBufferType testImg;
@@ -67,6 +106,11 @@ int main(int argc,char** argv)
 
         writeBmp(fname,&bmp);
     }
+}
 
+int main(int argc,char** argv)
+{
+
+    gfxFontDemo();
     return 0;
 }
