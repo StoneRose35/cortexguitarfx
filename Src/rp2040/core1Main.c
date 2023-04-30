@@ -241,9 +241,9 @@ void core1Main()
             {
                 if (programsToInitialize[c] != 0)
                 {
-                    if (fxPrograms[stompswitch_progs[c]]->setup != 0)
+                    if (fxPrograms[stompswitch_progs[c]]->reset != 0)
                     {
-                        fxPrograms[stompswitch_progs[c]]->setup(fxPrograms[stompswitch_progs[c]]->data);
+                        fxPrograms[stompswitch_progs[c]]->reset(fxPrograms[stompswitch_progs[c]]->data);
                     }
                     programsToInitialize[c]=0;
                     piPicoUiController.currentProgramIdx = stompswitch_progs[c];

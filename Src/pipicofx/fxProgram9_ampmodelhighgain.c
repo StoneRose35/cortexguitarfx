@@ -179,6 +179,45 @@ static void fxProgramSetup(void*data)
     initReverb(&pData->reverb,500);
 }
 
+static void fxProgram9Reset(void*data)
+{
+    FxProgram9DataType* pData = (FxProgram9DataType*)data;    
+
+    pData->highpass_old_in = 0;
+    pData->highpass_old_out = 0;
+
+    if (pData->cabSimType == 0)
+    {
+        firFilterReset(&pData->hiwattFir);
+    }
+    else if (pData->cabSimType == 1)
+    {
+        secondOrderIirFilterReset(&pData->hiwattIir1);
+        secondOrderIirFilterReset(&pData->hiwattIir2);
+        secondOrderIirFilterReset(&pData->hiwattIir3);
+    }
+    else if (pData->cabSimType == 2)
+    {
+        firFilterReset(&pData->frontmanFir);
+    }
+    else if (pData->cabSimType == 3)
+    {
+        secondOrderIirFilterReset(&pData->frontmanIir1);
+        secondOrderIirFilterReset(&pData->frontmanIir2);
+        secondOrderIirFilterReset(&pData->frontmanIir3);
+    }
+    else if (pData->cabSimType == 4)
+    {
+        firFilterReset(&pData->voxAC15Fir);
+    }
+    else if (pData->cabSimType == 5)
+    {
+        secondOrderIirFilterReset(&pData->voxAC15Iir1);
+        secondOrderIirFilterReset(&pData->voxAC15Iir2);
+        secondOrderIirFilterReset(&pData->voxAC15Iir3);
+    }
+}
+
 
 FxProgram9DataType fxProgram9data = {
     /* butterworth lowpass @ 6000Hz */
@@ -400,5 +439,6 @@ FxProgramType fxProgram9 = {
     },
     .processSample = &fxProgramprocessSample,
     .setup = &fxProgramSetup,
+    .reset = &fxProgram9Reset,
     .data = (void*)&fxProgram9data
 };

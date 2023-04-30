@@ -124,5 +124,6 @@ FxProgramType fxProgram6 = {
     },
     .processSample = &fxProgram6processSample,
     .setup = &fxProgram6Setup,
+    .reset = 0,
     .data = (void*)&fxProgram6data
 };

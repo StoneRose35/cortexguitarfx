@@ -53,6 +53,12 @@ int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data)
     {
         absSample = sampleOut;
     }
-    data->currentAvg = firstOlderIirDualCoeffLPProcessSample(absSample,&data->avgLowpass);
+    data->currentAvg = firstOrderIirDualCoeffLPProcessSample(absSample,&data->avgLowpass);
     return sampleOut;
+}
+
+void compressorReset(CompressorDataType*data)
+{
+    firstOrderIirDualCoeffLPReset(&data->avgLowpass);
+    data->currentAvg = 0;
 }

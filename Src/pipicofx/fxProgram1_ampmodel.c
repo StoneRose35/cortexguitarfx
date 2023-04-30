@@ -102,6 +102,15 @@ static void fxProgram1Setup(void*data)
 }
 
 
+static void fxProgram1Reset(void*data)
+{
+    FxProgram1DataType* pData = (FxProgram1DataType*)data;
+    pData->highpass_old_in=0;
+    pData->highpass_old_out=0;
+    secondOrderIirFilterReset(&pData->filter1);
+    firFilterReset(&pData->filter3);
+}
+
 FxProgram1DataType fxProgram1data = {
     /* butterworth lowpass @ 6000Hz */
     .filter1 = {
@@ -162,5 +171,6 @@ FxProgramType fxProgram1 = {
     },
     .processSample = &fxProgram1processSample,
     .setup = &fxProgram1Setup,
+    .reset = &fxProgram1Reset,
     .data = (void*)&fxProgram1data
 };

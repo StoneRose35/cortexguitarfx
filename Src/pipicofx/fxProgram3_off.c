@@ -13,5 +13,6 @@ FxProgramType fxProgram3 = {
     .nParameters=0,
     .processSample = &fxProgram3processSample,
     .setup = &fxProgram3Setup,
+    .reset = 0,
     .data = (void*)0
 };

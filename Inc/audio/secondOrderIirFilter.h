@@ -12,5 +12,5 @@ typedef struct
 void initSecondOrderIirFilter(SecondOrderIirFilterType* data);
 
 int16_t secondOrderIirFilterProcessSample(int16_t sampleIn,SecondOrderIirFilterType*data);
-int16_t secondOrderIirFilterProcessSampleHiRes(int16_t sampleIn,SecondOrderIirFilterType*data);
+void secondOrderIirFilterReset(SecondOrderIirFilterType*data);
 #endif

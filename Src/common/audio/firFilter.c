@@ -12,6 +12,11 @@ void initfirFilter(FirFilterType*data)
 {
     data->filterLength=64;
     data->delayPointer=0;
+    firFilterReset(data);
+}
+
+void firFilterReset(FirFilterType*data)
+{
     for(uint8_t c=0;c<data->filterLength;c++)
     {
         data->delayBuffer[c]=0;

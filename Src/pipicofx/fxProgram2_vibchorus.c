@@ -106,5 +106,6 @@ FxProgramType fxProgram2 = {
         }
     },
     .setup = &fxProgram2Setup,
+    .reset = 0,
     .data = (void*)&fxProgram2data
 };

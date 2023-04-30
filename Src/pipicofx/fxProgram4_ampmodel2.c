@@ -168,6 +168,45 @@ static void fxProgram4Setup(void*data)
     initfirFilter(&pData->voxAC15Fir);
 }
 
+static void fxProgram4Reset(void*data)
+{
+    FxProgram4DataType* pData = (FxProgram4DataType*)data;    
+
+    pData->highpass_old_in = 0;
+    pData->highpass_old_out = 0;
+
+    if (pData->cabSimType == 0)
+    {
+        firFilterReset(&pData->hiwattFir);
+    }
+    else if (pData->cabSimType == 1)
+    {
+        secondOrderIirFilterReset(&pData->hiwattIir1);
+        secondOrderIirFilterReset(&pData->hiwattIir2);
+        secondOrderIirFilterReset(&pData->hiwattIir3);
+    }
+    else if (pData->cabSimType == 2)
+    {
+        firFilterReset(&pData->frontmanFir);
+    }
+    else if (pData->cabSimType == 3)
+    {
+        secondOrderIirFilterReset(&pData->frontmanIir1);
+        secondOrderIirFilterReset(&pData->frontmanIir2);
+        secondOrderIirFilterReset(&pData->frontmanIir3);
+    }
+    else if (pData->cabSimType == 4)
+    {
+        firFilterReset(&pData->voxAC15Fir);
+    }
+    else if (pData->cabSimType == 5)
+    {
+        secondOrderIirFilterReset(&pData->voxAC15Iir1);
+        secondOrderIirFilterReset(&pData->voxAC15Iir2);
+        secondOrderIirFilterReset(&pData->voxAC15Iir3);
+    }
+}
+
 FxProgram4DataType fxProgram4data = {
     .hiwattFir = {
         .coefficients= {-42, -42, -6, 317, 1371, 3572, 7006, 11147, 14461, 14434, 9110, 4, -7520, -9233, -8098, -6638, -4065, -601, 2424, 3345, 1940, 242, 302, 976, 809, 424, -56, -633, -650, -448, -767, -1168, -598, 952, 2050, 1294, -1130, -3011, -3906, -3785, -2258, -467, 841, 1033, 81, -771, -368, 398, 469, 505, 527, -281, -1373, -2394, -3074, -2888, -2175, -1570, -877, 258, 821, 194, -528, -772}
@@ -343,6 +382,7 @@ FxProgramType fxProgram4 = {
     },
     .processSample = &fxProgram4processSample,
     .setup = &fxProgram4Setup,
+    .reset = &fxProgram4Reset,
     .data = (void*)&fxProgram4data
 };
 

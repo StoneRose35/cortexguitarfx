@@ -42,3 +42,10 @@ int16_t threeBandEqProcessSample(int16_t sampleIn,ThreeBandEQType*data)
     sampleOutw = clip((int32_t)sampleIn + lp + bp + hp,audioState);
     return (int16_t)sampleOutw;
 }
+
+void threeBandEqReset(ThreeBandEQType*data)
+{
+    secondOrderIirFilterReset(data->highShelf);
+    secondOrderIirFilterReset(data->lowShelf);
+    secondOrderIirFilterReset(data->midBand);
+}

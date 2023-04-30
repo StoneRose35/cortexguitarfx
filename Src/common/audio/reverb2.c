@@ -35,8 +35,13 @@ void initReverb2(Reverb2Type*reverbData)
     reverbData->lowpass.alpha = 9830;
     reverbData->lowpass.oldVal = 0;
     reverbData->lowpass.oldXVal = 0;
-    reverbData->mix=0;
-    
+    reverbData->mix=0;   
+}
+
+void reverb2Reset(Reverb2Type*reverbData)
+{
+    reverbData->lowpass.oldVal = 0;
+    reverbData->lowpass.oldXVal = 0;
 }
 
 int16_t reverb2ProcessSample(int16_t sampleIn,Reverb2Type*reverbData)

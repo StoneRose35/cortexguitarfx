@@ -52,5 +52,6 @@ FxProgramType fxProgram5 = {
     },
     .processSample = &fxProgram5processSample,
     .setup = &fxProgram5Setup,
+    .reset = 0,
     .data = (void*)&fxProgram5data
 };

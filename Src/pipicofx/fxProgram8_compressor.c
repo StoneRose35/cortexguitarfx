@@ -125,6 +125,11 @@ FxProgram8DataType fxProgram8Data =
     .makeupGain.offset = 0
 };
 
+static void fxProgramReset(void*data)
+{
+    FxProgram8DataType * pData=(FxProgram8DataType*)data;
+    compressorReset(&pData->compressor);
+} 
 
 FxProgramType fxProgram8 = {
     .data = (void*)&fxProgram8Data,
@@ -175,5 +180,6 @@ FxProgramType fxProgram8 = {
 
     },
     .processSample=&fxProgramProcessSample,
+    .reset = &fxProgramReset,
     .setup=0
 };

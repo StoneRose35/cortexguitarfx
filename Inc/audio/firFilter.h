@@ -15,5 +15,6 @@ __attribute__ ((section (".ramfunc"))) int32_t processFirstHalf(FirFilterType*da
 __attribute__ ((section (".ramfunc"))) int32_t processSecondHalf(FirFilterType*data);
 
 int16_t firFilterProcessSample(int16_t sampleIn,FirFilterType*data);
+void firFilterReset(FirFilterType*data);
 
 #endif

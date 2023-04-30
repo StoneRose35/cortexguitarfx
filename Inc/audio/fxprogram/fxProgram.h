@@ -31,6 +31,7 @@ typedef float(*processSampleCallback)(float,void*);
 #endif
 typedef void(*paramChangeCallback)(uint16_t,void*);
 typedef void(*setupCallback)(void*);
+typedef void(*resetCallback)(void*);
 typedef void*(*getParameterValueFct)(void*);
 typedef void(*getParameterDisplayFct)(void*,char*);
 
@@ -49,6 +50,7 @@ typedef struct {
     FxProgramParameterType parameters[FXPROGRAM_MAX_PARAMETERS];
     const processSampleCallback processSample;
     const setupCallback setup;
+    const resetCallback reset;
     const uint8_t nParameters;
     void * data;
 } FxProgramType;

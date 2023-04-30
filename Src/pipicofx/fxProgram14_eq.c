@@ -13,6 +13,12 @@ static void fxProgramSetup(void*data)
     initThreeBandEq(&pData->eq);
 }
 
+static void fxProgramReset(void*data)
+{
+    FxProgram14DataType* pData= (FxProgram14DataType*)data;
+    threeBandEqReset(&pData->eq);   
+}
+
 static void fxProgramParam1Callback(uint16_t val,void*data) // low
 {
     FxProgram14DataType* pData= (FxProgram14DataType*)data;
@@ -96,5 +102,6 @@ FxProgramType fxProgram14 = {
     },
     .processSample = &fxProgramProcessSample,
     .setup = &fxProgramSetup,
+    .reset = &fxProgramReset,
     .data = (void*)&fxProgram14data
 };

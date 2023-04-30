@@ -15,7 +15,7 @@ int16_t firstOrderIirLowpassProcessSample(int16_t sampleIn,FirstOrderIirType*dat
     return data->oldVal;
 }
 
-int16_t firstOlderIirDualCoeffLPProcessSample(int16_t sampleIn,FirstOrderIirDualCoeffLPType*data)
+int16_t firstOrderIirDualCoeffLPProcessSample(int16_t sampleIn,FirstOrderIirDualCoeffLPType*data)
 {
     if (sampleIn > data->oldVal)
     {
@@ -36,3 +36,16 @@ int16_t firstOrderIirHighpassProcessSample(int16_t sampleIn,FirstOrderIirType*da
     data->oldXVal = sampleIn;
     return data->oldVal;
 }
+
+void firstOrderIirReset(FirstOrderIirType*data)
+{
+    data->oldVal=0;
+    data->oldXVal=0;
+}
+
+void firstOrderIirDualCoeffLPReset(FirstOrderIirDualCoeffLPType*data)
+{
+    data->oldVal=0;
+    data->oldXVal=0;
+}
+

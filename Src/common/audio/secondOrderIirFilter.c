@@ -39,6 +39,14 @@ int16_t secondOrderIirFilterProcessSample(int16_t sampleIn,SecondOrderIirFilterT
     data->acc &= ((1 << 14)-1);
 
     return res;
+}
 
+void secondOrderIirFilterReset(SecondOrderIirFilterType*data)
+{
+    data->acc=0;
+    data->x1=0;
+    data->x2=0;
+    data->y1=0;
+    data->y2=0;
 }
 

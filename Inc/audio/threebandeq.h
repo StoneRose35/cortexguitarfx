@@ -15,5 +15,5 @@ typedef struct
 
 void initThreeBandEq(ThreeBandEQType*data);
 int16_t threeBandEqProcessSample(int16_t sampleIn,ThreeBandEQType*data);
-
+void threeBandEqReset(ThreeBandEQType*data);
 #endif

@@ -56,3 +56,8 @@ int16_t  OversamplingDistortionProcessSample(int16_t sample,OversamplingWaveshap
     return outVal;
 }
 
+void oversamplingWaveshaperReset(OversamplingWaveshaperDataType*data)
+{
+    data->oldValue=0;
+}
+
