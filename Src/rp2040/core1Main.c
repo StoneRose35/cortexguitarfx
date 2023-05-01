@@ -7,7 +7,7 @@
 #include "audio/firFilter.h"
 #include "audio/audiotools.h"
 #include "audio/delay.h"
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
 #include "adc.h"
 #include "rotEncoderSwitchPower.h"

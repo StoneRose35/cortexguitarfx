@@ -191,7 +191,7 @@
 #include "audio/oversamplingWaveshaper.h"
 #include "multicore.h"
 #include "core1Main.h"
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
 
 volatile uint32_t task=0;

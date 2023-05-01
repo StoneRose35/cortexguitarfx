@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
 #define P4_HIGHPASS 30000

@@ -1,4 +1,4 @@
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 
 int16_t fxProgram3processSample(int16_t sampleIn,void*data)
 {

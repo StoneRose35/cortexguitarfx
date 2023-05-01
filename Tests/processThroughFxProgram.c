@@ -1,5 +1,5 @@
 #include "inc/wavReader.h"
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "romfunc.h"
 #include <stdio.h>
 #include <stdlib.h> 

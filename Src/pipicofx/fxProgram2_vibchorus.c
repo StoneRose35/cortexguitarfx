@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
 static int16_t fxProgram2processSample(int16_t sampleIn,void*data)

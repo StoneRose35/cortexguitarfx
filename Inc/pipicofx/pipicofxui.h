@@ -1,7 +1,7 @@
 #ifndef _PI_PICO_FX_UI_H_
 #define _PI_PICO_FX_UI_H_
 #include "stdint.h"
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 
 typedef struct 
 {
