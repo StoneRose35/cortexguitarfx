@@ -154,8 +154,6 @@ uint8_t masterReceive(uint8_t lastCmd)
     uint32_t systickStart;
     volatile uint8_t abort, rxlvl;
      read_reg(I2C_IC_CLR_INTR);
-    // block as long as active
-    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_ACTIVITY_LSB))!=0);
 
     if (lastCmd !=0)
     {

@@ -9,10 +9,12 @@
 #include "audio/delay.h"
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
+#include "pipicofx/picofxCore.h"
 #include "adc.h"
+#include "stringFunctions.h"
 #include "rotEncoderSwitchPower.h"
 #include "stompswitches.h"
-//#include "i2s.h"
+#include "systick.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
 #include "hardware/regs/m0plus.h"
@@ -41,6 +43,8 @@ uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
 uint16_t adcChannel=0;
 uint8_t stompSwitchState;
+FxPresetType preset1, preset2;
+
 
 
 static volatile uint32_t * audioStatePtr;
@@ -78,6 +82,22 @@ void core1Main()
     setAsOuput(CLIPPING_LED_INPUT);
     setAsOuput(CLIPPING_LED_OUTPUT);
     setStompswitchColorRaw(0);
+
+    /*
+    preset1.bankNr = 0;
+    preset1.bankPos = 1;
+    preset1.name[0]=0;
+    appendToString(preset1.name,"ShortRev");
+    preset1.programNr = 8;
+    preset1.parameters[0]=2222;
+    preset1.parameters[1]=2568;
+    preset1.parameters[2]=0;
+    savePreset(&preset1,0);
+    waitSysticks(10);
+    loadPreset(&preset2,0);
+    waitSysticks(10);
+    */
+
     for(;;)
     {
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))

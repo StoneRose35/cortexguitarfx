@@ -34,8 +34,7 @@ void eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data)
         if (remaining < EEPROM_24LC128_PAGE_LENGTH)
         {
             lenToWrite = remaining;
-            eeprom24s128WritePage(addrCnt,remaining,data + dataCnt);
-            remaining = 0;
+            //eeprom24s128WritePage(addrCnt,remaining,data + dataCnt);
         }
         else
         {

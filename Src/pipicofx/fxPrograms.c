@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "pipicofx/fxPrograms.h"
-
-
+#include "pipicofx/picofxCore.h"
+#include "24lc128.h"
 
 FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     
@@ -18,3 +18,38 @@ FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     &fxProgram13, // hadamard diffusor reverb
     &fxProgram3 // Off
     };
+
+
+void savePreset(FxPresetType* preset,uint16_t presetPos)
+{
+    uint16_t cs=0;
+    uint32_t address;
+    uint8_t * presetArrayPtr;
+    presetArrayPtr = (uint8_t*)preset;
+    for (uint8_t c=0;c<sizeof(FxPresetType)-2;c++)
+    {
+        cs += *(presetArrayPtr + c);
+    }
+    preset->magicNr = cs;
+    address = presetPos*sizeof(FxPresetType);
+    eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArrayPtr);
+}
+
+uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
+{
+    uint16_t cs=0;
+    uint32_t address;
+    uint8_t * presetArrayPtr;
+    presetArrayPtr = (uint8_t*)preset;
+    address = presetPos*sizeof(FxPresetType);
+    eeprom24lc128ReadArray(address,sizeof(FxPresetType),presetArrayPtr);
+    for (uint8_t c=0;c<sizeof(FxPresetType)-2;c++)
+    {
+        cs += *(presetArrayPtr + c);
+    }
+    if (cs==preset->magicNr)
+    {
+        return 0;
+    }
+    return 1;
+}
