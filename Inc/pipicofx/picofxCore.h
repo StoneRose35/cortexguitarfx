@@ -48,5 +48,5 @@ typedef struct __attribute__((__packed__)) {
 
 void savePreset(FxPresetType* preset,uint16_t presetPos);
 uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos);
-
+void applyPreset(FxPresetType* preset,FxProgramType ** programs);
 #endif

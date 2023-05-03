@@ -310,12 +310,13 @@ uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFX
 	return glyph->xAdvance;
 }
 
-void drawText(uint8_t px, uint8_t py,const char * txt,uint16_t txtLength,BwImageBufferType* img,const GFXfont* font)
+void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,const GFXfont* font)
 {
 	uint8_t ppx,ppy;
 	ppx=px;
 	ppy=py;
-	for(uint16_t c=0;c<txtLength;c++)
+	uint16_t c=0;
+	while(*(txt + c)!=0)
 	{
 		if (*(txt + c) >= ' ' && *(txt + c) < 127)
 		{
@@ -335,6 +336,30 @@ void drawText(uint8_t px, uint8_t py,const char * txt,uint16_t txtLength,BwImage
 			ppx += drawChar(ppx,ppy,' ',img,font);
 			ppx += drawChar(ppx,ppy,' ',img,font);
 			ppx += drawChar(ppx,ppy,' ',img,font);
+		}
+		c++;
+	}
+}
+
+void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageBufferType* imgBuffer)
+{
+	uint8_t pixel;
+	uint8_t cxOut, cyOut;
+	for(uint8_t cy=0;cy<img->sy;cy++)
+	{
+		for(uint8_t cx=0;cx<img->sx;cx++)
+		{
+			cxOut = cx + px;
+			cyOut =cy + py;
+			pixel= getPixel(cx,cy,(BwImageBufferType*)img);
+			if (pixel)
+			{
+				setPixel(cxOut,cyOut,imgBuffer);
+			}
+			else
+			{
+				clearPixel(cxOut,cyOut,imgBuffer);
+			}
 		}
 	}
 }

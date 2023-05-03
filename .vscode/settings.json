@@ -38,7 +38,8 @@
         "reverbutils.h": "c",
         "fxprogram.h": "c",
         "iom88.h": "c",
-        "pipicofx_param_2_scaled.h": "c"
+        "pipicofx_param_2_scaled.h": "c",
+        "picofxcore.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

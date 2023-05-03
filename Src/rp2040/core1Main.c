@@ -257,6 +257,18 @@ void core1Main()
         if (programChangeState == 3)
         {
             clearDelayLine();
+            if (programsToInitialize[0] != 0xFF)
+            {
+                if (fxPrograms[programsToInitialize[0]]->reset != 0)
+                {
+                    fxPrograms[programsToInitialize[0]]->reset(fxPrograms[programsToInitialize[0]]->data);
+                }
+                piPicoUiController.currentProgramIdx = programsToInitialize[0];
+                programsToInitialize[0]=0xFF;
+                piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
+                onCreate(&piPicoUiController);
+            }
+            /*
             for (uint8_t c=0;c<3;c++)
             {
                 if (programsToInitialize[c] != 0)
@@ -271,6 +283,7 @@ void core1Main()
                     onCreate(&piPicoUiController);
                 }
             }
+            */
             programChangeState = 4;
         }
         requestSwitchesUpdate();

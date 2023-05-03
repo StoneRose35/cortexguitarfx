@@ -167,7 +167,7 @@ out/%.o: Src/services/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
 
 # image assets
 Inc/images/%.h: Assets/%.png
-	./tools/helper_scripts.py -convertImg $^
+	python3 ./tools/helper_scripts.py -convertBwImg $<
 
 
 Src/rp2040/neopixelDriver.c: Inc/gen/pio0_pio.h

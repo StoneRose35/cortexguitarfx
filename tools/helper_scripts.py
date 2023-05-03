@@ -104,7 +104,7 @@ def imageToBWCStream(fname="Rheinisch-Kaltblut-Gespann.png",outfolder=""):
     c = 0
     rownr_old=0
     nrows = int(img.shape[0]/8)
-    pixeldata = np.zeros(int(img.shape[0]/8)*img.shape[1],dtype="uint8")
+    pixeldata = np.zeros(int(np.ceil(img.shape[0]/8))*img.shape[1],dtype="uint8")
     for row in range(img.shape[0]):
         rownr = int(np.floor(c/8))
         bwbits = list(map(el_to_bw_pixels, img[row]))
@@ -242,11 +242,11 @@ if __name__ == "__main__":
             # dircontent = os.listdir(asset_path)
             full_path = args.convertImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToCStream(full_path, "../Inc/images")
+                imageToCStream(full_path, "./Inc/images")
         elif args.convertBwImg is not None:
             full_path = args.convertBwImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToBWCStream(full_path, "../Inc/images")
+                imageToBWCStream(full_path, "./Inc/images")
 
 
 

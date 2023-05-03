@@ -17,7 +17,7 @@
 #include "hardware/rp2040_registers.h"
 #include "hardware/regs/dma.h"
 
-static volatile uint8_t currentDmaRow;
+static volatile uint8_t currentDmaRow=8;
 static volatile uint8_t * currentFrameBuffer=0;
 
 void initSsd1306Display()
@@ -301,6 +301,7 @@ void ssd1306WriteNextLine(void)
 
 void ssd1306writeFramebufferAsync(uint8_t * fb)
 {
+    while(currentDmaRow!=8); // block until previous transfer is done
     currentDmaRow=0;
     currentFrameBuffer=fb;
     ssd1306WriteNextLine();

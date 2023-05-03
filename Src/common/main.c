@@ -311,6 +311,7 @@ int main(void)
 
 	ticEnd=0;
 	ticStart=0;
+	programsToInitialize[0]=0xFF;
 
 	#ifdef WM8731
 	initI2SSlave();
