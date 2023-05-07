@@ -63,3 +63,13 @@ void applyPreset(FxPresetType* preset,FxProgramType ** programs)
         (*programs + preset->programNr)->parameters[c].setParameter(preset->parameters[c],(*programs + preset->programNr)->data);
     }
 }
+
+void parametersToPreset(FxPresetType* preset,FxProgramType ** programs)
+{
+    uint8_t nParams;
+    nParams = (*programs + preset->programNr)->nParameters;
+    for (uint8_t c=0;c<nParams;c++)
+    {
+        preset->parameters[c] = (*programs + preset->programNr)->parameters[c].rawValue;
+    }    
+}

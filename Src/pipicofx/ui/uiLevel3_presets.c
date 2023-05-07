@@ -1,6 +1,6 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "fonts/GFXfonts.h"
+#include "graphics/gfxfont.h"
 #include "ssd1306_display.h"
 #include "adc.h"
 #include "pipicofx/pipicofxui.h"
@@ -10,11 +10,10 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
-FxPresetType presets[3];
-static volatile uint8_t currentBank=0;
-static volatile uint8_t currentPreset=0;
+extern FxPresetType presets[3];
+extern uint8_t currentBank;
+extern uint8_t currentPreset;
 static volatile uint8_t overlayNr=0xFF;
-static BwImageBufferType imgBuffer;
 const BwImageType* overlays[]={&editOverlay_streamimg, &settingsOverlay_streamimg};
 extern volatile uint8_t programsToInitialize[3];
 
@@ -22,53 +21,57 @@ static void create(PiPicoFxUiType*data)
 {
     char strbfr[8];
     char nrbfr[8];
+    BwImageBufferType* imgBuffer = getImageBuffer();
+    const GFXfont * font = getGFXFont(FREESANS12PT7B);
     // display preset Name and Bank Number
-    for(uint16_t c=0;c<256;c++)
-    {
-        *((uint32_t*)imgBuffer.data + c) = 0;
-    }
+    clearImage(imgBuffer);
     *(strbfr) = 0;
     appendToString(strbfr,"Bank:");
     UInt8ToChar(currentBank,nrbfr);
     appendToString(strbfr,nrbfr);
-    drawText(5,42,strbfr,&imgBuffer,&FreeSans12pt7b);
+    drawText(5,21,strbfr,imgBuffer,font);
     *(strbfr) = 0;
     appendToString(strbfr,presets[currentPreset].name);
-    drawText(5,42,strbfr,&imgBuffer,&FreeSans12pt7b);
+    drawText(5,42,strbfr,imgBuffer,font);
 
     *(strbfr) = 0;
     appendToString(strbfr,"In");
-    drawText(5,42+10,strbfr,&imgBuffer,&FreeSans9pt7b);
+    font = getGFXFont(FREESANS9PT7B);
+    drawText(5,42+10,strbfr,imgBuffer,font);
 
     *(strbfr) = 0;
     appendToString(strbfr,"Out");
-    drawText(5,42+10,strbfr,&imgBuffer,&FreeSans9pt7b);
+    drawText(5,42+20,strbfr,imgBuffer,font);
 
     applyPreset(presets+currentPreset,fxPrograms);
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
-{
+{    
+    BwImageBufferType* imgBuffer = getImageBuffer();
     // draw Level bars
-    clearSquare(40.0f,43.0f,128.0f,64.0f,&imgBuffer);
+    clearSquare(40.0f,43.0f,128.0f,64.0f,imgBuffer);
     //in
-    drawSquare(40.0f,43.0f,40.0f + int2float(avgInput)*(128.0f-40.0f)/128.0f,52.0f,&imgBuffer);
+    drawSquare(40.0f,43.0f,40.0f + int2float(avgInput)*(128.0f-40.0f)/128.0f,52.0f,imgBuffer);
     //out
-    drawSquare(40.0f,53.0f,40.0f + int2float(avgOutput)*(128.0f-40.0f)/128.0f,64.0f,&imgBuffer);
+    drawSquare(40.0f,53.0f,40.0f + int2float(avgOutput)*(128.0f-40.0f)/128.0f,64.0f,imgBuffer);
 
-    ssd1306writeFramebufferAsync(imgBuffer.data);
+    ssd1306writeFramebufferAsync(imgBuffer->data);
 }
 
 static void enterCallback(PiPicoFxUiType*data) 
 {
+    BwImageBufferType* imgBuffer = getImageBuffer();
     // show overlay menu (if not there)
     if (overlayNr == 0xFF)
     {
         overlayNr = 0;
-        drawImage(41,0,&editOverlay_streamimg,&imgBuffer);
+        drawImage(41,0,&editOverlay_streamimg,imgBuffer);
     }
     else
     {
+        data->lastUiLevel = 3;
+        //enterLevel4(data);
     // move to: edit preset, system settings if overlay there
     }
 
@@ -78,18 +81,20 @@ static void exitCallback(PiPicoFxUiType*data)
 {
     char strbfr[8];
     char nrbfr[8];
+    const GFXfont * font = getGFXFont(FREESANS12PT7B);
+    BwImageBufferType* imgBuffer = getImageBuffer();
     // remove overlay menu (if there)
     if (overlayNr != 0xFF)
     {
-        clearSquare(0.0f,0.0f,128.0f,42.0f,&imgBuffer);
+        clearSquare(0.0f,0.0f,128.0f,42.0f,imgBuffer);
         *(strbfr) = 0;
         appendToString(strbfr,"Bank:");
         UInt8ToChar(currentBank,nrbfr);
         appendToString(strbfr,nrbfr);
-        drawText(5,42,strbfr,&imgBuffer,&FreeSans12pt7b);
+        drawText(5,42,strbfr,imgBuffer,font);
         *(strbfr) = 0;
         appendToString(strbfr,presets[currentPreset].name);
-        drawText(5,42,strbfr,&imgBuffer,&FreeSans12pt7b);
+        drawText(5,42,strbfr,imgBuffer,font);
         overlayNr=0xFF;
     }
 }
@@ -113,6 +118,7 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
 {
     uint8_t oldPresetProgram;
+    BwImageBufferType* imgBuffer = getImageBuffer();
     // change overlay icon (if there)
     if (overlayNr != 0xFF)
     {
@@ -133,7 +139,7 @@ static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
             }
 
         }
-        drawImage(41,0,overlays[overlayNr],&imgBuffer);
+        drawImage(41,0,overlays[overlayNr],imgBuffer);
     }
     else // change preset
     {
@@ -180,11 +186,12 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
     // else: switch to preset 3 if not already chosen
 }
 
-void enterLevel10(PiPicoFxUiType*data)
+void enterLevel3(PiPicoFxUiType*data)
 {
     loadPreset(presets,currentBank*3);
     loadPreset(presets+1,currentBank*3+1);
     loadPreset(presets+2, currentBank*3+2);
+    data->editViaRotary = 1;
 
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);

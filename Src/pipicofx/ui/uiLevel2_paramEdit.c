@@ -9,6 +9,11 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
+
+extern FxPresetType presets[3];
+extern uint8_t currentBank;
+extern uint8_t currentPreset;
+
 static void create(PiPicoFxUiType*data)
 {
     ssd1306WriteTextLine(data->currentProgram->name,0);
@@ -54,7 +59,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
 
 static void exitCallback(PiPicoFxUiType*data)
 {
-    enterLevel1(data);
+    // none
 }
 
 static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)

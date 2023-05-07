@@ -20,6 +20,7 @@ static void fxProgramParam1Callback(uint16_t val,void*data) // decay / delay fee
         intermVal = 0x7FFD;
     }
     pData->reverb.delay.feedback = intermVal;
+    fxProgram13.parameters[0].rawValue = val;
 }
 
 static void fxProgramParam1Display(void*data,char*res)
@@ -43,7 +44,8 @@ static void fxProgramParam1Display(void*data,char*res)
 static void fxProgramParam2Callback(uint16_t val,void*data) // mix
 {
     FxProgram13DataType* pData= (FxProgram13DataType*)data;
-        pData->mix=(val << 3);
+    pData->mix=(val << 3);
+    fxProgram13.parameters[1].rawValue = val;
 }
 
 static void fxProgramParam2Display(void*data,char*res)

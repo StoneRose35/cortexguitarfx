@@ -12,6 +12,7 @@ static void fxProgramParam1Callback(uint16_t val,void*data) // reverb time
 {
     FxProgram12DataType* pData= (FxProgram12DataType*)data;
     pData->reverb.decay = val << 3;
+    fxProgram12.parameters[0].rawValue = val;
 }
 
 static void fxProgramParam1Display(void*data,char*res)
@@ -24,6 +25,7 @@ static void fxProgramParam2Callback(uint16_t val,void*data) // Mix
 {
     FxProgram12DataType* pData= (FxProgram12DataType*)data;
     pData->reverb.mix=(val << 3);
+    fxProgram12.parameters[1].rawValue = val;
 }
 
 static void fxProgramParam2Display(void*data,char*res)

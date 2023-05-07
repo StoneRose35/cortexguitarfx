@@ -2,17 +2,17 @@
 #define _PI_PICO_FX_UI_H_
 #include "stdint.h"
 #include "pipicofx/fxPrograms.h"
+#include "graphics/bwgraphics.h"
 
 typedef struct 
 {
-    uint8_t displayLevel; // 0,1 or two
     FxProgramType* currentProgram;
     FxProgramParameterType * currentParameter;
-    uint32_t oldEncoderValue;
     uint8_t currentProgramIdx;
     uint8_t currentParameterIdx;
-    int16_t oldParamValue;
-    uint8_t locked;
+    uint8_t locked : 1;
+    uint8_t editViaRotary : 1;
+    uint8_t lastUiLevel; // the ui level that should be entered upon exiting the current one, 0xFF means null
 } PiPicoFxUiType;
 
 
@@ -22,6 +22,8 @@ typedef struct
     
 } ButtonStateType;
 
+
+typedef void(*uiEnterFct)(PiPicoFxUiType*);
 
 void registerEnterButtonPressedCallback(void(*cb)(PiPicoFxUiType*));
 void registerEnterButtonReleasedCallback(void(*cb)(PiPicoFxUiType*));
@@ -56,27 +58,15 @@ void onStompSwitch3Pressed(PiPicoFxUiType*data);
 void onStompSwitch3Released(PiPicoFxUiType*data);
 void onUpdate(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data);
 void onCreate(PiPicoFxUiType*data);
+BwImageBufferType * getImageBuffer();
 
 
-
-
-/*
-void updateAudioUi(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data);
-
-void drawUi(PiPicoFxUiType*data);
-
-void knob0Callback(uint16_t val,PiPicoFxUiType*data);
-void knob1Callback(uint16_t val,PiPicoFxUiType*data);
-void knob2Callback(uint16_t val,PiPicoFxUiType*data);
-
-void button1Callback(PiPicoFxUiType*data);
-void button2Callback(PiPicoFxUiType*data);
-void rotaryCallback(int16_t encoderValue,PiPicoFxUiType*data);
-*/
 void piPicoFxUiSetup(PiPicoFxUiType*);
-
 void enterLevel0(PiPicoFxUiType*data);
 void enterLevel1(PiPicoFxUiType*data);
 void enterLevel2(PiPicoFxUiType*data);
+void enterLevel3(PiPicoFxUiType*data);
+void enterLevel4(PiPicoFxUiType*data);
+
 
 #endif

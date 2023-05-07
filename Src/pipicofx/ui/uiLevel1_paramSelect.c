@@ -9,6 +9,14 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
+
+static uint8_t exitState = 0; // 0: exit clicked for the first time 
+                              // 1: "Save and Exit" next time exit is pressed
+                              // 2: "Save without exiting" next time exit is pressed
+extern FxPresetType presets[3];
+extern uint8_t currentBank;
+extern uint8_t currentPreset;
+
 static void create(PiPicoFxUiType*data)
 {
     ssd1306WriteTextLine(data->currentProgram->name,0);
@@ -48,21 +56,47 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     drawLine(cx,cy,px,py,&imgBfr);
     ssd1306DisplayImageStandardAdressing(13,2,imgBfr.sx,imgBfr.sy>>3,imgBfr.data); 
     data->currentParameter->getParameterDisplay(data->currentProgram->data,paramValueBfr);
-    ssd1306WriteTextLine(paramValueBfr,7);
+    switch (exitState)
+    {   
+        case 0:
+            ssd1306WriteTextLine(paramValueBfr,7);
+            break;
+        case 1: 
+            ssd1306WriteTextLine("Save? Yes",7);
+            break;
+        case 2:
+            ssd1306WriteTextLine("Save? No", 7);
+            break;
+    }
 }
 
 static void enterCallback(PiPicoFxUiType*data) 
 {
-    if (data->currentParameter->control == 0xFF)
+    if (data->currentParameter->control == 0xFF || data->editViaRotary != 0)
     {
-        data->oldParamValue = data->currentParameter->rawValue;
+        data->lastUiLevel = 1;
         enterLevel2(data);
     }
 }
 
 static void exitCallback(PiPicoFxUiType*data)
 {
-    enterLevel0(data);
+    if (data->lastUiLevel == 3) // when coming from preset overview
+    {
+        if (exitState == 0)
+        {
+            exitState = 1;
+        }
+        else if (exitState == 1) // save and return
+        {
+            parametersToPreset(presets + currentBank*3 + currentPreset,fxPrograms);
+            savePreset(presets,currentBank*3 + currentPreset);
+        }
+        else if (exitState == 2) // return without saving: reapply preset
+        {
+            applyPreset(presets,fxPrograms);
+        }
+    }
 }
 
 static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)

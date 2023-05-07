@@ -15,6 +15,7 @@ static void fxProgram2Param1Callback(uint16_t val,void*data) // frequency
     // map 0 - 4095 to 1 1000
     val = ((val*250) >> 10) + 1;
     simpleChorusSetFrequency(val,&pData->chorusData);
+    fxProgram2.parameters[0].rawValue = val;
 }
 
 static void fxProgram2Param1Display(void*data,char*res)
@@ -30,6 +31,7 @@ static void fxProgram2Param2Callback(uint16_t val,void*data) // depth
     // map to 0 to 255
     val >>= 4;
     pData->chorusData.depth = (uint8_t)val;
+    fxProgram2.parameters[1].rawValue = val;
 }
 
 static void fxProgram2Param2Display(void*data,char*res)
@@ -47,6 +49,7 @@ static void fxProgram2Param3Callback(uint16_t val,void*data) // mix
     // map to 0 to 255
     val >>= 4;
     pData->chorusData.mix = (uint8_t)val;
+    fxProgram2.parameters[2].rawValue = val;
 }
 
 static void fxProgram2Param3Display(void*data,char*res)

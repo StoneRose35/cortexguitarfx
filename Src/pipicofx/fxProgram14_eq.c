@@ -23,6 +23,7 @@ static void fxProgramParam1Callback(uint16_t val,void*data) // low
 {
     FxProgram14DataType* pData= (FxProgram14DataType*)data;
     pData->eq.lowFactor = (-(1 << 12)) + (val << 3);
+    fxProgram14.parameters[0].rawValue = val;
 }
 
 static void fxProgramParam1Display(void*data,char*res)
@@ -38,6 +39,7 @@ static void fxProgramParam2Callback(uint16_t val,void*data) // mid
 {
     FxProgram14DataType* pData= (FxProgram14DataType*)data;
     pData->eq.midFactor = (-(1 << 12)) + (val << 3);
+    fxProgram14.parameters[1].rawValue = val;
 }
 
 static void fxProgramParam2Display(void*data,char*res)
@@ -53,6 +55,7 @@ static void fxProgramParam3Callback(uint16_t val,void*data) // high
 {
     FxProgram14DataType* pData= (FxProgram14DataType*)data;
     pData->eq.highFactor = (-(1 << 12)) + (val << 3);
+    fxProgram14.parameters[2].rawValue = val;
 }
 
 static void fxProgramParam3Display(void*data,char*res)

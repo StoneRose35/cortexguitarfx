@@ -11,6 +11,10 @@
 
 
 
+static BwImageBufferType imgBuffer;
+const uiEnterFct uiEnterFunctions[]={&enterLevel0, &enterLevel1, &enterLevel2, &enterLevel3, &enterLevel4};
+
+
 /*
 Callback function pointers
 */
@@ -30,6 +34,12 @@ static void (*stompSwitch3PressedCallback)(PiPicoFxUiType* ui)=0;
 static void (*stompSwitch3ReleasedCallback)(PiPicoFxUiType* ui)=0;
 static void (*onUpdateCallback)(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)=0;
 static void (*onCreateCallback)(PiPicoFxUiType* ui)=0;
+
+BwImageBufferType * getImageBuffer()
+{
+    return &imgBuffer;
+}
+
 
 /*
  registration functions, used to attach a certain functionality to a
@@ -126,6 +136,10 @@ void onExitPressed(PiPicoFxUiType*data)
     if (exitButtonPressedCallback!=0)
     {
         exitButtonPressedCallback(data);
+    }
+    if(data->lastUiLevel != 0xFF)
+    {
+        uiEnterFunctions[data->lastUiLevel](data);
     }
 }
 
@@ -239,9 +253,8 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     piPicoUiController->currentProgramIdx=0;
     piPicoUiController->currentParameter=fxPrograms[piPicoUiController->currentProgramIdx]->parameters;
     piPicoUiController->currentParameterIdx=0;
-    piPicoUiController->displayLevel=0;
     piPicoUiController->locked=0;
-    piPicoUiController->oldEncoderValue= 0x7FFFFFFF;
-    piPicoUiController->oldParamValue=0;
+    piPicoUiController->editViaRotary =0;
+    piPicoUiController->lastUiLevel =0xFF;
 }
 

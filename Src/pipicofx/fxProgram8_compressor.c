@@ -16,6 +16,7 @@ static void fxProgramP1Callback(uint16_t val,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     pData->compressor.avgLowpass.alphaRising = (1 << 15) - 2 - (val >> 6);
+    fxProgram8.parameters[0].rawValue = val;
 }
 
 static void fxProgramP1Display(void*data,char*res)
@@ -37,6 +38,7 @@ static void fxProgramP2Callback(uint16_t val,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     pData->compressor.avgLowpass.alphaFalling = (1 << 15) - 2 - (val >> 6);
+    fxProgram8.parameters[1].rawValue = val;
 }
 
 static void fxProgramP2Display(void*data,char*res)
@@ -62,6 +64,7 @@ static void fxProgramP3Callback(uint16_t val,void*data)
     {
         enumVal=5;
     }
+    fxProgram8.parameters[2].rawValue = val;
     pData->compressor.gainFunction.gainReduction = enumVal;
 }
 
@@ -85,6 +88,7 @@ static void fxProgramP4Callback(uint16_t val,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     pData->compressor.gainFunction.threshhold = val << 3;
+    fxProgram8.parameters[3].rawValue = val;
 }
 
 static void fxProgramP4Display(void*data,char*res)
@@ -101,6 +105,7 @@ static void fxProgramP5Callback(uint16_t val,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     pData->makeupGain.gain = val + 256;
+    fxProgram8.parameters[4].rawValue = val;
 }
 
 static void fxProgramP5Display(void*data,char*res)

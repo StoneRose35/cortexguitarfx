@@ -14,6 +14,9 @@ const uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111
 extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
 extern const uint8_t stompswitch_progs[];
+extern FxPresetType presets[3];
+extern uint8_t currentBank;
+extern uint8_t currentPreset;
 
 static void create(PiPicoFxUiType*data)
 {
@@ -144,6 +147,7 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 
 static void enterCallback(PiPicoFxUiType*data) 
 {
+    data->lastUiLevel = 0;
     enterLevel1(data);
 }
 
@@ -197,8 +201,8 @@ static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
 
 static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)
 {
-    if (data->currentProgramIdx != stompswitch_progs[switchNr]) // switch pressed an program not activated 
-    {
+    //if (data->currentProgramIdx != stompswitch_progs[switchNr]) // switch pressed an program not activated 
+    //{
         /*switch (data->currentProgramIdx)
         {
             case 8:
@@ -212,15 +216,15 @@ static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)
                 break;                        
 
         }*/
-        programsToInitialize[switchNr]=1;
-        programChangeState=1;
+        //programsToInitialize[switchNr]=1;
+        //programChangeState=1;
         /*data->currentProgramIdx = stompswitch_progs[switchNr];
         data->currentProgram = fxPrograms[data->currentProgramIdx];
         data->currentParameterIdx=0;
         data->currentParameter = data->currentProgram->parameters;
         */
-        setStompswitchColorRaw(3 << (switchNr << 1));
-    }
+        //setStompswitchColorRaw(3 << (switchNr << 1));
+    //}
 }
 
 static void stompswitch1Callback(PiPicoFxUiType* data)

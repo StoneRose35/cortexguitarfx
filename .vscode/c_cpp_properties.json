@@ -5,8 +5,7 @@
             "intelliSenseMode": "clang-arm",
             "includePath": [
                 "Inc/RpiPico",
-                "Inc",
-                "Src/tusb"
+                "Inc"
             ],
             "defines": [
                 "RP2040_FEATHER", "I2S_INPUT", "CS4270"

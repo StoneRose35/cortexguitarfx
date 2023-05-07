@@ -43,6 +43,7 @@ static void fxProgram1Param1Callback(uint16_t val,void*data) // highpass cutoff 
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
     dval = ((FXPROGRAM1_HIGHCUT_DELTA*val) >> 12);
     pData->highpassCutoff = FXPROGRAM1_HIGHCUT_VAL1 + (int16_t)dval;
+    fxProgram1.parameters[0].rawValue=val;
 }
 
 static void fxProgram1Param1Display(void*data,char*res)
@@ -58,6 +59,7 @@ static void fxProgram1Param2Callback(uint16_t val,void*data) // number of wavesh
     val >>= 9;
     val += 1; 
     pData->nWaveshapers = val;
+    fxProgram1.parameters[1].rawValue=val;
 }
 
 static void fxProgram1Param2Display(void*data,char*res)
@@ -73,6 +75,7 @@ static void fxProgram1Param3Callback(uint16_t val,void*data) // delay intensity
     pData->delay.delayInSamples = 9600 + (val << 2);
     pData->delay.mix = val << 2; // up to 100%
     pData->delay.feedback = (1<< 13);
+    fxProgram1.parameters[2].rawValue=val;
 }
 
 static void fxProgram1Param3Display(void*data,char*res)

@@ -385,3 +385,11 @@ void clearPixel(int32_t px,int32_t py,BwImageBufferType*img)
 	*(img->data + pageIdx) &= ~(1 << (bitindex));
 }
 
+
+void clearImage(BwImageBufferType*img)
+{
+	for(uint16_t c=0;c<256;c++)
+    {
+        *((uint32_t*)img->data + c) = 0;
+    }
+}

@@ -66,7 +66,7 @@ static void fxProgram4Param1Callback(uint16_t val,void*data) // gain
     pData->gainStage.gain = ((val << 2) + 0x3F); //pData->gainStage.gain + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(((val << 2) + 0x3F) - pData->gainStage.gain)) >> 8);
     val >>= 9;
     val += 1;
-    //pData->nWaveshapers = val;
+    fxProgram4.parameters[0].rawValue=val;
 }
 
 static void fxProgram4Param1Display(void*data,char*res)
@@ -82,6 +82,7 @@ static void fxProgram4Param2Callback(uint16_t val,void*data) // offset
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
     //pData->gainStage.offset = (val << 4) - 0x7FFF; 
     pData->gainStage.offset = ((val - 0x7FF) << 4);//pData->gainStage.offset + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(((val - 0x7FF) << 4)  - pData->gainStage.offset)) >> 8);
+    fxProgram4.parameters[1].rawValue=val;
 }
 
 static void fxProgram4Param2Display(void*data,char*res)
@@ -101,7 +102,7 @@ static void fxProgram4Param3Callback(uint16_t val,void*data) // choose cab sim f
         uval = 5;
     }
     pData->cabSimType = uval;
-
+    fxProgram4.parameters[2].rawValue=val;
 }
 
 static void fxProgram4Param3Display(void*data,char*res)
@@ -117,6 +118,7 @@ static void fxProgram4Param4Callback(uint16_t val,void*data)
 {
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
     pData->nWaveshapers = (val >> 10) + 1;
+    fxProgram4.parameters[3].rawValue=val;
 }
 
 static void fxProgram4Param4Display(void*data,char*res)
@@ -147,6 +149,7 @@ static void fxProgram4Param5Callback(uint16_t val,void*data)
         default:
             break;
     }
+    fxProgram4.parameters[4].rawValue=val;
 }
 
 static void fxProgram4Param5Display(void*data,char*res)

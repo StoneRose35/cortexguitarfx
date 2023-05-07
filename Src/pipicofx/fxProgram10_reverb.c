@@ -13,6 +13,7 @@ static void fxProgramParam1Callback(uint16_t val,void*data) // reverb time
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
     pData->reverbTime = (((uint32_t)val*1900)>>12) + 100;
     setReverbTime(pData->reverbTime,&pData->reverb);
+    fxProgram10.parameters[0].rawValue = val;
 }
 
 static void fxProgramParam1Display(void*data,char*res)
@@ -26,6 +27,7 @@ static void fxProgramParam2Callback(uint16_t val,void*data) // Mix
 {
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
     pData->reverb.mix=(val << 3);
+    fxProgram10.parameters[1].rawValue = val;
 }
 
 static void fxProgramParam2Display(void*data,char*res)
@@ -37,12 +39,12 @@ static void fxProgramParam2Display(void*data,char*res)
 
 }
 
-
 static void fxProgramParam3Callback(uint16_t val,void*data) // Parameter
 {
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
     pData->reverb.paramNr=(val >> 10);
     initReverb(&pData->reverb,pData->reverbTime);
+    fxProgram10.parameters[2].rawValue = val;
 }
 
 static void fxProgramParam3Display(void*data,char*res)

@@ -14,6 +14,7 @@ static void fxProgram6Param1Callback(uint16_t val,void*data) // Delay Time
     wVal = val;
     wVal <<= 4;
     pData->delay.delayInSamples = wVal; //pData->delay->delayInSamples + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(wVal - pData->delay->delayInSamples)) >> 8);
+    fxProgram6.parameters[0].rawValue = val;
 }
 
 static void fxProgram6Param1Display(void*data,char*res)
@@ -41,6 +42,7 @@ static void fxProgram6Param2Callback(uint16_t val,void*data) // Feedback
     wVal = val;
     wVal <<= 3;
     pData->delay.feedback=(int16_t)wVal;
+    fxProgram6.parameters[1].rawValue = val;
 }
 
 static void fxProgram6Param2Display(void*data,char*res)
@@ -65,6 +67,7 @@ static void fxProgram6Param3Callback(uint16_t val,void*data) // Mix
     wVal = val;
     wVal <<= 3;
     pData->delay.mix = wVal;
+    fxProgram6.parameters[2].rawValue = val;
 }
 
 static void fxProgram6Param3Display(void*data,char*res)
