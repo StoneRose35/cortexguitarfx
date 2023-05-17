@@ -12,7 +12,7 @@
 
 
 static BwImageBufferType imgBuffer;
-const uiEnterFct uiEnterFunctions[]={&enterLevel0, &enterLevel1, &enterLevel2, &enterLevel3, &enterLevel4};
+const uiEnterFct uiEnterFunctions[]={&enterLevel0, &enterLevel1, &enterLevel2, &enterLevel3, &enterLevel4, &enterLevel5};
 
 
 /*
@@ -137,9 +137,9 @@ void onExitPressed(PiPicoFxUiType*data)
     {
         exitButtonPressedCallback(data);
     }
-    if(data->lastUiLevel != 0xFF)
+    if(uiStackCurrent(data) != 0xFF)
     {
-        uiEnterFunctions[data->lastUiLevel](data);
+        uiEnterFunctions[uiStackPop(data)](data);
     }
 }
 
@@ -247,6 +247,34 @@ void onCreate(PiPicoFxUiType*data)
     }
 }
 
+uint8_t uiStackPush(PiPicoFxUiType* piPicoUiController,uint8_t val)
+{
+    if (piPicoUiController->uiLevelStackPtr < PIPICOFX_UI_STACK_SIZE)
+    {
+        *(piPicoUiController->uiLevelStack + piPicoUiController->uiLevelStackPtr++) = val;
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController)
+{
+    if (piPicoUiController->uiLevelStackPtr != 0)
+    {
+        return *(piPicoUiController->uiLevelStack + --piPicoUiController->uiLevelStackPtr);
+    }
+    return 0xFF;
+}
+
+uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController)
+{
+    if (piPicoUiController->uiLevelStackPtr != 0)
+    {
+        return *(piPicoUiController->uiLevelStack + piPicoUiController->uiLevelStackPtr-1);
+    }
+    return 0xFF;
+}
+
 void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
 {
     piPicoUiController->currentProgram=fxPrograms[0];
@@ -256,5 +284,10 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     piPicoUiController->locked=0;
     piPicoUiController->editViaRotary =0;
     piPicoUiController->lastUiLevel =0xFF;
+    piPicoUiController->uiLevelStackPtr = 0xFF;
+    for (uint8_t c=0;c<8;c++)
+    {
+        *(piPicoUiController->uiLevelStack + c) = 0;
+    }
 }
 

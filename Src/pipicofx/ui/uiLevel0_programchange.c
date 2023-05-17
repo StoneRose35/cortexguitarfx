@@ -147,14 +147,17 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 
 static void enterCallback(PiPicoFxUiType*data) 
 {
-    data->lastUiLevel = 0;
+    uiStackPush(data, 0);
     enterLevel1(data);
 }
 
 static void exitCallback(PiPicoFxUiType*data)
 {
-    data->locked ^= 0x1;
-    create(data);
+    if (data->lastUiLevel != 0xFF)
+    {
+        data->locked ^= 0x1;
+        create(data);
+    }
 }
 
 static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
@@ -225,6 +228,8 @@ static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)
         */
         //setStompswitchColorRaw(3 << (switchNr << 1));
     //}
+    uiStackPush(data, 0);
+    enterLevel3(data);
 }
 
 static void stompswitch1Callback(PiPicoFxUiType* data)

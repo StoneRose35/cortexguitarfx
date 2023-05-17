@@ -41,6 +41,7 @@ typedef struct __attribute__((__packed__)) {
     uint8_t bankPos : 3; // position within the bank
     uint8_t bankNr : 5; // the bank number
     uint8_t programNr; // the fx Program used in the preset
+    uint8_t ledColor; // 0: off, 1: red, 2: green, 3: red+green 
     char name[24]; // the name of the preset
     uint16_t parameters[8];
     uint16_t magicNr; // a magic number/checksum which identifies the memory loaded as a preset
@@ -50,4 +51,5 @@ void savePreset(FxPresetType* preset,uint16_t presetPos);
 uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos);
 void applyPreset(FxPresetType* preset,FxProgramType ** programs);
 void parametersToPreset(FxPresetType* preset,FxProgramType ** programs);
+void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos);
 #endif

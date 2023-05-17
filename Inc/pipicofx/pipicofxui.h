@@ -4,10 +4,14 @@
 #include "pipicofx/fxPrograms.h"
 #include "graphics/bwgraphics.h"
 
+#define PIPICOFX_UI_STACK_SIZE 8
+
 typedef struct 
 {
     FxProgramType* currentProgram;
     FxProgramParameterType * currentParameter;
+    uint8_t uiLevelStack[8];
+    uint8_t uiLevelStackPtr;
     uint8_t currentProgramIdx;
     uint8_t currentParameterIdx;
     uint8_t locked : 1;
@@ -67,6 +71,10 @@ void enterLevel1(PiPicoFxUiType*data);
 void enterLevel2(PiPicoFxUiType*data);
 void enterLevel3(PiPicoFxUiType*data);
 void enterLevel4(PiPicoFxUiType*data);
+void enterLevel5(PiPicoFxUiType*data);
 
+uint8_t uiStackPush(PiPicoFxUiType* piPicoUiController,uint8_t val);
+uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController);
+uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController);
 
 #endif

@@ -19,6 +19,7 @@
 
 static volatile uint8_t currentDmaRow=8;
 static volatile uint8_t * currentFrameBuffer=0;
+#define HORIZONTAL_OFFSET 2
 
 void initSsd1306Display()
 {
@@ -67,11 +68,11 @@ void initSsd1306Display()
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
 
     // COM remap to vertically flip the display
-    *SSPDR = 0xC8;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    //*SSPDR = 0xC8;
+    //while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     // columns remap (flip horizontal)
-    *SSPDR = 0xA1;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    //*SSPDR = 0xA1;
+    //while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
 
 
     // send display on command
@@ -98,10 +99,10 @@ void setCursor(uint8_t row, uint8_t col)
     *SSPDR = 0xB0 | row;
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
     // set column, low nibble
-    *SSPDR = ((col+0) & 0x0F);
+    *SSPDR = ((col+HORIZONTAL_OFFSET) & 0x0F);
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
     // set column, high nibble
-    *SSPDR = 0x10 | ((col+0) >> 4);
+    *SSPDR = 0x10 | ((col+HORIZONTAL_OFFSET) >> 4);
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
 

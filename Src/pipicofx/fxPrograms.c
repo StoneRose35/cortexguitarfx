@@ -2,6 +2,7 @@
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/picofxCore.h"
 #include "24lc128.h"
+#include "stringFunctions.h"
 
 FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     
@@ -73,3 +74,25 @@ void parametersToPreset(FxPresetType* preset,FxProgramType ** programs)
         preset->parameters[c] = (*programs + preset->programNr)->parameters[c].rawValue;
     }    
 }
+
+void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
+{
+    char nrbfr[8];
+    preset->bankNr = bank;
+    preset->bankPos = pos;
+    preset->name[0] = 0;
+    appendToString(preset->name,"B");
+    UInt8ToChar(bank,nrbfr);
+    appendToString(preset->name,nrbfr);
+    appendToString(preset->name," P");
+    UInt8ToChar(pos,nrbfr);
+    appendToString(preset->name,nrbfr);
+    preset->programNr = N_FX_PROGRAMS -1; // off should always be last
+    for (uint8_t c=0;c< 8; c++)
+    {
+        preset->parameters[c] = 0;
+    } 
+    preset->ledColor = 0;
+
+}
+ 

@@ -9,6 +9,7 @@
 #include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
+#include "stompswitches.h"
 
 #define EDITLEVEL_PROGRAM 0
 #define EDITLEVEL_LEDCOLOR 1
@@ -17,10 +18,13 @@
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
+extern volatile uint8_t programsToInitialize[3];
+extern volatile uint8_t programChangeState;
 
 static volatile uint8_t editType; // 0: Program
                                   // 1: Led Color
                                   // 2: Parameters 
+static volatile uint8_t exitState=0; // 0: Exit pressed the first time, 1: save and exit, 2: revert and exit
 
 static void create(PiPicoFxUiType*data)
 {
@@ -48,6 +52,21 @@ static void create(PiPicoFxUiType*data)
     }
     font = getGFXFont(FREESANS9PT7B);
     drawText(5,42,strbfr,imgBuffer,font);
+    switch (exitState)
+    {
+        case 1:
+            *strbfr = 0;
+            appendToString(strbfr,"Save? Yes");
+            drawText(5,60,strbfr,imgBuffer,font);
+            break;
+        case 2:
+            *strbfr = 0;
+            appendToString(strbfr,"Save? Yes");
+            drawText(5,60,strbfr,imgBuffer,font);
+            break;
+        default:
+            break;
+    }
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
@@ -75,10 +94,17 @@ static void enterCallback(PiPicoFxUiType*data)
     {
         case EDITLEVEL_PROGRAM:
             data->lastUiLevel = 4;
+            data->locked = 1;
             enterLevel0(data);
             break;
         case EDITLEVEL_LEDCOLOR:
-
+            presets[currentPreset].ledColor++;
+            presets[currentPreset].ledColor &= 0x3;
+            if (presets[currentPreset].ledColor == 0)
+            {
+                presets[currentPreset].ledColor++;
+            }
+            setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
             break;
         case EDITLEVEL_PARAMETERS:
             data->lastUiLevel = 4;
@@ -89,47 +115,67 @@ static void enterCallback(PiPicoFxUiType*data)
 
 static void exitCallback(PiPicoFxUiType*data)
 {
+    if (exitState == 0)
+    {
+        data->lastUiLevel = 0xFF; // prevent returning 
+        exitState=1;
+        create(data);
+    }
+    else if (exitState == 1)
+    {
+        data->lastUiLevel = 3;
+        savePreset(presets+currentPreset,currentBank*3 + currentPreset);
+        exitState = 0;
+    }
+    else if (exitState == 2)
+    {
+        data->lastUiLevel = 3;
+        loadPreset(presets+currentPreset,currentBank*3 + currentPreset);
+        if (data->currentProgramIdx != presets[currentPreset].programNr)
+        {
+            programsToInitialize[0] = presets[currentPreset].programNr;
+            programChangeState = 1;
+        }
+        applyPreset(presets+currentPreset,fxPrograms);
+        exitState =  0;   
+    }
 }
 
 static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
 {
-    char strbfr[8];
-    const GFXfont * font;
-    BwImageBufferType * imgBuffer = getImageBuffer();
-    if (encoderDelta > 0)
+    if (exitState == 0)
     {
-        editType++;
-        if (editType > 2)
+        if (encoderDelta > 0)
         {
-            editType = 2;
+            editType++;
+            if (editType > 2)
+            {
+                editType = 2;
+            }
+        }
+        else if (encoderDelta < 0)
+        {
+            editType--;
+            if (editType > 2)
+            {
+                editType = 0;
+            }
+        }
+        create(data);
+    }
+    else
+    {
+        if (encoderDelta > 0 && exitState == 1)
+        {
+            exitState = 2;
+            create(data);
+        }
+        else if (encoderDelta < 0 && exitState == 2)
+        {
+            exitState = 1;
+            create(data);
         }
     }
-    else if (encoderDelta < 0)
-    {
-        editType++;
-        if (editType > 2)
-        {
-            editType = 0;
-        }
-    }
-    clearSquare(0.f,22.f,128.f,42.f,imgBuffer);
-    switch (editType)
-    {
-        case EDITLEVEL_PROGRAM:
-            *(strbfr) = 0;    
-            appendToString(strbfr,"Select Program");
-            break;
-        case EDITLEVEL_LEDCOLOR:
-            *(strbfr) = 0;    
-            appendToString(strbfr,"Led Color");
-            break;
-        case EDITLEVEL_PARAMETERS:
-            *(strbfr) = 0;    
-            appendToString(strbfr,"Edit Params");
-            break;       
-    }
-    font = getGFXFont(FREESANS9PT7B);
-    drawText(5,42,strbfr,imgBuffer,font);
 }
 
 static void stompswitch1Callback(PiPicoFxUiType* data)
