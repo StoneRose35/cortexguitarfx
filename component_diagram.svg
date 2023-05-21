@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
+   sodipodi:docname="component_diagram.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="3.9710672"
+     inkscape:cx="218.58104"
+     inkscape:cy="239.60813"
+     inkscape:window-width="1846"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <rect
+       x="99.406526"
+       y="158.02978"
+       width="136.01408"
+       height="74.027644"
+       id="rect14871" />
+    <rect
+       x="338.72213"
+       y="445.17002"
+       width="116.82155"
+       height="19.443828"
+       id="rect14492" />
+    <marker
+       style="overflow:visible"
+       id="TriangleStart"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="TriangleStart"
+       markerWidth="5.3244081"
+       markerHeight="6.155385"
+       viewBox="0 0 5.3244081 6.1553851"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135" />
+    </marker>
+    <rect
+       x="122.27061"
+       y="475.37424"
+       width="46.047803"
+       height="52.851821"
+       id="rect11130" />
+    <rect
+       x="196.64043"
+       y="503.80338"
+       width="128.79779"
+       height="53.473656"
+       id="rect10978" />
+    <rect
+       x="190.45129"
+       y="473.88017"
+       width="87.983424"
+       height="25.004175"
+       id="rect9269" />
+    <rect
+       x="337.35047"
+       y="219.15031"
+       width="43.378225"
+       height="36.252855"
+       id="rect5136" />
+    <rect
+       x="366.41536"
+       y="249.47139"
+       width="19.943243"
+       height="13.240778"
+       id="rect2644" />
+    <rect
+       x="239.66531"
+       y="258.91577"
+       width="54.359806"
+       height="81.77481"
+       id="rect2468" />
+    <rect
+       x="117.90803"
+       y="283.59581"
+       width="76.462083"
+       height="22.043849"
+       id="rect1682" />
+    <rect
+       x="239.66531"
+       y="258.91577"
+       width="54.359806"
+       height="81.774811"
+       id="rect2468-3" />
+    <rect
+       x="239.66531"
+       y="258.91577"
+       width="61.86078"
+       height="81.369992"
+       id="rect2468-35" />
+    <rect
+       x="196.64043"
+       y="503.80338"
+       width="120.69724"
+       height="20.777921"
+       id="rect10978-1" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ffffff;fill-opacity:0.763166;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       id="rect1514"
+       width="9.8543339"
+       height="7.1755204"
+       x="17.387251"
+       y="69.25032" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       id="rect1516"
+       width="1.5690819"
+       height="12.448859"
+       x="24.287088"
+       y="66.613655" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-17.011822,5.094087)"
+       id="text1680"
+       style="white-space:pre;shape-inside:url(#rect1682);display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.00157;stroke-opacity:1"><tspan
+         x="117.9082"
+         y="294.21289"
+         id="tspan15040"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan15038">12 V AC In</tspan></tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       id="rect2525"
+       width="14.822174"
+       height="19.10393"
+       x="54.665737"
+       y="64.478477" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       id="rect2525-7"
+       width="30.037079"
+       height="19.413107"
+       x="95.236977"
+       y="62.5728" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       id="rect2525-7-9"
+       width="30.037079"
+       height="19.413107"
+       x="48.587982"
+       y="124.06477" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-7.3440982,-3.0222218)"
+       id="text2466"
+       style="white-space:pre;shape-inside:url(#rect2468);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00157;stroke-opacity:1"><tspan
+         x="239.66602"
+         y="269.5332"
+         id="tspan15042">12 V </tspan><tspan
+         x="239.66602"
+         y="284.5332"
+         id="tspan15044">Linear </tspan><tspan
+         x="239.66602"
+         y="299.5332"
+         id="tspan15046">power </tspan><tspan
+         x="239.66602"
+         y="314.5332"
+         id="tspan15048">supply</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       id="rect2525-6"
+       width="17.813478"
+       height="17.815315"
+       x="54.60096"
+       y="96.329224" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-7.4088777,28.828525)"
+       id="text2466-2"
+       style="white-space:pre;shape-inside:url(#rect2468-35);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00157;stroke-opacity:1"><tspan
+         x="239.66602"
+         y="269.5332"
+         id="tspan15050">5 V </tspan><tspan
+         x="239.66602"
+         y="284.5332"
+         id="tspan15052">switching </tspan><tspan
+         x="239.66602"
+         y="299.5332"
+         id="tspan15054">power </tspan><tspan
+         x="239.66602"
+         y="314.5332"
+         id="tspan15056">supply</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,46.972444,-3.7882464)"
+       id="text2466-6"
+       style="white-space:pre;shape-inside:url(#rect2468-3);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00157;stroke-opacity:1"><tspan
+         x="239.66602"
+         y="269.5332"
+         id="tspan15058">Codec / </tspan><tspan
+         x="239.66602"
+         y="284.5332"
+         id="tspan15060">Guitar </tspan><tspan
+         x="239.66602"
+         y="299.5332"
+         id="tspan15062">Input </tspan><tspan
+         x="239.66602"
+         y="314.5332"
+         id="tspan15064">Board</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text2642"
+       style="white-space:pre;shape-inside:url(#rect2644);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00157;stroke-opacity:1" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ff0404;stroke-width:0.264999;stroke-opacity:1"
+       d="m 69.465827,68.181264 c 3.925834,0.189188 11.503657,-2.424845 13.90936,-2.226823 2.405705,0.198022 11.906324,-0.557996 11.906324,-0.557996"
+       id="path2729" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-0.0463768,-0.99158025)"
+       id="text5134"
+       style="font-size:8px;white-space:pre;shape-inside:url(#rect5136);shape-padding:0.823549;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00157;stroke-opacity:1"><tspan
+         x="338.17383"
+         y="227.05273"
+         id="tspan15066">wire next </tspan><tspan
+         x="338.17383"
+         y="237.05273"
+         id="tspan15068">to each </tspan><tspan
+         x="338.17383"
+         y="247.05273"
+         id="tspan15070">other</tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       d="m 27.55224,74.653404 c 9.091691,0.520083 23.561624,17.960337 33.318052,19.301584 9.756429,1.341247 20.705035,-14.160384 23.515616,-17.999353 2.810582,-3.838969 6.190197,-8.703381 10.591946,-9.161994"
+       id="path5206" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       d="m 27.651249,74.680272 c 7.840993,0.186981 22.891369,-4.430088 26.943452,-4.438922"
+       id="path5274" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#fe0c0c;stroke-width:0.264999;stroke-opacity:1"
+       d="M 27.386976,71.354761 C 45.930335,67.181219 54.590283,66.777814 54.590283,66.777814"
+       id="path5276" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       d="m 27.268455,74.773395 c 8.037912,4.890177 14.324545,31.683455 17.325049,33.905855 3.000507,2.22241 6.472878,2.73624 9.942674,3.06014"
+       id="path6473" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       id="rect6641"
+       width="30.979706"
+       height="10.350861"
+       x="90.844429"
+       y="86.635185" />
+    <text
+       xml:space="preserve"
+       style="font-size:2.11667px;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       x="92.703918"
+       y="88.961014"
+       id="text6645"><tspan
+         sodipodi:role="line"
+         id="tspan6643"
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.265"
+         x="92.703918"
+         y="88.961014">Raspberry Pi Pico</tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#fc0000;stroke-width:0.264999;stroke-opacity:1"
+       d="m 72.494674,98.897799 c 6.333011,0.09423 13.019735,-10.045732 18.164984,-10.056773"
+       id="path6717" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-opacity:1"
+       d="m 27.382189,74.787381 c 10.990935,0.389051 16.489532,23.56641 21.978189,33.377679 5.488659,9.81127 3.968162,10.86248 11.127488,12.54861 7.159329,1.68613 17.377682,-0.42255 20.351321,-3.44698 2.973636,-3.02443 2.61992,-8.25838 3.19963,-13.79636 0.57971,-5.53798 2.321785,-12.256359 6.616425,-12.26004"
+       id="path9058" />
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text9267"
+       style="font-size:8px;white-space:pre;shape-inside:url(#rect9269);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00157;stroke-opacity:1"><tspan
+         x="190.45117"
+         y="480.95898"
+         id="tspan15072">Extension Board</tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ff0101;stroke-width:0.264999;stroke-opacity:1"
+       d="m 27.295694,71.321268 c 6.16149,1.13071 19.249319,20.757668 20.501859,21.818078 1.252542,1.060408 3.458017,6.062477 6.756659,5.98224"
+       id="path9273" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ff0101;stroke-width:0.264999;stroke-opacity:1"
+       d="m 27.362681,71.254278 c 6.277433,-0.03791 12.513641,56.335302 21.081939,56.420692"
+       id="path9923" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.7;stroke-opacity:1;stroke-dasharray:none"
+       d="m 27.685478,74.980987 c 8.313595,1.683919 16.315066,56.368793 20.795581,56.207583"
+       id="path10005" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-1.4965721,1.2190474)"
+       id="text10976"
+       style="font-size:8px;white-space:pre;shape-inside:url(#rect10978);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.64567;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="196.64062"
+         y="510.88086"
+         id="tspan15074">1000uF @ Power supplies
+</tspan><tspan
+         x="196.64062"
+         y="520.88086"
+         id="tspan15076">47pF @ Mic Volume
+</tspan><tspan
+         x="196.64062"
+         y="530.88086"
+         id="tspan15078">0.1uF @ 3.3v Dig. Out</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-2.1496629,11.729479)"
+       id="text10976-2"
+       style="font-size:8px;white-space:pre;shape-inside:url(#rect10978-1);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.64567;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="196.64062"
+         y="510.88086"
+         id="tspan15080">XLR's &amp; Jack's: Wire every </tspan><tspan
+         x="196.64062"
+         y="520.88086"
+         id="tspan15082">Ground to the board</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-3.3682074,-12.391809)"
+       id="text11128"
+       style="font-size:8px;white-space:pre;shape-inside:url(#rect11130);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.64567;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="122.27148"
+         y="482.45312"
+         id="tspan15084">Big Copper </tspan><tspan
+         x="122.27148"
+         y="492.45312"
+         id="tspan15086">Lead </tspan><tspan
+         x="122.27148"
+         y="502.45312"
+         id="tspan15088">directly to </tspan><tspan
+         x="122.27148"
+         y="512.45312"
+         id="tspan15090">ground </tspan><tspan
+         x="122.27148"
+         y="522.45312"
+         id="tspan15092">plane</tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:0.265;stroke-dasharray:none;stroke-opacity:1"
+       d="M 72.397503,98.858783 C 77.600907,100.3594 70.947676,133.2159 70.947676,133.2159"
+       id="path11243"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#00ff15;stroke-width:3.665;stroke-dasharray:none;stroke-opacity:0.48872051"
+       d="M 65.349701,134.25128 C 79.737184,125.01236 78.339256,74.45943 103.89324,72.49357"
+       id="path12808" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.265;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#TriangleStart)"
+       d="M 93.299824,116.58466 80.08722,108.42418"
+       id="path13893" />
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text14490"
+       style="font-size:8px;white-space:pre;shape-inside:url(#rect14492);display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.00157;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="338.72266"
+         y="452.24805"
+         id="tspan15096"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan15094">Analog bus including ground</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text14869"
+       style="font-size:8px;white-space:pre;shape-inside:url(#rect14871);fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00157;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="99.40625"
+         y="165.10742"
+         id="tspan15100"><tspan
+   style="font-weight:bold;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan15098">UI-Elements</tspan>
+</tspan><tspan
+         x="99.40625"
+         y="175.10742"
+         id="tspan15102">* Wire Ground in a tree like </tspan><tspan
+         x="99.40625"
+         y="185.10742"
+         id="tspan15104">topology avoiding loops to the </tspan><tspan
+         x="99.40625"
+         y="195.10742"
+         id="tspan15106">Ground of the 12 V AC In
+</tspan><tspan
+         x="99.40625"
+         y="205.10742"
+         id="tspan15108">* Connect the Element which </tspan><tspan
+         x="99.40625"
+         y="215.10742"
+         id="tspan15110">grounds the enclosure closest the </tspan><tspan
+         x="99.40625"
+         y="225.10742"
+         id="tspan15112">the 12 V AC In
+</tspan></text>
+  </g>
+</svg>
