@@ -289,5 +289,7 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     {
         *(piPicoUiController->uiLevelStack + c) = 0;
     }
+    imgBuffer.sx=128;
+    imgBuffer.sy=64;
 }
 
