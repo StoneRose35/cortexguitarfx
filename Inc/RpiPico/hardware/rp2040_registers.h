@@ -280,6 +280,7 @@
 #define SSPCPSR ((volatile uint32_t*)(SPI0_BASE +  SPI_SSPCPSR_OFFSET))
 #define SSPDR ((volatile uint32_t*)(SPI0_BASE +  SPI_SSPDR_OFFSET))
 #define SSPSR ((volatile uint32_t*)(SPI0_BASE +  SPI_SSPSR_OFFSET))
+#define SSPDMACR ((volatile uint32_t*)(SPI0_BASE + SPI_SSPDMACR_OFFSET))
 
 #define XOSC_STARTUP ((volatile uint32_t*)(XOSC_BASE+XOSC_STARTUP_OFFSET))
 #define XOSC_CTRL_ENABLE ((volatile uint32_t*)(XOSC_BASE+XOSC_CTRL_OFFSET))

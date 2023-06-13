@@ -44,6 +44,9 @@ void initSsd1306Display()
     *SSPCPSR = 2;
     // configure control register 1: enable by setting synchronous operation
     *SSPCR1 = 1 << SPI_SSPCR1_SSE_LSB;
+    //enable dma for the transmitter
+    *SSPDMACR = (1 << SPI_SSPDMACR_TXDMAE_LSB);
+
 
 
 
@@ -287,6 +290,8 @@ void ssd1306WriteLineAsync(volatile uint8_t * data)
 						| (1 << DMA_CH4_CTRL_TRIG_INCR_READ_LSB) 
 						| (0 << DMA_CH4_CTRL_TRIG_DATA_SIZE_LSB) // byte wise transfer
 						| (1 << DMA_CH4_CTRL_TRIG_EN_LSB);
+
+    *DMA_INTE0 |= (1 << 4);
 }
 
 void ssd1306WriteNextLine(void)
