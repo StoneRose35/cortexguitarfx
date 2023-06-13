@@ -81,7 +81,7 @@ void core1Main()
 
     setAsOuput(CLIPPING_LED_INPUT);
     setAsOuput(CLIPPING_LED_OUTPUT);
-    setStompswitchColorRaw(0);
+    setStompswitchColorRaw(3);
 
     /*
     preset1.bankNr = 0;
