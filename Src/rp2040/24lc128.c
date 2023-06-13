@@ -46,6 +46,10 @@ void eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data)
 
 void eeprom24lc128ReadArray(uint32_t startAdress,uint16_t len,uint8_t* data)
 {
+    if (getTargetAddress()!=EEPROM_24LC128_ADDRESS)
+    {
+        setTargetAddress(EEPROM_24LC128_ADDRESS);
+    }
     while(masterTransmit((startAdress >> 8) &0xFF,0)== I2C_ERROR_SLAVE_ADDRESS_NACK);
     masterTransmit(startAdress & 0xFF,1);   
     for(uint16_t c=0;c<len-1;c++)

@@ -73,6 +73,10 @@ void setStompswitchColorRaw(uint8_t data)
 void requestSwitchesUpdate()
 {
     uint8_t i2cData;
+    if (getTargetAddress()!=STOMPSWITCHES_I2C_ADDRESS)
+    {
+        setTargetAddress(STOMPSWITCHES_I2C_ADDRESS);
+    }
     i2cData = masterReceive(1);
     if (i2cData != 0xff)
     {
