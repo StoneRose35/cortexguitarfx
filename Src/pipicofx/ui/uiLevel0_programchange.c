@@ -261,9 +261,9 @@ void enterLevel0(PiPicoFxUiType*data)
     registerKnob0Callback(&knob0Callback);
     registerKnob1Callback(&knob1Callback);
     registerKnob2Callback(&knob2Callback);
-    registerStompswitch1PressedCallback(&stompswitch1Callback);
-    registerStompswitch2PressedCallback(&stompswitch2Callback);
-    registerStompswitch3PressedCallback(&stompswitch3Callback);
+    registerStompswitch1ReleasedCallback(&stompswitch1Callback);
+    registerStompswitch2ReleasedCallback(&stompswitch2Callback);
+    registerStompswitch3ReleasedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
     create(data);

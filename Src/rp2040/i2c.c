@@ -152,8 +152,9 @@ uint8_t masterReceive(uint8_t lastCmd)
 {
     uint8_t res;
     uint32_t systickStart;
-    volatile uint8_t abort, rxlvl;
-     read_reg(I2C_IC_CLR_INTR);
+    volatile uint8_t rxlvl;
+    volatile uint32_t abort;
+    abort = *I2C_IC_CLR_INTR;
 
     if (lastCmd !=0)
     {
@@ -165,10 +166,9 @@ uint8_t masterReceive(uint8_t lastCmd)
     }
 
     // wait until byte is received
-    abort = *I2C_IC_CLR_TX_ABRT;
     rxlvl = *I2C_IC_RXFLR;
     systickStart = getTickValue();
-    while (rxlvl==0 && abort == 0 && getTickValue() - systickStart < 2)
+    while (rxlvl==0 && getTickValue() - systickStart < 2)
     {
         rxlvl = *I2C_IC_RXFLR;
         abort = *I2C_IC_CLR_TX_ABRT;

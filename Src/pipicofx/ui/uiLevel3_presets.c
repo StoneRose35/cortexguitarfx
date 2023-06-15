@@ -216,6 +216,7 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
                     programsToInitialize[0]=presets[currentPreset].programNr;
                     programChangeState = 1;
                 }
+                setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
                 applyPreset(presets,fxPrograms);    
             }
         }
@@ -355,11 +356,11 @@ void enterLevel3(PiPicoFxUiType*data)
     }
     if (loadPreset(presets+1,currentBank*3+1)!=0)
     {
-        generateEmptyPreset(presets,currentBank,1);
+        generateEmptyPreset(presets+1,currentBank,1);
     }
     if (loadPreset(presets+2, currentBank*3+2)!=0)
     {
-        generateEmptyPreset(presets,currentBank,2);
+        generateEmptyPreset(presets+2,currentBank,2);
     }
     data->editViaRotary = 1;
 
@@ -375,5 +376,8 @@ void enterLevel3(PiPicoFxUiType*data)
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
     create(data);
+    currentPreset=0;
+    setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
+    applyPreset(presets, fxPrograms);
 }
 

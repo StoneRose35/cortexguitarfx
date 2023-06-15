@@ -92,7 +92,7 @@ void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
     {
         preset->parameters[c] = 0;
     } 
-    preset->ledColor = 0;
+    preset->ledColor = 1;
 
 }
  
