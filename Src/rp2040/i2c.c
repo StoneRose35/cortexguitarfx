@@ -11,7 +11,8 @@
 
 
 static inline void read_reg(volatile uint32_t* reg)
-{}
+{
+}
 
 static volatile void(*irqHandler)(uint8_t data,uint8_t address)=0;
 
@@ -153,8 +154,7 @@ uint8_t masterReceive(uint8_t lastCmd)
     uint8_t res;
     uint32_t systickStart;
     volatile uint8_t rxlvl;
-    volatile uint32_t abort;
-    abort = *I2C_IC_CLR_INTR;
+    (void)*I2C_IC_CLR_INTR;
 
     if (lastCmd !=0)
     {
@@ -171,7 +171,7 @@ uint8_t masterReceive(uint8_t lastCmd)
     while (rxlvl==0 && getTickValue() - systickStart < 2)
     {
         rxlvl = *I2C_IC_RXFLR;
-        abort = *I2C_IC_CLR_TX_ABRT;
+        (void)*I2C_IC_CLR_TX_ABRT;
     }
 
     // read back value

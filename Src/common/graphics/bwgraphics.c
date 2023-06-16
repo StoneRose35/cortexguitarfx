@@ -1,4 +1,5 @@
 #include "graphics/gfxfont.h"
+
 #include "graphics/bwgraphics.h"
 #include "stdlib.h"
 #ifdef RP2040_FEATHER
@@ -30,6 +31,7 @@ float fsin(float x)
 
 #endif
 
+extern const uint8_t ** oled_font_5x7;
 
 void drawLine(float spx,float spy,float epx, float epy,BwImageBufferType* img)
 {
@@ -272,7 +274,19 @@ void drawSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img
 	}
 }
 
-uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFXfont* font)
+uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const void* font)
+{
+	if (font==(void*)0)
+	{
+		return drawCharOLedFont(px,py,c,img);
+	}
+	else
+	{
+		return drawCharGFXFont(px,py,c,img,(GFXfont*)font);
+	}
+}
+
+uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFXfont* font)
 {
 	GFXglyph* glyph;
 	int8_t w,h;
@@ -310,7 +324,32 @@ uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFX
 	return glyph->xAdvance;
 }
 
-void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,const GFXfont* font)
+uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageBufferType* img)
+{   
+	uint8_t bitarray; 
+	for(int8_t x=0;x<5;x++)
+	{
+		bitarray = oled_font_5x7[c - ' '][x];
+		for (int8_t y=0;y<8;y++)
+		{
+			if (bitarray & 0x80)
+			{
+				if (px + x  > 0 && 
+				    px + x < img->sx &&
+					py + y < img->sy &&
+					py + y > 0
+					)
+				{
+					setPixel(px+x,py+y,img);
+				}
+			}
+			bitarray <<= 1;
+		}
+	}
+	return 6;
+}
+
+void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,const void* font)
 {
 	uint8_t ppx,ppy;
 	ppx=px;
@@ -328,7 +367,14 @@ void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,con
 		} 
 		else if (*(txt + c)=='\n')
 		{
-			ppy += font->yAdvance;
+			if (font!=(void*)0)
+			{
+				ppy += ((GFXfont*)font)->yAdvance;
+			}
+			else
+			{
+				ppy += 8;
+			}
 		}
 		else if (*(txt + c)=='\t')
 		{

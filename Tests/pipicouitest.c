@@ -46,7 +46,7 @@ void fontTest(void)
     {
         *(((uint32_t*)testImg.data) + c)=0;
     }
-    drawText(12,15,testtext,5,&testImg,&FreeMono12pt7b);
+    drawText(12,15,testtext,&testImg,&FreeMono12pt7b);
     bmImageToBitmapStruct(&testImg,&bmp);
     writeBmp(testImageFilename,&bmp);
 }
@@ -66,7 +66,7 @@ void gfxFontDemo(void)
             *(((uint32_t*)testImg.data) + c)=0;
         }
         sprintf(fname,"%s.bmp",gfxfontNames[f]);
-        drawText(0,32,testtext,5,&testImg,gfxfonts[f]);
+        drawText(0,32,testtext,&testImg,gfxfonts[f]);
         bmImageToBitmapStruct(&testImg,&bmp);
         writeBmp(fname,&bmp);
     }

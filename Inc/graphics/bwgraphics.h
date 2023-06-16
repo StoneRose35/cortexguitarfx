@@ -35,8 +35,10 @@ void drawOval(float ax,float ay,float cx,float cy,BwImageBufferType*img);
 void clearOval(float ax,float ay,float cx,float cy,BwImageBufferType*img);
 void clearSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img);
 void drawSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img);
-uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFXfont* font);
-void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,const GFXfont* font);
+uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const void* font);
+uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFXfont* font);
+uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageBufferType* img);
+void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,const void* font);
 void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageBufferType* imgBuffer);
 void clearImage(BwImageBufferType*img);
 #endif
