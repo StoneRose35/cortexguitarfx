@@ -43,12 +43,12 @@ static void create(PiPicoFxUiType*data)
 
     *(strbfr) = 0;
     appendToString(strbfr,"In");
-    font = getGFXFont(FREESANS9PT7B);
-    drawText(5,42+10,strbfr,imgBuffer,font);
+    font = getGFXFont(FREEMONO12PT7B);
+    drawText(5,42+10,strbfr,imgBuffer,(void*)0);
 
     *(strbfr) = 0;
     appendToString(strbfr,"Out");
-    drawText(5,42+20,strbfr,imgBuffer,font);
+    drawText(5,42+20,strbfr,imgBuffer,(void*)0);
 
     applyPreset(presets+currentPreset,fxPrograms);
 }
@@ -130,7 +130,7 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 }
 
 
-static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
     BwImageBufferType* imgBuffer = getImageBuffer();
     // change overlay icon (if there)
@@ -204,7 +204,6 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
             {
                 generateEmptyPreset(presets,currentBank,2);
             }
-            create(data);
         }
         else
         {
@@ -220,6 +219,7 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
                 applyPreset(presets,fxPrograms);    
             }
         }
+        create(data);
     }
     else
     {
@@ -254,7 +254,6 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
             {
                 generateEmptyPreset(presets,currentBank,2);
             }
-            create(data);
         }
         else if (((nbStompSwitch1 & 0x1) == 0x0) && ((nbStompSwitch3 & 0x1) == 0x1))
         {
@@ -276,7 +275,6 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
             {
                 generateEmptyPreset(presets,currentBank,2);
             }
-            create(data);
         }
         else
         {
@@ -292,6 +290,7 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
                 applyPreset(presets,fxPrograms);
             }
         }
+        create(data);
     }
     else
     {
@@ -325,7 +324,6 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
             {
                 generateEmptyPreset(presets,currentBank,2);
             }
-            create(data);
         }
         else
         {
@@ -341,6 +339,7 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
                 applyPreset(presets,fxPrograms);
             }
         }
+        create(data);
     }
     else
     {

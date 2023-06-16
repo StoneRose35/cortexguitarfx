@@ -22,7 +22,7 @@ static void (*enterButtonPressedCallback)(PiPicoFxUiType *ui)=0;
 static void (*enterButtonReleasedCallback)(PiPicoFxUiType* ui)=0; 
 static void (*exitButtonPressedCallback)(PiPicoFxUiType* ui)=0;
 static void (*exitButtonReleasedCallback)(PiPicoFxUiType* ui)=0;
-static void (*rotaryCallback)(uint16_t val,PiPicoFxUiType* ui)=0;
+static void (*rotaryCallback)(int16_t val,PiPicoFxUiType* ui)=0;
 static void (*knob0Callback)(uint16_t val,PiPicoFxUiType* ui)=0;
 static void (*knob1Callback)(uint16_t val,PiPicoFxUiType* ui)=0;
 static void (*knob2Callback)(uint16_t val,PiPicoFxUiType* ui)=0;
@@ -85,7 +85,7 @@ void registerStompswitch3ReleasedCallback(void(*cb)(PiPicoFxUiType*))
 {
     stompSwitch3ReleasedCallback=cb;
 }
-void registerRotaryCallback(void(*cb)(uint16_t,PiPicoFxUiType*))
+void registerRotaryCallback(void(*cb)(int16_t,PiPicoFxUiType*))
 {
     rotaryCallback=cb;
 }
@@ -151,7 +151,7 @@ void onExitReleased(PiPicoFxUiType*data)
     }
 }
 
-void onRotaryChange(uint16_t delta,PiPicoFxUiType*data)
+void onRotaryChange(int16_t delta,PiPicoFxUiType*data)
 {
     if(rotaryCallback!=0)
     {

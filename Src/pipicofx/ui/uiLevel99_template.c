@@ -40,7 +40,7 @@ static void exitCallback(PiPicoFxUiType*data)
 {
 }
 
-static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
 }
 

@@ -160,7 +160,7 @@ static void exitCallback(PiPicoFxUiType*data)
     }
 }
 
-static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
     uint16_t knobVal;
     if (data->locked == 0 && encoderDelta != 0)

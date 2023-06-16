@@ -104,7 +104,7 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 }
 
 
-static void rotaryCallback(uint16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
     data->currentParameterIdx += encoderDelta;
     if (data->currentParameterIdx >= data->currentProgram->nParameters && encoderDelta > 0)
