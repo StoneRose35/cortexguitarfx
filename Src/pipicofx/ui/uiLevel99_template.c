@@ -15,7 +15,7 @@ static void create(PiPicoFxUiType*data)
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
-    BwImageBufferType* imgBuffer = getImageBuffer();
+    BwImageType* imgBuffer = getImageBuffer();
     ssd1306writeFramebufferAsync(imgBuffer->data);
 }
 

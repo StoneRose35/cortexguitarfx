@@ -61,7 +61,7 @@ void onStompSwitch3Pressed(PiPicoFxUiType*data);
 void onStompSwitch3Released(PiPicoFxUiType*data);
 void onUpdate(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data);
 void onCreate(PiPicoFxUiType*data);
-BwImageBufferType * getImageBuffer();
+BwImageType * getImageBuffer();
 
 
 void piPicoFxUiSetup(PiPicoFxUiType*);

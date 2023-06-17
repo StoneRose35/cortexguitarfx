@@ -33,7 +33,7 @@ float fsin(float x)
 
 extern const uint8_t oled_font_5x7[98][5];
 
-void drawLine(float spx,float spy,float epx, float epy,BwImageBufferType* img)
+void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 {
 	float dy,dx,absdy,absdx,delta;
 	int32_t idx,idy,ix,iy;
@@ -204,7 +204,7 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageBufferType* img)
 	}
 }
 
-void drawOval(float ax,float ay,float cx,float cy,BwImageBufferType*img)
+void drawOval(float ax,float ay,float cx,float cy,BwImageType*img)
 {
 	float fix,fiy,dr;
 	for(int32_t ix=0;ix<img->sx;ix++)
@@ -222,7 +222,7 @@ void drawOval(float ax,float ay,float cx,float cy,BwImageBufferType*img)
 	}
 }
 
-void clearOval(float ax,float ay,float cx,float cy,BwImageBufferType*img)
+void clearOval(float ax,float ay,float cx,float cy,BwImageType*img)
 {
 	float fix,fiy,dr;
 	for(int32_t ix=0;ix<img->sx;ix++)
@@ -240,7 +240,7 @@ void clearOval(float ax,float ay,float cx,float cy,BwImageBufferType*img)
 	}
 }
 
-void clearSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img)
+void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 {
 	uint32_t dx,dy;
 	dx=(uint32_t)float2int(epx-spx);
@@ -257,7 +257,7 @@ void clearSquare(float spx, float spy,float epx, float epy,BwImageBufferType* im
 	}
 }
 
-void drawSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img)
+void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 {
 	uint32_t dx,dy;
 	dx=(uint32_t)float2int(epx-spx);
@@ -274,7 +274,7 @@ void drawSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img
 	}
 }
 
-uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const void* font)
+uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageType* img,const void* font)
 {
 	if (font==(void*)0)
 	{
@@ -286,7 +286,7 @@ uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const voi
 	}
 }
 
-uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFXfont* font)
+uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GFXfont* font)
 {
 	GFXglyph* glyph;
 	int8_t w,h;
@@ -324,7 +324,7 @@ uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageBufferType* img,co
 	return glyph->xAdvance;
 }
 
-uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageBufferType* img)
+uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageType* img)
 {   
 	uint8_t bitarray; 
 	for(int8_t x=0;x<5;x++)
@@ -349,7 +349,7 @@ uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageBufferType* img)
 	return 6;
 }
 
-void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,const void* font)
+void drawText(uint8_t px, uint8_t py,const char * txt,BwImageType* img,const void* font)
 {
 	uint8_t ppx,ppy;
 	ppx=px;
@@ -387,7 +387,7 @@ void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,con
 	}
 }
 
-void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageBufferType* imgBuffer)
+void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgBuffer)
 {
 	uint8_t pixel;
 	uint8_t cxOut, cyOut;
@@ -397,7 +397,7 @@ void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageBufferType
 		{
 			cxOut = cx + px;
 			cyOut =cy + py;
-			pixel= getPixel(cx,cy,(BwImageBufferType*)img);
+			pixel= getPixel(cx,cy,img);
 			if (pixel)
 			{
 				setPixel(cxOut,cyOut,imgBuffer);
@@ -410,21 +410,21 @@ void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageBufferType
 	}
 }
 
-uint8_t getPixel(int32_t px,int32_t py,BwImageBufferType*img)
+uint8_t getPixel(int32_t px,int32_t py,const BwImageType*img)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
 	return *(img->data + pageIdx) & (1 << (bitindex)); 
 }
 
-void setPixel(int32_t px,int32_t py,BwImageBufferType*img)
+void setPixel(int32_t px,int32_t py,BwImageType*img)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
 	*(img->data + pageIdx) |= (1 << (bitindex));
 }
 
-void clearPixel(int32_t px,int32_t py,BwImageBufferType*img)
+void clearPixel(int32_t px,int32_t py,BwImageType*img)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
@@ -432,7 +432,7 @@ void clearPixel(int32_t px,int32_t py,BwImageBufferType*img)
 }
 
 
-void clearImage(BwImageBufferType*img)
+void clearImage(BwImageType*img)
 {
 	for(uint16_t c=0;c<256;c++)
     {

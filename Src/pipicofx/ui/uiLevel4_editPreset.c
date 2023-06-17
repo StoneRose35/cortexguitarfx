@@ -30,7 +30,7 @@ static void create(PiPicoFxUiType*data)
 {
     char strbfr[8];
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
-    BwImageBufferType * imgBuffer = getImageBuffer();
+    BwImageType * imgBuffer = getImageBuffer();
     clearImage(imgBuffer);
     *(strbfr) = 0;    
     appendToString(strbfr,presets[currentPreset].name);
@@ -71,7 +71,7 @@ static void create(PiPicoFxUiType*data)
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
-    BwImageBufferType* imgBuffer = getImageBuffer();
+    BwImageType* imgBuffer = getImageBuffer();
     ssd1306writeFramebufferAsync(imgBuffer->data);
 }
 

@@ -28,7 +28,7 @@ static void create(PiPicoFxUiType*data)
 {
     char strbfr[8];
     char nrbfr[8];
-    BwImageBufferType* imgBuffer = getImageBuffer();
+    BwImageType* imgBuffer = getImageBuffer();
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
     // display preset Name and Bank Number
     clearImage(imgBuffer);
@@ -55,7 +55,7 @@ static void create(PiPicoFxUiType*data)
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {    
-    BwImageBufferType* imgBuffer = getImageBuffer();
+    BwImageType* imgBuffer = getImageBuffer();
     // draw Level bars
     clearSquare(40.0f,43.0f,128.0f,64.0f,imgBuffer);
     //in
@@ -68,7 +68,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
 
 static void enterCallback(PiPicoFxUiType*data) 
 {
-    BwImageBufferType* imgBuffer = getImageBuffer();
+    BwImageType* imgBuffer = getImageBuffer();
     // show overlay menu (if not there)
     if (overlayNr == 0xFF)
     {
@@ -98,7 +98,7 @@ static void exitCallback(PiPicoFxUiType*data)
     char strbfr[8];
     char nrbfr[8];
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
-    BwImageBufferType* imgBuffer = getImageBuffer();
+    BwImageType* imgBuffer = getImageBuffer();
     // remove overlay menu (if there)
     if (overlayNr != 0xFF)
     {
@@ -107,7 +107,7 @@ static void exitCallback(PiPicoFxUiType*data)
         appendToString(strbfr,"Bank:");
         UInt8ToChar(currentBank,nrbfr);
         appendToString(strbfr,nrbfr);
-        drawText(5,42,strbfr,imgBuffer,font);
+        drawText(5,21,strbfr,imgBuffer,font);
         *(strbfr) = 0;
         appendToString(strbfr,presets[currentPreset].name);
         drawText(5,42,strbfr,imgBuffer,font);
@@ -137,7 +137,7 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
-    BwImageBufferType* imgBuffer = getImageBuffer();
+    BwImageType* imgBuffer = getImageBuffer();
     // change overlay icon (if there)
     if (overlayNr != 0xFF)
     {
@@ -381,6 +381,7 @@ void enterLevel3(PiPicoFxUiType*data)
     registerOnCreateCallback(&create);
     create(data);
     currentPreset=0;
+    overlayNr=0xFF;
     setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
     applyPreset(presets, fxPrograms);
 }

@@ -12,6 +12,7 @@
 
 
 static BwImageBufferType imgBuffer;
+static BwImageType img;
 const uiEnterFct uiEnterFunctions[]={&enterLevel0, &enterLevel1, &enterLevel2, &enterLevel3, &enterLevel4, &enterLevel5};
 
 
@@ -35,9 +36,13 @@ static void (*stompSwitch3ReleasedCallback)(PiPicoFxUiType* ui)=0;
 static void (*onUpdateCallback)(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)=0;
 static void (*onCreateCallback)(PiPicoFxUiType* ui)=0;
 
-BwImageBufferType * getImageBuffer()
+BwImageType * getImageBuffer()
 {
-    return &imgBuffer;
+    img.data = imgBuffer.data;
+    img.sx = imgBuffer.sx;
+    img.sy = imgBuffer.sy;
+    img.type = 0;
+    return &img;
 }
 
 
@@ -283,7 +288,7 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     piPicoUiController->currentParameterIdx=0;
     piPicoUiController->locked=0;
     piPicoUiController->editViaRotary =0;
-    piPicoUiController->uiLevelStackPtr = 0xFF;
+    piPicoUiController->uiLevelStackPtr = 0;
     for (uint8_t c=0;c<8;c++)
     {
         *(piPicoUiController->uiLevelStack + c) = 0xFF;

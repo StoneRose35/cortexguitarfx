@@ -29,6 +29,7 @@ static void create(PiPicoFxUiType*data)
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
     BwImageBufferType imgBfr;
+    BwImageType * img=(BwImageType*)&imgBfr;
     float fValue,fMaxValue,fMinValue;
     char paramValueBfr[16];
     float cx,cy,px,py;
@@ -50,7 +51,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     py = 24.0f + fcos(fValue)*14.0f;
     cx = 51.0f;
     cy = 24.0f;
-    drawLine(cx,cy,px,py,&imgBfr);
+    drawLine(cx,cy,px,py,img);
     ssd1306DisplayImageStandardAdressing(13,2,imgBfr.sx,imgBfr.sy>>3,imgBfr.data); 
     data->currentParameter->getParameterDisplay(data->currentProgram->data,paramValueBfr);
 

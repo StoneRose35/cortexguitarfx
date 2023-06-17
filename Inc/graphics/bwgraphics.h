@@ -29,19 +29,19 @@ typedef struct BwImageBufferStruct
 } BwImageBufferType;
 
 
-uint8_t getPixel(int32_t px,int32_t py,BwImageBufferType*img);
-void drawLine(float spx,float spy,float epx, float epy,BwImageBufferType* img);
-void setPixel(int32_t px,int32_t py,BwImageBufferType*img);
-void clearPixel(int32_t px,int32_t py,BwImageBufferType*img);
+uint8_t getPixel(int32_t px,int32_t py,const BwImageType*img);
+void drawLine(float spx,float spy,float epx, float epy,BwImageType* img);
+void setPixel(int32_t px,int32_t py,BwImageType*img);
+void clearPixel(int32_t px,int32_t py,BwImageType*img);
 
-void drawOval(float ax,float ay,float cx,float cy,BwImageBufferType*img);
-void clearOval(float ax,float ay,float cx,float cy,BwImageBufferType*img);
-void clearSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img);
-void drawSquare(float spx, float spy,float epx, float epy,BwImageBufferType* img);
-uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const void* font);
-uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageBufferType* img,const GFXfont* font);
-uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageBufferType* img);
-void drawText(uint8_t px, uint8_t py,const char * txt,BwImageBufferType* img,const void* font);
-void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageBufferType* imgBuffer);
-void clearImage(BwImageBufferType*img);
+void drawOval(float ax,float ay,float cx,float cy,BwImageType*img);
+void clearOval(float ax,float ay,float cx,float cy,BwImageType*img);
+void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img);
+void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img);
+uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageType* img,const void* font);
+uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GFXfont* font);
+uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageType* img);
+void drawText(uint8_t px, uint8_t py,const char * txt,BwImageType* img,const void* font);
+void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgBuffer);
+void clearImage(BwImageType*img);
 #endif
