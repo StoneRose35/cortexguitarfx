@@ -10,6 +10,7 @@ static uint8_t editOverlay_bwdata[]= {
 static const struct BwImageStruct editOverlay_streamimg = {
     .data = editOverlay_bwdata,
     .sx = 47,
-    .sy = 43
+    .sy = 43,
+    .type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES
 };
 #endif

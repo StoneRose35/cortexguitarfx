@@ -10,6 +10,7 @@ static uint8_t pipicofx_param_2_scaled_bwdata[]= {
 static const struct BwImageStruct pipicofx_param_2_scaled_streamimg = {
     .data = pipicofx_param_2_scaled_bwdata,
     .sx = 102,
-    .sy = 40
+    .sy = 40,
+    .type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES
 };
 #endif

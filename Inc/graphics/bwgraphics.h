@@ -9,13 +9,16 @@ int32_t float2int(float a);
 float int2float(int32_t a);
 float fcos(float x);
 float fsin(float x);
-
 #endif
+
+#define BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES 0
+#define BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES 1
 typedef struct BwImageStruct
 {
 	uint8_t * data; // data is arrange x axis first, starting from top left
 	uint8_t sx; // size in pixels
 	uint8_t sy; // size in pixels
+	uint8_t type;
 } BwImageType;
 
 typedef struct BwImageBufferStruct
