@@ -283,11 +283,10 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     piPicoUiController->currentParameterIdx=0;
     piPicoUiController->locked=0;
     piPicoUiController->editViaRotary =0;
-    piPicoUiController->lastUiLevel =0xFF;
     piPicoUiController->uiLevelStackPtr = 0xFF;
     for (uint8_t c=0;c<8;c++)
     {
-        *(piPicoUiController->uiLevelStack + c) = 0;
+        *(piPicoUiController->uiLevelStack + c) = 0xFF;
     }
     imgBuffer.sx=128;
     imgBuffer.sy=64;

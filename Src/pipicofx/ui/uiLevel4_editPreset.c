@@ -93,7 +93,7 @@ static void enterCallback(PiPicoFxUiType*data)
     switch (editType)
     {
         case EDITLEVEL_PROGRAM:
-            data->lastUiLevel = 4;
+            uiStackPush(data,4);
             data->locked = 1;
             enterLevel0(data);
             break;
@@ -107,7 +107,7 @@ static void enterCallback(PiPicoFxUiType*data)
             setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
             break;
         case EDITLEVEL_PARAMETERS:
-            data->lastUiLevel = 4;
+            uiStackPush(data,4);
             enterLevel2(data);
             break;
     }
@@ -117,19 +117,19 @@ static void exitCallback(PiPicoFxUiType*data)
 {
     if (exitState == 0)
     {
-        data->lastUiLevel = 0xFF; // prevent returning 
+        uiStackPush(data,0xFF);
         exitState=1;
         create(data);
     }
     else if (exitState == 1)
     {
-        data->lastUiLevel = 3;
+        uiStackPop(data);
         savePreset(presets+currentPreset,currentBank*3 + currentPreset);
         exitState = 0;
     }
     else if (exitState == 2)
     {
-        data->lastUiLevel = 3;
+        uiStackPop(data);
         loadPreset(presets+currentPreset,currentBank*3 + currentPreset);
         if (data->currentProgramIdx != presets[currentPreset].programNr)
         {

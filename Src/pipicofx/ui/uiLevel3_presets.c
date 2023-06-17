@@ -74,17 +74,18 @@ static void enterCallback(PiPicoFxUiType*data)
     {
         overlayNr = OVERLAY_NR_EDIT;
         drawImage(41,0,&editOverlay_streamimg,imgBuffer);
+        uiStackPush(data,0xFF);
     }
     else
     {
+        uiStackPop(data);
+        uiStackPush(data, 3);
         if (overlayNr == OVERLAY_NR_EDIT)
         {
-            uiStackPush(data, 3);
             enterLevel4(data);
         }
         else if (overlayNr == OVERLAY_NR_SYSTEMSETTINGS)
         {
-            data->lastUiLevel = 3;
             // TODO
             //enterLevel5(data);
         }
@@ -111,6 +112,10 @@ static void exitCallback(PiPicoFxUiType*data)
         appendToString(strbfr,presets[currentPreset].name);
         drawText(5,42,strbfr,imgBuffer,font);
         overlayNr=0xFF;
+    }
+    else // remove ui level switching blocker
+    {
+        uiStackPop(data);
     }
 }
 

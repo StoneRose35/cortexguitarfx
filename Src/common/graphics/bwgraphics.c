@@ -31,7 +31,7 @@ float fsin(float x)
 
 #endif
 
-extern const uint8_t ** oled_font_5x7;
+extern const uint8_t oled_font_5x7[98][5];
 
 void drawLine(float spx,float spy,float epx, float epy,BwImageBufferType* img)
 {
@@ -336,11 +336,11 @@ uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageBufferType* img)
 			{
 				if (px + x  > 0 && 
 				    px + x < img->sx &&
-					py + y < img->sy &&
-					py + y > 0
+					py - y < img->sy &&
+					py - y > 0
 					)
 				{
-					setPixel(px+x,py+y,img);
+					setPixel(px+x,py-y,img);
 				}
 			}
 			bitarray <<= 1;

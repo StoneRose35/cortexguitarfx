@@ -153,11 +153,10 @@ static void enterCallback(PiPicoFxUiType*data)
 
 static void exitCallback(PiPicoFxUiType*data)
 {
-    if (data->lastUiLevel != 0xFF)
-    {
-        data->locked ^= 0x1;
-        create(data);
-    }
+
+    data->locked ^= 0x1;
+    create(data);
+
 }
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)

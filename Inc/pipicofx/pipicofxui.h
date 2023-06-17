@@ -16,7 +16,6 @@ typedef struct
     uint8_t currentParameterIdx;
     uint8_t locked : 1;
     uint8_t editViaRotary : 1;
-    uint8_t lastUiLevel; // the ui level that should be entered upon exiting the current one, 0xFF means null
 } PiPicoFxUiType;
 
 
