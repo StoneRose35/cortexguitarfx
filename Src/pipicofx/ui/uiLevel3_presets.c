@@ -180,6 +180,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         }
         setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
         applyPreset(presets + currentPreset,fxPrograms);
+        create(data);
     }     
 }
 
@@ -203,11 +204,11 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
             }
             if (loadPreset(presets+1,currentBank*3+1)!=0)
             {
-                generateEmptyPreset(presets,currentBank,1);
+                generateEmptyPreset(presets+1,currentBank,1);
             }
             if (loadPreset(presets+2, currentBank*3+2)!=0)
             {
-                generateEmptyPreset(presets,currentBank,2);
+                generateEmptyPreset(presets+2,currentBank,2);
             }
         }
         else
@@ -253,11 +254,11 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
             }
             if (loadPreset(presets+1,currentBank*3+1)!=0)
             {
-                generateEmptyPreset(presets,currentBank,1);
+                generateEmptyPreset(presets+1,currentBank,1);
             }
             if (loadPreset(presets+2, currentBank*3+2)!=0)
             {
-                generateEmptyPreset(presets,currentBank,2);
+                generateEmptyPreset(presets+2,currentBank,2);
             }
         }
         else if (((nbStompSwitch1 & 0x1) == 0x0) && ((nbStompSwitch3 & 0x1) == 0x1))
@@ -274,11 +275,11 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
             }
             if (loadPreset(presets+1,currentBank*3+1)!=0)
             {
-                generateEmptyPreset(presets,currentBank,1);
+                generateEmptyPreset(presets+1,currentBank,1);
             }
             if (loadPreset(presets+2, currentBank*3+2)!=0)
             {
-                generateEmptyPreset(presets,currentBank,2);
+                generateEmptyPreset(presets+2,currentBank,2);
             }
         }
         else
@@ -323,11 +324,11 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
             }
             if (loadPreset(presets+1,currentBank*3+1)!=0)
             {
-                generateEmptyPreset(presets,currentBank,1);
+                generateEmptyPreset(presets+1,currentBank,1);
             }
             if (loadPreset(presets+2, currentBank*3+2)!=0)
             {
-                generateEmptyPreset(presets,currentBank,2);
+                generateEmptyPreset(presets+2,currentBank,2);
             }
         }
         else

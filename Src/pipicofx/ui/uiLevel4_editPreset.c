@@ -61,7 +61,7 @@ static void create(PiPicoFxUiType*data)
             break;
         case 2:
             *strbfr = 0;
-            appendToString(strbfr,"Save? Yes");
+            appendToString(strbfr,"Save? No");
             drawText(5,60,strbfr,imgBuffer,font);
             break;
         default:

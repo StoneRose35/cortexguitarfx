@@ -154,15 +154,23 @@ static void enterCallback(PiPicoFxUiType*data)
 static void exitCallback(PiPicoFxUiType*data)
 {
 
-    data->locked ^= 0x1;
-    create(data);
+    // apply current program to preset when coming from 4
+    if(uiStackCurrent(data)==4)
+    {
+        presets[currentPreset].programNr = data->currentProgramIdx;
+    }
+    else
+    {
+        data->locked ^= 0x1;
+        create(data);
+    }
 
 }
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
     uint16_t knobVal;
-    if (data->locked == 0 && encoderDelta != 0)
+    if (encoderDelta != 0)
     {
         data->currentProgramIdx += encoderDelta;
         if (data->currentProgramIdx >= N_FX_PROGRAMS && encoderDelta > 0)
