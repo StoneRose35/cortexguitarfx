@@ -55,11 +55,11 @@ static void fxProgram1Param1Display(void*data,char*res)
 static void fxProgram1Param2Callback(uint16_t val,void*data) // number of waveshaper (more means more distortion)
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
+    fxProgram1.parameters[1].rawValue=val;
     // map 0-4095 to 1-8
     val >>= 9;
     val += 1; 
     pData->nWaveshapers = val;
-    fxProgram1.parameters[1].rawValue=val;
 }
 
 static void fxProgram1Param2Display(void*data,char*res)

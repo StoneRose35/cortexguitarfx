@@ -147,8 +147,11 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 
 static void enterCallback(PiPicoFxUiType*data) 
 {
-    uiStackPush(data, 0);
-    enterLevel1(data);
+    if (data->locked == 0)
+    {
+        uiStackPush(data, 0);
+        enterLevel1(data);
+    }
 }
 
 static void exitCallback(PiPicoFxUiType*data)
@@ -235,6 +238,7 @@ static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)
         */
         //setStompswitchColorRaw(3 << (switchNr << 1));
     //}
+    currentPreset = switchNr;
     uiStackPush(data, 0);
     enterLevel3(data);
 }

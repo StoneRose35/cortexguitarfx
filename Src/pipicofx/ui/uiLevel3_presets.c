@@ -381,8 +381,12 @@ void enterLevel3(PiPicoFxUiType*data)
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
     create(data);
-    currentPreset=0;
     overlayNr=0xFF;
+    if (data->currentProgramIdx != presets[currentPreset].programNr)
+    {
+        programsToInitialize[0]=presets[currentPreset].programNr;
+        programChangeState = 1;
+    }
     setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
     applyPreset(presets, fxPrograms);
 }

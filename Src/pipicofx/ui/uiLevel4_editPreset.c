@@ -108,7 +108,12 @@ static void enterCallback(PiPicoFxUiType*data)
             break;
         case EDITLEVEL_PARAMETERS:
             uiStackPush(data,4);
-            enterLevel2(data);
+            data->currentParameterIdx = 0;
+            data->currentParameter = data->currentProgram->parameters + data->currentParameterIdx;
+            if (data->currentProgram->nParameters > 0)
+            {
+                enterLevel1(data);
+            }
             break;
     }
 }
@@ -130,7 +135,10 @@ static void exitCallback(PiPicoFxUiType*data)
     else if (exitState == 2)
     {
         uiStackPop(data);
-        loadPreset(presets+currentPreset,currentBank*3 + currentPreset);
+        if (loadPreset(presets+currentPreset,currentBank*3 + currentPreset)!=0)
+        {
+            generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
+        }
         if (data->currentProgramIdx != presets[currentPreset].programNr)
         {
             programsToInitialize[0] = presets[currentPreset].programNr;

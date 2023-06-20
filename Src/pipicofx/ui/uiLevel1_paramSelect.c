@@ -28,20 +28,20 @@ static void create(PiPicoFxUiType*data)
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
-    BwImageBufferType imgBfr;
-    BwImageType * img=(BwImageType*)&imgBfr;
+    BwImageType * img=getImageBuffer();
     float fValue,fMaxValue,fMinValue;
     char paramValueBfr[16];
     float cx,cy,px,py;
     (void)avgInput;
     (void)avgOutput;
     (void)cpuLoad;
-    imgBfr.sx=pipicofx_param_1_scaled_streamimg.sx;
-    imgBfr.sy=pipicofx_param_1_scaled_streamimg.sy;
+    img->sx=pipicofx_param_1_scaled_streamimg.sx;
+    img->sy=pipicofx_param_1_scaled_streamimg.sy;
     for (uint16_t c=0;c<510;c++)
     {
-        imgBfr.data[c]=pipicofx_param_1_scaled_streamimg.data[c];
+        img->data[c]=pipicofx_param_1_scaled_streamimg.data[c];
     }
+
     fValue = int2float((int32_t)data->currentParameter->rawValue);
     fMaxValue = int2float((int32_t)(1 << 12));
     fMinValue = int2float((int32_t)0);
@@ -52,7 +52,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     cx = 51.0f;
     cy = 24.0f;
     drawLine(cx,cy,px,py,img);
-    ssd1306DisplayImageStandardAdressing(13,2,imgBfr.sx,imgBfr.sy>>3,imgBfr.data); 
+    ssd1306DisplayImageStandardAdressing(13,2,img->sx,img->sy>>3,img->data); 
     data->currentParameter->getParameterDisplay(data->currentProgram->data,paramValueBfr);
 
     ssd1306WriteTextLine(paramValueBfr,7);
@@ -70,6 +70,7 @@ static void enterCallback(PiPicoFxUiType*data)
 
 static void exitCallback(PiPicoFxUiType*data)
 {
+    parametersToPreset(presets+currentPreset,fxPrograms);
 }
 
 static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)
