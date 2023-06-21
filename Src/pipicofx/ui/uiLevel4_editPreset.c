@@ -108,6 +108,7 @@ static void enterCallback(PiPicoFxUiType*data)
             break;
         case EDITLEVEL_PARAMETERS:
             uiStackPush(data,4);
+            data->locked = 1;
             data->currentParameterIdx = 0;
             data->currentParameter = data->currentProgram->parameters + data->currentParameterIdx;
             if (data->currentProgram->nParameters > 0)

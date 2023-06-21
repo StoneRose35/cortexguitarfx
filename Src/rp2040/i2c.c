@@ -110,9 +110,10 @@ void setTargetAddress(uint8_t address)
 
 uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
 {
-    uint32_t txAbortSrc;
-    // block as long as fifo is not empty
-    while ((*I2C_IC_TXFLR)>15);
+    volatile uint32_t txAbortSrc;
+    volatile uint8_t retval = 0;
+    // block as long as fifo is completely full
+    //while ((*I2C_IC_TXFLR)>15);
 
     // put data
     if (lastCmd !=0)
@@ -124,29 +125,32 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
         *I2C_IC_DATA_CMD = data;
     }
 
+    // wait until either transmission is done or an abort is detected
+    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_TFE_LSB))==0 && (*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_ABRT_LSB))==0);
+
     if ((*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_ABRT_LSB)) !=0)
     {
         txAbortSrc=*I2C_IC_TX_ABRT_SOURCE;
-        read_reg(I2C_IC_CLR_TX_ABRT);
+        (void)(*I2C_IC_CLR_TX_ABRT);
         if ((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ARB_LOST_LSB))!=0)
         {
-            return I2C_ERROR_ARBITRATION_LOST;
+            retval = I2C_ERROR_ARBITRATION_LOST;
         }
-        if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_TXDATA_NOACK_LSB))!=0)
+        else if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_TXDATA_NOACK_LSB))!=0)
         {
-            return I2C_ERROR_DATA_NACK;
+            retval = I2C_ERROR_DATA_NACK;
         }
-        if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_7B_ADDR_NOACK_LSB))!=0)
+        else if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_7B_ADDR_NOACK_LSB))!=0)
         {
-            return I2C_ERROR_SLAVE_ADDRESS_NACK;
+            retval = I2C_ERROR_SLAVE_ADDRESS_NACK;
         }
         else
         {
-            return I2C_GENERIC_TX_ERROR;
+            retval = I2C_GENERIC_TX_ERROR;
         }
     }
 
-    return 0;
+    return retval;
 }
 
 uint8_t masterReceive(uint8_t lastCmd)
