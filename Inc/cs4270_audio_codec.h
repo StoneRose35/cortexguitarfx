@@ -15,9 +15,20 @@
 #define CS4270_R4_DIG_LOOPBK_Pos (5)
 
 #define CS4270_R6 (6)
+#define CS4270_R7 (7)
+#define CS4270_R8 (8)
+
+#define CS4270_I2C_ADDRESS 72
+#define CS4270_CHANNEL_A 0 
+#define CS4270_CHANNEL_B 1
+#define CS4270_CHANNEL_BOTH 2
 
 void setupCS4270();
 
 void cs4270PowerDown();
 
+void cs4270InputControl(uint8_t channel,uint8_t val);
+
+void cs4270SetOutputVolume(uint8_t channel,uint8_t volume);
+uint16_t cs4270GetOutputVolume();
 #endif

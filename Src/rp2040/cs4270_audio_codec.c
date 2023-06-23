@@ -17,6 +17,12 @@ static uint8_t cs4270Write(uint16_t data)
     return res;
 }
 
+static uint8_t cs4270Read(uint8_t reg)
+{
+    masterTransmit(reg,1);
+    return masterReceive(1);
+}
+
 void cs4270PowerDown()
 {
     uint16_t regdata;
@@ -29,6 +35,11 @@ void setupCS4270()
     // reset
     uint32_t regdata;
     volatile uint8_t i2c_error = 0;
+
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
     *GPIO_OE |= (1 << AUDIO_CODEC_RESET);
     *AUDIO_CODEC_RESET_PIN_CNTR = 5;
 
@@ -60,5 +71,92 @@ void setupCS4270()
 
     regdata = (CS4270_R2 << 8); // power up again
     i2c_error += cs4270Write(regdata);
+}
 
+/*
+    channel is either CS4270_CHANNEL_A or CS4270_CHANNEL_B,
+    val: 1 means unmuted (on) and 0 means muted (off)
+*/
+void cs4270InputControl(uint8_t channel,uint8_t val)
+{
+    uint16_t regdata;
+    uint8_t regContent;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    regdata = (CS4270_R6 << 8);
+    regContent = cs4270Read(CS4270_R6);
+    if (val!=0)
+    {
+        if (channel == CS4270_CHANNEL_A || channel == CS4270_CHANNEL_BOTH)
+        {
+            regContent &= ~(1 << 3);
+        }
+        if (channel == CS4270_CHANNEL_B || channel == CS4270_CHANNEL_BOTH)
+        {
+            regContent &= ~(1 << 4);
+        }
+    }
+    else
+    {
+        if (channel == CS4270_CHANNEL_A || channel == CS4270_CHANNEL_BOTH)
+        {
+            regContent |= ~(1 << 3);
+        }
+        if (channel == CS4270_CHANNEL_B || channel == CS4270_CHANNEL_BOTH)
+        {
+            regContent |= ~(1 << 4);
+        }
+    }
+    regdata |= regContent;
+    cs4270Write(regdata);
+}
+
+void cs4270SetOutputVolume(uint8_t channel,uint8_t volume)
+{
+    uint16_t regdata;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    if (channel == CS4270_CHANNEL_A) 
+    {
+        regdata = (CS4270_R7 << 8);
+    }
+    else if (channel == CS4270_CHANNEL_B)
+    {
+        regdata = (CS4270_R8 << 8);
+    }
+    else
+    {
+        regdata = ((0x80 | CS4270_R7) << 8);
+    }
+    regdata |= (0xFF - volume);
+    if (channel != CS4270_CHANNEL_BOTH)
+    {
+        cs4270Write(regdata);
+    }
+    else
+    {
+        masterTransmit((0x80 | CS4270_R7),0);
+        masterTransmit((0xFF - volume),0);
+        masterTransmit((0xFF - volume),1);
+    }
+}
+
+/*
+returns the output volume for both channels
+A is in the MSB, B in the LSB 
+*/
+uint16_t cs4270GetOutputVolume()
+{
+    uint16_t outval=0;
+    uint8_t channelVal;
+    masterTransmit((0x80 | CS4270_R7),1);
+    channelVal = 0xFF - masterReceive(0);
+    outval |= (channelVal << 8);
+    channelVal = 0xFF - masterReceive(0);
+    outval |= channelVal;
+    return outval;
 }
