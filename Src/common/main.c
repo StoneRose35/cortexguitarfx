@@ -260,7 +260,7 @@ int main(void)
 	initI2c(26);
 	#endif
 	#ifdef CS4270
-	initI2c(72); //72 
+	initI2c(CS4270_I2C_ADDRESS); //72 
 	#endif
 	//initUSB();
 	//initUart(57600,&usbCommBuffer);
