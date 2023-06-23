@@ -60,7 +60,8 @@ void initI2c(uint8_t slaveAdress)
     *I2C_IC_CON = (1 << I2C_IC_CON_SPEED_LSB) | 
                   (1 << I2C_IC_CON_IC_SLAVE_DISABLE_LSB) | 
                   (1 << I2C_IC_CON_IC_RESTART_EN_LSB) | 
-                  (1 << I2C_IC_CON_MASTER_MODE_LSB);
+                  (1 << I2C_IC_CON_MASTER_MODE_LSB) |
+                  (1 << I2C_IC_CON_TX_EMPTY_CTRL_LSB);
 
     // configure clock, 100kHz in standard mode with a peripheral clock of 120 MHz
     /*
@@ -112,8 +113,37 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
 {
     volatile uint32_t txAbortSrc;
     volatile uint8_t retval = 0;
-    // block as long as fifo is completely full
-    //while ((*I2C_IC_TXFLR)>15);
+
+    // return with an error code if an abort occurred due to a previous
+    // operation
+    /*
+    if ((*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_ABRT_LSB)) !=0)
+    {
+        txAbortSrc=*I2C_IC_TX_ABRT_SOURCE;
+        (void)(*I2C_IC_CLR_TX_ABRT);
+        if ((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ARB_LOST_LSB))!=0)
+        {
+            retval = I2C_ERROR_ARBITRATION_LOST;
+        }
+        else if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_TXDATA_NOACK_LSB))!=0)
+        {
+            retval = I2C_ERROR_DATA_NACK;
+        }
+        else if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_7B_ADDR_NOACK_LSB))!=0)
+        {
+            retval = I2C_ERROR_SLAVE_ADDRESS_NACK;
+        }
+        else
+        {
+            retval = I2C_GENERIC_TX_ERROR;
+        }
+        return retval;
+    }
+    */
+
+    //block as long as fifo is completely full
+    while ((*I2C_IC_TXFLR)>15);
+
 
     // put data
     if (lastCmd !=0)
@@ -125,8 +155,8 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
         *I2C_IC_DATA_CMD = data;
     }
 
-    // wait until either transmission is done or an abort is detected
-    while ((*I2C_IC_STATUS & (1 << I2C_IC_STATUS_TFE_LSB))==0 && (*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_ABRT_LSB))==0);
+    while((*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_EMPTY_LSB))==0);
+
 
     if ((*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_ABRT_LSB)) !=0)
     {
