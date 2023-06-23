@@ -77,7 +77,7 @@ void setupCS4270()
     channel is either CS4270_CHANNEL_A or CS4270_CHANNEL_B,
     val: 1 means unmuted (on) and 0 means muted (off)
 */
-void cs4270InputControl(uint8_t channel,uint8_t val)
+void cs4270SetInputState(uint8_t channel,uint8_t val)
 {
     uint16_t regdata;
     uint8_t regContent;
@@ -111,6 +111,24 @@ void cs4270InputControl(uint8_t channel,uint8_t val)
     }
     regdata |= regContent;
     cs4270Write(regdata);
+}
+
+/*
+    channel is either CS4270_CHANNEL_A or CS4270_CHANNEL_B,
+    byte 0: Channel A, byte 1: Channel B
+*/
+uint8_t cs4270GetInputState()
+{
+    uint8_t regContent;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    regContent = cs4270Read(CS4270_R6);
+    regContent >>= 3;
+    regContent &= (0x3);
+    regContent ^= (0x3);
+    return regContent;
 }
 
 void cs4270SetOutputVolume(uint8_t channel,uint8_t volume)

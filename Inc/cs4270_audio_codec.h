@@ -27,8 +27,8 @@ void setupCS4270();
 
 void cs4270PowerDown();
 
-void cs4270InputControl(uint8_t channel,uint8_t val);
-
+void cs4270SetInputState(uint8_t channel,uint8_t val);
+uint8_t cs4270GetInputState();
 void cs4270SetOutputVolume(uint8_t channel,uint8_t volume);
 uint16_t cs4270GetOutputVolume();
 #endif

@@ -33,7 +33,7 @@ float fsin(float x)
 
 extern const uint8_t oled_font_5x7[98][5];
 
-void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
+void changeLine(float spx,float spy,float epx, float epy,uint8_t draw,BwImageType* img)
 {
 	float dy,dx,absdy,absdx,delta;
 	int32_t idx,idy,ix,iy;
@@ -75,7 +75,14 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 					delta = delta - 1.0f;
 				}
 				ix++;
-				setPixel(ix,iy,img);
+				if (draw)
+				{
+					setPixel(ix,iy,img);
+				}
+				else
+				{
+					clearPixel(ix,iy,img);
+				}
 			}
 		}
 		else if (idx < 0 && idy>=0)
@@ -92,7 +99,14 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 					delta = delta - 1.0f;
 				}
 				ix--;
-				setPixel(ix,iy,img);
+				if (draw)
+				{
+					setPixel(ix,iy,img);
+				}
+				else
+				{
+					clearPixel(ix,iy,img);
+				}
 			}
 		}
 		else if (idx>=0 && idy < 0)
@@ -109,7 +123,14 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 					delta = delta - 1.0f;
 				}
 				ix++;
-				setPixel(ix,iy,img);
+				if (draw)
+				{
+					setPixel(ix,iy,img);
+				}
+				else
+				{
+					clearPixel(ix,iy,img);
+				}
 			}
 		}
 		else
@@ -126,7 +147,14 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 					delta = delta - 1.0f;
 				}
 				ix--;
-				setPixel(ix,iy,img);
+				if (draw)
+				{
+					setPixel(ix,iy,img);
+				}
+				else
+				{
+					clearPixel(ix,iy,img);
+				}
 			}
 		}
 	}
@@ -147,7 +175,14 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 					delta = delta - 1.0f;
 				}
 				iy++;
-				setPixel(ix,iy,img);
+				if (draw)
+				{
+					setPixel(ix,iy,img);
+				}
+				else
+				{
+					clearPixel(ix,iy,img);
+				}
 			}
 		}
 		else if (idx < 0 && idy >=0)
@@ -164,7 +199,14 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 					delta = delta - 1.0f;
 				}
 				iy++;
-				setPixel(ix,iy,img);
+				if (draw)
+				{
+					setPixel(ix,iy,img);
+				}
+				else
+				{
+					clearPixel(ix,iy,img);
+				}
 			}
 		}
 		else if (idx >= 0 && idy < 0)
@@ -181,7 +223,14 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 					delta = delta - 1.0f;
 				}
 				iy--;
-				setPixel(ix,iy,img);
+				if (draw)
+				{
+					setPixel(ix,iy,img);
+				}
+				else
+				{
+					clearPixel(ix,iy,img);
+				}
 			}
 		}
 		else
@@ -198,12 +247,100 @@ void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 					delta = delta - 1.0f;
 				}
 				iy--;
-				setPixel(ix,iy,img);
+				if (draw)
+				{
+					setPixel(ix,iy,img);
+				}
+				else
+				{
+					clearPixel(ix,iy,img);
+				}
 			}
 		}
 	}
 }
 
+void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
+{
+	changeLine(spx,spy,epx,epy,1,img);
+}
+
+void clearLine(float spx,float spy,float epx, float epy,BwImageType* img)
+{
+	changeLine(spx,spy,epx,epy,0,img);
+}
+
+void drawHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
+{
+	if (sx > ex)
+	{
+		for(uint8_t c=ex;c<=sx;c++)
+		{
+			setPixel(c,yval,img);
+		}
+	}
+	else
+	{
+		for(uint8_t c=sx;c<=ex;c++)
+		{
+			setPixel(c,yval,img);
+		}
+	}
+}
+
+void drawVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
+{
+	if (sy > ey)
+	{
+		for(uint8_t c=ey;c<=sy;c++)
+		{
+			setPixel(xval,c,img);
+		}
+	}
+	else
+	{
+		for(uint8_t c=sy;c<=ey;c++)
+		{
+			setPixel(xval,c,img);
+		}
+	}
+}
+
+void clearHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
+{
+	if (sx > ex)
+	{
+		for(uint8_t c=ex;c<=sx;c++)
+		{
+			clearPixel(c,yval,img);
+		}
+	}
+	else
+	{
+		for(uint8_t c=sx;c<=ex;c++)
+		{
+			clearPixel(c,yval,img);
+		}
+	}
+}
+
+void clearVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
+{
+	if (sy > ey)
+	{
+		for(uint8_t c=ey;c<=sy;c++)
+		{
+			clearPixel(xval,c,img);
+		}
+	}
+	else
+	{
+		for(uint8_t c=sy;c<=ey;c++)
+		{
+			clearPixel(xval,c,img);
+		}
+	}
+}
 void drawOval(float ax,float ay,float cx,float cy,BwImageType*img)
 {
 	float fix,fiy,dr;

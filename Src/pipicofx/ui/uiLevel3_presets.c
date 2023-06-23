@@ -87,7 +87,7 @@ static void enterCallback(PiPicoFxUiType*data)
         else if (overlayNr == OVERLAY_NR_SYSTEMSETTINGS)
         {
             // TODO
-            //enterLevel5(data);
+            enterLevel5(data);
         }
     }
 
