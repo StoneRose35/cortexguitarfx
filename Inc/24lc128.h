@@ -8,5 +8,5 @@
 
 void eeprom24lc128ReadArray(uint32_t startAdress,uint16_t len,uint8_t* data);
 void eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data);
-
+void eeprom24lc128WaitUntilAvailable();
 #endif
