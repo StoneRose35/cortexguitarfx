@@ -27,9 +27,9 @@ static void create(PiPicoFxUiType*data)
     *(strbfr) = 0;  
     clearImage(img);
     appendToString(strbfr,"Settings");
-    drawText(2,2,strbfr,img,font);
+    drawText(2,14,strbfr,img,font);
 
-    regbfr = cs4270GetInputState();
+    regbfr = 0; //cs4270GetInputState();
     if (regbfr & 0x1)
     {
         drawImage(16,20,&toggleswitch_on_streamimg,img);
@@ -50,17 +50,17 @@ static void create(PiPicoFxUiType*data)
 
     *(strbfr) = 0;  
     appendToString(strbfr,"Mic");
-    drawText(4,50,strbfr,img,(void*)0);
+    drawText(9,55,strbfr,img,(void*)0);
 
     *(strbfr) = 0;  
     appendToString(strbfr,"Instr");
-    drawText(35,50,strbfr,img,(void*)0);
+    drawText(35,55,strbfr,img,(void*)0);
 
     *(strbfr) = 0;  
     appendToString(strbfr,"Vol");
-    drawText(87,50,strbfr,img,(void*)0);
+    drawText(87,55,strbfr,img,(void*)0);
 
-    currentVolume = cs4270GetOutputVolume();
+    currentVolume = 0xFFFF; //cs4270GetOutputVolume();
     drawOval(10.f,10.f,100.f,32.f,img);
     clearOval(8.f,8.f,100.f,32.f,img);
 
@@ -104,18 +104,6 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     ssd1306writeFramebufferAsync(imgBuffer->data);
 }
 
-
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data)
-{
-}
-
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data)
-{
-}
-
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
-{
-}
 
 static void enterCallback(PiPicoFxUiType*data) 
 {
@@ -178,7 +166,10 @@ static void exitCallback(PiPicoFxUiType*data)
     }
     else
     {
-        uiStackPop(data);
+        if(uiStackCurrent(data)==0xFF)
+        {
+            uiStackPop(data);
+        }
     }
 }
 
@@ -315,29 +306,13 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
     }
 }
 
-static void stompswitch1Callback(PiPicoFxUiType* data)
-{
-}
-
-static void stompswitch2Callback(PiPicoFxUiType* data)
-{
-}
-
-static void stompswitch3Callback(PiPicoFxUiType* data)
-{
-}
 
 void enterLevel5(PiPicoFxUiType*data)
 {
+    clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
-    registerKnob0Callback(&knob0Callback);
-    registerKnob1Callback(&knob1Callback);
-    registerKnob2Callback(&knob2Callback);
-    registerStompswitch1PressedCallback(&stompswitch1Callback);
-    registerStompswitch2PressedCallback(&stompswitch2Callback);
-    registerStompswitch3PressedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
     create(data);

@@ -111,15 +111,12 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 
 void enterLevel2(PiPicoFxUiType*data)
 {
-    registerEnterButtonPressedCallback(0);
+    clearCallbackAssignments();
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
     registerKnob0Callback(&knob0Callback);
     registerKnob1Callback(&knob1Callback);
     registerKnob2Callback(&knob2Callback);
-    registerStompswitch1PressedCallback(0);
-    registerStompswitch2PressedCallback(0);
-    registerStompswitch3PressedCallback(0);
     registerOnUpdateCallback(&update);
     create(data);
 }

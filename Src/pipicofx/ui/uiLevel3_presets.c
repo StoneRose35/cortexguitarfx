@@ -119,20 +119,6 @@ static void exitCallback(PiPicoFxUiType*data)
     }
 }
 
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data)
-{
-    // nothing
-}
-
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data)
-{
-    // nothing
-}
-
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
-{
-    // nothing
-}
 
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
@@ -368,13 +354,10 @@ void enterLevel3(PiPicoFxUiType*data)
         generateEmptyPreset(presets+2,currentBank,2);
     }
     data->editViaRotary = 1;
-
+    clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
-    registerKnob0Callback(&knob0Callback);
-    registerKnob1Callback(&knob1Callback);
-    registerKnob2Callback(&knob2Callback);
     registerStompswitch1ReleasedCallback(&stompswitch1Callback);
     registerStompswitch2ReleasedCallback(&stompswitch2Callback);
     registerStompswitch3ReleasedCallback(&stompswitch3Callback);

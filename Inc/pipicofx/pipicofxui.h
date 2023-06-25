@@ -44,6 +44,7 @@ void registerKnob1Callback(void(*cb)(uint16_t,PiPicoFxUiType*));
 void registerKnob2Callback(void(*cb)(uint16_t,PiPicoFxUiType*));
 void registerOnUpdateCallback(void(*cb)(int16_t,int16_t,uint8_t,PiPicoFxUiType*));
 void registerOnCreateCallback(void(*cb)(PiPicoFxUiType*));
+void clearCallbackAssignments();
 
 void onEnterPressed(PiPicoFxUiType*data);
 void onEnterReleased(PiPicoFxUiType*data);
