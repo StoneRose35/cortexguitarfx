@@ -266,6 +266,7 @@ register onUpdate, on Create
 */
 void enterLevel0(PiPicoFxUiType*data)
 {
+    clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);

@@ -115,6 +115,26 @@ void registerOnCreateCallback(void(*cb)(PiPicoFxUiType*))
     onCreateCallback=cb;
 }
 
+void clearCallbackAssignments()
+{
+    enterButtonPressedCallback = 0;
+    enterButtonReleasedCallback = 0;
+    exitButtonPressedCallback = 0;
+    exitButtonReleasedCallback = 0;
+    knob0Callback = 0;
+    knob1Callback = 0;
+    knob2Callback = 0;
+    rotaryCallback = 0;
+    stompSwitch1PressedCallback = 0;
+    stompSwitch1ReleasedCallback = 0;
+    stompSwitch2PressedCallback = 0;
+    stompSwitch2ReleasedCallback = 0;
+    stompSwitch3PressedCallback = 0;
+    stompSwitch3ReleasedCallback = 0;
+    onUpdateCallback = 0;
+    onCreateCallback = 0;
+}
+
 
 /*
 Callees used by the OS to dispatch UI event, should not be used by "user" code
