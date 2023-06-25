@@ -368,7 +368,7 @@ void clearOval(float ax,float ay,float cx,float cy,BwImageType*img)
 		{
 			fix = int2float(ix);
 			fiy = int2float(iy);
-			dr = (fix-ix)*(fix-ix)/ax/ax + (fiy-iy)*(fiy-iy)/ay/ay; 
+			dr = (fix-cx)*(fix-cx)/ax/ax + (fiy-cy)*(fiy-cy)/ay/ay; 
 			if (dr <= 1.0f)
 			{
 				clearPixel(ix,iy,img);
@@ -534,14 +534,17 @@ void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgB
 		{
 			cxOut = cx + px;
 			cyOut =cy + py;
-			pixel= getPixel(cx,cy,img);
-			if (pixel)
+			if (cxOut  < imgBuffer->sx && cyOut < imgBuffer->sy)
 			{
-				setPixel(cxOut,cyOut,imgBuffer);
-			}
-			else
-			{
-				clearPixel(cxOut,cyOut,imgBuffer);
+				pixel= getPixel(cx,cy,img);
+				if (pixel)
+				{
+					setPixel(cxOut,cyOut,imgBuffer);
+				}
+				else
+				{
+					clearPixel(cxOut,cyOut,imgBuffer);
+				}
 			}
 		}
 	}
