@@ -408,7 +408,7 @@ FxProgramType fxProgram9 = {
         {
             .name="Gain           ",
             .control=1,
-            .increment = 64, // 4096/8
+            .increment = 32, // 4096/8
             .rawValue=0,
             .setParameter=&fxProgramParam2Callback,
             .getParameterValue=0,
@@ -417,7 +417,7 @@ FxProgramType fxProgram9 = {
         {
             .name="Mod Intensity  ",
             .control=2,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .setParameter=&fxProgramParam3Callback,
             .getParameterValue=0,

@@ -340,7 +340,7 @@ FxProgramType fxProgram4 = {
         {
             .name = "Gain           ",
             .control=0,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram4Param1Display,
             .getParameterValue=0,
@@ -349,7 +349,7 @@ FxProgramType fxProgram4 = {
         {
             .name = "DC-Offset      ",
             .control=1,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram4Param2Display,
             .getParameterValue=0,
@@ -358,7 +358,7 @@ FxProgramType fxProgram4 = {
         {
             .name = "Cab Type       ",
             .control=2,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram4Param3Display,
             .getParameterValue=0,

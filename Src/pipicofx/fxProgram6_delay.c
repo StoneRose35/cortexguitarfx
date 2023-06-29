@@ -100,7 +100,7 @@ FxProgramType fxProgram6 = {
         {
             .name = "Time           ",
             .control=0,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram6Param1Display,
             .getParameterValue=0,
@@ -109,7 +109,7 @@ FxProgramType fxProgram6 = {
         {
             .name = "Feedback       ",
             .control=1,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram6Param2Display,
             .getParameterValue=0,
@@ -118,7 +118,7 @@ FxProgramType fxProgram6 = {
         {
             .name = "Mix            ",
             .control=2,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram6Param3Display,
             .getParameterValue=0,

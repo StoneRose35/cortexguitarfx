@@ -165,7 +165,7 @@ FxProgramType fxProgram1 = {
         {
             .name="Delay Intensity",
             .control=2,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .setParameter=&fxProgram1Param3Callback,
             .getParameterValue=0,

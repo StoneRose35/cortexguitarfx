@@ -44,7 +44,7 @@ FxProgramType fxProgram5 = {
         {
             .name = "Bit Reduction  ",
             .control=0,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram5Param1Display,
             .getParameterValue=0,

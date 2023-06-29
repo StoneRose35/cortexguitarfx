@@ -53,7 +53,7 @@ FxProgramType fxProgram12 = {
         {
             .name = "Decay          ",
             .control=0,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam1Display,
             .getParameterValue=0,
@@ -62,7 +62,7 @@ FxProgramType fxProgram12 = {
         {
             .name = "Mix            ",
             .control=1,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam2Display,
             .getParameterValue=0,

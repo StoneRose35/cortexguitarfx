@@ -146,7 +146,7 @@ FxProgramType fxProgram8 = {
             .control=0x0,
             .getParameterDisplay=&fxProgramP4Display,
             .setParameter=&fxProgramP4Callback,
-            .increment=64,
+            .increment=32,
             .rawValue=0
         },
         {
@@ -162,7 +162,7 @@ FxProgramType fxProgram8 = {
             .control=2,
             .getParameterDisplay=&fxProgramP5Display,
             .setParameter=&fxProgramP5Callback,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
         },
         {
@@ -170,7 +170,7 @@ FxProgramType fxProgram8 = {
             .control=0xff,
             .getParameterDisplay=&fxProgramP1Display,
             .setParameter=&fxProgramP1Callback,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
         },
         {
@@ -178,7 +178,7 @@ FxProgramType fxProgram8 = {
             .control=0xff,
             .getParameterDisplay=&fxProgramP2Display,
             .setParameter=&fxProgramP2Callback,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
         },
 
