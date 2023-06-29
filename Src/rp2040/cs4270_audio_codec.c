@@ -12,6 +12,10 @@
 static uint8_t cs4270Write(uint16_t data)
 {
     uint8_t res=0;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
     res += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
     res += masterTransmit((uint8_t)(data&0xFF),1);
     return res;
@@ -19,6 +23,10 @@ static uint8_t cs4270Write(uint16_t data)
 
 static uint8_t cs4270Read(uint8_t reg)
 {
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
     masterTransmit(reg,1);
     return masterReceive(1);
 }
@@ -26,6 +34,10 @@ static uint8_t cs4270Read(uint8_t reg)
 void cs4270PowerDown()
 {
     uint16_t regdata;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
     regdata = (CS4270_R2 << 8) | (1 << CS4270_R2_PDN_Pos); // power down
     cs4270Write(regdata);
 }
@@ -171,6 +183,10 @@ uint16_t cs4270GetOutputVolume()
 {
     uint16_t outval=0;
     uint8_t channelVal;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
     masterTransmit((0x80 | CS4270_R7),1);
     channelVal = 0xFF - masterReceive(0);
     outval |= (channelVal << 8);

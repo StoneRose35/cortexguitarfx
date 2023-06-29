@@ -111,8 +111,8 @@ void setTargetAddress(uint8_t address)
 
 uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
 {
-    volatile uint32_t txAbortSrc;
-    volatile uint8_t retval = 0;
+    uint32_t txAbortSrc;
+    uint8_t retval = 0;
 
     // return with an error code if an abort occurred due to a previous
     // operation
@@ -154,39 +154,39 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
     {
         *I2C_IC_DATA_CMD = data;
     }
+    while((*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_EMPTY_LSB))==0); // wait until address and read/write is transmitted
 
-    if (lastCmd == 0)
+    txAbortSrc=*I2C_IC_TX_ABRT_SOURCE;
+    if (txAbortSrc != 0)
     {
-        while((*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_EMPTY_LSB))==0); // wait until address and read/write is transmitted
-
-
-        if ((*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_TX_ABRT_LSB)) !=0)
-        {
-            txAbortSrc=*I2C_IC_TX_ABRT_SOURCE;
-            (void)(*I2C_IC_CLR_TX_ABRT);
-            if ((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ARB_LOST_LSB))!=0)
-            {
-                retval = I2C_ERROR_ARBITRATION_LOST;
-            }
-            else if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_TXDATA_NOACK_LSB))!=0)
-            {
-                retval = I2C_ERROR_DATA_NACK;
-            }
-            else if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_7B_ADDR_NOACK_LSB))!=0)
-            {
-                retval = I2C_ERROR_SLAVE_ADDRESS_NACK;
-            }
-            else
-            {
-                retval = I2C_GENERIC_TX_ERROR;
-            }
-        }
+        (void)(*I2C_IC_CLR_TX_ABRT);
     }
-    else
+    if (lastCmd == 1 || txAbortSrc != 0)
     {
         while((*I2C_IC_RAW_INTR_STAT & (1 << I2C_IC_RAW_INTR_STAT_STOP_DET_LSB))==0);
         (void)(*I2C_IC_CLR_STOP_DET);
     }
+        
+    if (txAbortSrc !=0)
+    {
+        if ((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ARB_LOST_LSB))!=0)
+        {
+            retval = I2C_ERROR_ARBITRATION_LOST;
+        }
+        else if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_TXDATA_NOACK_LSB))!=0)
+        {
+            retval = I2C_ERROR_DATA_NACK;
+        }
+        else if((txAbortSrc & (1 << I2C_IC_TX_ABRT_SOURCE_ABRT_7B_ADDR_NOACK_LSB))!=0)
+        {
+            retval = I2C_ERROR_SLAVE_ADDRESS_NACK;
+        }
+        else
+        {
+            retval = I2C_GENERIC_TX_ERROR;
+        }
+    }
+ 
 
     return retval;
 }
@@ -194,7 +194,8 @@ uint8_t masterTransmit(uint8_t data,uint8_t lastCmd)
 uint8_t masterReceive(uint8_t lastCmd)
 {
     uint8_t res;
-    uint32_t systickStart;
+    volatile uint32_t systickStart, currentSystick;
+
     volatile uint8_t rxlvl;
     (void)*I2C_IC_CLR_INTR;
 
@@ -210,10 +211,12 @@ uint8_t masterReceive(uint8_t lastCmd)
     // wait until byte is received
     rxlvl = *I2C_IC_RXFLR;
     systickStart = getTickValue();
-    while (rxlvl==0 && getTickValue() - systickStart < 2)
+    currentSystick = getTickValue();
+    while (rxlvl==0 && currentSystick - systickStart < 2)
     {
         rxlvl = *I2C_IC_RXFLR;
         (void)*I2C_IC_CLR_TX_ABRT;
+        currentSystick=getTickValue();
     }
 
     // read back value

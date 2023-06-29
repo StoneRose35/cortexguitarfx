@@ -69,6 +69,10 @@ void eeprom24lc128ReadArray(uint32_t startAdress,uint16_t len,uint8_t* data)
 
 void eeprom24lc128WaitUntilAvailable()
 {
+    if (getTargetAddress()!=EEPROM_24LC128_ADDRESS)
+    {
+        setTargetAddress(EEPROM_24LC128_ADDRESS);
+    }
     while(masterTransmit(0,1)!=0)
     {
 
