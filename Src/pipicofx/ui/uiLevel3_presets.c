@@ -6,6 +6,8 @@
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
+#include "images/fwUpgradeOverlay.h"
+#include "images/fwupdateScreen.h"
 #include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
@@ -17,12 +19,13 @@ extern uint8_t currentPreset;
 static volatile uint8_t overlayNr=0xFF;
 static volatile uint8_t bankChanged=0; // flag indicating that the bank has been changed upon stomp switch release
                                        // used to prohob action when the second stomp switch is released
-const BwImageType* overlays[]={&editOverlay_streamimg, &settingsOverlay_streamimg};
+const BwImageType* overlays[]={&editOverlay_streamimg, &settingsOverlay_streamimg, &fwUpgradeOverlay_streamimg};
 extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
 
 #define OVERLAY_NR_EDIT 0
 #define OVERLAY_NR_SYSTEMSETTINGS 1
+#define OVERLAY_NR_FWUPDATE 2
 
 static void create(PiPicoFxUiType*data)
 {
@@ -86,8 +89,13 @@ static void enterCallback(PiPicoFxUiType*data)
         }
         else if (overlayNr == OVERLAY_NR_SYSTEMSETTINGS)
         {
-            // TODO
             enterLevel5(data);
+        }
+        else if (overlayNr == OVERLAY_NR_FWUPDATE)
+        {
+            drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
+            ssd1306DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
+            reset_usb_boot(0,0);
         }
     }
 
@@ -102,7 +110,7 @@ static void exitCallback(PiPicoFxUiType*data)
     // remove overlay menu (if there)
     if (overlayNr != 0xFF)
     {
-        clearSquare(0.0f,0.0f,128.0f,42.0f,imgBuffer);
+        clearSquare(0.0f,0.0f,128.0f,43.0f,imgBuffer);
         *(strbfr) = 0;
         appendToString(strbfr,"Bank:");
         UInt8ToChar(currentBank,nrbfr);
@@ -130,7 +138,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         if (encoderDelta > 0)
         {
             overlayNr++;
-            if (overlayNr > 1)
+            if (overlayNr > 2)
             {
                 overlayNr=1;
             }
@@ -138,7 +146,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         else
         {
             overlayNr--;
-            if (overlayNr > 1)
+            if (overlayNr > 2)
             {
                 overlayNr=0;
             }

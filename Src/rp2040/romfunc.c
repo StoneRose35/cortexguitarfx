@@ -68,6 +68,12 @@ void flash_range_program(uint32_t addr,const uint8_t * data, uint32_t cnt)
     flash_range_program_ptr(addr,data,cnt);
 }
 
+void reset_usb_boot(uint32_t gpio_activity_mask,uint32_t disable_interface_mask)
+{
+    reset_usb_boot_fn reset_usb_boot_ptr = getRomFunction('U', 'B');
+    reset_usb_boot_ptr(gpio_activity_mask,disable_interface_mask);
+}
+
 /**
  * @brief a+b
  * 

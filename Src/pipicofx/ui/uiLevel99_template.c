@@ -58,6 +58,7 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
 
 void enterLevel99(PiPicoFxUiType*data)
 {
+    clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
