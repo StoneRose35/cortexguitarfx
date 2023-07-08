@@ -34,7 +34,9 @@ SECTIONS
         
     
     .text : {
-        KEEP (*(.vectors))
+        KEEP (*(.vectors_core0))
+        . = ALIGN(256);
+        KEEP (*(.vectors_core1))
         KEEP (*(.reset))
         /* put that stuff into ram, so exclude it here*/
         *(EXCLUDE_FILE(*libgcc.a: *libc.a:*lib_a-mem*.o *libm.a:) .text*)

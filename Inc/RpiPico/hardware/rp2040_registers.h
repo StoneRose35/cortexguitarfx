@@ -168,10 +168,20 @@
 #define SIO_FIFO_ST ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_ST_OFFSET))
 #define SIO_FIFO_RD ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_RD_OFFSET))
 #define SIO_FIFO_WR ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_WR_OFFSET))
+#define SIO_CPUID ((volatile uint32_t*)(SIO_BASE + SIO_CPUID_OFFSET))
 
 #define M0PLUS_VTOR ((volatile uint32_t*)(PPB_BASE + M0PLUS_VTOR_OFFSET))
 #define NVIC_ISER ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_ISER_OFFSET))
 #define NVIC_ICER ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_ICER_OFFSET))
+#define NVIC_IPR7 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR7_OFFSET))
+#define NVIC_IPR6 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR6_OFFSET))
+#define NVIC_IPR5 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR5_OFFSET))
+#define NVIC_IPR4 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR4_OFFSET))
+#define NVIC_IPR3 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR3_OFFSET))
+#define NVIC_IPR2 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR2_OFFSET))
+#define NVIC_IPR1 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR1_OFFSET))
+#define NVIC_IPR0 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR0_OFFSET))
+
 
 #define RESETS ((volatile uint32_t*)(RESETS_BASE + RESETS_RESET_OFFSET))
 #define RESETS_DONE ((volatile uint32_t*)(RESETS_BASE + RESETS_RESET_DONE_OFFSET))

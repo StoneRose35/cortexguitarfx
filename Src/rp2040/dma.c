@@ -36,6 +36,7 @@ extern volatile uint8_t programChangeState;
 extern PiPicoFxUiType piPicoUiController;
 static volatile uint32_t * audioStatePtr;
 int16_t fadeCounter;
+volatile uint32_t spurious_irq_cntr=0;
 
 void initDMA()
 {
@@ -55,8 +56,9 @@ void initDMA()
  * on channel 0 an interrupt is asserted when the neopixel data has been fully clocked out
  * on channel 1 an interrupt is asserted when data has been sent over the usb uart
  */
-void isr_dma_irq0_irq11()
+void isr_c0_dma_irq0_irq11()
 {
+	/*
 	if ((*DMA_INTS0 & (1<<0))==(1 << 0)) // if from channel 0: neopixel  frame timer
 	{
 		// clear interrupt
@@ -67,17 +69,20 @@ void isr_dma_irq0_irq11()
 
 		sendState = SEND_STATE_SENT;
 	}
-	else if ((*DMA_INTS0 & (1<<1))==(1 << 1)) // from channel 1: usb uart transmission done
+	else */if ((*DMA_INTS0 & (1<<1))==(1 << 1) ) // from channel 1: usb uart transmission done, handled by core0
 	{
 		*DMA_INTS0 = (1<<1);
 		*DMA_CH1_CTRL_TRIG &= ~(1 << DMA_CH1_CTRL_TRIG_EN_LSB); // disable dma channel 1
 		task |= (1 << TASK_USB_CONSOLE_TX);
 	}
-	else if ((*DMA_INTS0 & (1<<3))==(1 << 3)) // from channel 3: toogle audio input buffer
+	else if ((*DMA_INTS0 & (1<<3))==(1 << 3) ) // from channel 3: toogle audio input buffer, handled by core0
 	{
+		*DMA_INTS0 = (1<<3);
+		// disable other dma interrupts when processing audio
+		*NVIC_ICER = (1 << 11);
 		toggleAudioBuffer();	
 		toggleAudioInputBuffer();
-		*DMA_INTS0 = (1<<3);
+
 
 
 		if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
@@ -179,11 +184,31 @@ void isr_dma_irq0_irq11()
 			cpuLoad = cpuLoad*196; //*256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
 			cpuLoad = cpuLoad >> 8;
 		}
+		// re-enable dma interrupts
+		*NVIC_ISER = (1 << 11);
 	}
-	else if ((*DMA_INTS0 & (1<<4))==(1 << 4)) // channel 4: one line of display data written
+	/*
+	else if ((*DMA_INTS0 & (1<<4))==(1 << 4)) // channel 4: one line of display data written, handled by core 1
+	{
+		*DMA_INTS0 = (1<<4);
+		ssd1306WriteNextLine();
+	}*/
+	return;
+}
+
+
+
+void isr_c1_dma_irq0_irq11()
+{
+	if ((*DMA_INTS0 & (1<<4))==(1 << 4)) // channel 4: one line of display data written, handled by core 1
 	{
 		*DMA_INTS0 = (1<<4);
 		ssd1306WriteNextLine();
 	}
+	else 
+	{
+		spurious_irq_cntr++;
+	}
+	
 	return;
 }

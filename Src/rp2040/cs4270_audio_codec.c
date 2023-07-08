@@ -114,11 +114,11 @@ void cs4270SetInputState(uint8_t channel,uint8_t val)
     {
         if (channel == CS4270_CHANNEL_A || channel == CS4270_CHANNEL_BOTH)
         {
-            regContent |= ~(1 << 3);
+            regContent |= (1 << 3);
         }
         if (channel == CS4270_CHANNEL_B || channel == CS4270_CHANNEL_BOTH)
         {
-            regContent |= ~(1 << 4);
+            regContent |= (1 << 4);
         }
     }
     regdata |= regContent;

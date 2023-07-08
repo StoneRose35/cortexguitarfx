@@ -248,12 +248,12 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 regbfr = cs4270GetInputState();
                 if ((regbfr & 0x1) != 0 && encoderDelta < 0) // switch off, was on
                 {
-                    cs4270SetInputState(CS4270_CHANNEL_A,0);
+                    cs4270SetInputState(CS4270_CHANNEL_B,0);
                     drawImage(16,20,&toggleswitch_off_streamimg,img);
                 }
                 else if ((regbfr & 0x1) == 0 && encoderDelta > 0) // switch on, was off
                 {
-                    cs4270SetInputState(CS4270_CHANNEL_A,1);
+                    cs4270SetInputState(CS4270_CHANNEL_B,1);
                     drawImage(16,20,&toggleswitch_on_streamimg,img);
                 }
                 break;
@@ -261,12 +261,12 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 regbfr = cs4270GetInputState();
                 if ((regbfr & 0x2) != 0 && encoderDelta < 0) // switch off, was on
                 {
-                    cs4270SetInputState(CS4270_CHANNEL_B,0);
+                    cs4270SetInputState(CS4270_CHANNEL_A,0);
                     drawImage(47,20,&toggleswitch_off_streamimg,img);
                 }
                 else if ((regbfr & 0x2) == 0 && encoderDelta > 0) // switch on, was off
                 {
-                    cs4270SetInputState(CS4270_CHANNEL_B,1);
+                    cs4270SetInputState(CS4270_CHANNEL_A,1);
                     drawImage(47,20,&toggleswitch_on_streamimg,img);
                 }
                 break;

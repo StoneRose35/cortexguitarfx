@@ -8,6 +8,7 @@
 #include "hardware/rp2040_registers.h"
 #include "cs4270_audio_codec.h"
 #include "systick.h"
+#include "irq.h"
 
 static uint32_t oldtickenc,oldtickswitch;
 static volatile uint32_t encoderVal = 0x7FFFFFFF;
@@ -19,7 +20,7 @@ static volatile uint8_t switchPins[8];
 static volatile uint8_t switchVals[8]; // bit 0: sticky bit set when button is pressed (chage from 0 to 1), bit 1: sticky bit set when button is released, bit 2: momentary value
 static volatile uint32_t oldTickSwitches[8];
 static volatile uint8_t lastTrigger;
-void isr_io_irq_bank0_irq13()
+void isr_c1_io_irq_bank0_irq13()
 {
     uint32_t* switchIntAddress;
     if ((*ENCODER_1_INTR & (1 << ENCODER_1_EDGE_HIGH)) == (1 << ENCODER_1_EDGE_HIGH))
@@ -178,6 +179,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
 
 
     *NVIC_ISER = (1 << 13);
+    setInterruptPriority(13,1);
 
     //read old tick values
     oldtickenc=getTickValue();

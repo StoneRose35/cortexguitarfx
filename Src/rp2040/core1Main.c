@@ -3,6 +3,7 @@
 #include "multicore.h"
 #include "core1Main.h"
 #include "gpio.h"
+#include "irq.h"
 #include "ssd1306_display.h"
 #include "audio/firFilter.h"
 #include "audio/audiotools.h"
@@ -53,7 +54,7 @@ static volatile uint32_t * audioStatePtr;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 
-void isr_sio_irq_proc1_irq16() // only fires when a fir computation has to be made
+void isr_c1_sio_irq_proc1_irq16() // only fires when a fir computation has to be made
 {
     if ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_VLD_LSB))!= 0)
     {
@@ -74,16 +75,18 @@ void core1Main()
     // initalized the rotary encoder and the switches so that core 1 handler the interrupts of the ui elements
     initRotaryEncoder(switchesPins,2);
     initStompSwitchesInterface();
-
-    *SIO_FIFO_ST = (1 << 2);
-    *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
-    *NVIC_ISER = (1 << 16); //enable interrupt for adc and sio of proc1 
+    initRoundRobinReading(); // internal adc for reading parameters
 
     setAsOuput(CLIPPING_LED_INPUT);
     setAsOuput(CLIPPING_LED_OUTPUT);
 
     setStompswitchColorRaw(0);
 
+
+    *SIO_FIFO_ST = (1 << 2);
+    *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
+    *NVIC_ISER = (1 << 16) | (1 << 11); // enable interrupt for dma and sio of proc1 
+    setInterruptPriority(11,1);
     /*
     preset1.bankNr = 0;
     preset1.bankPos = 1;

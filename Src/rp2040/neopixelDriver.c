@@ -29,7 +29,7 @@ volatile uint8_t sendState=SEND_STATE_INITIAL;
 // framerate timer irq function
 // should update sendState every frame to notify the mainloop that a new  color info should be sent
 // and should also update sendState once clocking in the colors is done a.k.a. when decompressArray can be called earliest
-void isr_pio0_irq0_irq7()
+void isr_c0_pio0_irq0_irq7()
 {
 	if((*PIO_IRQ & (1 << 1)) == (1 << 1)) // got irq 0, a frame has passed
 	{

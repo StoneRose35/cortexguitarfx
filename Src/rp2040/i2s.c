@@ -20,7 +20,7 @@ static volatile uint32_t dbfrInputPtr;
 
 
 
-void isr_pio1_irq0_irq9()
+void isr_c0_pio1_irq0_irq9()
 {
 	if((*PIO1_IRQ & (1 << 0)) == (1 << 0))
 	{

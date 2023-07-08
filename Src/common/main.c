@@ -251,8 +251,8 @@ int main(void)
 	initUsbPll();
 	initSystickTimer();
 	initDMA();
-	initPio();
 	initGpio();
+	initPio();
 	initTimer();
 	initAdc();
 	initDatetimeClock();
@@ -262,6 +262,26 @@ int main(void)
 	#ifdef CS4270
 	initI2c(CS4270_I2C_ADDRESS); //72 
 	#endif
+	#ifdef WM8731
+	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
+	#endif
+	#ifdef CS4270
+	setupCS4270();
+#endif
+	startCore1(&core1Main);
+	// sync with core 1
+	while ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_VLD_LSB)) != (1 << SIO_FIFO_ST_VLD_LSB));
+	core1Handshake=*SIO_FIFO_RD;
+	while (core1Handshake != 0xcafeface)
+	{
+		DebugLedOn();
+		core1Handshake = *SIO_FIFO_RD;
+	}
+
+
+
+
+
 	//initUSB();
 	//initUart(57600,&usbCommBuffer);
 
@@ -270,12 +290,7 @@ int main(void)
 	 * Initialise Component-specific drivers
 	 * 
 	 * */
-	#ifdef WM8731
-	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
-	#endif
-	#ifdef CS4270
-	setupCS4270();
-	#endif
+
 
 	initSsd1306Display();
 
@@ -288,7 +303,7 @@ int main(void)
      *
 	 */
 
-	initRoundRobinReading(); // internal adc for reading parameters
+	
 	piPicoFxUiSetup(&piPicoUiController);
 	ssd1306ClearDisplay();
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
@@ -302,15 +317,7 @@ int main(void)
 	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 
-	startCore1(&core1Main);
-	// sync with core 1
-	while ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_VLD_LSB)) != (1 << SIO_FIFO_ST_VLD_LSB));
-	core1Handshake=*SIO_FIFO_RD;
-	while (core1Handshake != 0xcafeface)
-	{
-		DebugLedOn();
-		core1Handshake = *SIO_FIFO_RD;
-	}
+
 
 	ticEnd=0;
 	ticStart=0;

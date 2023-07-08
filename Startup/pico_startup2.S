@@ -6,60 +6,6 @@
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/m0plus.h"
 
-.section .vectors, "ax"
-.align 2
-
-.global __vectors 
-__vectors:
-.word __StackTop
-.word _start_c_runtime
-.word isr_nmi
-.word isr_hardfault
-.word isr_invalid // Reserved, should never fire
-.word isr_invalid // Reserved, should never fire
-.word isr_invalid // Reserved, should never fire
-.word isr_invalid // Reserved, should never fire
-.word isr_invalid // Reserved, should never fire
-.word isr_invalid // Reserved, should never fire
-.word isr_invalid // Reserved, should never fire
-.word isr_svcall
-.word isr_invalid // Reserved, should never fire
-.word isr_invalid // Reserved, should never fire
-.word isr_pendsv
-.word isr_systick
-.word isr_timer_irq0
-.word isr_timer_irq1
-.word isr_timer_irq2
-.word isr_timer_irq3
-.word isr_pwm_wrap_irq4
-.word isr_usbctrl_irq5
-.word isr_xip_irq6
-.word isr_pio0_irq0_irq7
-.word isr_pio0_irq1_irq8
-.word isr_pio1_irq0_irq9
-.word isr_pio1_irq1_irq10
-.word isr_dma_irq0_irq11
-.word isr_dma_irq1_irq12
-.word isr_io_irq_bank0_irq13
-.word isr_io_irq_qspi_irq14
-.word isr_sio_irq_proc0_irq15
-.word isr_sio_irq_proc1_irq16
-.word isr_clocks_irq17
-.word isr_spi0_irq18
-.word isr_spi1_irq19
-.word isr_uart0_irq20
-.word isr_uart1_irq21
-.word isr_adc_fifo_irq22
-.word isr_i2c0_irq23
-.word isr_i2c1_irq24
-.word isr_rtc_irq25
-.word isr_irq26
-.word isr_irq27
-.word isr_irq28
-.word isr_irq29
-.word isr_irq30
-.word isr_irq31
-
 
 /* standard isr declarations as weak function */
 .macro std_isr name
@@ -76,45 +22,195 @@ __vectors:
     bkpt #0
 .endm
 
-bkpt_isr isr_nmi
-bkpt_isr isr_hardfault
-bkpt_isr isr_invalid
-bkpt_isr isr_svcall
-bkpt_isr isr_pendsv
-bkpt_isr isr_systick
+.section .vectors_core0, "ax"
+.align 2
 
-std_isr isr_timer_irq0
-std_isr isr_timer_irq1
-std_isr isr_timer_irq2
-std_isr isr_timer_irq3
-std_isr isr_pwm_wrap_irq4
-std_isr isr_usbctrl_irq5
-std_isr isr_xip_irq6
-std_isr isr_pio0_irq0_irq7
-std_isr isr_pio0_irq1_irq8
-std_isr isr_pio1_irq0_irq9
-std_isr isr_pio1_irq1_irq10
-std_isr isr_dma_irq0_irq11
-std_isr isr_dma_irq1_irq12
-std_isr isr_io_irq_bank0_irq13
-std_isr isr_io_irq_qspi_irq14
-std_isr isr_sio_irq_proc0_irq15
-std_isr isr_sio_irq_proc1_irq16
-std_isr isr_clocks_irq17
-std_isr isr_spi0_irq18
-std_isr isr_spi1_irq19
-std_isr isr_uart0_irq20
-std_isr isr_uart1_irq21
-std_isr isr_adc_fifo_irq22
-std_isr isr_i2c0_irq23
-std_isr isr_i2c1_irq24
-std_isr isr_rtc_irq25
-std_isr isr_irq26
-std_isr isr_irq27
-std_isr isr_irq28
-std_isr isr_irq29
-std_isr isr_irq30
-std_isr isr_irq31
+.global __vectors_core0 
+__vectors_core0:
+.word __StackTop
+.word _start_c_runtime
+.word isr_c0_nmi
+.word isr_c0_hardfault
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_svcall
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_invalid // Reserved, should never fire
+.word isr_c0_pendsv
+.word isr_c0_systick
+.word isr_c0_timer_irq0
+.word isr_c0_timer_irq1
+.word isr_c0_timer_irq2
+.word isr_c0_timer_irq3
+.word isr_c0_pwm_wrap_irq4
+.word isr_c0_usbctrl_irq5
+.word isr_c0_xip_irq6
+.word isr_c0_pio0_irq0_irq7
+.word isr_c0_pio0_irq1_irq8
+.word isr_c0_pio1_irq0_irq9
+.word isr_c0_pio1_irq1_irq10
+.word isr_c0_dma_irq0_irq11
+.word isr_c0_dma_irq1_irq12
+.word isr_c0_io_irq_bank0_irq13
+.word isr_c0_io_irq_qspi_irq14
+.word isr_c0_sio_irq_proc0_irq15
+.word isr_c0_sio_irq_proc1_irq16
+.word isr_c0_clocks_irq17
+.word isr_c0_spi0_irq18
+.word isr_c0_spi1_irq19
+.word isr_c0_uart0_irq20
+.word isr_c0_uart1_irq21
+.word isr_c0_adc_fifo_irq22
+.word isr_c0_i2c0_irq23
+.word isr_c0_i2c1_irq24
+.word isr_c0_rtc_irq25
+.word isr_c0_irq26
+.word isr_c0_irq27
+.word isr_c0_irq28
+.word isr_c0_irq29
+.word isr_c0_irq30
+.word isr_c0_irq31
+
+
+
+bkpt_isr isr_c0_nmi
+bkpt_isr isr_c0_hardfault
+bkpt_isr isr_c0_invalid
+bkpt_isr isr_c0_svcall
+bkpt_isr isr_c0_pendsv
+bkpt_isr isr_c0_systick
+
+std_isr isr_c0_timer_irq0
+std_isr isr_c0_timer_irq1
+std_isr isr_c0_timer_irq2
+std_isr isr_c0_timer_irq3
+std_isr isr_c0_pwm_wrap_irq4
+std_isr isr_c0_usbctrl_irq5
+std_isr isr_c0_xip_irq6
+std_isr isr_c0_pio0_irq0_irq7
+std_isr isr_c0_pio0_irq1_irq8
+std_isr isr_c0_pio1_irq0_irq9
+std_isr isr_c0_pio1_irq1_irq10
+std_isr isr_c0_dma_irq0_irq11
+std_isr isr_c0_dma_irq1_irq12
+std_isr isr_c0_io_irq_bank0_irq13
+std_isr isr_c0_io_irq_qspi_irq14
+std_isr isr_c0_sio_irq_proc0_irq15
+std_isr isr_c0_sio_irq_proc1_irq16
+std_isr isr_c0_clocks_irq17
+std_isr isr_c0_spi0_irq18
+std_isr isr_c0_spi1_irq19
+std_isr isr_c0_uart0_irq20
+std_isr isr_c0_uart1_irq21
+std_isr isr_c0_adc_fifo_irq22
+std_isr isr_c0_i2c0_irq23
+std_isr isr_c0_i2c1_irq24
+std_isr isr_c0_rtc_irq25
+std_isr isr_c0_irq26
+std_isr isr_c0_irq27
+std_isr isr_c0_irq28
+std_isr isr_c0_irq29
+std_isr isr_c0_irq30
+std_isr isr_c0_irq31
+
+.section .vectors_core1, "ax"
+.align 2
+
+.global __vectors_core1 
+__vectors_core1:
+.word __StackTop
+.word _start_c_runtime
+.word isr_c1_nmi
+.word isr_c1_hardfault
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_svcall
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_invalid // Reserved, should never fire
+.word isr_c1_pendsv
+.word isr_c1_systick
+.word isr_c1_timer_irq0
+.word isr_c1_timer_irq1
+.word isr_c1_timer_irq2
+.word isr_c1_timer_irq3
+.word isr_c1_pwm_wrap_irq4
+.word isr_c1_usbctrl_irq5
+.word isr_c1_xip_irq6
+.word isr_c1_pio0_irq0_irq7
+.word isr_c1_pio0_irq1_irq8
+.word isr_c1_pio1_irq0_irq9
+.word isr_c1_pio1_irq1_irq10
+.word isr_c1_dma_irq0_irq11
+.word isr_c1_dma_irq1_irq12
+.word isr_c1_io_irq_bank0_irq13
+.word isr_c1_io_irq_qspi_irq14
+.word isr_c1_sio_irq_proc0_irq15
+.word isr_c1_sio_irq_proc1_irq16
+.word isr_c1_clocks_irq17
+.word isr_c1_spi0_irq18
+.word isr_c1_spi1_irq19
+.word isr_c1_uart0_irq20
+.word isr_c1_uart1_irq21
+.word isr_c1_adc_fifo_irq22
+.word isr_c1_i2c0_irq23
+.word isr_c1_i2c1_irq24
+.word isr_c1_rtc_irq25
+.word isr_c1_irq26
+.word isr_c1_irq27
+.word isr_c1_irq28
+.word isr_c1_irq29
+.word isr_c1_irq30
+.word isr_c1_irq31
+
+bkpt_isr isr_c1_nmi
+bkpt_isr isr_c1_hardfault
+bkpt_isr isr_c1_invalid
+bkpt_isr isr_c1_svcall
+bkpt_isr isr_c1_pendsv
+bkpt_isr isr_c1_systick
+
+std_isr isr_c1_timer_irq0
+std_isr isr_c1_timer_irq1
+std_isr isr_c1_timer_irq2
+std_isr isr_c1_timer_irq3
+std_isr isr_c1_pwm_wrap_irq4
+std_isr isr_c1_usbctrl_irq5
+std_isr isr_c1_xip_irq6
+std_isr isr_c1_pio0_irq0_irq7
+std_isr isr_c1_pio0_irq1_irq8
+std_isr isr_c1_pio1_irq0_irq9
+std_isr isr_c1_pio1_irq1_irq10
+std_isr isr_c1_dma_irq0_irq11
+std_isr isr_c1_dma_irq1_irq12
+std_isr isr_c1_io_irq_bank0_irq13
+std_isr isr_c1_io_irq_qspi_irq14
+std_isr isr_c1_sio_irq_proc0_irq15
+std_isr isr_c1_sio_irq_proc1_irq16
+std_isr isr_c1_clocks_irq17
+std_isr isr_c1_spi0_irq18
+std_isr isr_c1_spi1_irq19
+std_isr isr_c1_uart0_irq20
+std_isr isr_c1_uart1_irq21
+std_isr isr_c1_adc_fifo_irq22
+std_isr isr_c1_i2c0_irq23
+std_isr isr_c1_i2c1_irq24
+std_isr isr_c1_rtc_irq25
+std_isr isr_c1_irq26
+std_isr isr_c1_irq27
+std_isr isr_c1_irq28
+std_isr isr_c1_irq29
+std_isr isr_c1_irq30
+std_isr isr_c1_irq31
 
 
 .section .reset,"ax"
@@ -137,7 +233,7 @@ bx r2
 _start_c_runtime:
 _entry_point:
 // set the vector offset table register
-ldr r0, =__vectors
+ldr r0, =__vectors_core0
 ldr r1,=PPB_BASE+M0PLUS_VTOR_OFFSET
 str r0,[r1]
 

@@ -41,8 +41,10 @@
         "pipicofx_param_2_scaled.h": "c",
         "picofxcore.h": "c",
         "gfxfonts.h": "c",
-        "ssd1306_display.h": "c"
+        "ssd1306_display.h": "c",
+        "pads_bank0.h": "c",
+        "systick.h": "c"
     },
     "cmake.configureOnOpen": false,
-    "cortex-debug.variableUseNaturalFormat": false
+    "cortex-debug.variableUseNaturalFormat": true
 }

@@ -174,7 +174,7 @@ UsbEndpointConfigurationType * endpointsIn[16];
 UsbEndpointConfigurationType * endpointsOut[16];
 
 // usb controller interrupt routine
-void isr_usbctrl_irq5()
+void isr_c0_usbctrl_irq5()
 {
     uint32_t stat;
     stat = usb_hw->ints;

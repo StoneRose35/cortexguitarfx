@@ -30,7 +30,7 @@ CommBuffer usbBuffer;
 static CommBuffer bluetoothBuffer;
 
 // receive interrupt for the usb uart
-void isr_uart0_irq20()
+void isr_c0_uart0_irq20()
 {
 	uint8_t bfr;
 	if ((*UART_UARTMIS & (1 << UART_UARTMIS_RXMIS_LSB)) == (1 << UART_UARTMIS_RXMIS_LSB)) // reception case
@@ -44,7 +44,7 @@ void isr_uart0_irq20()
 }
 
 // receive interrupt for the bluetooth uart
-void isr_uart1_irq21()
+void isr_c0_uart1_irq21()
 {
 	uint8_t bfr;
 	if ((*UARTBT_UARTMIS & (1 << UART_UARTMIS_RXMIS_LSB)) == (1 << UART_UARTMIS_RXMIS_LSB)) // reception case

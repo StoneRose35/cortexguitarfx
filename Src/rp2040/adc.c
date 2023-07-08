@@ -1,6 +1,7 @@
 #include "adc.h"
 #include "dma.h"
 #include "system.h"
+#include "irq.h"
 #include "hardware/regs/resets.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/adc.h"
@@ -18,7 +19,7 @@ extern uint32_t task;
 
 volatile uint16_t adcChannel0Value, adcChannel1Value, adcChannel2Value;
 
-void isr_adc_fifo_irq22()
+void isr_c1_adc_fifo_irq22()
 {
     adcChannel0Value = *ADC_FIFO;
     adcChannel1Value = *ADC_FIFO;
@@ -147,6 +148,8 @@ void initRoundRobinReading()
 
     // enable global interrupt (handled by core 0)
     *NVIC_ISER = (1 << 22);
+    setInterruptPriority(22,1);
+
 
     // set round robin for channels 0 to 2
     *ADC_CS |= ((1 << 0) << ADC_CS_RROBIN_LSB) | ((1 << 1) << ADC_CS_RROBIN_LSB) | ((1 << 2) << ADC_CS_RROBIN_LSB);

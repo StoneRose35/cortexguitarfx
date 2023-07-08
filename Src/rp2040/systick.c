@@ -7,7 +7,7 @@
 
 volatile static uint32_t ticks=0;
 
-void isr_systick()
+void isr_c0_systick()
 {
     ticks++;
 }

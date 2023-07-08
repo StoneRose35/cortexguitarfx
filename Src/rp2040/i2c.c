@@ -14,22 +14,6 @@ static inline void read_reg(volatile uint32_t* reg)
 {
 }
 
-static volatile void(*irqHandler)(uint8_t data,uint8_t address)=0;
-
-void isr_i2c0_irq23()
-{
-    if(irqHandler!=0)
-    {
-        irqHandler(*I2C_IC_DATA_CMD & 0xFF,*I2C_IC_TAR &0xFF);
-    }
-    read_reg(I2C_IC_CLR_INTR);
-}
-
-
-void registerI2C0IRQ(void(*handler)(uint8_t data,uint8_t address))
-{
-    irqHandler = handler;
-}
 
 void initI2c(uint8_t slaveAdress)
 {
