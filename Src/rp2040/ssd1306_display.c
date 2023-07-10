@@ -307,7 +307,7 @@ void ssd1306WriteNextLine(void)
 
 void ssd1306writeFramebufferAsync(uint8_t * fb)
 {
-    while(currentDmaRow!=8); // block until previous transfer is done
+    while(currentDmaRow<8); // block until previous transfer is done
     currentDmaRow=0;
     currentFrameBuffer=fb;
     ssd1306WriteNextLine();

@@ -187,12 +187,6 @@ void isr_c0_dma_irq0_irq11()
 		// re-enable dma interrupts
 		*NVIC_ISER = (1 << 11);
 	}
-	/*
-	else if ((*DMA_INTS0 & (1<<4))==(1 << 4)) // channel 4: one line of display data written, handled by core 1
-	{
-		*DMA_INTS0 = (1<<4);
-		ssd1306WriteNextLine();
-	}*/
 	return;
 }
 
