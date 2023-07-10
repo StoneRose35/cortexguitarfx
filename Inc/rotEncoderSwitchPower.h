@@ -19,5 +19,7 @@ int16_t getStickyIncrementDelta();
 
 void clearStickyIncrementDelta();
 
+uint32_t getRotaryDeltaT();
+
 #endif
 

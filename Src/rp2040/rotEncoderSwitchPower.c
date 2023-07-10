@@ -7,6 +7,7 @@
 #include "hardware/regs/sio.h"
 #include "hardware/rp2040_registers.h"
 #include "cs4270_audio_codec.h"
+#include "timer.h"
 #include "systick.h"
 #include "irq.h"
 
@@ -15,6 +16,8 @@ static volatile uint32_t encoderVal = 0x7FFFFFFF;
 static volatile uint32_t encoderValOld = 0x7FFFFFFF;
 static volatile int16_t encoderStickyIncrement=0;
 static volatile int16_t encoderStickyDecrement=0;
+static volatile uint32_t currentUsVal;
+static volatile uint32_t lastUsVal;
 static volatile uint8_t switchVal;
 static volatile uint8_t switchPins[8];
 static volatile uint8_t switchVals[8]; // bit 0: sticky bit set when button is pressed (chage from 0 to 1), bit 1: sticky bit set when button is released, bit 2: momentary value
@@ -35,6 +38,8 @@ void isr_c1_io_irq_bank0_irq13()
                 {
                     encoderStickyDecrement++;
                     encoderValOld=encoderVal;
+                    lastUsVal = currentUsVal;
+                    currentUsVal = getTimeLW();
                 }
             }
             else
@@ -75,6 +80,8 @@ void isr_c1_io_irq_bank0_irq13()
                 { 
                     encoderStickyIncrement++;
                     encoderValOld=encoderVal;
+                    lastUsVal = currentUsVal;
+                    currentUsVal = getTimeLW();
                 }
             }
             else 
@@ -210,6 +217,16 @@ void clearReleasedStickyBit(uint8_t nr)
 int16_t getStickyIncrementDelta()
 {
     return encoderStickyIncrement-encoderStickyDecrement;
+}
+
+// returns the time passed in us between sticky increments oder decrements
+uint32_t getRotaryDeltaT()
+{
+    if (currentUsVal >= lastUsVal)
+    {
+        return currentUsVal - lastUsVal;
+    }
+    return 0xFFFFFFFF;
 }
 
 void clearStickyIncrementDelta()
