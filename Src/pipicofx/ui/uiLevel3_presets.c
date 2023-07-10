@@ -95,7 +95,7 @@ static void enterCallback(PiPicoFxUiType*data)
         {
             drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
             ssd1306DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
-            reset_usb_boot(0,0);
+            reset_usb_boot(1 << 17,2);
         }
     }
 
