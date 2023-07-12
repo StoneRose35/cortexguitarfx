@@ -171,6 +171,31 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
+            "name": "gcc-9 - fx programs integration test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Tests/fxprograms_integrationtest",
+            "cwd": "${workspaceFolder}/Tests",
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "compile fxprogram integration test",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "gcc-9 - run audio test",
             "type": "cppdbg",
             "request": "launch",

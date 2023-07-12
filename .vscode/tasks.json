@@ -73,6 +73,33 @@
         },
         {
             "type": "cppbuild",
+            "label": "compile fxprogram integration test",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/fxprograms_integrationtest.c", "./Src/common/audio/*.c",
+                "./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "./Src/common/math/*.c",
+                "-o",
+                "./Tests/fxprograms_integrationtest", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Function to run a given wavefile through a predefined fx program."
+        },
+        {
+            "type": "cppbuild",
             "label": "compile generateUnitPulseWav",
             "command": "/usr/bin/gcc-9",
             "args": [
