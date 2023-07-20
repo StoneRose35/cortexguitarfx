@@ -14,6 +14,7 @@
 #define EDITLEVEL_PROGRAM 0
 #define EDITLEVEL_LEDCOLOR 1
 #define EDITLEVEL_PARAMETERS 2
+#define EDITLEVEL_NAME 3
 
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
@@ -48,7 +49,11 @@ static void create(PiPicoFxUiType*data)
         case EDITLEVEL_PARAMETERS:
             *(strbfr) = 0;    
             appendToString(strbfr,"Edit Params");
-            break;       
+            break;    
+        case EDITLEVEL_NAME:
+            *(strbfr) = 0;    
+            appendToString(strbfr,"Edit Name");
+            break;    
     }
     font = getGFXFont(FREESANS9PT7B);
     drawText(5,42,strbfr,imgBuffer,font);
@@ -105,6 +110,12 @@ static void enterCallback(PiPicoFxUiType*data)
                 enterLevel1(data);
             }
             break;
+        case EDITLEVEL_NAME:
+            uiStackPush(data,4);
+            presets[currentPreset].name[23]=0;
+            data->data = presets[currentPreset].name;
+            enterLevel6(data);
+
     }
 }
 
