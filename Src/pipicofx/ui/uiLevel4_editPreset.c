@@ -157,15 +157,15 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         if (encoderDelta > 0)
         {
             editType++;
-            if (editType > 2)
+            if (editType > 3)
             {
-                editType = 2;
+                editType = 3;
             }
         }
         else if (encoderDelta < 0)
         {
             editType--;
-            if (editType > 2)
+            if (editType > 3)
             {
                 editType = 0;
             }

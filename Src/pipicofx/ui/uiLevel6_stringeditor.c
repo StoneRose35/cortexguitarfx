@@ -87,7 +87,10 @@ static void enterCallback(PiPicoFxUiType*data)
             drawLine(editPos*11,0,(editPos+1)*11,0,imgBuffer);
             drawLine(editPos*11,3+font->yAdvance,(editPos+1)*11,3+font->yAdvance,imgBuffer);
         }
-        uiStackPush(data,0xFF);
+        if (uiStackCurrent(data) != 0xFF)
+        {
+            uiStackPush(data,0xFF);
+        }
     }
 }
 
@@ -136,17 +139,25 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         {
             newPos = 0;
         }
-        if (newPos > maxStringLength-1 && editPos < 254)
+        else if (newPos > maxStringLength-1 && editPos < 254)
         {
             newPos = 254;
         }
-        if (editPos == 254 && newPos > editPos)
+        else if (editPos == 254 && newPos > editPos)
         {
             newPos = 255;
         }
-        if (editPos == 255 && newPos < editPos)
+        else if (editPos == 254 && newPos < editPos)
+        {
+            newPos = maxStringLength-1;
+        }
+        else if (editPos == 255 && encoderDelta < 0)
         {
             newPos = 254;
+        }
+        else if (editPos == 255 && encoderDelta > 0)
+        {
+            newPos = 255;
         }
 
         if (editPos < 254)
@@ -180,7 +191,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
             drawLine(40,53-12,106,53-12,imgBuffer);
             drawLine(40,53-11+font->yAdvance,106,53-11+font->yAdvance,imgBuffer);
         }        
-        
+        editPos = newPos;
     }
     else
     {
