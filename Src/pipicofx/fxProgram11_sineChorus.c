@@ -21,9 +21,9 @@ static void fxProgramParam1Callback(uint16_t val,void*data) // frequency
 {
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
     // map 0 - 4095 to 1 1000
+    fxProgram11.parameters[0].rawValue = val;
     val = ((val*250) >> 10) + 1;
     sineChorusSetFrequency(val,&pData->sineChorus);
-    fxProgram11.parameters[0].rawValue = val;
 }
 
 static void fxProgramParam1Display(void*data,char*res)
@@ -36,10 +36,10 @@ static void fxProgramParam1Display(void*data,char*res)
 static void fxProgramParam2Callback(uint16_t val,void*data) // depth
 {
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
+    fxProgram11.parameters[1].rawValue = val;
     // map to 0 to 255
     val >>= 4;
     pData->sineChorus.depth = (uint8_t)val;
-    fxProgram11.parameters[1].rawValue = val;
 }
 
 static void fxProgramParam2Display(void*data,char*res)
@@ -66,9 +66,9 @@ static void fxProgramParam3Display(void*data,char*res)
 
 static void fxProgramParam4Callback(uint16_t val,void*data)
 {
+    fxProgram11.parameters[3].rawValue = val;
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
     pData->sineChorus.offset = 49 + (val >> 1);
-    fxProgram11.parameters[3].rawValue = val;
 }
 
 static void fxProgramParam4Display(void*data,char*res)

@@ -208,6 +208,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     break;
             }
         }
+        parametersToPreset(presets + currentPreset,fxPrograms);
     }
     create(data);
 }

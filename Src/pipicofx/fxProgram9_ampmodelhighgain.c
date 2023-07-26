@@ -99,7 +99,7 @@ static void fxProgramParam2Callback(uint16_t val,void*data) // gain
     // map 0-4095 to 0-63
     val >>= 6;
     pData->waveshaper1.functionIndex = val;
-    fxProgram8.parameters[1].rawValue = val;
+    fxProgram9.parameters[1].rawValue = val;
 }
 
 
@@ -119,7 +119,7 @@ static void fxProgramParam3Callback(uint16_t val,void*data) // delay/reverb inte
 
     setReverbTime(500 + (val>>2),&pData->reverb);
     pData->reverb.mix = val << 2;
-    fxProgram8.parameters[2].rawValue = val;
+    fxProgram9.parameters[2].rawValue = val;
 }
 
 static void fxProgramParam3Display(void*data,char*res)
@@ -135,7 +135,7 @@ static void fxProgramParam4Callback(uint16_t val,void*data) // modulation type
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
     pData->modType = val >> 11;
-    fxProgram8.parameters[3].rawValue = val;
+    fxProgram9.parameters[3].rawValue = val;
 }
 
 static void fxProgramParam4Display(void*data,char*res) // modulation type
@@ -160,7 +160,7 @@ static void fxProgramParam5Callback(uint16_t val,void*data) // cab type
     {
         pData->cabSimType=8;
     }
-    fxProgram8.parameters[4].rawValue = val;
+    fxProgram9.parameters[4].rawValue = val;
 }
 
 static void fxProgramParam5Display(void*data,char*res) // cab type
