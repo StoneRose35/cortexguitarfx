@@ -97,9 +97,9 @@ static void fxProgramParam2Callback(uint16_t val,void*data) // gain
 {
     FxProgram9DataType* pData = (FxProgram9DataType*)data;
     // map 0-4095 to 0-63
+    fxProgram9.parameters[1].rawValue = val;
     val >>= 6;
     pData->waveshaper1.functionIndex = val;
-    fxProgram9.parameters[1].rawValue = val;
 }
 
 
