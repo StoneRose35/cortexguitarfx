@@ -176,5 +176,30 @@
             },
             "detail": "Audio Unit Tests."
         },
+        {
+            "type": "cppbuild",
+            "label": "compile compressor test",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/compressorTest.c", "./Src/common/audio/*.c","./Src/common/stringFunctions.c","./Src/common/math/*.c","./Tests/libs/wavReader.c",
+                "-o",
+                "./Tests/compressorTest", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Audio Unit Tests."
+        },
     ]
 }

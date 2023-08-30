@@ -20,6 +20,10 @@ typedef struct
 void setAttack(int32_t attackInUs,CompressorDataType*data);
 void setRelease(int32_t releaseInUs,CompressorDataType*data);
 int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data);
+int16_t compressor2ProcessSample(int16_t sampleIn,CompressorDataType*data);
+int16_t compressor3ProcessSample(int16_t sampleIn,CompressorDataType*data);
 int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*gainFunction);
+
+int16_t applyGain2(int16_t sample,int16_t avgVolume,CompressorDataType*gainFunction);
 void compressorReset(CompressorDataType*data);
 #endif

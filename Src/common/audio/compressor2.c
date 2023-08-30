@@ -4,14 +4,14 @@
 #include "fastExpLog.h"
 #include "audio/firstOrderIirFilter.h"
 
-int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
+int16_t applyGain2(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
 {
     int32_t gainFactor;
     int16_t sampleOut;
     int32_t sampleInterm=0;
     int16_t logAvg;
 
-    logAvg = fastlog(avgVolume);
+    logAvg = avgVolume;//fastlog(avgVolume);
     if (logAvg < comp->gainFunction.threshhold) // below threshhold, amplification 1
     {
         sampleInterm=sample;
@@ -19,7 +19,7 @@ int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
     else if (comp->gainFunction.gainReduction > 4)
     {
         gainFactor = fastexp(comp->gainFunction.threshhold)*32767;
-        gainFactor /=avgVolume;
+        gainFactor /=fastexp(avgVolume);
         if (avgVolume != 0)
         {
             sampleInterm = (sample*gainFactor) >> 15;  // sampleInterm/avgVolume;
@@ -28,7 +28,7 @@ int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
     else
     {
         gainFactor =  fastexp(comp->gainFunction.threshhold + ((logAvg-comp->gainFunction.threshhold) >> (comp->gainFunction.gainReduction)))*32767;
-        gainFactor /=avgVolume;
+        gainFactor /=fastexp(avgVolume);
         if (avgVolume != 0)
         {
             sampleInterm = (sample*gainFactor) >> 15;
@@ -39,13 +39,13 @@ int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
 }
 
 
-int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data)
+int16_t compressor2ProcessSample(int16_t sampleIn,CompressorDataType*data)
 {
     int16_t absSample;
     int16_t sampleOut;
     int32_t intermAvg;
 
-    sampleOut = applyGain(sampleIn,data->currentAvg,data);
+    sampleOut = applyGain2(sampleIn,data->currentAvg,data);
     
     if(sampleOut < 0)
     {
@@ -63,13 +63,8 @@ int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data)
     {
         absSample = sampleIn;
     }*/
+    absSample = fastlog(absSample);
     intermAvg = firstOrderIirDualCoeffLPProcessSample(absSample,&data->avgLowpass);
     data->currentAvg = (int16_t)intermAvg; 
     return sampleOut;
-}
-
-void compressorReset(CompressorDataType*data)
-{
-    firstOrderIirDualCoeffLPReset(&data->avgLowpass);
-    data->currentAvg = 0;
 }

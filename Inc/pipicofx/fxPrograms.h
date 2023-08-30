@@ -192,6 +192,7 @@ typedef struct
 
 typedef struct 
 {
+    uint8_t compressorType;
     CompressorDataType compressor;
     GainStageDataType makeupGain;
 }  FxProgram8DataType;

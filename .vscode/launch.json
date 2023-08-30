@@ -258,6 +258,32 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
+            "name": "gcc-9 - run compressor test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Tests/compressorTest",
+            "args": ["./audiosamples/tele_single_note.wav", "./audiosamples/tele_single_note_proc.wav"],
+            "cwd": "${workspaceFolder}/Tests",
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "compile compressor test",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "gcc-9 - generate unit pulse wav",
             "type": "cppdbg",
             "request": "launch",

@@ -7,7 +7,18 @@
 static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    sampleIn = compressorProcessSample(sampleIn,&pData->compressor);
+    switch(pData->compressorType)
+    {
+        case 0:
+            sampleIn = compressorProcessSample(sampleIn,&pData->compressor);
+            break;
+        case 1:
+            sampleIn = compressor2ProcessSample(sampleIn,&pData->compressor);
+            break;
+        case 2:
+            sampleIn = compressor3ProcessSample(sampleIn,&pData->compressor);
+            break;
+    }
     sampleIn = gainStageProcessSample(sampleIn,&pData->makeupGain);
     return sampleIn;
 }
@@ -117,6 +128,37 @@ static void fxProgramP5Display(void*data,char*res)
     decimalInt16ToChar((int16_t)dval,res,2);
 }
 
+static void fxProgramP6Callback(uint16_t val,void*data) 
+{
+    uint8_t intermVal;
+    FxProgram8DataType * pData=(FxProgram8DataType*)data;
+    intermVal = val >> 10;
+    if (intermVal == 3)
+    {
+        intermVal = 2;
+    }
+    pData->compressorType = intermVal;
+    fxProgram8.parameters[5].rawValue = val;
+}
+
+static void fxProgramP6Display(void*data,char*res)
+{
+    FxProgram8DataType * pData=(FxProgram8DataType*)data;
+    *res=0;
+    switch (pData->compressorType)
+    {
+        case 0:
+            appendToString(res,"Dirty");
+            break;
+        case 1:
+            appendToString(res,"Snappy");
+            break;
+        case 2:
+            appendToString(res,"Pumpy");
+            break;
+    }
+}
+
 FxProgram8DataType fxProgram8Data =
 {
     .compressor.avgLowpass.alphaFalling = 10,
@@ -139,7 +181,7 @@ static void fxProgramReset(void*data)
 FxProgramType fxProgram8 = {
     .data = (void*)&fxProgram8Data,
     .name = "Compressor",
-    .nParameters=5,
+    .nParameters=6,
     .parameters = {
         {
             .name="Threshhold     ",
@@ -181,6 +223,14 @@ FxProgramType fxProgram8 = {
             .increment=32,
             .rawValue=0,
         },
+        {
+            .name="Flavor        ",
+            .control=0xff,
+            .getParameterDisplay=&fxProgramP6Display,
+            .setParameter=&fxProgramP6Callback,
+            .increment=1024,
+            .rawValue=0
+        }
 
 
     },
