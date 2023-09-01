@@ -39,6 +39,8 @@ int16_t applyGain2(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
 }
 
 
+
+
 int16_t compressor2ProcessSample(int16_t sampleIn,CompressorDataType*data)
 {
     int16_t absSample;

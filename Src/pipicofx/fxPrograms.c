@@ -17,6 +17,7 @@ FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     &fxProgram10, // reverb
     &fxProgram12, // allpass reverb
     &fxProgram13, // hadamard diffusor reverb
+    &fxProgram15, // vocal processor
     &fxProgram3 // Off
     };
 

@@ -38,6 +38,17 @@ int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
     return sampleOut;
 }
 
+int16_t getMaxGain(CompressorDataType*comp)
+{
+    if (comp->gainFunction.gainReduction > 4)
+    {
+        return fastexp(comp->gainFunction.threshhold);
+    }
+    else
+    {
+        return fastexp(comp->gainFunction.threshhold + ((0x7FFF-comp->gainFunction.threshhold) >> (comp->gainFunction.gainReduction)));
+    }
+}
 
 int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data)
 {

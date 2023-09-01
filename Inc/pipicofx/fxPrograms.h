@@ -19,7 +19,7 @@
 #include "pipicofx/picofxCore.h"
 
 
-#define N_FX_PROGRAMS 12
+#define N_FX_PROGRAMS 13
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
 
@@ -226,6 +226,15 @@ typedef struct
     ThreeBandEQType eq;
 } FxProgram14DataType;
 
+typedef struct 
+{
+    int16_t reverbTime;
+    ThreeBandEQType eq;
+    CompressorDataType comp;
+    GainStageDataType postGain;
+    ReverbType reverb;
+} FxProgram15DataType;
+
 
 extern FxProgramType fxProgram1;
 extern FxProgramType fxProgram2;
@@ -241,6 +250,7 @@ extern FxProgramType fxProgram11;
 extern FxProgramType fxProgram12;
 extern FxProgramType fxProgram13;
 extern FxProgramType fxProgram14;
+extern FxProgramType fxProgram15;
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
 #endif
