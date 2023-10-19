@@ -9,6 +9,9 @@
 #include "hardware/regs/pads_bank0.h"
 #include "hardware/regs/sio.h"
 
+
+#define SSD1306_DISPLAY_N_PAGES 8
+#define SSD1306_DISPLAY_N_COLUMNS 128
 void initSsd1306Display();
 
 

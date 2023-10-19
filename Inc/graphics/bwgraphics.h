@@ -13,6 +13,9 @@ float fsin(float x);
 
 #define BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES 0
 #define BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES 1
+
+#define BWIMAGE_FRAMEBUFFER_HORIZONTAL
+//#define BWIMAGE_FRAMEBUFFER_VERTICAL
 typedef struct BwImageStruct
 {
 	uint8_t * data; // data is arrange x axis first, starting from top left
@@ -26,6 +29,7 @@ typedef struct BwImageBufferStruct
 	uint8_t data[1024]; // data is arrange x axis first, starting from top left
 	uint8_t sx; // size in pixels
 	uint8_t sy; // size in pixels
+	uint8_t type;
 } BwImageBufferType;
 
 
@@ -39,6 +43,8 @@ void drawOval(float ax,float ay,float cx,float cy,BwImageType*img);
 void clearOval(float ax,float ay,float cx,float cy,BwImageType*img);
 void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img);
 void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img);
+void clearSquareInt(uint8_t spx, uint8_t spy,uint8_t epx, uint8_t epy,BwImageType* img);
+void drawSquareInt(uint8_t spx, uint8_t spy,uint8_t epx, uint8_t epy,BwImageType* img);
 void drawHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img);
 void clearHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img);
 void drawVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img);

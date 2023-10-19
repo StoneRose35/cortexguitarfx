@@ -91,8 +91,8 @@ void initSsd1306Display()
 /**
  * @brief Set the Cursor object
  * 
- * @param row goes from 0 to 7, defines the page to write
- * @param col columns, goes from 0 to 127
+ * @param row goes from 0 to SSD1306_DISPLAY_N_PAGES-1, defines the page to write
+ * @param col columns, goes from 0 to SSD1306_DISPLAY_N_COLUMNS-1
  */
 void setCursor(uint8_t row, uint8_t col)
 {
@@ -111,9 +111,9 @@ void setCursor(uint8_t row, uint8_t col)
 
 void ssd1306ClearDisplay()
 {
-    for(uint8_t r=0;r<8;r++)
+    for(uint8_t r=0;r<SSD1306_DISPLAY_N_PAGES;r++)
     {
-        for(uint8_t c=0;c<128;c++)
+        for(uint8_t c=0;c<SSD1306_DISPLAY_N_COLUMNS;c++)
         {
             setCursor(r,c);
             *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD); // switch to data
@@ -126,8 +126,8 @@ void ssd1306ClearDisplay()
 /**
  * @brief fill a full or parts of a row with bytes
  * 
- * @param row the row from 0 to 7
- * @param col starting column from 0 to 127
+ * @param row the row from 0 to SSD1306_DISPLAY_N_PAGES-1
+ * @param col starting column from 0 to SSD1306_DISPLAY_N_COLUMNS-1
  * @param arr the data array (lsb is on top)
  * @param arrayLength the length of the array
  */
@@ -145,8 +145,8 @@ void ssd1306DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t
 /**
  * @brief displays an image defines as a row-first array
  * 
- * @param px x value of the top left position (0 to 127)
- * @param py y values of the top left position (0 to 7)
+ * @param px x value of the top left position (0 to SSD1306_DISPLAY_N_COLUMNS-1)
+ * @param py y values of the top left position (0 to SSD1306_DISPLAY_N_PAGES-1)
  * @param sx x size of the image
  * @param sy y size of the image in pages (8 bit)
  * @param img the image data, the number of bytes must be sx*sy
@@ -285,7 +285,7 @@ void ssd1306WriteLineAsync(volatile uint8_t * data)
 {
     *DMA_CH4_WRITE_ADDR = (uint32_t)SSPDR;
 	*DMA_CH4_READ_ADDR = (uint32_t)data;
-	*DMA_CH4_TRANS_COUNT = 128;
+	*DMA_CH4_TRANS_COUNT = SSD1306_DISPLAY_N_COLUMNS;
 	*DMA_CH4_CTRL_TRIG = (16 << DMA_CH4_CTRL_TRIG_TREQ_SEL_LSB) 
 						| (1 << DMA_CH4_CTRL_TRIG_INCR_READ_LSB) 
 						| (0 << DMA_CH4_CTRL_TRIG_DATA_SIZE_LSB) // byte wise transfer
@@ -296,18 +296,18 @@ void ssd1306WriteLineAsync(volatile uint8_t * data)
 
 void ssd1306WriteNextLine(void)
 {
-    if (currentDmaRow <8 )
+    if (currentDmaRow <SSD1306_DISPLAY_N_PAGES )
     {
         setCursor(currentDmaRow,0);
         *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD);
-        ssd1306WriteLineAsync(currentFrameBuffer + currentDmaRow*128);
+        ssd1306WriteLineAsync(currentFrameBuffer + currentDmaRow*SSD1306_DISPLAY_N_COLUMNS);
         currentDmaRow++;
     }
 }
 
 void ssd1306writeFramebufferAsync(uint8_t * fb)
 {
-    while(currentDmaRow<8); // block until previous transfer is done
+    while(currentDmaRow<SSD1306_DISPLAY_N_PAGES); // block until previous transfer is done
     currentDmaRow=0;
     currentFrameBuffer=fb;
     ssd1306WriteNextLine();

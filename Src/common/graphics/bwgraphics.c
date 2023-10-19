@@ -394,6 +394,21 @@ void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 	}
 }
 
+void clearSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageType* img)
+{
+	uint32_t dx,dy;
+	dx=(uint32_t)(epx-spx);
+	dy=(uint32_t)(epy-spy);
+
+	for (int32_t cx = 0;cx<dx;cx++)
+	{
+		for(int32_t cy=0;cy<dy;cy++)
+		{
+			clearPixel(spx + cx,spy + cy,img);
+		}
+	}
+}
+
 void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 {
 	uint32_t dx,dy;
@@ -407,6 +422,21 @@ void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 		for(uint8_t cy=0;cy<dy;cy++)
 		{
 			setPixel(px + cx,py + cy,img);
+		}
+	}
+}
+
+void drawSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageType* img)
+{
+	uint32_t dx,dy;
+	dx=(uint32_t)(epx-spx);
+	dy=(uint32_t)(epy-spy);
+
+	for (int32_t cx = 0;cx<dx;cx++)
+	{
+		for(int32_t cy=0;cy<dy;cy++)
+		{
+			setPixel(spx + cx,spy + cy,img);
 		}
 	}
 }
@@ -552,29 +582,56 @@ void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgB
 
 uint8_t getPixel(int32_t px,int32_t py,const BwImageType*img)
 {
+if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
+{
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
-	return *(img->data + pageIdx) & (1 << (bitindex)); 
+	return *(img->data + pageIdx) & (1 << (bitindex));
+}
+else
+{
+	int32_t bitindex = px & 0x7;
+	int32_t pageIdx =  (px >> 3)*(img->sy) + py;
+	return *(img->data + pageIdx) & (1 << (bitindex));
+}
 }
 
 void setPixel(int32_t px,int32_t py,BwImageType*img)
+{
+if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
 	*(img->data + pageIdx) |= (1 << (bitindex));
 }
+else
+{
+	int32_t bitindex = px & 0x7;
+	int32_t pageIdx =  (px >> 3)*(img->sy) + py;
+	*(img->data + pageIdx) |= (1 << (bitindex));
+}
+}
 
 void clearPixel(int32_t px,int32_t py,BwImageType*img)
+{
+if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
 	*(img->data + pageIdx) &= ~(1 << (bitindex));
 }
+else
+{
+	int32_t bitindex = px & 0x7;
+	int32_t pageIdx =  (px >> 3)*(img->sy) + py;
+	*(img->data + pageIdx) &= ~(1 << (bitindex));
+}
+}
 
 
 void clearImage(BwImageType*img)
 {
-	for(uint16_t c=0;c<256;c++)
+	for(uint16_t c=0;c<((img->sx*img->sy) >> 3);c++)
     {
         *((uint32_t*)img->data + c) = 0;
     }

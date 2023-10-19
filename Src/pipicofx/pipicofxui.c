@@ -315,5 +315,6 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     }
     imgBuffer.sx=128;
     imgBuffer.sy=64;
+    imgBuffer.type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
 }
 
