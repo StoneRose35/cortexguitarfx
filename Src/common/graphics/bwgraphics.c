@@ -476,10 +476,10 @@ uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GF
 			}
 			if (bitarray & 0x80)
 			{
-				if (px + x + xOffset > 0 && 
+				if (px + x + xOffset >= 0 && 
 				    px + x + xOffset < img->sx &&
 					py + y + yOffset < img->sy &&
-					py + y + yOffset > 0
+					py + y + yOffset >= 0
 					)
 				{
 					setPixel(px+x+xOffset,py+y+yOffset,img);
@@ -501,10 +501,10 @@ uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageType* img)
 		{
 			if (bitarray & 0x80)
 			{
-				if (px + x  > 0 && 
+				if (px + x  >= 0 && 
 				    px + x < img->sx &&
 					py - y < img->sy &&
-					py - y > 0
+					py - y >= 0
 					)
 				{
 					setPixel(px+x,py-y,img);
@@ -631,7 +631,8 @@ else
 
 void clearImage(BwImageType*img)
 {
-	for(uint16_t c=0;c<((img->sx*img->sy) >> 3);c++)
+	for(uint16_t c=0;c<((img->sx*img->sy) >> 5);c++) // /8 /4, since one byte extends over 8 pixels,
+	                                                 // and because of 32bit access 
     {
         *((uint32_t*)img->data + c) = 0;
     }
