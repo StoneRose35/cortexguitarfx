@@ -1,6 +1,6 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "ssd1306_display.h"
+#include "oled_display.h"
 #include "adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"

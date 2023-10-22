@@ -13,7 +13,7 @@
 #include "timer.h"
 #include "pipicofx/pipicofxui.h"
 #include "audio/audiotools.h"
-#include "ssd1306_display.h"
+#include "oled_display.h"
 
 int16_t* audioBufferPtr;
 #ifndef I2S_INPUT
@@ -197,7 +197,7 @@ void isr_c1_dma_irq0_irq11()
 	if ((*DMA_INTS0 & (1<<4))==(1 << 4)) // channel 4: one line of display data written, handled by core 1
 	{
 		*DMA_INTS0 = (1<<4);
-		ssd1306WriteNextLine();
+		OledWriteNextLine();
 	}
 	else 
 	{

@@ -4,7 +4,7 @@
 #include "core1Main.h"
 #include "gpio.h"
 #include "irq.h"
-#include "ssd1306_display.h"
+#include "oled_display.h"
 #include "audio/firFilter.h"
 #include "audio/audiotools.h"
 #include "audio/delay.h"

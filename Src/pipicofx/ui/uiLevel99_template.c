@@ -1,6 +1,6 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "ssd1306_display.h"
+#include "oled_display.h"
 #include "adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
@@ -16,7 +16,7 @@ static void create(PiPicoFxUiType*data)
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
     BwImageType* imgBuffer = getImageBuffer();
-    ssd1306writeFramebufferAsync(imgBuffer->data);
+    OledwriteFramebufferAsync(imgBuffer->data);
 }
 
 

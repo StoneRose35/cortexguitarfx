@@ -1,7 +1,7 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "graphics/gfxfont.h"
-#include "ssd1306_display.h"
+#include "oled_display.h"
 #include "adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
@@ -66,7 +66,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     //out
     drawSquare(40.0f,53.0f,40.0f + int2float(avgOutput)*(128.0f-40.0f)/128.0f,64.0f,imgBuffer);
 
-    ssd1306writeFramebufferAsync(imgBuffer->data);
+    OledwriteFramebufferAsync(imgBuffer->data);
 }
 
 static void enterCallback(PiPicoFxUiType*data) 
@@ -94,7 +94,7 @@ static void enterCallback(PiPicoFxUiType*data)
         else if (overlayNr == OVERLAY_NR_FWUPDATE)
         {
             drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
-            ssd1306DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
+            OledDisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
             reset_usb_boot(1 << 17,2);
         }
     }

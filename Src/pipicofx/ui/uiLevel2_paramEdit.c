@@ -1,6 +1,6 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "ssd1306_display.h"
+#include "oled_display.h"
 #include "adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
@@ -61,7 +61,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     data->currentParameter->getParameterDisplay(data->currentProgram->data,paramValueBfr);
     drawText(0,56,paramValueBfr,img,0);
     //ssd1306WriteTextLine(paramValueBfr,7);
-    ssd1306writeFramebufferAsync(img->data);
+    OledwriteFramebufferAsync(img->data);
 }
 
 

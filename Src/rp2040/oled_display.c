@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#include "ssd1306_display.h"
+#include "oled_display.h"
 #include "systick.h"
 #include "fonts/oled_font_5x7.h"
 #include "hardware/regs/addressmap.h"
@@ -17,11 +17,11 @@
 #include "hardware/rp2040_registers.h"
 #include "hardware/regs/dma.h"
 
-static volatile uint8_t currentDmaRow=8;
+static volatile uint8_t currentDmaRow=SSD1306_DISPLAY_N_PAGES;
 static volatile uint8_t * currentFrameBuffer=0;
-#define HORIZONTAL_OFFSET 2
 
-void initSsd1306Display()
+
+void initOledDisplay()
 {
     // get spi out of reset
     *RESETS |= (1 << RESETS_RESET_SPI0_LSB); 
@@ -62,8 +62,18 @@ void initSsd1306Display()
 
     // manually set display offset and  startline since these two values turned out to be wrong after reset
     *(GPIO_OUT + 2) = (1 << SSD1306_DISPLAY_CD);
+    #ifdef SH1107
+    *SSPDR = 0xDC; // set startline 0
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    *SSPDR = 0x0;
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    #endif
+    #ifdef SH1106
     *SSPDR = 0x40; // set startline 0
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    #endif
+
+
     // set displayoffset 0
     *SSPDR = 0xD3;
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
@@ -71,8 +81,10 @@ void initSsd1306Display()
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
 
     // COM remap to vertically flip the display
-    //*SSPDR = 0xC8;
-    //while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    #ifdef VERTICAL_DISPLAY
+    *SSPDR = 0xC8;
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    #endif
     // columns remap (flip horizontal)
     //*SSPDR = 0xA1;
     //while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
@@ -109,7 +121,7 @@ void setCursor(uint8_t row, uint8_t col)
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
 
-void ssd1306ClearDisplay()
+void OledClearDisplay()
 {
     for(uint8_t r=0;r<SSD1306_DISPLAY_N_PAGES;r++)
     {
@@ -131,7 +143,7 @@ void ssd1306ClearDisplay()
  * @param arr the data array (lsb is on top)
  * @param arrayLength the length of the array
  */
-void ssd1306DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayLength)
+void OledDisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayLength)
 {
     setCursor(row,col);
     *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD); // switch to data
@@ -151,7 +163,7 @@ void ssd1306DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t
  * @param sy y size of the image in pages (8 bit)
  * @param img the image data, the number of bytes must be sx*sy
  */
-void ssd1306DisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
+void OledDisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
 {
     //setCursor(py,px);
     *(GPIO_OUT + 2) = (1 << SSD1306_DISPLAY_CD);
@@ -203,7 +215,7 @@ void ssd1306DisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * i
  * @param sy y size of the image in pages (8 bit)
  * @param img the image data, the number of bytes must be sx*sy
  */
-void ssd1306DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
+void OledDisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
 {
     uint16_t index;
     for(uint8_t cc=0;cc<sy;cc++)
@@ -219,7 +231,7 @@ void ssd1306DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8
     }
 }
 
-void ssd1306WriteChar(char chr)
+void OledWriteChar(char chr)
 {
     uint8_t fontIdx;
 
@@ -235,14 +247,14 @@ void ssd1306WriteChar(char chr)
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
 
-void ssd1306WriteText(const char * str,uint8_t posH,uint8_t posV)
+void OledWriteText(const char * str,uint8_t posH,uint8_t posV)
 {
     uint8_t cnt = 0;
     uint8_t hCurrent=posH;
     setCursor(posV,posH*6);
     while(*(str+cnt) != 0)
     {
-        ssd1306WriteChar(*(str+cnt));
+        OledWriteChar(*(str+cnt));
         hCurrent += 1;
         cnt++;
     }
@@ -261,18 +273,18 @@ void ssd1306WriteText(const char * str,uint8_t posH,uint8_t posV)
  * @param str 
  * @param posV 
  */
-void ssd1306WriteTextLine(const char * str,uint8_t posV)
+void OledWriteTextLine(const char * str,uint8_t posV)
 {
     uint8_t cnt=0;
     setCursor(posV,0);
     while(*(str+cnt) != 0)
     {
-        ssd1306WriteChar(*(str+cnt));
+        OledWriteChar(*(str+cnt));
         cnt++;
     }
     while(cnt < 21)
     {
-        ssd1306WriteChar(' ');
+        OledWriteChar(' ');
         cnt++;
     }
     *SSPDR = 0x0;
@@ -281,7 +293,7 @@ void ssd1306WriteTextLine(const char * str,uint8_t posV)
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
 
-void ssd1306WriteLineAsync(volatile uint8_t * data)
+void OledWriteLineAsync(volatile uint8_t * data)
 {
     *DMA_CH4_WRITE_ADDR = (uint32_t)SSPDR;
 	*DMA_CH4_READ_ADDR = (uint32_t)data;
@@ -294,21 +306,21 @@ void ssd1306WriteLineAsync(volatile uint8_t * data)
     *DMA_INTE0 |= (1 << 4);
 }
 
-void ssd1306WriteNextLine(void)
+void OledWriteNextLine(void)
 {
     if (currentDmaRow <SSD1306_DISPLAY_N_PAGES )
     {
         setCursor(currentDmaRow,0);
         *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD);
-        ssd1306WriteLineAsync(currentFrameBuffer + currentDmaRow*SSD1306_DISPLAY_N_COLUMNS);
+        OledWriteLineAsync(currentFrameBuffer + currentDmaRow*SSD1306_DISPLAY_N_COLUMNS);
         currentDmaRow++;
     }
 }
 
-void ssd1306writeFramebufferAsync(uint8_t * fb)
+void OledwriteFramebufferAsync(uint8_t * fb)
 {
     while(currentDmaRow<SSD1306_DISPLAY_N_PAGES); // block until previous transfer is done
     currentDmaRow=0;
     currentFrameBuffer=fb;
-    ssd1306WriteNextLine();
+    OledWriteNextLine();
 }

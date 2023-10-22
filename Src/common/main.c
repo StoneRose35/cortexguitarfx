@@ -166,7 +166,7 @@
 #include "adc.h"
 #include "timer.h"
 #include "gpio.h"
-#include "ssd1306_display.h"
+#include "oled_display.h"
 #include "wm8731.h"
 #include "usb/usb_common.h"
 #include "usb/usb_cdc.h"
@@ -292,7 +292,7 @@ int main(void)
 	 * */
 
 
-	initSsd1306Display();
+	initOledDisplay();
 
 	initDebugLed();
 
@@ -305,7 +305,7 @@ int main(void)
 
 	
 	piPicoFxUiSetup(&piPicoUiController);
-	ssd1306ClearDisplay();
+	OledClearDisplay();
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
 	{
 		if ((uint32_t)fxPrograms[c]->setup != 0)

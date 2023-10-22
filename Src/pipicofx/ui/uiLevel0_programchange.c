@@ -1,6 +1,6 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "ssd1306_display.h"
+#include "oled_display.h"
 #include "adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
@@ -132,7 +132,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     drawImage(0,3*8,&bargraph,imgBuffer);
     //ssd1306DisplayByteArray(3,0,bargraphBuffer,128);
 
-    ssd1306writeFramebufferAsync(imgBuffer->data);
+    OledwriteFramebufferAsync(imgBuffer->data);
 }
 
 static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)
