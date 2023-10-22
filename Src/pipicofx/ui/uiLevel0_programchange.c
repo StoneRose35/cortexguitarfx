@@ -31,7 +31,7 @@ static void create(PiPicoFxUiType*data)
     lock.type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     clearImage(imgBuffer);
     //ssd1306WriteTextLine(data->currentProgram->name,0);
-    drawText(0,0,data->currentProgram->name,imgBuffer,0);
+    drawText(0,1*8,data->currentProgram->name,imgBuffer,0);
     if (data->locked != 0)
     {
         drawImage(0,122,&lock,imgBuffer);
@@ -49,7 +49,7 @@ static void create(PiPicoFxUiType*data)
             appendToString(lineBuffer,"P1:");
             appendToString(lineBuffer,data->currentProgram->parameters[c].name);
             //ssd1306WriteTextLine(lineBuffer,4);
-            drawText(0,4*8,lineBuffer,imgBuffer,0);
+            drawText(0,5*8,lineBuffer,imgBuffer,0);
             //paramIdxesDrawn[0]=1;
         }
         if (data->currentProgram->parameters[c].control == 1)
@@ -58,7 +58,7 @@ static void create(PiPicoFxUiType*data)
             appendToString(lineBuffer,"P2:");
             appendToString(lineBuffer,data->currentProgram->parameters[c].name);
             //ssd1306WriteTextLine(lineBuffer,5);
-            drawText(0,5*8,lineBuffer,imgBuffer,0);
+            drawText(0,6*8,lineBuffer,imgBuffer,0);
             //paramIdxesDrawn[1]=1;
         }
         if (data->currentProgram->parameters[c].control == 2)
@@ -67,7 +67,7 @@ static void create(PiPicoFxUiType*data)
             appendToString(lineBuffer,"P3:");
             appendToString(lineBuffer,data->currentProgram->parameters[c].name);
             //ssd1306WriteTextLine(lineBuffer,6);
-            drawText(0,6*8,lineBuffer,imgBuffer,0);
+            drawText(0,7*8,lineBuffer,imgBuffer,0);
             //paramIdxesDrawn[2]=1;
         }                
     }
