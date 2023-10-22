@@ -41,7 +41,7 @@ BwImageType * getImageBuffer()
     img.data = imgBuffer.data;
     img.sx = imgBuffer.sx;
     img.sy = imgBuffer.sy;
-    img.type = 0;
+    img.type = imgBuffer.type;
     return &img;
 }
 
@@ -315,6 +315,6 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     }
     imgBuffer.sx=128;
     imgBuffer.sy=64;
-    imgBuffer.type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
+    imgBuffer.type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;//BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES;
 }
 
