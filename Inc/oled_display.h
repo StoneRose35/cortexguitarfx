@@ -12,6 +12,10 @@
 #define SH1106
 #define HORIZONTAL_DISPLAY
 
+// use both lines if ribbon cable is at the bottom, comment otherwise 
+#define VERTICAL_FLIP
+#define HORIZONTAL_FLIP
+
 #ifdef SH1107
 #define SSD1306_DISPLAY_N_PAGES 16
 #define SSD1306_DISPLAY_N_COLUMNS 64

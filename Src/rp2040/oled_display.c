@@ -81,14 +81,15 @@ void initOledDisplay()
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
 
     // COM remap to vertically flip the display
-    #ifdef VERTICAL_DISPLAY
+    #ifdef VERTICAL_FLIP
     *SSPDR = 0xC8;
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     #endif
+    #ifdef HORIZONTAL_FLIP
     // columns remap (flip horizontal)
-    //*SSPDR = 0xA1;
-    //while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
-
+    *SSPDR = 0xA1;
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
+    #endif
 
     // send display on command
     *(GPIO_OUT + 2) = (1 << SSD1306_DISPLAY_CD);
