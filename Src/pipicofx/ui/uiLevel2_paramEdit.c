@@ -20,14 +20,6 @@ static void create(PiPicoFxUiType*data)
     clearImage(imgBuffer);
     drawText(0,0,data->currentProgram->name,imgBuffer,0);
     drawText(0,8,data->currentParameter->name,imgBuffer,0);
-    //ssd1306WriteTextLine(data->currentProgram->name,0);
-    //ssd1306WriteTextLine(data->currentParameter->name,1);
-    //ssd1306WriteTextLine(" ",2);    
-    //ssd1306WriteTextLine(" ",3);
-    //ssd1306WriteTextLine(" ",4);
-    //ssd1306WriteTextLine(" ",5);
-    //ssd1306WriteTextLine(" ",6);
-    //ssd1306WriteTextLine(" ",7);
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
@@ -40,27 +32,19 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     (void)avgInput;
     (void)avgOutput;
     (void)cpuLoad;
-    //img->sx=pipicofx_param_2_scaled_streamimg.sx;
-    //img->sy=pipicofx_param_2_scaled_streamimg.sy;
-    //for (uint16_t c=0;c<510;c++)
-    //{
-    //    img->data[c]=pipicofx_param_2_scaled_streamimg.data[c];
-    //}
     fValue = int2float((int32_t)data->currentParameter->rawValue);
     fMaxValue = int2float((int32_t)(1 << 12));
     fMinValue = int2float((int32_t)0);
     fValue = 0.7853981633974483f + 4.71238898038469f*(fValue - fMinValue)/(fMaxValue-fMinValue); //fValue is now an angle in radians from 45° to 315°
-    // center is at 51/24
-    px = 51.0f - fsin(fValue)*14.0f;
-    py = 24.0f + fcos(fValue)*14.0f;
-    cx = 51.0f;
-    cy = 24.0f;
+    // center is at (51+13)/(24+16)
+    px = 64.0f - fsin(fValue)*14.0f;
+    py = 40.0f + fcos(fValue)*14.0f;
+    cx = 64.0f;
+    cy = 40.0f;
     drawLine(cx,cy,px,py,img);   
-    //ssd1306DisplayImageStandardAdressing(13,2,img->sx,img->sy>>3,img->data); 
     drawImage(13,16,&pipicofx_param_2_scaled_streamimg,img);
     data->currentParameter->getParameterDisplay(data->currentProgram->data,paramValueBfr);
-    drawText(0,56,paramValueBfr,img,0);
-    //ssd1306WriteTextLine(paramValueBfr,7);
+    drawText(0,64,paramValueBfr,img,0);
     OledwriteFramebufferAsync(img->data);
 }
 
