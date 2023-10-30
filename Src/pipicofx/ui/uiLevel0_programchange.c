@@ -22,25 +22,18 @@ extern uint8_t currentPreset;
 static void create(PiPicoFxUiType*data)
 {
     char lineBuffer[24];
-    lineBuffer[0]=0;
-    //uint8_t paramIdxesDrawn[3]={0,0,0};
     BwImageType* imgBuffer = getImageBuffer();
     lock.data =locksymbol;
     lock.sx=5;
     lock.sy=8;
     lock.type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     clearImage(imgBuffer);
-    //ssd1306WriteTextLine(data->currentProgram->name,0);
     drawText(0,1*8,data->currentProgram->name,imgBuffer,0);
     if (data->locked != 0)
     {
         drawImage(0,122,&lock,imgBuffer);
-     //   ssd1306DisplayByteArray(0,122,locksymbol,5);
     }
-    //clearSquareInt(0,8,128,32,imgBuffer);
-    //ssd1306WriteTextLine(" ",1);
-    //ssd1306WriteTextLine(" ",2);
-    //ssd1306WriteTextLine(" ",3);
+
     for (uint8_t c=0;c<data->currentProgram->nParameters;c++)
     {
         if (data->currentProgram->parameters[c].control == 0)
@@ -48,37 +41,23 @@ static void create(PiPicoFxUiType*data)
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P1:");
             appendToString(lineBuffer,data->currentProgram->parameters[c].name);
-            //ssd1306WriteTextLine(lineBuffer,4);
             drawText(0,5*8,lineBuffer,imgBuffer,0);
-            //paramIdxesDrawn[0]=1;
         }
         if (data->currentProgram->parameters[c].control == 1)
         {
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P2:");
             appendToString(lineBuffer,data->currentProgram->parameters[c].name);
-            //ssd1306WriteTextLine(lineBuffer,5);
             drawText(0,6*8,lineBuffer,imgBuffer,0);
-            //paramIdxesDrawn[1]=1;
         }
         if (data->currentProgram->parameters[c].control == 2)
         {
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P3:");
             appendToString(lineBuffer,data->currentProgram->parameters[c].name);
-            //ssd1306WriteTextLine(lineBuffer,6);
             drawText(0,7*8,lineBuffer,imgBuffer,0);
-            //paramIdxesDrawn[2]=1;
         }                
     }
-    //for (uint8_t c=0;c<3;c++)
-    //{
-    //    if (paramIdxesDrawn[c]==0)
-    //    {
-    //        ssd1306WriteTextLine(" ",c+4);
-    //    }
-    //}
-    //ssd1306WriteTextLine(" ",7);
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
@@ -102,7 +81,6 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
         }
     }
     drawImage(0,1*8,&bargraph,imgBuffer);
-    //ssd1306DisplayByteArray(1,0,bargraphBuffer,128);
 
     for (uint8_t c=0;c<128;c++)
     {
@@ -116,7 +94,6 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
         }
     }
     drawImage(0,2*8,&bargraph,imgBuffer);
-    //ssd1306DisplayByteArray(2,0,bargraphBuffer,128);
 
     for (uint8_t c=0;c<128;c++)
     {
@@ -130,7 +107,6 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
         }
     }
     drawImage(0,3*8,&bargraph,imgBuffer);
-    //ssd1306DisplayByteArray(3,0,bargraphBuffer,128);
 
     OledwriteFramebufferAsync(imgBuffer->data);
 }
@@ -238,30 +214,6 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 
 static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)
 {
-    //if (data->currentProgramIdx != stompswitch_progs[switchNr]) // switch pressed an program not activated 
-    //{
-        /*switch (data->currentProgramIdx)
-        {
-            case 8:
-                setStompswitchColor(0,0);
-                break;
-            case 7:
-                setStompswitchColor(1,0);
-                break;
-            case 1:
-                setStompswitchColor(2,0);
-                break;                        
-
-        }*/
-        //programsToInitialize[switchNr]=1;
-        //programChangeState=1;
-        /*data->currentProgramIdx = stompswitch_progs[switchNr];
-        data->currentProgram = fxPrograms[data->currentProgramIdx];
-        data->currentParameterIdx=0;
-        data->currentParameter = data->currentProgram->parameters;
-        */
-        //setStompswitchColorRaw(3 << (switchNr << 1));
-    //}
     currentPreset = switchNr;
     uiStackPush(data, 0);
     enterLevel3(data);
