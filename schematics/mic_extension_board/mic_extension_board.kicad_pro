@@ -483,6 +483,10 @@
       {
         "netclass": "Vsupply",
         "pattern": "AC"
+      },
+      {
+        "netclass": "Ground",
+        "pattern": "VGND"
       }
     ]
   },
@@ -545,6 +549,14 @@
     [
       "e63e39d7-6ac0-4ffd-8aa3-1841a4541b55",
       ""
+    ],
+    [
+      "f9ef1368-05a5-440b-8b6f-d12c6284b642",
+      "UI Controller"
+    ],
+    [
+      "9b4677b6-5618-4dd2-a345-e4ce8cf01c2f",
+      "Analog Preamp"
     ]
   ],
   "text_variables": {}
