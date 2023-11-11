@@ -557,6 +557,10 @@
     [
       "9b4677b6-5618-4dd2-a345-e4ce8cf01c2f",
       "Analog Preamp"
+    ],
+    [
+      "6ec17984-49ce-45c2-b1f4-ed6e904b8c80",
+      "Codec"
     ]
   ],
   "text_variables": {}
