@@ -1,7 +1,7 @@
 #ifndef _SSD1306_DISPLAY_H_
 #define _SSD1036_DISPLAY_H_
 #include <stdint.h>
-
+#include "globalConfig.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/spi.h"
 #include "hardware/regs/resets.h"
@@ -9,12 +9,7 @@
 #include "hardware/regs/pads_bank0.h"
 #include "hardware/regs/sio.h"
 
-#define SH1106
-#define HORIZONTAL_DISPLAY
 
-// use both lines if ribbon cable is at the bottom, comment otherwise 
-#define VERTICAL_FLIP
-#define HORIZONTAL_FLIP
 
 #ifdef SH1107
 #define SSD1306_DISPLAY_N_PAGES 16

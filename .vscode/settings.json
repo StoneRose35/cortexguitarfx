@@ -43,7 +43,9 @@
         "gfxfonts.h": "c",
         "oled_display.h": "c",
         "pads_bank0.h": "c",
-        "systick.h": "c"
+        "systick.h": "c",
+        "core1main.h": "c",
+        "globalconfig.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": true

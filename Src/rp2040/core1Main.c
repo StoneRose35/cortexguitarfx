@@ -1,3 +1,4 @@
+#include "globalConfig.h"
 #include "system.h"
 #include "dma.h"
 #include "multicore.h"
@@ -74,14 +75,17 @@ void core1Main()
 
     // initalized the rotary encoder and the switches so that core 1 handler the interrupts of the ui elements
     initRotaryEncoder(switchesPins,2);
+    #ifdef EXTENSION_BOARD
     initStompSwitchesInterface();
+    #endif
     initRoundRobinReading(); // internal adc for reading parameters
 
     setAsOuput(CLIPPING_LED_INPUT);
     setAsOuput(CLIPPING_LED_OUTPUT);
 
+    #ifdef EXTENSION_BOARD
     setStompswitchColorRaw(0);
-
+    #endif
 
     *SIO_FIFO_ST = (1 << 2);
     *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
@@ -223,6 +227,7 @@ void core1Main()
         * Stomp Switches Callback
         * 
        */
+        #ifdef EXTENSION_BAORD
         stompSwitchState = getStompSwitchState(0);
         if ((stompSwitchState & (1 << 1)) != 0) 
         {
@@ -272,24 +277,10 @@ void core1Main()
                 piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
                 onCreate(&piPicoUiController);
             }
-            /*
-            for (uint8_t c=0;c<3;c++)
-            {
-                if (programsToInitialize[c] != 0)
-                {
-                    if (fxPrograms[stompswitch_progs[c]]->reset != 0)
-                    {
-                        fxPrograms[stompswitch_progs[c]]->reset(fxPrograms[stompswitch_progs[c]]->data);
-                    }
-                    programsToInitialize[c]=0;
-                    piPicoUiController.currentProgramIdx = stompswitch_progs[c];
-                    piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
-                    onCreate(&piPicoUiController);
-                }
-            }
-            */
+
             programChangeState = 4;
         }
         requestSwitchesUpdate();
+        #endif
     }
 }
