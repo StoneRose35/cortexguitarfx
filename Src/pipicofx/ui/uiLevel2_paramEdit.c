@@ -18,8 +18,8 @@ static void create(PiPicoFxUiType*data)
 {
     BwImageType* imgBuffer = getImageBuffer();
     clearImage(imgBuffer);
-    drawText(0,0,data->currentProgram->name,imgBuffer,0);
-    drawText(0,8,data->currentParameter->name,imgBuffer,0);
+    drawText(0,8,data->currentProgram->name,imgBuffer,0);
+    drawText(0,16,data->currentParameter->name,imgBuffer,0);
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
@@ -41,8 +41,8 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     py = 40.0f + fcos(fValue)*14.0f;
     cx = 64.0f;
     cy = 40.0f;
-    drawLine(cx,cy,px,py,img);   
     drawImage(13,16,&pipicofx_param_2_scaled_streamimg,img);
+    drawLine(cx,cy,px,py,img);   
     data->currentParameter->getParameterDisplay(data->currentProgram->data,paramValueBfr);
     drawText(0,64,paramValueBfr,img,0);
     OledwriteFramebufferAsync(img->data);
