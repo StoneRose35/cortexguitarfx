@@ -61,7 +61,7 @@ int16_t simpleChorusProcessSample(int16_t sampleIn,SimpleChorusType*data)
         data->delayInputPtr &= (SIMPLE_CHORUS_DELAY_SIZE-1);
         lfoValInterp = data->lfoValOld + ((data->lfoUpdateCnt*(data->lfoVal - data->lfoValOld)) >> 8);
         // compute current index of the delay pointer
-        delayPtr = (data->delayInputPtr-1) - 4 - (((lfoValInterp+0xFF)*data->depth) >> 8);
+        delayPtr = (data->delayInputPtr-1) - SIMPLE_CHORUS_MIN_DELAY - (((lfoValInterp+0xFF)*data->depth) >> 8);
         if (delayPtr < 0)
         {
             delayPtr = SIMPLE_CHORUS_DELAY_SIZE + delayPtr;

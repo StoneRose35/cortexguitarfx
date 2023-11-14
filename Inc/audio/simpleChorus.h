@@ -4,6 +4,7 @@
 
 #define SIMPLE_CHORUS_DELAY_SIZE 2048
 #define SIMPLE_CHORUS_LFO_DIVIDER 256
+#define SIMPLE_CHORUS_MIN_DELAY 384
 typedef struct 
 {
     int16_t delayBuffer[SIMPLE_CHORUS_DELAY_SIZE];
