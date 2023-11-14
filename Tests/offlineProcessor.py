@@ -22,8 +22,8 @@ class OfflineProcessorGui:
         self.labels = []
         self.currentProgram = -1
         self.currentSample = None
-        bigfont = font.Font(family="helvetica", size=20)
-        self.w.option_add("*Font", bigfont)
+        #bigfont = font.Font(family="helvetica", size=10)
+        #self.w.option_add("*Font", bigfont)
         self.w.title("PiPicoFX Offline Processor")
         self.w.geometry("760x1000")
         self.w["bg"] = "#9bb0d1"

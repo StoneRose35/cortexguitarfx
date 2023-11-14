@@ -19,7 +19,7 @@
 #include "pipicofx/picofxCore.h"
 
 
-#define N_FX_PROGRAMS 13
+#define N_FX_PROGRAMS 12
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
 

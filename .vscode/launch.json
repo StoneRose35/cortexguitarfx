@@ -185,7 +185,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": ["-p", "./audiosamples/unitPulse.wav", "9", "3394", "3049"],
+            "args": ["-p", "./audiosamples/acoustic_drums.wav", "11", "89", "490", "167", "1291", "1180", "0"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],
