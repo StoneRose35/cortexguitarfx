@@ -17,6 +17,7 @@ static void fxProgramSetup(void*data)
 {
     FxProgram15DataType* pData= (FxProgram15DataType*)data;
     initThreeBandEq(&pData->eq);
+    initReverb(&pData->reverb,500);
 }
 
 static void fxProgramReset(void*data)
@@ -78,11 +79,11 @@ static void fxProgramParam4Callback(uint16_t val,void*data) // compressor (one-k
     FxProgram15DataType* pData= (FxProgram15DataType*)data;
     int32_t maxGain;
     // map val to a thresshold range of 0 to ~ -60dB /-8599
-    pData->comp.gainFunction.threshhold = - (val << 1);
+    pData->comp.gainFunction.threshhold = 0x7FFF - (val << 1);
     // compute post Gain according to threshhold set
     maxGain = getMaxGain(&pData->comp);
     maxGain = 32767/maxGain; // 0.8 as q15
-    maxGain >>= 8;
+    maxGain <<= 8;
     pData->postGain.gain = (int16_t)maxGain;
     fxProgram15.parameters[3].rawValue = val;
 }
@@ -90,7 +91,7 @@ static void fxProgramParam4Callback(uint16_t val,void*data) // compressor (one-k
 static void fxProgramParam4Display(void*data,char*res)
 {
     int16_t comppercent = (int16_t)(fxProgram15.parameters[3].rawValue << 3);
-    Int16ToChar(comppercent,res);
+    Int16ToChar(comppercent/328,res);
     appendToString(res,"%");
 }
 
@@ -138,7 +139,7 @@ FxProgram15DataType fxProgram15data=
     .eq.lowFactor = 0,
     .reverb.mix = 0,
     .reverb.paramNr = 1,
-
+    .postGain.gain = 0x100
 };
 
 FxProgramType fxProgram15 = {
@@ -146,7 +147,7 @@ FxProgramType fxProgram15 = {
     .nParameters=6,
     .parameters = {
         {
-            .name = "EQ Low        ",
+            .name = "EQ Low",
             .control=0,
             .increment=32,
             .rawValue=0,
@@ -155,7 +156,7 @@ FxProgramType fxProgram15 = {
             .setParameter=&fxProgramParam1Callback
         },
         {
-            .name = "EQ Mid         ",
+            .name = "EQ Mid",
             .control=1,
             .increment=32,
             .rawValue=0,
@@ -164,7 +165,7 @@ FxProgramType fxProgram15 = {
             .setParameter=&fxProgramParam2Callback
         },
         {
-            .name = "EQ High        ",
+            .name = "EQ High",
             .control=2,
             .increment=32,
             .rawValue=0,
@@ -173,7 +174,7 @@ FxProgramType fxProgram15 = {
             .setParameter=&fxProgramParam3Callback
         },
         {
-            .name = "Compressor Int. ",
+            .name = "Compressor Int.",
             .control=0xFF,
             .increment=32,
             .rawValue=0,
