@@ -19,18 +19,18 @@ int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
     else if (comp->gainFunction.gainReduction > 4)
     {
         gainFactor = fastexp(comp->gainFunction.threshhold)*32767;
-        gainFactor /=avgVolume;
         if (avgVolume != 0)
         {
+            gainFactor /=avgVolume;
             sampleInterm = (sample*gainFactor) >> 15;  // sampleInterm/avgVolume;
         }
     }
     else
     {
         gainFactor =  fastexp(comp->gainFunction.threshhold + ((logAvg-comp->gainFunction.threshhold) >> (comp->gainFunction.gainReduction)))*32767;
-        gainFactor /=avgVolume;
         if (avgVolume != 0)
         {
+            gainFactor /=avgVolume;
             sampleInterm = (sample*gainFactor) >> 15;
         }
     }
