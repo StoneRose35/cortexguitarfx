@@ -25,7 +25,7 @@ static void create(PiPicoFxUiType*data)
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
     BwImageType * img = getImageBuffer();
-    clearSquareInt(0,16,128,56,img);
+    clearSquareInt(0,16,128,64,img);
     float fValue,fMaxValue,fMinValue;
     char paramValueBfr[16];
     float cx,cy,px,py;
