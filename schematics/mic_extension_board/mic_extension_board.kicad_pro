@@ -485,7 +485,7 @@
         "pattern": "AC"
       },
       {
-        "netclass": "Ground",
+        "netclass": "Default",
         "pattern": "VGND"
       }
     ]
@@ -561,6 +561,10 @@
     [
       "6ec17984-49ce-45c2-b1f4-ed6e904b8c80",
       "Codec"
+    ],
+    [
+      "5b76a2fc-3494-4cf0-b601-f44157bc070a",
+      "Headphone Amp"
     ]
   ],
   "text_variables": {}
