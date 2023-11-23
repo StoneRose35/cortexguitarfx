@@ -7,11 +7,13 @@
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
 #include "images/fwUpgradeOverlay.h"
+#include "images/aboutoverlay.h"
 #include "images/fwupdateScreen.h"
 #include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
+#include "gen/version.h"
 
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
@@ -19,13 +21,14 @@ extern uint8_t currentPreset;
 static volatile uint8_t overlayNr=0xFF;
 static volatile uint8_t bankChanged=0; // flag indicating that the bank has been changed upon stomp switch release
                                        // used to prohob action when the second stomp switch is released
-const BwImageType* overlays[]={&editOverlay_streamimg, &settingsOverlay_streamimg, &fwUpgradeOverlay_streamimg};
+const BwImageType* overlays[]={&editOverlay_streamimg, &settingsOverlay_streamimg, &aboutoverlay_streamimg, &fwUpgradeOverlay_streamimg};
 extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
 
 #define OVERLAY_NR_EDIT 0
 #define OVERLAY_NR_SYSTEMSETTINGS 1
-#define OVERLAY_NR_FWUPDATE 2
+#define OVERLAY_NR_ABOUT 2
+#define OVERLAY_NR_FWUPDATE 3
 
 static void create(PiPicoFxUiType*data)
 {
@@ -72,6 +75,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
 static void enterCallback(PiPicoFxUiType*data) 
 {
     BwImageType* imgBuffer = getImageBuffer();
+    char strbfr[24];
     // show overlay menu (if not there)
     if (overlayNr == 0xFF)
     {
@@ -90,6 +94,23 @@ static void enterCallback(PiPicoFxUiType*data)
         else if (overlayNr == OVERLAY_NR_SYSTEMSETTINGS)
         {
             enterLevel5(data);
+        }
+        else if (overlayNr == OVERLAY_NR_ABOUT)
+        {
+            clearSquareInt(0,0,128,43,imgBuffer);
+            *strbfr=0;
+            appendToString(strbfr,"About PiPicoFX");
+            drawText(0,8,strbfr,imgBuffer,(void*)0);
+            drawText(0,16,PI_PICO_FX_VERSION_NR,imgBuffer,(void*)0);
+            *strbfr=0;
+            appendToString(strbfr,"built ");
+            appendToString(strbfr,PI_PICO_FX_BUILD_DATE);
+            drawText(0,24,strbfr,imgBuffer,(void*)0);
+            *strbfr=0;
+            appendToString(strbfr,"      ");
+            appendToString(strbfr,PI_PICO_FX_BUILD_TIME);
+            drawText(0,32,strbfr,imgBuffer,(void*)0);
+
         }
         else if (overlayNr == OVERLAY_NR_FWUPDATE)
         {
@@ -138,15 +159,15 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         if (encoderDelta > 0)
         {
             overlayNr++;
-            if (overlayNr > 2)
+            if (overlayNr > 3)
             {
-                overlayNr=1;
+                overlayNr=3;
             }
         }
         else
         {
             overlayNr--;
-            if (overlayNr > 2)
+            if (overlayNr > 3)
             {
                 overlayNr=0;
             }

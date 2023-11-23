@@ -6,6 +6,11 @@
 # **********************************
 
 PROJECT=microsys_audio
+MAIN_VERSION=0
+SUB_VERSION=6
+MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
+BUILD_DATE:=$(shell date +%Y-%m-%d -u)
+BUILD_TIME:=$(shell date +%H:%M:%S -u)
 CC=arm-none-eabi-gcc
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
@@ -118,51 +123,51 @@ bootstage2.o: bootstage2.S
 	$(CC) $(CARGS) $(OPT) -c ./out/bootstage2.S -o ./out/bootstage2.o 
 
 # common libs
-out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio libs
-out/%.o: Src/common/audio/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/common/audio/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # math libs
-out/%.o: Src/common/math/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/common/math/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio fx libs
-out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio fx ui libs
-out/%.o: Src/pipicofx/ui/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/pipicofx/ui/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # graphics libs
-out/%.o: Src/common/graphics/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/common/graphics/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # sdcard libs
-out/%.o: Src/common/neopixel/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/common/neopixel/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # neopixel libs
-out/%.o: Src/common/sdcard/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/common/sdcard/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # rp2040 specific libs
-out/%.o: Src/rp2040/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/rp2040/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # rp2040 specific assembly libs
-out/%.o: Src/rp2040/%.S $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/rp2040/%.S $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # application layer
-out/%.o: Src/apps/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/apps/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # services layer
-out/%.o: Src/services/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h out
+out/%.o: Src/services/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # image assets
@@ -182,6 +187,14 @@ Src/rp2040/ds18b20.c: Inc/gen/pio0_pio.h
 Inc/gen/pio0_pio.h: Inc/gen tools/pioasm
 	./tools/pioasm -o c-sdk ./Src/rp2040/pio0.pio ./Inc/gen/pio0_pio.h
 
+Inc/gen/version.h: Inc/gen
+#REV=`expr %REV% / 60`
+	@echo "#ifndef _PI_PICO_VERSION_H_\r\n#define _PI_PICO_VERSION_H_\r\n" > Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_FULL_VERSION[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION) built $(BUILD_DATE)T$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_VERSION_NR[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION)\";\r\n" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_BUILD_DATE[]=\"$(BUILD_DATE)\";\r\n" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_BUILD_TIME[]=\"$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
+	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # main linking and generating flashable content
 $(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common  all_audio all_graphics all_math $(ASSET_IMAGES)
