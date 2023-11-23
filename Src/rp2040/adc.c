@@ -1,5 +1,5 @@
 #include "drivers/adc.h"
-#include "dma.h"
+#include "drivers/dma.h"
 #include "system.h"
 #include "drivers/irq.h"
 #include "hardware/regs/resets.h"

@@ -1,5 +1,5 @@
 
-#include "dma.h"
+#include "drivers/dma.h"
 #include "drivers/neopixelDriver.h"
 #include "drivers/i2s.h"
 #include "drivers/adc.h"

@@ -2,9 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <malloc.h>
-#include <utilCommands.h>
+#include <commands/utilCommands.h>
 #include <bufferedInputHandler.h>
-#include "neopixelCommands.h"
+#include "commands/neopixelCommands.h"
 #include "drivers/bluetoothATConfig.h"
 #include "drivers/systick.h"
 #include "stringFunctions.h"

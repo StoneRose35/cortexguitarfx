@@ -1,10 +1,10 @@
 
-#include "displayCommands.h"
-#include "spi_sdcard_display.h"
+#include "commands/displayCommands.h"
+#include "drivers/spi_sdcard_display.h"
 #include "charDisplay.h"
 #include "drivers/uart.h"
 #include "stringFunctions.h"
-#include "taskManagerUtils.h" 
+#include "commands/taskManagerUtils.h" 
 #include <string.h>
 #include "consoleBase.h"
 static uint8_t ptrX=0;

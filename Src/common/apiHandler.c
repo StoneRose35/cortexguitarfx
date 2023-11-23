@@ -12,7 +12,7 @@
 
 #include "system.h"
 #include "apiHandler.h"
-#include "taskManager.h"
+#include "commands/taskManager.h"
 #include "bufferedInputHandler.h"
 
 /**
