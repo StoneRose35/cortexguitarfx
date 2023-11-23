@@ -227,7 +227,7 @@ void core1Main()
         * Stomp Switches Callback
         * 
        */
-        #ifdef EXTENSION_BAORD
+        #ifdef EXTENSION_BOARD
         stompSwitchState = getStompSwitchState(0);
         if ((stompSwitchState & (1 << 1)) != 0) 
         {
