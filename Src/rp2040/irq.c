@@ -3,7 +3,7 @@
 #include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
 
-#include "irq.h"
+#include "drivers/irq.h"
 
 void setInterruptPriority(uint8_t interruptNr,uint8_t priority)
 {

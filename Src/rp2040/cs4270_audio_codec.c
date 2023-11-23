@@ -4,9 +4,9 @@
 #include "hardware/regs/io_bank0.h"
 #include "hardware/regs/resets.h"
 #include "hardware/rp2040_registers.h"
-#include "systick.h"
-#include "i2c.h"
-#include "cs4270_audio_codec.h"
+#include "drivers/systick.h"
+#include "drivers/i2c.h"
+#include "drivers/cs4270_audio_codec.h"
 
 
 static uint8_t cs4270Write(uint16_t data)

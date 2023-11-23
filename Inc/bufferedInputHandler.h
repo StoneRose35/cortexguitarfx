@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include "bufferedInputStructs.h"
-#include "uart.h"
+#include "drivers/uart.h"
 
 
 #define BINPUT_TYPE_CONSOLE 0

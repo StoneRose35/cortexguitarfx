@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#include "oled_display.h"
-#include "systick.h"
+#include "drivers/oled_display.h"
+#include "drivers/systick.h"
 #include "fonts/oled_font_5x7.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/spi.h"

@@ -5,12 +5,12 @@
 #include <utilCommands.h>
 #include <bufferedInputHandler.h>
 #include "neopixelCommands.h"
-#include "bluetoothATConfig.h"
-#include "systick.h"
+#include "drivers/bluetoothATConfig.h"
+#include "drivers/systick.h"
 #include "stringFunctions.h"
-#include "neopixelDriver.h"
-#include "uart.h"
-#include "datetimeClock.h"
+#include "drivers/neopixelDriver.h"
+#include "drivers/uart.h"
+#include "drivers/datetimeClock.h"
 #include "consoleBase.h"
 /**
  * @brief prints a brief overview of the commands

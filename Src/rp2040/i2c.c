@@ -6,8 +6,8 @@
 #include "hardware/regs/i2c.h"
 #include "hardware/rp2040_registers.h"
 #include "hardware/regs/m0plus.h"
-#include "i2c.h"
-#include "systick.h"
+#include "drivers/i2c.h"
+#include "drivers/systick.h"
 
 
 static inline void read_reg(volatile uint32_t* reg)

@@ -5,8 +5,8 @@
 #include "hardware/regs/pads_bank0.h"
 #include "hardware/regs/dma.h"
 #include "gen/pio0_pio.h"
-#include "i2s.h"
-#include "adc.h"
+#include "drivers/i2s.h"
+#include "drivers/adc.h"
 #include "hardware/rp2040_registers.h"
 #include "audio/audiotools.h"
 

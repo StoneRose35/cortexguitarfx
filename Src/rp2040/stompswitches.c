@@ -1,8 +1,8 @@
 /*
 driver for a stomp switches interface which communicates it's status over i2c
 */
-#include "i2c.h"
-#include "stompswitches.h"
+#include "drivers/i2c.h"
+#include "drivers/stompswitches.h"
 
 
 // bit 0: momentary

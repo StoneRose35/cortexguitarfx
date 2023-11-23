@@ -6,10 +6,10 @@
 #include "hardware/regs/m0plus.h"
 #include "hardware/regs/sio.h"
 #include "hardware/rp2040_registers.h"
-#include "cs4270_audio_codec.h"
-#include "timer.h"
-#include "systick.h"
-#include "irq.h"
+#include "drivers/cs4270_audio_codec.h"
+#include "drivers/timer.h"
+#include "drivers/systick.h"
+#include "drivers/irq.h"
 
 static uint32_t oldtickenc,oldtickswitch;
 static volatile uint32_t encoderVal = 0x7FFFFFFF;

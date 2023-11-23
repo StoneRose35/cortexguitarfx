@@ -1,6 +1,6 @@
-#include "wm8731.h"
-#include "i2c.h"
-#include "debugLed.h"
+#include "drivers/wm8731.h"
+#include "drivers/i2c.h"
+#include "drivers/debugLed.h"
 
 uint8_t wm8731_write(uint16_t data)
 {

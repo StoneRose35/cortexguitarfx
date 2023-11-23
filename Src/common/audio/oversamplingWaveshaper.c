@@ -1,9 +1,9 @@
 #include "audio/oversamplingWaveshaper.h"
 #include "audio/secondOrderIirFilter.h"
 #include <stdint.h>
-#include "i2s.h"
+#include "drivers/i2s.h"
 
-// oversampling factor as power of two
+//v oversampling factor as power of two
 #define OVERSAMPLING_FACTOR 2 
 
 

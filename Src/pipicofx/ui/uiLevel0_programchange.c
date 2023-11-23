@@ -1,14 +1,14 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "oled_display.h"
-#include "adc.h"
+#include "drivers/oled_display.h"
+#include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
 #include "images/pipicofx_param_1_scaled.h"
 #include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
-#include "stompswitches.h"
+#include "drivers/stompswitches.h"
 
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
 BwImageType lock;

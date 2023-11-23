@@ -8,7 +8,7 @@
 #include "hardware/regs/resets.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
-#include "systemClock.h"
+#include "drivers/systemClock.h"
 #include "memFunctions.h"
 #include "hardware/usb_rp2040.h"
 #include "usb/usb_cdc.h"

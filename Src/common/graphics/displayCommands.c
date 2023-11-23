@@ -2,7 +2,7 @@
 #include "displayCommands.h"
 #include "spi_sdcard_display.h"
 #include "charDisplay.h"
-#include "uart.h"
+#include "drivers/uart.h"
 #include "stringFunctions.h"
 #include "taskManagerUtils.h" 
 #include <string.h>

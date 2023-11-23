@@ -1,5 +1,5 @@
 
-#include "multicore.h"
+#include "drivers/multicore.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/regs/sio.h"

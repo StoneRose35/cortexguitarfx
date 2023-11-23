@@ -1,5 +1,5 @@
 #include <sys/stat.h>
-#include "uart.h"
+#include "drivers/uart.h"
 #include "bufferedInputStructs.h"
 #include "bufferedInputHandler.h"
 

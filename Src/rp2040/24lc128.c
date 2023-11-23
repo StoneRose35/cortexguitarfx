@@ -1,5 +1,5 @@
-#include "24lc128.h"
-#include "systick.h"
+#include "drivers/24lc128.h"
+#include "drivers/systick.h"
 
 void eeprom24s128WritePage(uint32_t address,uint16_t len, uint8_t* data)
 {

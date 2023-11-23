@@ -1,19 +1,19 @@
 
 #include "dma.h"
-#include "neopixelDriver.h"
-#include "i2s.h"
-#include "adc.h"
-#include "gpio.h"
+#include "drivers/neopixelDriver.h"
+#include "drivers/i2s.h"
+#include "drivers/adc.h"
+#include "drivers/gpio.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/resets.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/regs/dma.h"
 #include "hardware/regs/pio.h"
 #include "hardware/rp2040_registers.h"
-#include "timer.h"
+#include "drivers/timer.h"
 #include "pipicofx/pipicofxui.h"
 #include "audio/audiotools.h"
-#include "oled_display.h"
+#include "drivers/oled_display.h"
 
 int16_t* audioBufferPtr;
 #ifndef I2S_INPUT

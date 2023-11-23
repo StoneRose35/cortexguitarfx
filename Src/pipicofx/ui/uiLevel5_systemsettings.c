@@ -1,7 +1,7 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "oled_display.h"
-#include "adc.h"
+#include "drivers/oled_display.h"
+#include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
@@ -9,7 +9,7 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
-#include "cs4270_audio_codec.h"
+#include "drivers/cs4270_audio_codec.h"
 #include "images/toggleswitch_on.h"
 #include "images/toggleswitch_off.h"
 

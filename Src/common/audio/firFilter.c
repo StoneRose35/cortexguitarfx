@@ -1,8 +1,8 @@
 #include "audio/firFilter.h"
 #include "audio/audiotools.h"
 #ifdef RP2040_FEATHER
-#include "multicore.h"
-#include "gpio.h"
+#include "drivers/multicore.h"
+#include "drivers/gpio.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
 #include "hardware/rp2040_registers.h"

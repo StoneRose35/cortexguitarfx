@@ -1,5 +1,5 @@
 #include "stdint.h"
-#include "timer.h"
+#include "drivers/timer.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/timer.h"
 #include "hardware/regs/watchdog.h"

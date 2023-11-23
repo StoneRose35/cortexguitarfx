@@ -1,8 +1,8 @@
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "graphics/gfxfont.h"
-#include "oled_display.h"
-#include "adc.h"
+#include "drivers/oled_display.h"
+#include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
@@ -11,7 +11,7 @@
 #include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
-#include "stompswitches.h"
+#include "drivers/stompswitches.h"
 
 extern FxPresetType presets[3];
 extern uint8_t currentBank;

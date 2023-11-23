@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/picofxCore.h"
-#include "24lc128.h"
+#include "drivers/24lc128.h"
 #include "stringFunctions.h"
 
 FxProgramType* fxPrograms[N_FX_PROGRAMS]={

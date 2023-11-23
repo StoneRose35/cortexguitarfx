@@ -15,7 +15,7 @@
 
 #include "stringFunctions.h"
 #include "utilCommands.h"
-#include "uart.h"
+#include "drivers/uart.h"
 #include "consoleBase.h"
 RGBStream lampsdata[N_LAMPS];
 RGBStream * lamps = lampsdata;

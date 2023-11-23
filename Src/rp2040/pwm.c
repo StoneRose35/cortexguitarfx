@@ -2,7 +2,7 @@
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/resets.h"
 #include "hardware/rp2040_registers.h"
-#include "pwm.h"
+#include "drivers/pwm.h"
 
 void initPwm()
 {

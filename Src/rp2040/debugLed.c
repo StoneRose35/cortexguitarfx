@@ -3,7 +3,7 @@
 #include "hardware/regs/sio.h"
 #include "hardware/regs/io_bank0.h"
 #include "hardware/rp2040_registers.h"
-#include "debugLed.h"
+#include "drivers/debugLed.h"
 
 void initDebugLed()
 {
