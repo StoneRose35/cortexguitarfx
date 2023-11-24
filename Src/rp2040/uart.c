@@ -7,8 +7,8 @@
 
 #ifdef RP2040_FEATHER
 
-#include <neopixelDriver.h>
-#include "uart.h"
+#include <drivers/neopixelDriver.h>
+#include "drivers/uart.h"
 #include "system.h"
 #include "consoleHandler.h"
 #include "bufferedInputHandler.h"
@@ -25,29 +25,35 @@
 extern uint32_t task;
 extern uint8_t context; // used by printf to decide where a certain information should be output
 
-CommBufferType usbCommBuffer __attribute__((aligned (256)));
+CommBuffer usbBuffer;
 
-CommBufferType btCommBuffer;
+static CommBuffer bluetoothBuffer;
 
 // receive interrupt for the usb uart
-void isr_uart0_irq20()
+void isr_c0_uart0_irq20()
 {
+	uint8_t bfr;
 	if ((*UART_UARTMIS & (1 << UART_UARTMIS_RXMIS_LSB)) == (1 << UART_UARTMIS_RXMIS_LSB)) // reception case
 	{
-		usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=*UART_UARTDR & 0xFF;
-		usbCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
-		task |= (1 << TASK_USB_CONSOLE_RX);
+		//usbCommBuffer.inputBuffer[usbCommBuffer.inputBufferCnt++]=*UART_UARTDR & 0xFF;
+		bfr = *UART_UARTDR & 0xFF;
+		//usbCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
+		appendToInputBuffer(usbBuffer,&bfr,1);
+		//task |= (1 << TASK_USB_CONSOLE_RX);
 	}
 }
 
 // receive interrupt for the bluetooth uart
-void isr_uart1_irq21()
+void isr_c0_uart1_irq21()
 {
+	uint8_t bfr;
 	if ((*UARTBT_UARTMIS & (1 << UART_UARTMIS_RXMIS_LSB)) == (1 << UART_UARTMIS_RXMIS_LSB)) // reception case
 	{
-		btCommBuffer.inputBuffer[btCommBuffer.inputBufferCnt++]=*UARTBT_UARTDR & 0xFF;
-		btCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
-		task |= (1 << TASK_BT_CONSOLE_RX);
+		//btCommBuffer.inputBuffer[btCommBuffer.inputBufferCnt++]=*UARTBT_UARTDR & 0xFF;
+		bfr = *UARTBT_UARTDR & 0xFF;
+		appendToInputBuffer(bluetoothBuffer,&bfr,1);
+		//btCommBuffer.inputBufferCnt &= (INPUT_BUFFER_SIZE-1);
+		//task |= (1 << TASK_BT_CONSOLE_RX);
 	}
 }
 
@@ -57,8 +63,40 @@ void isr_uart1_irq21()
  * reads forward from tail to head
  * @return uint8_t 0 if transmission is ongoing, 1 if terminated
  */
-uint8_t sendCharAsyncUsb()
+void sendCharAsyncUsb(void * commBfr,uint8_t blocking)
 {
+	uint32_t len;
+	uint32_t offset;
+	CommBuffer bfr = (CommBuffer)commBfr;
+	getOutputBuffer(bfr,&len,&offset);
+
+	if (blocking != 0)
+	{
+		getOutputBuffer(bfr,&len,&offset);
+		while (len > 0)
+		{
+			while ((*DMA_CH1_CTRL_TRIG & (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)) == (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB));
+			*DMA_CH1_READ_ADDR = (uint32_t)(bfr->outputBuffer+offset);
+			*DMA_CH1_TRANS_COUNT = len;
+			*DMA_CH1_CTRL_TRIG |= (1 << DMA_CH1_CTRL_TRIG_EN_LSB);
+			consumeOutputBufferBytes(bfr,len);
+			getOutputBuffer(bfr,&len,&offset);
+		}
+	}
+	else 
+	{
+		getOutputBuffer(bfr,&len,&offset);
+		if (len > 0 && ( (*DMA_CH1_CTRL_TRIG & (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)) != (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)))
+		{
+			*DMA_CH1_READ_ADDR = (uint32_t)(bfr->outputBuffer+offset);
+			*DMA_CH1_TRANS_COUNT = len;
+			*DMA_CH1_CTRL_TRIG |= (1 << DMA_CH1_CTRL_TRIG_EN_LSB);
+			consumeOutputBufferBytes(bfr,len);
+		}
+	}
+	//return 0;
+
+	/*
 	if (usbCommBuffer.outputBufferWriteCnt != usbCommBuffer.outputBufferReadCnt 
 	&& (*DMA_CH1_CTRL_TRIG & (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)) != (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB))//((*UART_UARTFR & (1 << UART_UARTFR_BUSY_LSB)) == 0))
 	{
@@ -83,33 +121,29 @@ uint8_t sendCharAsyncUsb()
 	{
 		return 0;
 	}
+	*/
 }
 
-uint8_t sendCharAsyncBt()
+void sendCharAsyncBt(void * commBfr,uint8_t blocking)
 {
-	if (btCommBuffer.outputBufferWriteCnt < btCommBuffer.outputBufferReadCnt && ((*UARTBT_UARTRIS & (1 << UART_UARTRIS_TXRIS_LSB)) == (1 << UART_UARTRIS_TXRIS_LSB)))
+	CommBuffer bfr=(CommBuffer)commBfr;
+	uint32_t offset,len;
+	getOutputBuffer(bfr,&len,&offset);
+	if (len > 0 && ((*UARTBT_UARTRIS & (1 << UART_UARTRIS_TXRIS_LSB)) == (1 << UART_UARTRIS_TXRIS_LSB)))
 	{
-		*UARTBT_UARTDR = *(btCommBuffer.outputBuffer+btCommBuffer.outputBufferWriteCnt);
-		btCommBuffer.outputBufferWriteCnt++;
+		*UARTBT_UARTDR =  *(bfr->outputBuffer+offset);
+		consumeOutputBufferBytes(bfr,1);
 	}
-	if (btCommBuffer.outputBufferWriteCnt == btCommBuffer.outputBufferReadCnt)
-	{
-		btCommBuffer.outputBufferWriteCnt=0;
-		btCommBuffer.outputBufferReadCnt=0;
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
+	//return 0;
 }
 
 
 /* USB Uart, used for serial communication over usb
  * 
  * */
-void initUart(uint16_t baudrate)
+void initUart(uint16_t baudrate,CommBuffer bfr)
 {
+	usbBuffer=bfr;
 	// power on uart, first switch it off explicitely
 	*RESETS |= (1 << RESETS_RESET_UART0_LSB); 
 	*RESETS &= ~(1 << RESETS_RESET_UART0_LSB);
@@ -156,15 +190,15 @@ void initUart(uint16_t baudrate)
 
 	// enable interrupt of channel 1 to inte0
 	*DMA_INTE0 |= (1 << 1);
-
 }
 
 /*
  * Uart connected to the bluetooth module
  * 
  * */
-void initBTUart(uint16_t baudrate)
+void initBTUart(uint16_t baudrate,CommBuffer bfr)
 {
+	bluetoothBuffer=bfr;
 	// power on uart
 	*RESETS |= (1 << RESETS_RESET_UART1_LSB); 
 	*RESETS &= ~(1 << RESETS_RESET_UART1_LSB);

@@ -11,39 +11,46 @@
 // ***************
 #define RP2040_LED_PIN (25) // 13 on rp2040 feather, 25 on rpi pico boards
 
-#define DS18B20_PIN 2
+#define I2C_SCL 5
+#define I2C_SDA 4
 
-#define HEATER  6 // heating element controlled using pwm
+#define AUDIO_CODEC_RESET 3
 
-#define I2C_SCL 2
-#define I2C_SDA 1
-
-#define I2S_WS_PIN 12
 #define I2S_BCK_PIN 11
-#define I2S_DATA_PIN 10
+#define I2S_WS_PIN 10
 #define I2S_DATA_IN_PIN 9
+#define I2S_DATA_PIN 12
 #define I2S_MCLK_PIN 8
 #define I2S_DEBUG_PIN 6
 
-// GPIO number where the neopixel is attached
-// Integrated Neopixel on RP2040 Feather: 16
-// Integrated Neopixel on RP2040 Itsybitsy: 17
-#ifdef ITSYBITSY
-#define NEOPIXEL_PIN 17
-#define NEOPIXEL_POWER_PIN 16
-#else
-#define NEOPIXEL_PIN 16
-#endif
-
-#define REMOTESWITCH_PIN 14 // 433 MHz radio-controller switch, reverse-engineered
+#define CLIPPING_LED_INPUT 16
+#define CLIPPING_LED_OUTPUT 17
 
 // rotary encoder combined with a push switch
 #define ENCODER_1 7
 #define ENCODER_2 6
-#define SWITCH 22
+#define ENTER_SWITCH 22
+#define EXIT_SWITCH 20
+#define POWERSENSE 13
 
-// backlight for lcd display
-#define BACKLIGHT 8
+// driver for ssd1306-based display (128*64 pixel oled display interfaced using spi)
+#define SSD1306_CS_DISPLAY 21
+#define SSD1306_SCK 18
+#define SSD1306_MOSI 19
+#define SSD1306_DISPLAY_CD 14
+#define SSD1306_DISPLAY_RESET 15
+
+// pin definitions for two uart ports
+#define UART_USB_RX 1
+#define UART_USB_TX 0
+
+// -----------------------------------------------------------------------------------------
+
+#define UART_BT_RX 9
+#define UART_BT_TX 8
+
+// debug pin
+#define DEBUG_PIN_1 2
 
 // 1.8" Color TFT LCD display with MicroSD Card Breakout - ST7735R
 // one spi sharing connection to a ST7735 display and  an sd card
@@ -56,19 +63,24 @@
 #define DISPLAY_CD 25
 #define DISPLAY_BACKLIGHT 8 
 
-// driver for ssd1306-based display (128*64 pixel oled display interfaced using spi)
-#define SSD1306_CS_DISPLAY 21
-#define SSD1306_SCK 18
-#define SSD1306_MOSI 19
-#define SSD1306_DISPLAY_CD 14
-#define SSD1306_DISPLAY_RESET 15
+#define REMOTESWITCH_PIN 14 // 433 MHz radio-controller switch, reverse-engineered
 
-// pin definitions for two uart ports
-#define UART_USB_RX 1
-#define UART_USB_TX 0
-#define UART_BT_RX 9
-#define UART_BT_TX 8
+#define DS18B20_PIN 2
 
+#define HEATER  6 // heating element controlled using pwm
+
+// backlight for lcd display
+#define BACKLIGHT 8
+
+// GPIO number where the neopixel is attached
+// Integrated Neopixel on RP2040 Feather: 16
+// Integrated Neopixel on RP2040 Itsybitsy: 17
+#ifdef ITSYBITSY
+#define NEOPIXEL_PIN 17
+#define NEOPIXEL_POWER_PIN 16
+#else
+#define NEOPIXEL_PIN 16
+#endif
 
 // ****************************************
 // * other device-specific configurations *
@@ -106,6 +118,7 @@
 
 #define CLK_ADC_CTRL ((volatile uint32_t*)(CLOCKS_BASE + CLOCKS_CLK_ADC_CTRL_OFFSET))
 #define CLK_ADC_DIV ((volatile uint32_t*)(CLOCKS_BASE + CLOCKS_CLK_ADC_DIV_OFFSET))
+#define CLK_USB_CTRL ((volatile uint32_t*)(CLOCKS_BASE + CLOCKS_CLK_USB_CTRL_OFFSET))
 
 #define ADC_CS ((volatile uint32_t*)(ADC_BASE + ADC_CS_OFFSET))
 #define ADC_DIV ((volatile uint32_t*)(ADC_BASE + ADC_DIV_OFFSET))
@@ -142,6 +155,12 @@
 #define DMA_CH3_TRANS_COUNT ((volatile uint32_t*)(DMA_BASE+DMA_CH3_TRANS_COUNT_OFFSET))
 #define DMA_CH3_TRANS_COUNT_TRIG ((volatile uint32_t*)(DMA_BASE+DMA_CH3_TRANS_COUNT_OFFSET+0x14))
 
+#define DMA_CH4_WRITE_ADDR ((volatile uint32_t*)(DMA_BASE+DMA_CH4_WRITE_ADDR_OFFSET))
+#define DMA_CH4_READ_ADDR ((volatile uint32_t*)(DMA_BASE+DMA_CH4_READ_ADDR_OFFSET))
+#define DMA_CH4_CTRL_TRIG ((volatile uint32_t*)(DMA_BASE+DMA_CH4_CTRL_TRIG_OFFSET))
+#define DMA_CH4_TRANS_COUNT ((volatile uint32_t*)(DMA_BASE+DMA_CH4_TRANS_COUNT_OFFSET))
+#define DMA_CH4_TRANS_COUNT_TRIG ((volatile uint32_t*)(DMA_BASE+DMA_CH4_TRANS_COUNT_OFFSET+0x14))
+
 #define DMA_INTE0 ((volatile uint32_t*)(DMA_BASE+DMA_INTE0_OFFSET))
 #define DMA_INTS0 ((volatile uint32_t*)(DMA_BASE+DMA_INTS0_OFFSET))
 
@@ -149,10 +168,20 @@
 #define SIO_FIFO_ST ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_ST_OFFSET))
 #define SIO_FIFO_RD ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_RD_OFFSET))
 #define SIO_FIFO_WR ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_WR_OFFSET))
+#define SIO_CPUID ((volatile uint32_t*)(SIO_BASE + SIO_CPUID_OFFSET))
 
 #define M0PLUS_VTOR ((volatile uint32_t*)(PPB_BASE + M0PLUS_VTOR_OFFSET))
 #define NVIC_ISER ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_ISER_OFFSET))
 #define NVIC_ICER ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_ICER_OFFSET))
+#define NVIC_IPR7 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR7_OFFSET))
+#define NVIC_IPR6 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR6_OFFSET))
+#define NVIC_IPR5 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR5_OFFSET))
+#define NVIC_IPR4 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR4_OFFSET))
+#define NVIC_IPR3 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR3_OFFSET))
+#define NVIC_IPR2 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR2_OFFSET))
+#define NVIC_IPR1 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR1_OFFSET))
+#define NVIC_IPR0 ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_IPR0_OFFSET))
+
 
 #define RESETS ((volatile uint32_t*)(RESETS_BASE + RESETS_RESET_OFFSET))
 #define RESETS_DONE ((volatile uint32_t*)(RESETS_BASE + RESETS_RESET_DONE_OFFSET))
@@ -239,7 +268,17 @@
 #define I2C_IC_CON ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CON_OFFSET))
 #define I2C_IC_TAR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TAR_OFFSET))
 #define I2C_IC_DATA_CMD ((volatile uint32_t*)(I2C0_BASE +I2C_IC_DATA_CMD_OFFSET))
-
+#define I2C_IC_DATA_CMD_BYTE ((volatile uint8_t*)(I2C0_BASE +I2C_IC_DATA_CMD_OFFSET))
+#define I2C_IC_INTR_MASK ((volatile uint32_t*)(I2C0_BASE +I2C_IC_INTR_MASK_OFFSET))
+#define I2C_IC_CLR_RX_DONE ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_RX_DONE_OFFSET))
+#define I2C_IC_CLR_INTR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_INTR_OFFSET))
+#define I2C_IC_CLR_STOP_DET ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_STOP_DET_OFFSET))
+#define I2C_IC_CLR_TX_ABRT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_TX_ABRT_OFFSET))
+#define I2C_IC_TXFLR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TXFLR_OFFSET))
+#define I2C_IC_TX_TL ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TX_TL_OFFSET))
+#define I2C_IC_RXFLR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_RXFLR_OFFSET))
+#define I2C_IC_RX_TL ((volatile uint32_t*)(I2C0_BASE +I2C_IC_RX_TL_OFFSET))
+#define I2C_IC_DMA_CR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_DMA_CR_OFFSET))
 #define I2C_IC_SS_SCL_HCNT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_SS_SCL_HCNT_OFFSET))
 #define I2C_IC_SS_SCL_LCNT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_SS_SCL_LCNT_OFFSET))
 #define I2C_IC_STATUS ((volatile uint32_t*)(I2C0_BASE +I2C_IC_STATUS_OFFSET))
@@ -253,6 +292,7 @@
 #define SSPCPSR ((volatile uint32_t*)(SPI0_BASE +  SPI_SSPCPSR_OFFSET))
 #define SSPDR ((volatile uint32_t*)(SPI0_BASE +  SPI_SSPDR_OFFSET))
 #define SSPSR ((volatile uint32_t*)(SPI0_BASE +  SPI_SSPSR_OFFSET))
+#define SSPDMACR ((volatile uint32_t*)(SPI0_BASE + SPI_SSPDMACR_OFFSET))
 
 #define XOSC_STARTUP ((volatile uint32_t*)(XOSC_BASE+XOSC_STARTUP_OFFSET))
 #define XOSC_CTRL_ENABLE ((volatile uint32_t*)(XOSC_BASE+XOSC_CTRL_OFFSET))
@@ -307,21 +347,27 @@ typedef struct {
 
 #define ENCODER_1_PIN_CNTR  ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*ENCODER_1))
 #define ENCODER_1_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*ENCODER_1))
-#define ENCODER_1_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC0_INTE0_OFFSET + (((4*ENCODER_1) & 0xFFE0) >> 3)))
+#define ENCODER_1_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*ENCODER_1) & 0xFFE0) >> 3)))
 #define ENCODER_1_INTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*ENCODER_1) & 0xFFE0) >> 3)))
 #define ENCODER_1_EDGE_LOW (((4*ENCODER_1) & 0x1F)+2)
 #define ENCODER_1_EDGE_HIGH (((4*ENCODER_1) & 0x1F)+3)
 
 #define ENCODER_2_PIN_CNTR  ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*ENCODER_2))
 #define ENCODER_2_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*ENCODER_2))
-#define ENCODER_2_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC0_INTE0_OFFSET + (((4*ENCODER_2) & 0xFFE0) >> 3)))
+#define ENCODER_2_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*ENCODER_2) & 0xFFE0) >> 3)))
 #define ENCODER_2_INTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*ENCODER_2) & 0xFFE0) >> 3)))
 #define ENCODER_2_EDGE_LOW (((4*ENCODER_2) & 0x1F)+2)
 #define ENCODER_2_EDGE_HIGH (((4*ENCODER_2) & 0x1F)+3)
 
+#define POWERSENSE_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*POWERSENSE))
+#define POWERSENSE_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*POWERSENSE))
+#define POWERSENSE_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*POWERSENSE) & 0xFFE0) >> 3)))
+#define POWERSENSE_INTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*POWERSENSE) & 0xFFE0) >> 3)))
+#define POWERSENSE_EDGE_LOW (((4*POWERSENSE) & 0x1F)+2)
+
 #define SWITCH_PIN_CNTR  ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*SWITCH))
 #define SWITCH_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*SWITCH))
-#define SWITCH_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC0_INTE0_OFFSET + (((4*SWITCH) & 0xFFE0) >> 3)))
+#define SWITCH_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*SWITCH) & 0xFFE0) >> 3)))
 #define SWITCH_INTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*SWITCH) & 0xFFE0) >> 3)))
 #define SWITCH_EDGE_LOW (((4*SWITCH) & 0x1F)+2)
 #define SWITCH_EDGE_HIGH (((4*SWITCH) & 0x1F)+3)
@@ -341,6 +387,8 @@ typedef struct {
 
 #define I2C_SCL_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + 4*I2C_SCL + 4))
 #define I2C_SDA_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + 4*I2C_SDA + 4))
+#define AUDIO_CODEC_RESET_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*AUDIO_CODEC_RESET))
+#define AUDIO_CODEC_RESET_PAD_CNTR  ((volatile uint32_t*)(PADS_BANK0_BASE + 4*AUDIO_CODEC_RESET + 4))
 
 #define DISPLAY_BACKLIGHT_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*DISPLAY_BACKLIGHT))
 

@@ -9,7 +9,7 @@
  */
 
 #include "systemChoice.h"
-#include "taskManagerUtils.h"
+#include "commands/taskManagerUtils.h"
 #include "intFunctions.h"
 #include <string.h>
 #include <stdlib.h>

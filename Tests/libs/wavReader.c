@@ -123,7 +123,15 @@ void getNextSample(int16_t*sample,WavFileType*wavFile)
 
 void writeWavFile(WavFileType*wavFile)
 {
+    uint32_t chunkSize;
+    // write raw wave file data
     fwrite(wavFile->data,2,wavFile->dataSize>>1,wavFile->filePointer);
+    
+    // write the chunk size
+    chunkSize = wavFile->dataSize + sizeof(WavHeaderType) + sizeof(WavFormatType);
+    wavFile->wavHeader.ChunkSize = chunkSize;
+    fseek(wavFile->filePointer,4,SEEK_SET);
+    fwrite(&wavFile->wavHeader.ChunkSize,4,1,wavFile->filePointer);
 }
 void writeNextSample(int16_t*sample,WavFileType*wavFile)
 {

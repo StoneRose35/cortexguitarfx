@@ -1,6 +1,7 @@
-#include "adc.h"
-#include "dma.h"
+#include "drivers/adc.h"
+#include "drivers/dma.h"
 #include "system.h"
+#include "drivers/irq.h"
 #include "hardware/regs/resets.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/adc.h"
@@ -18,7 +19,7 @@ extern uint32_t task;
 
 volatile uint16_t adcChannel0Value, adcChannel1Value, adcChannel2Value;
 
-void isr_adc_fifo_irq22()
+void isr_c1_adc_fifo_irq22()
 {
     adcChannel0Value = *ADC_FIFO;
     adcChannel1Value = *ADC_FIFO;
@@ -137,7 +138,7 @@ void initRoundRobinReading()
     //*(PADS_ADC0 + 2) &= ~(1 << PADS_BANK0_GPIO26_OD_LSB);
 
     // set update frequency
-    *ADC_DIV=((F_ADC_USB/(UI_UPDATE_RATE*3)) - 1) << 8; 
+    *ADC_DIV= 0xFFFF << 8; //((F_ADC_USB/(UI_UPDATE_RATE*3)) - 1) << 8; 
 
     // set threshhold to 3
     *ADC_FCS = (1 << ADC_FCS_EN_LSB) | (3 << ADC_FCS_THRESH_LSB); 
@@ -147,6 +148,8 @@ void initRoundRobinReading()
 
     // enable global interrupt (handled by core 0)
     *NVIC_ISER = (1 << 22);
+    setInterruptPriority(22,1);
+
 
     // set round robin for channels 0 to 2
     *ADC_CS |= ((1 << 0) << ADC_CS_RROBIN_LSB) | ((1 << 1) << ADC_CS_RROBIN_LSB) | ((1 << 2) << ADC_CS_RROBIN_LSB);

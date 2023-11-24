@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include "consoleHandler.h"
 #include <string.h>
-#include "taskManager.h"
+#include "commands/taskManager.h"
 #include "system.h"
 
 static char currentPath[CONSOLE_MAX_PATHLENGTH];

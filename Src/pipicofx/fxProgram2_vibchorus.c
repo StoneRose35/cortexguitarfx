@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
 static int16_t fxProgram2processSample(int16_t sampleIn,void*data)
@@ -15,23 +15,14 @@ static void fxProgram2Param1Callback(uint16_t val,void*data) // frequency
     // map 0 - 4095 to 1 1000
     val = ((val*250) >> 10) + 1;
     simpleChorusSetFrequency(val,&pData->chorusData);
+    fxProgram2.parameters[0].rawValue = val;
 }
 
 static void fxProgram2Param1Display(void*data,char*res)
 {
     FxProgram2DataType* pData = (FxProgram2DataType*)data;
     decimalInt16ToChar(pData->chorusData.frequency,res,2);
-    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-3;c++)
-    {
-        if(*(res+c)==0)
-        {
-            *(res+c)=' ';
-            *(res+c+1)='H';
-            *(res+c+2)='z';
-            *(res+c+3)=(char)0;
-            break;
-        }
-    }
+    appendToString(res," Hz");
 }
 
 static void fxProgram2Param2Callback(uint16_t val,void*data) // depth
@@ -40,23 +31,16 @@ static void fxProgram2Param2Callback(uint16_t val,void*data) // depth
     // map to 0 to 255
     val >>= 4;
     pData->chorusData.depth = (uint8_t)val;
+    fxProgram2.parameters[1].rawValue = val;
 }
 
 static void fxProgram2Param2Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram2DataType* fData=(FxProgram2DataType*)data;
-    dVal = fData->chorusData.depth/164;
+    dVal = (fData->chorusData.depth*100) >> 8;
     Int16ToChar(dVal,res);
-    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
-    {
-        if(*(res+c)==0)
-        {
-            *(res+c)='%';
-            *(res+c+1)=(char)0;
-            break;
-        }
-    }
+    appendToString(res,"%");
 }
 
 static void fxProgram2Param3Callback(uint16_t val,void*data) // mix
@@ -65,23 +49,16 @@ static void fxProgram2Param3Callback(uint16_t val,void*data) // mix
     // map to 0 to 255
     val >>= 4;
     pData->chorusData.mix = (uint8_t)val;
+    fxProgram2.parameters[2].rawValue = val;
 }
 
 static void fxProgram2Param3Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram2DataType* fData = (FxProgram2DataType*)data;
-    dVal = fData->chorusData.mix/328;
+    dVal = (fData->chorusData.mix*100) >> 8;
     Int16ToChar(dVal,res);
-    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
-    {
-        if(*(res+c)==0)
-        {
-            *(res+c)='%';
-            *(res+c+1)=(char)0;
-            break;
-        }
-    }
+    appendToString(res,"%");
 }
 
 static void fxProgram2Setup(void*data)
@@ -99,14 +76,14 @@ FxProgram2DataType fxProgram2data = {
 };
 
 FxProgramType fxProgram2 = {
-    .name = "Vibrato/Chorus       ",
+    .name = "Vibrato/Chorus",
     .nParameters=3,
     .processSample = &fxProgram2processSample,
     .parameters = {
         {
             .name = "Frequency      ",
             .control=0,
-            .increment = 64,
+            .increment = 32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram2Param1Display,
             .getParameterValue=0,
@@ -115,7 +92,7 @@ FxProgramType fxProgram2 = {
         {
             .name = "Depth          ",
             .control=1,
-            .increment = 64,
+            .increment = 32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram2Param2Display,
             .getParameterValue=0,
@@ -124,7 +101,7 @@ FxProgramType fxProgram2 = {
         {
             .name = "Mix            ",
             .control=2,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram2Param3Display,
             .getParameterValue=0,
@@ -132,5 +109,6 @@ FxProgramType fxProgram2 = {
         }
     },
     .setup = &fxProgram2Setup,
+    .reset = 0,
     .data = (void*)&fxProgram2data
 };

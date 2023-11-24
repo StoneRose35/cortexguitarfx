@@ -1,9 +1,9 @@
 #include "audio/oversamplingWaveshaper.h"
 #include "audio/secondOrderIirFilter.h"
 #include <stdint.h>
-#include "i2s.h"
+#include "drivers/i2s.h"
 
-// oversampling factor as power of two
+//v oversampling factor as power of two
 #define OVERSAMPLING_FACTOR 2 
 
 
@@ -54,5 +54,10 @@ int16_t  OversamplingDistortionProcessSample(int16_t sample,OversamplingWaveshap
     outVal = (int16_t)((osVal1+osVal2+osVal3+osVal4) >> 2);
     //osVal4 = secondOrderIirFilterProcessSample(osVal4,&waveshaper->oversamplingFilter);
     return outVal;
+}
+
+void oversamplingWaveshaperReset(OversamplingWaveshaperDataType*data)
+{
+    data->oldValue=0;
 }
 

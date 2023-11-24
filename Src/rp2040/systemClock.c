@@ -11,7 +11,7 @@
 #include "hardware/regs/pll.h"
 #include "hardware/regs/resets.h"
 #include "hardware/rp2040_registers.h"
-#include "systemClock.h"
+#include "drivers/systemClock.h"
 #include "system.h"
 
 

@@ -8,9 +8,9 @@
 #ifdef RP2040_FEATHER
 
 #include <stdint.h>
-#include "neopixelDriver.h"
+#include "drivers/neopixelDriver.h"
 #include "stdlib.h"
-#include "flash.h"
+#include "drivers/flash.h"
 #include "romfunc.h"
 
 

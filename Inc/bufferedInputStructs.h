@@ -68,6 +68,7 @@ typedef struct {
  */
 typedef ConsoleType* Console;
 
+typedef void(*bufferConsumerType)(void * bfr,uint8_t blocking);
 /**
  * @brief data structure for a byte-oriented hardware communication interface (typically UART)
  * 
@@ -79,6 +80,7 @@ typedef struct
 	uint32_t outputBufferReadCnt; //!< counts how many bytes have been read by the output buffer, is increased by the system
 	uint32_t outputBufferWriteCnt; //!< counts how many bytes have been written out the the interface, is increased by sendCharAsync
 	uint8_t inputBufferCnt; //!< counts the number of bytes in the input buffer
+	bufferConsumerType bufferConsumer;
 } CommBufferType;
 
 /**
@@ -86,6 +88,8 @@ typedef struct
  * 
  */
 typedef CommBufferType* CommBuffer;
+
+
 
 /**
  * @brief data structure for an entire communication interface
@@ -104,5 +108,8 @@ typedef struct
  * 
  */
 typedef BufferedInputType* BufferedInput;
+
+
+
 
 #endif /* BUFFEREDINPUTSTRUCTS_H_ */

@@ -11,11 +11,11 @@
  * 
  * 
  */
-#include "taskManager.h"
+#include "commands/taskManager.h"
 
 #include "stringFunctions.h"
-#include "utilCommands.h"
-#include "uart.h"
+#include "commands/utilCommands.h"
+#include "drivers/uart.h"
 #include "consoleBase.h"
 RGBStream lampsdata[N_LAMPS];
 RGBStream * lamps = lampsdata;

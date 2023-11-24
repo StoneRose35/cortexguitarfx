@@ -1,4 +1,4 @@
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
 static int16_t fxProgram5processSample(int16_t sampleIn,void*data)
@@ -13,6 +13,7 @@ static void fxProgram5Param1Callback(uint16_t val,void*data) // set bit mask
     uint16_t resolution;
     resolution = (4096 - val) >> 8;
     setBitMask((uint8_t)resolution,&pData->bitcrusher);
+    fxProgram5.parameters[0].rawValue = val;
 }
 
 static void fxProgram5Param1Display(void*data,char*res)
@@ -37,13 +38,13 @@ FxProgram5DataType fxProgram5data = {
 };
 
 FxProgramType fxProgram5 = {
-    .name = "Monstercrusher       ",
+    .name = "Monstercrusher",
     .nParameters=1,
     .parameters = {
         {
             .name = "Bit Reduction  ",
             .control=0,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram5Param1Display,
             .getParameterValue=0,
@@ -52,5 +53,6 @@ FxProgramType fxProgram5 = {
     },
     .processSample = &fxProgram5processSample,
     .setup = &fxProgram5Setup,
+    .reset = 0,
     .data = (void*)&fxProgram5data
 };

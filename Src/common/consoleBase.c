@@ -12,6 +12,8 @@ extern CommBufferType btCommBuffer;
 // it seems data is sent multiple time when the output buffer would run over
 void printf(const char* data)
 {
+	appendStringToOutputBuffer(&usbCommBuffer,data);
+	/*
 	uint32_t cnt = 0;
 	uint8_t cur_data;
 	uint8_t sc_res;
@@ -27,12 +29,12 @@ void printf(const char* data)
 			usbCommBuffer.outputBufferReadCnt++;
 			usbCommBuffer.outputBufferReadCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
 
-			if (usbCommBuffer.outputBufferReadCnt==usbCommBuffer.outputBufferWriteCnt-1) // ring buffer full
+			if (usbCommBuffer.outputBufferReadCnt==((usbCommBuffer.outputBufferWriteCnt-1) & ((1 << OUTPUT_BUFFER_SIZE)-1))) // ring buffer full
 			{
 			    sc_res = sendCharAsyncUsb();
 				while (sc_res == 0)
 				{
-					sc_res = sendCharAsyncBt();
+					sc_res = sendCharAsyncUsb();
 				}
 				//while((*DMA_CH1_CTRL_TRIG & (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB)) == (1 << DMA_CH1_CTRL_TRIG_BUSY_LSB));
 			}
@@ -56,4 +58,5 @@ void printf(const char* data)
 		cur_data = *(data + cnt);
 	}
 	//sendCharAsyncUsb();
+	*/
 }

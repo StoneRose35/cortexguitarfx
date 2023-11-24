@@ -36,7 +36,8 @@ static uint8_t {0}_bwdata[]= {{
 static const struct BwImageStruct {0}_streamimg = {{
     .data = {0}_bwdata,
     .sx = {2},
-    .sy = {3}
+    .sy = {3},
+    .type = {5}
 }};
 #endif
 """
@@ -104,21 +105,51 @@ def imageToBWCStream(fname="Rheinisch-Kaltblut-Gespann.png",outfolder=""):
     c = 0
     rownr_old=0
     nrows = int(img.shape[0]/8)
-    pixeldata = np.zeros(int(img.shape[0]/8)*img.shape[1],dtype="uint8")
+    pixeldata = np.zeros(int(np.ceil(img.shape[0]/8))*img.shape[1],dtype="uint8")
     for row in range(img.shape[0]):
         rownr = int(np.floor(c/8))
         bwbits = list(map(el_to_bw_pixels, img[row]))
 
         bitpos = c - rownr*8
-        for p in range(img.shape[1]):
-            idx = p*nrows + rownr
-            pixeldata[idx] |= (bwbits[p] << bitpos)
+        ncolumns = img.shape[1]
+        for p in range(ncolumns):
+            bitval = el_to_bw_pixels(img[row][p])
+            idx = p + rownr*ncolumns #p*nrows + rownr
+            pixeldata[idx] |= (bitval << bitpos)
         c += 1
     for el in pixeldata:
         bytearray += hex(el) + ", "
-    fcontent = c_template_bw.format(imgname, bytearray, int(img.shape[1]), int(img.shape[0]),imgname.upper())
+    fcontent = c_template_bw.format(imgname, bytearray, int(img.shape[1]), int(img.shape[0]),imgname.upper(),"BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES")
     fp.write(fcontent)
     fp.close()
+
+def imageToBWXYPixelCStream(fname="Rheinisch-Kaltblut-Gespann.png", outfolder=""):
+    img = mpimg.imread(fname)
+    imgname = fname.split(os.path.sep)[-1].split(".")[0]
+    if (len(outfolder) > 0):
+        fp = open(os.path.join(outfolder, imgname + ".h"), "wt")
+    else:
+        fp = open(imgname + ".h", "wt")
+    bytearray = ""
+    idx = 0
+    bitpos = 0
+    pixeldata = np.zeros(int(np.ceil(img.shape[0]*img.shape[1])/8),dtype="uint8")
+    for row in range(img.shape[0]):
+        ncolumns = img.shape[1]
+        for p in range(ncolumns):
+            bitval = el_to_bw_pixels(img[row][p])
+            pixeldata[idx] |= (bitval << bitpos)
+            bitpos += 1
+            if bitpos > 7:
+                idx += 1
+                bitpos = 0
+            
+    for el in pixeldata:
+        bytearray += hex(el) + ", "
+    fcontent = c_template_bw.format(imgname, bytearray, int(img.shape[1]), int(img.shape[0]),imgname.upper(),"BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES")
+    fp.write(fcontent)
+    fp.close()
+
 
 
 def fontImageToArray(fname="sm_ascii_16x16.png", sizex=16, sizey=16, offsetx=0, offsety=0, outfolder=""):
@@ -221,6 +252,7 @@ if __name__ == "__main__":
     parser.add_argument("-generateAssets",help="generate images and font asset headers",action="store_true")
     parser.add_argument("-convertImg",help="convert specific image to c header as 16bit color image (for ST7735)")
     parser.add_argument("-convertBwImg",help="convert specific image to c header as black/white image (for SSD1306)")
+    parser.add_argument("-convertBwXYPixel",help="convert specific image to c header as black/white image useable with the bwgraphics lib")
 
     args = parser.parse_args()
     if args.calcSysFreqs is False and args.generateAssets is False and args.convertImg is None and args.convertBwImg is None:
@@ -240,12 +272,15 @@ if __name__ == "__main__":
             # dircontent = os.listdir(asset_path)
             full_path = args.convertImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToCStream(full_path, "../Inc/images")
+                imageToCStream(full_path, "./Inc/images")
         elif args.convertBwImg is not None:
             full_path = args.convertBwImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToBWCStream(full_path, "../Inc/images")
-
+                imageToBWCStream(full_path, "./Inc/images")
+        elif args.convertBwXYPixel is not None:
+            full_path = args.convertBwXYPixel # os.path.join(asset_path,args.convertImg)
+            if os.path.isfile(full_path) and full_path.lower().endswith("png"):
+                imageToBWXYPixelCStream(full_path, "./Inc/images")
 
 
     """

@@ -11,9 +11,10 @@ typedef struct
 
 void initfirFilter(FirFilterType*data);
 void addSample(int16_t sampleIn,FirFilterType*data);
-int16_t processFirstHalf(FirFilterType*data);
-int16_t processSecondHalf(FirFilterType*data);
+__attribute__ ((section (".ramfunc"))) int32_t processFirstHalf(FirFilterType*data); 
+__attribute__ ((section (".ramfunc"))) int32_t processSecondHalf(FirFilterType*data);
 
 int16_t firFilterProcessSample(int16_t sampleIn,FirFilterType*data);
+void firFilterReset(FirFilterType*data);
 
 #endif

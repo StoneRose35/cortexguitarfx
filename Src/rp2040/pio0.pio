@@ -140,40 +140,38 @@ set y,14 side 3
 jmp i2s_duplex_loop_l side 3
 
 ; full duplex mode operating as slave, the pins data_in, lrclock, and bck must be consecutive pins
-
+; pin 1: lrclk, pin 2: bclk
 .program i2s_duplex_slave
 i2s_duplex_slave_start:
 wait 1 pin 1
+i2s_d_s_wait_left:
+set x,15
 wait 0 pin 1 
-i2s_d_s_proc_right_last:
 wait 0 pin 2
-out pins,1
-pull noblock
 wait 1 pin 2 
-in pins,1
-push noblock
 i2s_d_s_proc_left:
 wait 0 pin 2
-jmp pin i2s_d_s_last_left ; jump to last left when 1
-; last left
 out pins,1
 wait 1 pin 2 
 in pins,1
-jmp i2s_d_s_proc_left
-i2s_d_s_last_left:
-out pins,1
+jmp x--,i2s_d_s_proc_left
+;push noblock
+;pull noblock
+set x,15 [3]
+set pins,0 ; assert that zeros are being clocked out 
+wait 1 pin 1 ; wait for lrclk to toggle
+wait 0 pin 2
 wait 1 pin 2 
-in pins,1
-;jmp i2s_d_s_proc_right
 i2s_d_s_proc_right:
 wait 0 pin 2
-jmp pin i2s_d_s_cont_right; continue to read right when 1
-jmp i2s_d_s_proc_right_last
-i2s_d_s_cont_right:
 out pins,1
 wait 1 pin 2 
 in pins,1
-jmp i2s_d_s_proc_right
+jmp x--,i2s_d_s_proc_right [3]
+set pins,0 ; assert that zeros are being clocked out
+;push noblock
+;pull noblock
+jmp i2s_d_s_wait_left
 
 
 

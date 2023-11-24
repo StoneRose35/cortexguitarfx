@@ -5,7 +5,7 @@
 #include "hardware/regs/pads_bank0.h"
 #include "hardware/rp2040_registers.h"
 #include "hardware/regs/resets.h"
-#include "gpio.h"
+#include "drivers/gpio.h"
 
 
 void setAsOuput(uint8_t pinNr)

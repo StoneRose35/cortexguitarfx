@@ -1,65 +1,63 @@
 #include "stdint.h"
 #include "audio/compressor.h"
 #include "romfunc.h"
+#include "fastExpLog.h"
+#include "audio/firstOrderIirFilter.h"
 
 int16_t applyGain(int16_t sample,int16_t avgVolume,CompressorDataType*comp)
 {
-    int16_t sample_reduced;
+    int32_t gainFactor;
     int16_t sampleOut;
-    int32_t sampleInterm;
-    if (avgVolume < comp->gainFunction.threshhold)
+    int32_t sampleInterm=0;
+    int16_t logAvg;
+
+    logAvg = fastlog(avgVolume);
+    if (logAvg < comp->gainFunction.threshhold) // below threshhold, amplification 1
     {
-        sample_reduced = avgVolume;
         sampleInterm=sample;
     }
     else if (comp->gainFunction.gainReduction > 4)
     {
-        sample_reduced =  comp->gainFunction.threshhold;
-        sampleInterm=sample*sample_reduced;
+        gainFactor = fastexp(comp->gainFunction.threshhold)*32767;
         if (avgVolume != 0)
         {
-            sampleInterm = sampleInterm/avgVolume;
+            gainFactor /=avgVolume;
+            sampleInterm = (sample*gainFactor) >> 15;  // sampleInterm/avgVolume;
         }
     }
     else
     {
-        sample_reduced =  comp->gainFunction.threshhold + ((avgVolume-comp->gainFunction.threshhold) >> (comp->gainFunction.gainReduction));
-        sampleInterm=sample*sample_reduced;
+        gainFactor =  fastexp(comp->gainFunction.threshhold + ((logAvg-comp->gainFunction.threshhold) >> (comp->gainFunction.gainReduction)))*32767;
         if (avgVolume != 0)
         {
-            sampleInterm = sampleInterm/avgVolume;
+            gainFactor /=avgVolume;
+            sampleInterm = (sample*gainFactor) >> 15;
         }
     }
-
-
     sampleOut=(int16_t)sampleInterm;
-
     return sampleOut;
 }
 
-void setAttack(int32_t attackInUs,CompressorDataType*data)
+int16_t getMaxGain(CompressorDataType*comp)
 {
-    float attackFloat, samplesFloat;
-    attackFloat = int2float(attackInUs);
-    samplesFloat = 32767.0f*20.833f/attackFloat;
-    data->attack= (int16_t)float2int(samplesFloat);
-}
-
-void setRelease(int32_t releaseInUs,CompressorDataType*data)
-{
-    float releaseFloat, samplesFloat;
-    releaseFloat = int2float(releaseInUs);
-    samplesFloat = 32767.0f*20.833f/releaseFloat;
-    data->release= (int16_t)float2int(samplesFloat);
+    if (comp->gainFunction.gainReduction > 4)
+    {
+        return fastexp(comp->gainFunction.threshhold);
+    }
+    else
+    {
+        return fastexp(comp->gainFunction.threshhold + ((0x7FFF-comp->gainFunction.threshhold) >> (comp->gainFunction.gainReduction)));
+    }
 }
 
 int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data)
 {
     int16_t absSample;
-    int16_t delta;
     int16_t sampleOut;
+    int32_t intermAvg;
 
     sampleOut = applyGain(sampleIn,data->currentAvg,data);
+    
     if(sampleOut < 0)
     {
         absSample = -sampleOut;
@@ -68,36 +66,21 @@ int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data)
     {
         absSample = sampleOut;
     }
-    delta = absSample - data->currentAvg;
-    if (delta < 0)
+    /*if(sampleIn < 0)
     {
-        if(-delta > data->release)
-        {
-            data->currentAvg -= data->release;
-        }
-        else
-        {
-            data->currentAvg += delta;
-        }
-        if (data->currentAvg < 0)
-        {
-            data->currentAvg=0;
-        }
+        absSample = -sampleIn;
     }
     else
     {
-        if(delta > data->attack)
-        {
-            data->currentAvg += data->attack;
-        }
-        else
-        {
-            data->currentAvg += delta;
-        }
-        if (data->currentAvg < 0) // overflow in this case
-        {
-            data->currentAvg=(1 << 15)-1;
-        }
-    }
+        absSample = sampleIn;
+    }*/
+    intermAvg = firstOrderIirDualCoeffLPProcessSample(absSample,&data->avgLowpass);
+    data->currentAvg = (int16_t)intermAvg; 
     return sampleOut;
+}
+
+void compressorReset(CompressorDataType*data)
+{
+    firstOrderIirDualCoeffLPReset(&data->avgLowpass);
+    data->currentAvg = 0;
 }

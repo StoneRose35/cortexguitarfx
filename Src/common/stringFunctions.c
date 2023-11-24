@@ -258,11 +258,11 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 	if (((uint16_t)nr & 0x8000) != 0)
 	{
 		// have to add least one zero before the decimal separator
-		if(charpos < decimalPlace+3)
+		if(charpos <= decimalPlace+1)
 		{
 			// shift digits back
 			c2=charpos;
-			for(uint8_t c=charpos;c>0;c--)
+			for(int8_t c=charpos;c>0;c--)
 			{
 				out[c2+(decimalPlace-charpos)+3] = out[c2];
 				c2--;
@@ -285,7 +285,7 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 		{
 			// shift one position back
 			c2=charpos;
-			for(uint8_t c=0;c<decimalPlace;c++)
+			for(uint8_t c=0;c<decimalPlace+1;c++)
 			{
 				out[c2+1] = out[c2];
 				c2--;
@@ -297,11 +297,11 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 	else
 	{
 		// have to add least one zero before the decimal separator
-		if(charpos < decimalPlace+2)
+		if(charpos <= decimalPlace)
 		{
 			// shift digits back
 			c2=charpos;
-			for(uint8_t c=charpos;c>=0;c--)
+			for(int8_t c=charpos;c>=0;c--)
 			{
 				out[c2+(decimalPlace-charpos)+2] = out[c2];
 				c2--;
@@ -312,11 +312,11 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 			{
 				if (c==1)
 				{
-					out[c+1] = '.';
+					out[c] = '.';
 				}
 				else
 				{
-					out[c+1] = '0';
+					out[c] = '0';
 				}
 			}
 		}
@@ -324,7 +324,7 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 		{
 			// shift one position back
 			c2=charpos;
-			for(uint8_t c=0;c<decimalPlace;c++)
+			for(uint8_t c=0;c<decimalPlace+1;c++)
 			{
 				out[c2+1] = out[c2];
 				c2--;
@@ -825,7 +825,14 @@ void dateTimeToString(char * out,uint16_t year,uint8_t month,uint8_t day,uint8_t
      *(out + strPos) = 0;
 }
 
-uint16_t appendToString(char * appendee,char *  appender)
+/**
+ * @brief appends appender to appendee
+ * 
+ * @param appendee 
+ * @param appender 
+ * @return uint16_t 
+ */
+uint16_t appendToString(char * appendee,const char *  appender)
 {
 	uint16_t c=0,c2=0;
 	while (*(appendee + c) != 0)
@@ -833,6 +840,21 @@ uint16_t appendToString(char * appendee,char *  appender)
 		c++;
 	}
 	while(*(appender + c2) != 0)
+	{
+		*(appendee + c++) = *(appender + c2++); 
+	}
+	*(appendee + c) = 0;
+	return c;
+}
+
+uint16_t appendToStringUntil(char * appendee,const char *  appender,uint8_t maxLen)
+{
+	uint16_t c=0,c2=0;
+	while (*(appendee + c) != 0)
+	{
+		c++;
+	}
+	while(*(appender + c2) != 0 && c<maxLen)
 	{
 		*(appendee + c++) = *(appender + c2++); 
 	}

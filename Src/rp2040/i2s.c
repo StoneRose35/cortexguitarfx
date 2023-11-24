@@ -5,10 +5,10 @@
 #include "hardware/regs/pads_bank0.h"
 #include "hardware/regs/dma.h"
 #include "gen/pio0_pio.h"
-#include "i2s.h"
-#include "adc.h"
+#include "drivers/i2s.h"
+#include "drivers/adc.h"
 #include "hardware/rp2040_registers.h"
-
+#include "audio/audiotools.h"
 
 
 static int16_t i2sDoubleBuffer[AUDIO_BUFFER_SIZE*2*2];
@@ -17,10 +17,10 @@ static int16_t i2sDoubleBufferIn[AUDIO_BUFFER_SIZE*2*2];
 #endif
 static volatile  uint32_t dbfrPtr; 
 static volatile uint32_t dbfrInputPtr;
-volatile uint32_t audioState;
 
 
-void isr_pio1_irq0_irq9()
+
+void isr_c0_pio1_irq0_irq9()
 {
 	if((*PIO1_IRQ & (1 << 0)) == (1 << 0))
 	{
@@ -35,7 +35,7 @@ void initI2S()
     uint16_t instr_mem_cnt = 0;
 	uint16_t first_instr_pos;
 
-	audioState = 0;
+	*getAudioStatePtr() = 0;
  
     first_instr_pos = instr_mem_cnt;
     // disable optional side-set, set wrap top and wrap bottom
@@ -180,7 +180,7 @@ void initI2S()
 		// __asm__("nop"); 
 		*PIO1_CTRL |= ((1 << 0) << PIO_CTRL_CLKDIV_RESTART_LSB) | (1 << (PIO_CTRL_SM_ENABLE_LSB+0)) | ((1 << 0) << PIO_CTRL_SM_RESTART_LSB);
 	#endif
-	audioState = (1 << AUDIO_STATE_ON);
+	*getAudioStatePtr() = (1 << AUDIO_STATE_ON);
 }
 
 
@@ -189,7 +189,7 @@ void initI2SSlave()
     uint16_t instr_mem_cnt = 0;
 	uint16_t first_instr_pos;
 
-	audioState = 0;
+	*getAudioStatePtr() = 0;
  
     first_instr_pos = instr_mem_cnt;
     // set wrap top and wrap bottom, set jump pin
@@ -199,12 +199,12 @@ void initI2SSlave()
 
 	// shift out to left and in from right 
 	*PIO1_SM0_SHIFTCTRL = (0 << PIO_SM0_SHIFTCTRL_PULL_THRESH_LSB) 
-                           | (0 << PIO_SM0_SHIFTCTRL_AUTOPULL_LSB) 
+                           | (1 << PIO_SM0_SHIFTCTRL_AUTOPULL_LSB) 
                            | (0 << PIO_SM0_SHIFTCTRL_FJOIN_TX_LSB) 
 						   | (0 << PIO_SM0_SHIFTCTRL_OUT_SHIFTDIR_LSB)
 
 						   | (0 << PIO_SM0_SHIFTCTRL_PUSH_THRESH_LSB)
-						   | (0 << PIO_SM0_SHIFTCTRL_AUTOPUSH_LSB)
+						   | (1 << PIO_SM0_SHIFTCTRL_AUTOPUSH_LSB)
 						   | (0 << PIO_SM0_SHIFTCTRL_FJOIN_RX_LSB)
 						   | (0 << PIO_SM0_SHIFTCTRL_IN_SHIFTDIR_LSB)
 						   ;
@@ -262,7 +262,10 @@ void initI2SSlave()
 						| (2 << DMA_CH3_CTRL_TRIG_DATA_SIZE_LSB) // always write left and right at once
 						| (1 << DMA_CH3_CTRL_TRIG_EN_LSB);
 
-	*DMA_INTE0 |= (1 << 3) | (1 << 2); // assert dma for channel 3 since the adc channel is always finished halb a bitclock cycle later
+	*DMA_INTE0 |= (1 << 3); // | (1 << 2); // assert dma for channel 3 since the adc channel is always finished halb a bitclock cycle later
+
+	// enable PIO1 SM0
+	*PIO1_CTRL |= (1 << (PIO_CTRL_SM_ENABLE_LSB+0));
 
 }
 
@@ -290,7 +293,7 @@ void enableAudioEngine()
 	#ifdef I2S_INPUT
 	*DMA_CH3_CTRL_TRIG |= (1 << DMA_CH3_CTRL_TRIG_EN_LSB);
 	#endif
-	audioState = (1 << AUDIO_STATE_ON);
+	*getAudioStatePtr() = (1 << AUDIO_STATE_ON);
 }
 
 void disableAudioEngine()
@@ -299,7 +302,7 @@ void disableAudioEngine()
 	#ifdef I2S_INPUT
 	*DMA_CH3_CTRL_TRIG &= ~(1 << DMA_CH3_CTRL_TRIG_EN_LSB);
 	#endif
-	audioState = 0;
+	*getAudioStatePtr() = 0;
 }
 
 int16_t* getEditableAudioBuffer()

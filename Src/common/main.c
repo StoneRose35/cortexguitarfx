@@ -150,65 +150,86 @@
 #ifndef SIMPLE_NEOPIXEL
 
 
-#include <neopixelDriver.h>
+#include <drivers/neopixelDriver.h>
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
 #include "hardware/rp2040_registers.h"
 #include "system.h"
-#include "core.h"
-#include "systemClock.h"
-#include "systick.h"
-#include "uart.h"
-#include "dma.h"
-#include "pio.h"
-#include "adc.h"
-#include "timer.h"
-#include "gpio.h"
-#include "ssd1306_display.h"
-#include "debugLed.h"
+#include "drivers/core.h"
+#include "drivers/systemClock.h"
+#include "drivers/datetimeClock.h"
+#include "drivers/systick.h"
+#include "drivers/uart.h"
+#include "consoleBase.h"
+#include "drivers/dma.h"
+#include "drivers/pio.h"
+#include "drivers/adc.h"
+#include "drivers/timer.h"
+#include "drivers/gpio.h"
+#include "drivers/oled_display.h"
+#include "drivers/wm8731.h"
+#include "usb/usb_common.h"
+#include "usb/usb_cdc.h"
+#include "drivers/cs4270_audio_codec.h"
+#include "drivers/debugLed.h"
 #include "consoleHandler.h"
 #include "apiHandler.h"
 #include "bufferedInputHandler.h"
 #include "stringFunctions.h"
+#include "fastExpLog.h"
 #include "charDisplay.h"
-#include "rotaryEncoder.h"
+#include "drivers/rotEncoderSwitchPower.h"
 #include "cliApiTask.h"
-#include "i2s.h"
-#include "i2c.h"
+#include "drivers/i2s.h"
+#include "drivers/i2c.h"
+#include "drivers/stompswitches.h"
 #include "audio/sineplayer.h"
 #include "audio/simpleChorus.h"
 #include "audio/secondOrderIirFilter.h"
 #include "audio/firFilter.h"
 #include "audio/waveShaper.h"
 #include "audio/oversamplingWaveshaper.h"
-#include "multicore.h"
+#include "drivers/multicore.h"
 #include "core1Main.h"
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
 
 volatile uint32_t task=0;
 volatile uint8_t context;
 
-extern CommBufferType usbCommBuffer;
-extern CommBufferType btCommBuffer;
+
+CommBufferType usbCommBuffer __attribute__((aligned (256)));
+ConsoleType usbConsole;
+ApiType usbApi;
+BufferedInputType bufferedInput;
+//CommBufferType btCommBuffer;
 
 
-int16_t* audioBufferPtr;
-#ifndef I2S_INPUT
-uint16_t* audioBufferInputPtr;
-#else
-int16_t* audioBufferInputPtr;
-#endif
-int16_t inputSample, inputSampleOther;
+PiPicoFxUiType piPicoUiController;
 uint32_t core1Handshake;
-volatile int16_t avgOut=0,avgOutOld=0,avgIn=0,avgInOld=0;
-uint16_t bufferCnt=0;
+volatile int16_t avgOutOld=0,avgInOld=0;
+volatile uint16_t bufferCnt=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
-const uint8_t switchesPins[2]={22,20};
+volatile uint8_t programsActivated=0;
+const uint8_t stompswitch_progs[]={8,7,1};
+volatile uint8_t programsToInitialize[3];
+FxPresetType presets[3];
+volatile uint8_t currentBank=0;
+volatile uint8_t currentPreset=0;
+
+// 0: done
+// 1: change request
+// 2: fade out
+// 3: in bypass / change in progress
+// 4: fade in
+volatile uint8_t programChangeState;
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
+volatile uint16_t secCnt=0;
+
+char charbfr[8];
 /**
  * @brief the main entry point, should never exit
  * 
@@ -230,46 +251,23 @@ int main(void)
 	initUsbPll();
 	initSystickTimer();
 	initDMA();
-	initPio();
 	initGpio();
+	initPio();
 	initTimer();
 	initAdc();
-	//initI2c(50);
-	
-
-
-	/*
-	 *
-	 * Initialise Component-specific drivers
-	 * 
-	 * */
-	initSsd1306Display();
-	initI2S();
-	initDebugLed();
-	initRotaryEncoder(switchesPins,2);
-
-
-	/*
-     *
-     * Initialize Background Services
-     *
-	 */
-
-	initRoundRobinReading(); // internal adc for reading parameters
-
-	//printf("Microsys v1.0 running\r\n");
-	piPicoFxUiSetup();
-	ssd1306ClearDisplay();
-	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	{
-		if ((uint32_t)fxPrograms[c]->setup != 0)
-		{
-			fxPrograms[c]->setup(fxPrograms[c]->data);
-		}
-	}
-	drawUi(&piPicoUiController);
-
-
+	initDatetimeClock();
+	#ifdef WM8731
+	initI2c(26);
+	#endif
+	#ifdef CS4270
+	initI2c(CS4270_I2C_ADDRESS); //72 
+	#endif
+	#ifdef WM8731
+	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
+	#endif
+	#ifdef CS4270
+	setupCS4270();
+#endif
 	startCore1(&core1Main);
 	// sync with core 1
 	while ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_VLD_LSB)) != (1 << SIO_FIFO_ST_VLD_LSB));
@@ -280,81 +278,66 @@ int main(void)
 		core1Handshake = *SIO_FIFO_RD;
 	}
 
+
+
+
+
+	//initUSB();
+	//initUart(57600,&usbCommBuffer);
+
+	/*
+	 *
+	 * Initialise Component-specific drivers
+	 * 
+	 * */
+
+
+	initOledDisplay();
+
+	initDebugLed();
+
+
+	/*
+     *
+     * Initialize Background Services
+     *
+	 */
+
+	
+	piPicoFxUiSetup(&piPicoUiController);
+	OledClearDisplay();
+	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
+	{
+		if ((uint32_t)fxPrograms[c]->setup != 0)
+		{
+			fxPrograms[c]->setup(fxPrograms[c]->data);
+		}
+	}
+	enterLevel0(&piPicoUiController);
+	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
+
+
+
+
 	ticEnd=0;
 	ticStart=0;
+	programsToInitialize[0]=0xFF;
 
-
+	#ifdef WM8731
+	initI2SSlave();
+	#else
+	initI2SSlave();
+	#endif
     /* Loop forever */
 	for(;;)
 	{
 
-		//cliApiTask(task);
-		if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
-		{
-			ticStart = getTimeLW();
-
-
-			audioBufferPtr = getEditableAudioBuffer();
-			#ifndef I2S_INPUT
-			audioBufferInputPtr = getReadableAudioBuffer();
-			#else
-			audioBufferInputPtr = getInputAudioBuffer();
-			#endif
-
-			for (uint8_t c=0;c<AUDIO_BUFFER_SIZE;c++) // count in frame of 4 bytes or two  16bit samples
-			{
-				// convert raw input to signed 16 bit
-				#ifndef I2S_INPUT
-				inputSample = (*(audioBufferInputPtr + c) << 4) - 0x7FFF;
-				#else
-				inputSample=*(audioBufferInputPtr + c*2);
-			
-				#endif
-				//inputSample = getNextSineValue();
-
-				if (inputSample < 0)
-				{
-					avgIn = -inputSample;
-				}
-				else
-				{
-					avgIn = inputSample;
-				}
-				avgInOld = ((AVERAGING_LOWPASS_CUTOFF*avgIn) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgInOld) >> 15);
-
-				inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);//fxPrograms[fxProgramIdx]->processSample(inputSample,fxPrograms[fxProgramIdx]->data);
-
-
-				if (inputSample < 0)
-				{
-					avgOut = -inputSample;
-				}
-				else
-				{
-					avgOut = inputSample;
-				}
-				avgOutOld = ((AVERAGING_LOWPASS_CUTOFF*avgOut) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgOutOld) >> 15);
-
-				*((uint32_t*)audioBufferPtr+c) = ((uint16_t)inputSample << 16) | (0xFFFF & (uint16_t)inputSample); 
-
-			}
-			task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
-			bufferCnt++;
-
-			ticEnd = getTimeLW();
-			if(ticEnd > ticStart)
-			{
-				cpuLoad = ticEnd-ticStart;
-				cpuLoad = cpuLoad*196; //*256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
-				cpuLoad = cpuLoad >> 8;
-			}
-		}
-		if (bufferCnt == UI_UPDATE_IN_SAMPLE_BUFFERS)
+		if (bufferCnt >= UI_UPDATE_IN_SAMPLE_BUFFERS)
 		{
 			bufferCnt = 0;
 			task |= (1 << TASK_UPDATE_AUDIO_UI);
 		}
-		
+		//cliApiTask(&bufferedInput);
 	}
 }
 #endif

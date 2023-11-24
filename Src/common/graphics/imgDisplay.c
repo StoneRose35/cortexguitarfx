@@ -1,7 +1,7 @@
 #include "imgDisplay.h"
 #include "charDisplay.h"
 #include "stdlib.h"
-#include "spi_sdcard_display.h"
+#include "drivers/spi_sdcard_display.h"
 
 uint8_t displayImage(const ST7735ImageType* img,uint8_t px,uint8_t py)
 {

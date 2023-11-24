@@ -1,5 +1,5 @@
 
-#include "systick.h"
+#include "drivers/systick.h"
 #include "system.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/m0plus.h"
@@ -7,7 +7,7 @@
 
 volatile static uint32_t ticks=0;
 
-void isr_systick()
+void isr_c0_systick()
 {
     ticks++;
 }

@@ -5,7 +5,7 @@
 #include "charDisplay.h"
 #include "imgDisplay.h"
 #include <stdint.h>
-#include "spi_sdcard_display.h"
+#include "drivers/spi_sdcard_display.h"
 #include "fonts/font8x8_basic.h"
 #include "fonts/sm_ascii_16x16.h"
 

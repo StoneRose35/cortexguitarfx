@@ -7,8 +7,8 @@
 
 #ifdef RP2040_FEATHER
 #include <stdint.h>
-#include "uart.h"
-#include "neopixelDriver.h"
+#include "drivers/uart.h"
+#include "drivers/neopixelDriver.h"
 #include "stringFunctions.h"
 #include "memoryAccess.h"
 

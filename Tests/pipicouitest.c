@@ -1,6 +1,7 @@
 #include "stdint.h"
 #include "./inc/bmplib.h"
 #include "./../Inc/graphics/bwgraphics.h"
+#include "./../Inc/fonts/GFXfonts.h"
 #include "./../Inc/images/pipicofx_param_2_scaled.h"
 #include "./../Inc/images/pipicofx_param_1_scaled.h"
 #include "math.h"
@@ -33,7 +34,45 @@ void bmImageToBitmapStruct(BwImageBufferType*bwImg,BitmapFileHeaderType*bmp)
     }
 }
 
-int main(int argc,char** argv)
+void fontTest(void)
+{
+    BwImageBufferType testImg;
+    BitmapFileHeaderType bmp;
+    const char testtext[]="Hallo";
+    char *  testImageFilename = "screen0.bmp";
+    testImg.sx=128;
+    testImg.sy=64;
+    for (uint8_t c=0;c<0xFF;c++)
+    {
+        *(((uint32_t*)testImg.data) + c)=0;
+    }
+    drawText(12,15,testtext,&testImg,&FreeMono12pt7b);
+    bmImageToBitmapStruct(&testImg,&bmp);
+    writeBmp(testImageFilename,&bmp);
+}
+
+void gfxFontDemo(void)
+{
+    BwImageBufferType testImg;
+    BitmapFileHeaderType bmp;
+    const char testtext[]="Megadeth";
+    char fname[32];
+    testImg.sx=128;
+    testImg.sy=64;
+    for (uint8_t f=0;f<(sizeof(gfxfonts)/sizeof(GFXfont*));f++)
+    {
+        for (uint8_t c=0;c<0xFF;c++)
+        {
+            *(((uint32_t*)testImg.data) + c)=0;
+        }
+        sprintf(fname,"%s.bmp",gfxfontNames[f]);
+        drawText(0,32,testtext,&testImg,gfxfonts[f]);
+        bmImageToBitmapStruct(&testImg,&bmp);
+        writeBmp(fname,&bmp);
+    }
+}
+
+void potentiometerImageTest()
 {
     float cx,cy,px,py,fValue;
     BwImageBufferType testImg;
@@ -49,10 +88,12 @@ int main(int argc,char** argv)
         testImg.sy=pipicofx_param_1_scaled_streamimg.sy;
         sprintf(fname,testImageFilename,c);
 
+        
         for (uint16_t c=0;c<510;c++)
         {
             testImg.data[c]=pipicofx_param_1_scaled_streamimg.data[c];
         }
+        
 
         fValue = 0.7853981633974483f + 4.71238898038469f*(fValue - F_MIN_VALUE)/(F_MAX_VALUE - F_MIN_VALUE); //fValue is now an angle in radians from 45° to 315°
         // center is at 51/24
@@ -65,6 +106,11 @@ int main(int argc,char** argv)
 
         writeBmp(fname,&bmp);
     }
+}
 
+int main(int argc,char** argv)
+{
+
+    gfxFontDemo();
     return 0;
 }

@@ -1,0 +1,205 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build using make",
+            "type": "shell",
+            "command": "make clean_objs;make -j8 all",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Main Builder: generates the UF2-Firmware to put onto the Raspberry Pi Pico"
+        },
+        {
+            "label": "Build tests",
+            "type": "shell",
+            "command": "make tests",
+            "group": "build"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc-9 Aktive Datei kompilieren",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./../Inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}", "../Src/common/stringFunctions.c", "../Src/common/piRegulator.c",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Vom Debugger generierte Aufgabe."
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile offline audio processor",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/processThroughFxProgram.c", "./Src/common/audio/*.c",
+                "./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "./Src/common/math/*.c",
+                "-o",
+                "./Tests/processThroughFxProgram", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Function to run a given wavefile through a predefined fx program."
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile fxprogram integration test",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/fxprograms_integrationtest.c", "./Src/common/audio/*.c",
+                "./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "./Src/common/math/*.c",
+                "-o",
+                "./Tests/fxprograms_integrationtest", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Function to run a given wavefile through a predefined fx program."
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile generateUnitPulseWav",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/generateUnitPulseWav.c","./Tests/libs/wavReader.c",
+                "-o",
+                "./Tests/generateUnitPulseWav", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Generates a Unit Pulse Wav File"
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile bitmap helper",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Inc/graphics",
+                "-I./Tests/inc",
+                "-I./Inc/fonts",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/pipicouitest.c", "./Src/common/graphics/bwgraphics.c", "./Tests/libs/*.c", 
+                "-o",
+                "./Tests/pipicouitest",
+                "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Rendering OLED display images to Bitmaps."
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile audio tests",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/audioTest.c", "./Src/common/audio/*.c","./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "-o",
+                "./Tests/audioTest", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Audio Unit Tests."
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile compressor test",
+            "command": "/usr/bin/gcc-9",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/compressorTest.c", "./Src/common/audio/*.c","./Src/common/stringFunctions.c","./Src/common/math/*.c","./Tests/libs/wavReader.c",
+                "-o",
+                "./Tests/compressorTest", "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Audio Unit Tests."
+        },
+    ]
+}

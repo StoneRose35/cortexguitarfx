@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 #include <stdlib.h>
-#include "flash.h"
+#include "drivers/flash.h"
 #include "memoryAccess.h"
 
 /**

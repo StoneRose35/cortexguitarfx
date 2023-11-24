@@ -1,9 +1,12 @@
 
 #include "stdint.h"
+#include "inc/wavReader.h"
 #include "audio/compressor.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h> 
+#include <string.h>
 #include "math.h"
+
 
 float int2float(int32_t a)
 {
@@ -20,8 +23,8 @@ int32_t float2int(float a)
 void sineTest()
 {
     CompressorDataType compressor = {
-        .attack=(20 << 3),
-        .release=(20 << 3),
+        .avgLowpass.alphaFalling = 13,
+        .avgLowpass.alphaRising = 13,
         .currentAvg=0,
         .gainFunction.gainReduction = 3,
         .gainFunction.threshhold=9600
@@ -37,6 +40,52 @@ void sineTest()
         printf("In: %d, Out: %d, Average: %d\n",sample,sampleOut,compressor.currentAvg);
     }
     
+}
+
+
+void processSampleThoughCompressor(char * filenameIn, char * filenameOut)
+{
+    char filenameInBfr[256];
+    char filenameOutBfr[256];
+    WavFileType wavFileIn;
+    WavFileType wavFileOut;
+    uint32_t byteCnt=0;
+    int16_t sample[2];
+    int16_t sampleOut;
+    CompressorDataType compressor = {
+        .avgLowpass.alphaFalling = 32766,
+        .avgLowpass.alphaRising = 1,
+        .currentAvg=0,
+        .gainFunction.gainReduction = 4,
+        .gainFunction.threshhold=32767
+    };
+    strcpy(filenameInBfr,filenameIn);
+    openWavFile(filenameIn,&wavFileIn);
+    strcpy(filenameOutBfr,filenameOut);
+    createWavFile(filenameOutBfr,&wavFileOut,wavFileIn.dataSize);
+    printf("In,Out,Average\n");
+    while(byteCnt < wavFileIn.dataSize)
+    {
+        sample[0] = wavFileIn.data[byteCnt>>1];
+        if (wavFileIn.wavFormat.wChannels == 2)
+        {
+            sample[1] = wavFileIn.data[(byteCnt>>1)+1];
+        }
+        sampleOut = compressorProcessSample(sample[0],&compressor);
+        printf("%d,%d,%d\n",sample[0],sampleOut,compressor.currentAvg);
+        wavFileOut.data[byteCnt>>1]=compressor.currentAvg;
+        if (wavFileIn.wavFormat.wChannels==2)
+        {
+            byteCnt+=4;
+        }
+        else
+        {
+            byteCnt+=2;
+        }
+    }
+    writeWavFile(&wavFileOut);
+    fclose(wavFileIn.filePointer);
+    fclose(wavFileOut.filePointer);
 }
 
 void gainFunctionTest()
@@ -55,5 +104,6 @@ void gainFunctionTest()
 
 int main(int argc,char ** argv)
 {
-    sineTest();
+    //sineTest();
+    processSampleThoughCompressor(argv[1], argv[2]);
 }
