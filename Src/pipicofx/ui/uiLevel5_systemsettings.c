@@ -30,7 +30,7 @@ static void create(PiPicoFxUiType*data)
     drawText(2,14,strbfr,img,font);
 
     regbfr = cs4270GetInputState();
-    if (regbfr & 0x1)
+    if (regbfr & 0x2)
     {
         drawImage(16,20,&toggleswitch_on_streamimg,img);
     }
@@ -39,7 +39,7 @@ static void create(PiPicoFxUiType*data)
         drawImage(16,20,&toggleswitch_off_streamimg,img);
     }
 
-    if (regbfr & 0x2)
+    if (regbfr & 0x1)
     {
         drawImage(47,20,&toggleswitch_on_streamimg,img);
     }

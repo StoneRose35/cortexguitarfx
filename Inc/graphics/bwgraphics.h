@@ -21,7 +21,8 @@ typedef struct BwImageStruct
 	uint8_t * data; // data is arrange x axis first, starting from top left
 	uint8_t sx; // size in pixels
 	uint8_t sy; // size in pixels
-	uint8_t type;
+	uint8_t type; // either WIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES if bytes run along the vertical axis, or 
+	              // BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES
 } BwImageType;
 
 typedef struct BwImageBufferStruct

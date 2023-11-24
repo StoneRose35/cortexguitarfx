@@ -88,7 +88,7 @@ static void enterCallback(PiPicoFxUiType*data)
     {
         case EDITLEVEL_PROGRAM:
             uiStackPush(data,4);
-            data->locked = 1;
+            data->locked = 0;
             enterLevel0(data);
             break;
         case EDITLEVEL_LEDCOLOR:

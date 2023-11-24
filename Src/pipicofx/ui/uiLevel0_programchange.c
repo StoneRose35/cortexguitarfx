@@ -31,7 +31,7 @@ static void create(PiPicoFxUiType*data)
     drawText(0,1*8,data->currentProgram->name,imgBuffer,0);
     if (data->locked != 0)
     {
-        drawImage(0,122,&lock,imgBuffer);
+        drawImage(122,0,&lock,imgBuffer);
     }
 
     for (uint8_t c=0;c<data->currentProgram->nParameters;c++)
@@ -68,6 +68,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     bargraph.data = bargraphBuffer;
     bargraph.sx=128;
     bargraph.sy = 8;
+    bargraph.type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     // show basic display
     for (uint8_t c=0;c<128;c++)
     {
