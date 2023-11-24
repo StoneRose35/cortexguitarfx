@@ -6,7 +6,7 @@
 #include <string.h>
 #include "math.h"
 
-#define SAMPLES_PER_PARAMETER 32
+#define SAMPLES_PER_PARAMETER 24
 
 float int2float(int32_t a)
 {
