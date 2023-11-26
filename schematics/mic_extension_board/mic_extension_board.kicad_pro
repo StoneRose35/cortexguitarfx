@@ -491,6 +491,10 @@
       {
         "netclass": "Ground",
         "pattern": "3V3"
+      },
+      {
+        "netclass": "Ground",
+        "pattern": "Vin"
       }
     ]
   },
