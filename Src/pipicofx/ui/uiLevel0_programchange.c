@@ -157,10 +157,17 @@ static void enterCallback(PiPicoFxUiType*data)
 static void exitCallback(PiPicoFxUiType*data)
 {
 
-    // apply current program to preset when coming from 4
+    // apply current program and parameters to preset when coming from 4
     if(uiStackCurrent(data)==4)
     {
         presets[currentPreset].programNr = data->currentProgramIdx;
+        for (uint8_t c=0;c<fxPrograms[presets[currentPreset].programNr]->nParameters;c++)
+        {
+            if (fxPrograms[presets[currentPreset].programNr]->parameters[c].control<0xFF)
+            {
+                presets[currentPreset].parameters[c] = fxPrograms[presets[currentPreset].programNr]->parameters[c].rawValue;
+            }
+        }
     }
     else
     {
