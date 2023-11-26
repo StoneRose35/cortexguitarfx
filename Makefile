@@ -5,10 +5,11 @@
 #
 # **********************************
 
-PROJECT=microsys_audio
+
 MAIN_VERSION=0
 SUB_VERSION=6
 MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
+PROJECT=pipicofx_$(MAIN_VERSION)_$(SUB_VERSION)_$(MINUTES_SINCE_INCUBATION)
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
 CC=arm-none-eabi-gcc
