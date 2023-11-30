@@ -1,16 +1,11 @@
-2
-9
-.tran 10u 10m
-2
-1
-Net-(C2-Pad2)
-V
-1
-Net-(C4-Pad2)
-V
-1
-.ac dec 512 1 20k
+version 2
 1
 9
-Net-(C4-Pad2)
-V
+.tran 10m 1{return}.kicad adjustpaths{return}.save all{return}.probe alli
+2
+1
+V(Net-_C5-Pad2_)
+ 
+1
+V(Net-_U4--_)
+ 

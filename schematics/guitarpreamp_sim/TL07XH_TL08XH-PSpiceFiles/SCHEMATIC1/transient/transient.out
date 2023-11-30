@@ -1,0 +1,440 @@
+
+**** 08/20/21 15:58:31 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     CIRCUIT DESCRIPTION
+
+
+******************************************************************************
+
+
+
+
+** Creating circuit file "transient.cir" 
+** WARNING: THIS AUTOMATICALLY GENERATED FILE MAY BE OVERWRITTEN BY SUBSEQUENT SIMULATIONS
+
+*Libraries: 
+* Profile Libraries :
+* Local Libraries :
+.LIB "../../../tl07xh_tl08xh.lib" 
+* From [PSPICE NETLIST] section of C:\SPB_Data\cdssetup\OrCAD_PSpiceTIPSpice_Install\17.4.0\PSpice.ini file:
+.lib "nom_pspti.lib" 
+.lib "nom.lib" 
+
+*Analysis directives: 
+.TRAN  0 1m 0 
+.OPTIONS ADVCONV
+.OPTIONS FILEMODELSEARCH
+.PROBE64 N([VOUT])
+.PROBE64 N([VIN])
+.INC "..\SCHEMATIC1.net" 
+
+
+
+**** INCLUDING SCHEMATIC1.net ****
+* source TL07XH_TL08XH
+V_V1         VCC 0 20
+V_V2         0 VEE 20
+X_U1         VIN VOUT VCC VEE VOUT TL07XH_TL08XH
+V_V3         VIN 0  
++SIN 0 1 1k 0 0 0
+
+**** RESUMING transient.cir ****
+.END
+
+**** 08/20/21 15:58:31 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     Diode MODEL PARAMETERS
+
+
+******************************************************************************
+
+
+
+
+               X_U1.Xe_n.DVN   
+          IS  100.000000E-18 
+          KF   10.000000E-12 
+
+
+**** 08/20/21 15:58:31 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     Resistor MODEL PARAMETERS
+
+
+******************************************************************************
+
+
+
+
+               X_U1.R_RES_1    X_U1.R_RES_2    X_U1.R_RES_3    X_U1.R_RES_4    
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_5    X_U1.R_RES_6    X_U1.R_RES_7    X_U1.R_RES_8    
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_9    X_U1.R_RES_10   X_U1.R_RES_11   X_U1.R_RES_12   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_13   X_U1.R_RES_14   X_U1.R_RES_15   X_U1.R_RES_16   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_17   X_U1.R_RES_18   X_U1.R_RES_19   X_U1.R_RES_20   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_21   X_U1.R_RES_22   X_U1.R_RES_23   X_U1.R_RES_24   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_25   X_U1.R_RES_26   X_U1.R_RES_27   X_U1.R_RES_28   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_29   X_U1.R_RES_30   X_U1.R_RES_31   X_U1.R_RES_32   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_33   X_U1.R_RES_34   X_U1.R_RES_35   X_U1.R_RES_36   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_37   X_U1.R_RES_38   X_U1.R_RES_39   X_U1.R_RES_40   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_41   X_U1.R_RES_42   X_U1.R_RES_43   X_U1.R_RES_44   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_45   X_U1.R_RES_46   X_U1.R_RES_47   X_U1.R_RES_48   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_49   X_U1.R_RES_50   X_U1.R_RES_51   X_U1.R_RES_52   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_53   X_U1.R_RES_54   X_U1.R_RES_55   X_U1.R_RES_56   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_57   X_U1.R_RES_58   X_U1.R_RES_59   X_U1.R_RES_60   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_61   X_U1.R_RES_62   X_U1.R_RES_63   X_U1.R_RES_64   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_65   X_U1.R_RES_66   X_U1.R_RES_67   X_U1.R_RES_68   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_69   X_U1.R_RES_70   X_U1.R_RES_71   X_U1.R_RES_72   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_73   X_U1.R_RES_74   X_U1.R_RES_75   X_U1.R_RES_76   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_77   X_U1.R_RES_78   X_U1.R_RES_79   X_U1.R_RES_80   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_81   X_U1.R_RES_82   X_U1.R_RES_83   X_U1.R_RES_84   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_85   X_U1.R_RES_86   X_U1.R_RES_87   
+  T_Measured   27              27              27            
+   T_Current -273.15         -273.15         -273.15         
+           R    1               1               1            
+
+
+**** 08/20/21 15:58:31 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     Voltage Controlled Switch MODEL PARAMETERS
+
+
+******************************************************************************
+
+
+
+
+               X_U1.S_VSWITCH_1 
+         RON  100            
+        ROFF    1.000000E+12 
+         VON    1            
+        VOFF     .1          
+
+
+               X_U1.S_VSWITCH_2 
+         RON  100            
+        ROFF    1.000000E+12 
+         VON    1            
+        VOFF     .1          
+
+
+               X_U1.S_VSWITCH_3 
+         RON   50            
+        ROFF    1.000000E+12 
+         VON     .5          
+        VOFF     .1          
+
+
+               X_U1.S_VSWITCH_4 
+         RON   50            
+        ROFF    1.000000E+12 
+         VON     .5          
+        VOFF     .1          
+
+
+               X_U1.S_VSWITCH_5 
+         RON     .01         
+        ROFF    1.000000E+09 
+         VON     .01         
+        VOFF    0            
+
+
+               X_U1.S_VSWITCH_6 
+         RON     .01         
+        ROFF    1.000000E+09 
+         VON     .01         
+        VOFF    0            
+
+
+               X_U1.S_VSWITCH_7 
+         RON    1.000000E-03 
+        ROFF    1.000000E+09 
+         VON     .9          
+        VOFF     .8          
+
+
+               X_U1.S_VSWITCH_8 
+         RON   50            
+        ROFF    1.000000E+12 
+         VON     .5          
+        VOFF     .45         
+
+
+               X_U1.S_VSWITCH_9 
+         RON   50            
+        ROFF    1.000000E+12 
+         VON     .5          
+        VOFF     .45         
+
+
+**** 08/20/21 15:58:31 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     INITIAL TRANSIENT SOLUTION       TEMPERATURE =   27.000 DEG C
+
+
+******************************************************************************
+
+
+
+ NODE   VOLTAGE     NODE   VOLTAGE     NODE   VOLTAGE     NODE   VOLTAGE
+
+
+(  VCC)   20.0000  (  VEE)  -20.0000  (  VIN)    0.0000  ( VOUT)     .0010      
+
+(X_U1.21)     .0056                   (X_U1.22)     .0618                       
+
+(X_U1.23)     .0056                   (X_U1.24)     .0056                       
+
+(X_U1.25)     .0056                   (X_U1.26)     .0023                       
+
+(X_U1.27)-650.0E-12                   (X_U1.28)    -.0126                       
+
+(X_U1.29)    -.0126                   (X_U1.30)-645.7E-12                       
+
+(X_U1.31)     .0028                   (X_U1.32)     .0012                       
+
+(X_U1.33)     .0012                   (X_U1.34)     .0012                       
+
+(X_U1.35)   67.0000                   (X_U1.36)  -67.0000                       
+
+(X_U1.37)     .0012                   (X_U1.38)-650.0E-12                       
+
+(X_U1.39)-650.0E-12                   (X_U1.40)-650.0E-12                       
+
+(X_U1.41)-650.0E-12                   (X_U1.42)     .0068                       
+
+(X_U1.43)   10.7640                   (X_U1.44)    -.0126                       
+
+(X_U1.45)-10.01E-15                   (X_U1.46)-6.656E-09                       
+
+(X_U1.47)-6.656E-09                   (X_U1.48)-6.656E-09                       
+
+(X_U1.49)-6.656E-09                   (X_U1.50)    6.0012                       
+
+(X_U1.51)    6.0012                   (X_U1.52)   -5.9988                       
+
+(X_U1.53)   -5.9988                   (X_U1.54)     .0112                       
+
+(X_U1.55) 9.584E-09                   (X_U1.56)     .0010                       
+
+(X_U1.57)     .0010                   (X_U1.58)     .0013                       
+
+(X_U1.59)     .0121                   (X_U1.60)     .0010                       
+
+(X_U1.61)    -.0068                   (X_U1.62)  -10.7640                       
+
+(X_U1.63)   25.0000                   (X_U1.64)  -25.0000                       
+
+(X_U1.65)-650.0E-12                   (X_U1.66)-650.0E-12                       
+
+(X_U1.67)    6.0012                   (X_U1.68)   -5.9988                       
+
+(X_U1.69)-650.0E-12                   (X_U1.70)-650.0E-12                       
+
+(X_U1.71)   19.9900                   (X_U1.72)  -19.9900                       
+
+(X_U1.73)   19.9900                   (X_U1.74)  -19.9900                       
+
+(X_U1.75)-650.0E-12                   (X_U1.76)-650.0E-12                       
+
+(X_U1.77)-650.0E-12                   (X_U1.78)-650.0E-12                       
+
+(X_U1.79)-650.0E-12                   (X_U1.80)-139.0E-12                       
+
+(X_U1.81)     .0010                   (X_U1.82)     .0012                       
+
+(X_U1.83)     .0010                   (X_U1.84)  -19.0000                       
+
+(X_U1.85)   20.3000                   (X_U1.86)     .0010                       
+
+(X_U1.87)-650.0E-12                   (X_U1.88)  -20.0000                       
+
+(X_U1.89)   20.0000                   (X_U1.90)    -.0126                       
+
+(X_U1.MID)-650.0E-12                  (X_U1.ESDn)     .0010                     
+
+(X_U1.ESDp)-10.01E-15                 (X_U1.VCLP)     .0012                     
+
+(X_U1.CLAMP)     .0012                (X_U1.SW_OL)-650.0E-12                    
+
+(X_U1.VCC_B)   20.0000                (X_U1.VEE_B)  -20.0000                    
+
+(X_U1.VIMON)-139.0E-12                (X_U1.VOUT_S)     .0010                   
+
+(X_U1.VSENSE)     .0012               (X_U1.Xe_n.3)    0.0000                   
+
+(X_U1.Xe_n.4)    0.0000               (X_U1.Xe_n.5)    0.0000                   
+
+(X_U1.Xe_n.6)    0.0000               (X_U1.Xe_n.7)     .8338                   
+
+(X_U1.Xe_n.8)     .8338               (X_U1.VCC_CLP)   19.9900                  
+
+(X_U1.VEE_CLP)  -19.9900              (X_U1.Xi_nn.3)    0.0000                  
+
+(X_U1.Xi_nn.5)    0.0000              (X_U1.Xi_np.3)    0.0000                  
+
+(X_U1.Xi_np.5)    0.0000              (X_U1.CL_CLAMP)     .0012                 
+
+(X_U1.CLAW_CLAMP)     .0012           (X_U1.XVOS_VS_VCM.1)    -.0126        
+
+
+
+
+    VOLTAGE SOURCE CURRENTS
+    NAME         CURRENT
+
+    V_V1        -9.375E-04
+    V_V2        -9.375E-04
+    V_V3        -1.001E-12
+    X_U1.V_GRp  -6.700E-08
+    X_U1.V_GRn   6.700E-08
+    X_U1.V_ISCp  -2.500E-08
+    X_U1.V_ISCn   2.500E-08
+    X_U1.V_ORn   0.000E+00
+    X_U1.V11     6.006E-09
+    X_U1.V_ORp   0.000E+00
+    X_U1.V12    -6.006E-09
+    X_U1.V4      5.110E-13
+    X_U1.VCM_MIN   1.900E-08
+    X_U1.VCM_MAX  -2.030E-08
+
+    TOTAL POWER DISSIPATION   3.75E-02  WATTS
+
+
+
+          JOB CONCLUDED
+
+**** 08/20/21 15:58:31 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     JOB STATISTICS SUMMARY
+
+
+******************************************************************************
+
+
+
+  License check-out time            =        1.48
+  Total job time (using Solver 1)   =         .92
+

@@ -1,0 +1,23 @@
+** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.sim ] 
+
+** Creating circuit file "transient.cir" 
+** WARNING: THIS AUTOMATICALLY GENERATED FILE MAY BE OVERWRITTEN BY SUBSEQUENT SIMULATIONS
+
+*Libraries: 
+* Profile Libraries :
+* Local Libraries :
+.LIB "../../../tl07xh_tl08xh.lib" 
+* From [PSPICE NETLIST] section of C:\SPB_Data\cdssetup\OrCAD_PSpiceTIPSpice_Install\17.4.0\PSpice.ini file:
+.lib "nom_pspti.lib" 
+.lib "nom.lib" 
+
+*Analysis directives: 
+.TRAN  0 1m 0 
+.OPTIONS ADVCONV
+.OPTIONS FILEMODELSEARCH
+.PROBE64 N([VOUT])
+.PROBE64 N([VIN])
+.INC "..\SCHEMATIC1.net" 
+
+
+.END
