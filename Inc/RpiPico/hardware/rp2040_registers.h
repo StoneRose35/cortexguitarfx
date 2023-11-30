@@ -20,8 +20,8 @@
 #define I2S_WS_PIN 10
 #define I2S_DATA_IN_PIN 9
 #define I2S_DATA_PIN 12
-#define I2S_MCLK_PIN 8
-#define I2S_DEBUG_PIN 6
+#define I2S_MCLK_PIN 8 //unused
+#define I2S_DEBUG_PIN 6 //unused
 
 #define CLIPPING_LED_INPUT 16
 #define CLIPPING_LED_OUTPUT 17
