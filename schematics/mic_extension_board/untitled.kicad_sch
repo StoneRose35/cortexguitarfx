@@ -473,9 +473,6 @@
     (pin "2" (uuid 746acde9-cbd1-4c71-bc76-f99d212f1829))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R15") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "R15") (unit 1)
         )
@@ -508,9 +505,6 @@
     (pin "8" (uuid 9c52ad47-aa90-4e06-b550-68f3b7cc65e1))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U10") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "U10") (unit 1)
         )
@@ -537,9 +531,6 @@
     (pin "2" (uuid 7ba8e472-d505-4edd-83eb-9660edf43177))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R18") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "R18") (unit 1)
         )
@@ -566,9 +557,6 @@
     (pin "2" (uuid ed2855f7-8b15-43dc-bf24-b95536348e90))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R16") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "R16") (unit 1)
         )
@@ -594,9 +582,6 @@
     (pin "1" (uuid 70283c87-9655-4fe0-9dab-ac38e1a5c79d))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR016") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "#PWR016") (unit 1)
         )
@@ -607,7 +592,7 @@
   (symbol (lib_id "power:GND") (at 170.18 76.2 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a33dd6a8-dbf9-4265-805f-204b67c731ab)
-    (property "Reference" "#PWR018" (at 170.18 82.55 0)
+    (property "Reference" "#PWR024" (at 170.18 82.55 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 170.18 80.6434 0)
@@ -622,9 +607,6 @@
     (pin "1" (uuid 3e1bd258-3c80-4856-a58c-f0a175a9e928))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR018") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "#PWR024") (unit 1)
         )
@@ -635,7 +617,7 @@
   (symbol (lib_id "power:GND") (at 120.65 43.18 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c87bc788-72e8-4972-9ad0-4343b2b1915c)
-    (property "Reference" "#PWR024" (at 120.65 49.53 0)
+    (property "Reference" "#PWR018" (at 120.65 49.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 120.65 47.6234 0)
@@ -650,9 +632,6 @@
     (pin "1" (uuid ea2e4bff-8fb6-4f0b-8953-7a613434607d))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR024") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "#PWR018") (unit 1)
         )
@@ -679,9 +658,6 @@
     (pin "2" (uuid 17d68e61-9d9d-47fe-a4af-c031fc86a560))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R17") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "R17") (unit 1)
         )
@@ -692,7 +668,7 @@
   (symbol (lib_id "Connector:Conn_01x03_Female") (at 123.19 34.29 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d23d391d-cc17-41c7-99e9-515c7f92744f)
-    (property "Reference" "J9" (at 123.19 30.641 90)
+    (property "Reference" "J6" (at 123.19 30.641 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "Conn_01x03_Female" (at 123.19 33.1779 90)
@@ -709,9 +685,6 @@
     (pin "3" (uuid 5508d2a2-d1f3-4e5e-930a-9714530e8f67))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "J9") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "J6") (unit 1)
         )
@@ -738,9 +711,6 @@
     (pin "2" (uuid 3e5a3324-31c1-4985-abf5-e42d5b37ec47))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "C11") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "C11") (unit 1)
         )
@@ -767,9 +737,6 @@
     (pin "2" (uuid 08a53fc6-a258-4833-8dc4-e69289045f23))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "C12") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "C12") (unit 1)
         )
@@ -796,9 +763,6 @@
     (pin "2" (uuid 08ce4590-8b93-4cf8-9d3c-be6c93dbe944))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "C9") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "C9") (unit 1)
         )
@@ -825,9 +789,6 @@
     (pin "2" (uuid 1532356c-429b-4fc3-a395-ff78ca1751f2))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R29") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
           (reference "R29") (unit 1)
         )

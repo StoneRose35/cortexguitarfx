@@ -924,9 +924,6 @@
   (junction (at 209.55 102.87) (diameter 0) (color 0 0 0 0)
     (uuid 97864bc6-8e44-4b88-a946-9d91986fc78e)
   )
-  (junction (at 161.29 45.72) (diameter 0) (color 0 0 0 0)
-    (uuid 97ec3ccb-b1ba-448c-8fa4-978965abb8fc)
-  )
   (junction (at 34.29 119.38) (diameter 0) (color 0 0 0 0)
     (uuid 9cd08cf5-4fb6-43df-8a74-9b4a6afeac87)
   )
@@ -956,6 +953,9 @@
   )
   (junction (at 66.04 148.59) (diameter 0) (color 0 0 0 0)
     (uuid c9384073-41a4-407c-bf25-b940ae3af8ae)
+  )
+  (junction (at 171.45 53.34) (diameter 0) (color 0 0 0 0)
+    (uuid ca997039-8392-4175-b7d1-a7190b261ba7)
   )
   (junction (at 143.51 48.26) (diameter 0) (color 0 0 0 0)
     (uuid cb3ec323-7722-4c4c-b842-3c0e7cea58ec)
@@ -1040,10 +1040,6 @@
   (wire (pts (xy 187.96 102.87) (xy 190.5 102.87))
     (stroke (width 0) (type default))
     (uuid 16bca8d1-aed4-40a1-9494-ad6f7b87d866)
-  )
-  (wire (pts (xy 161.29 45.72) (xy 161.29 36.83))
-    (stroke (width 0) (type default))
-    (uuid 16cad9cc-5082-4eb5-ab56-6ba35b4a70b0)
   )
   (wire (pts (xy 123.19 49.53) (xy 119.38 49.53))
     (stroke (width 0) (type default))
@@ -1373,7 +1369,7 @@
     (stroke (width 0) (type default))
     (uuid a1bfcfe9-5d36-4a87-9ecf-ca8884a3696e)
   )
-  (wire (pts (xy 161.29 36.83) (xy 166.37 36.83))
+  (wire (pts (xy 171.45 30.48) (xy 176.53 30.48))
     (stroke (width 0) (type default))
     (uuid a312e73a-62c0-4422-bdf7-5c507adbe4a2)
   )
@@ -1508,6 +1504,10 @@
   (wire (pts (xy 217.17 91.44) (xy 218.44 91.44))
     (stroke (width 0) (type default))
     (uuid ceacf468-74f4-4648-8036-73bcc7d4ab3e)
+  )
+  (wire (pts (xy 171.45 30.48) (xy 171.45 53.34))
+    (stroke (width 0) (type default))
+    (uuid cfb0379e-7458-4384-84ef-a4be7591489b)
   )
   (wire (pts (xy 106.68 69.85) (xy 106.68 62.23))
     (stroke (width 0) (type default))
@@ -1708,7 +1708,7 @@
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid c7f90f3e-99cf-4222-baf0-14ef7befb3b8)
   )
-  (hierarchical_label "Left Analog Out" (shape output) (at 166.37 36.83 0) (fields_autoplaced)
+  (hierarchical_label "Left Analog Out" (shape output) (at 176.53 30.48 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid f54d9d4c-fcf8-47a8-a476-c77381421ea9)
   )
@@ -1736,9 +1736,6 @@
     (pin "2" (uuid 4b3d1906-1fb1-43b0-988c-51c228522f15))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R27") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R27") (unit 1)
         )
@@ -1771,9 +1768,6 @@
     (pin "8" (uuid f87dba68-e7b7-4d67-ba9a-fe099004cbb6))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U4") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "U4") (unit 1)
         )
@@ -1799,9 +1793,6 @@
     (pin "1" (uuid b0135f3d-2318-4556-af9d-016a726eb870))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR02") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR02") (unit 1)
         )
@@ -1812,7 +1803,7 @@
   (symbol (lib_id "power:GND") (at 34.29 120.65 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 039cfd14-473f-424a-912d-17e4b440cbdd)
-    (property "Reference" "#PWR0104" (at 34.29 127 0)
+    (property "Reference" "#PWR013" (at 34.29 127 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 34.29 125.0934 0)
@@ -1827,9 +1818,6 @@
     (pin "1" (uuid 284818ce-e338-44e7-95f7-9575dd22ddf0))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0104") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR013") (unit 1)
         )
@@ -1856,9 +1844,6 @@
     (pin "2" (uuid 654ef8c9-9a67-48fe-8148-202269b11b6d))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R20") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R20") (unit 1)
         )
@@ -1921,7 +1906,7 @@
   (symbol (lib_id "power:GND") (at 198.12 81.28 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0bb8e353-7bf1-4371-9ed5-b8bb1bd1dc53)
-    (property "Reference" "#PWR0108" (at 198.12 87.63 0)
+    (property "Reference" "#PWR025" (at 198.12 87.63 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 198.12 85.7234 0)
@@ -1936,9 +1921,6 @@
     (pin "1" (uuid c052f5c8-b8d0-4d4c-aa5d-791e360974b7))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0108") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR025") (unit 1)
         )
@@ -1964,9 +1946,6 @@
     (pin "1" (uuid f0f4935c-56de-45fe-8392-38b7848bf441))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "TP2") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "TP2") (unit 1)
         )
@@ -1993,9 +1972,6 @@
     (pin "2" (uuid 30c52039-aa21-48e8-b5a2-82f8c7346061))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R2") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R2") (unit 1)
         )
@@ -2023,9 +1999,6 @@
     (pin "3" (uuid 8ed4c152-7b9f-4b81-bd12-73c5591a7fb5))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "J1") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "J1") (unit 1)
         )
@@ -2036,7 +2009,7 @@
   (symbol (lib_id "power:GND") (at 64.77 72.39 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1756abc0-32c3-4ee4-bd11-ab3e97af4413)
-    (property "Reference" "#PWR01" (at 64.77 78.74 0)
+    (property "Reference" "#PWR012" (at 64.77 78.74 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 64.77 76.8334 0)
@@ -2051,9 +2024,6 @@
     (pin "1" (uuid 3657d26d-705a-4f94-9a28-f86fd49b7837))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR01") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR012") (unit 1)
         )
@@ -2081,9 +2051,6 @@
     (pin "3" (uuid 7d742d8d-c4b9-4649-9a12-d66be6d6891f))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "J8") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "J8") (unit 1)
         )
@@ -2136,9 +2103,6 @@
     (pin "2" (uuid b52e9834-649f-4dc6-b6c0-69cbe3b1cbfd))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R4") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R4") (unit 1)
         )
@@ -2201,7 +2165,7 @@
   (symbol (lib_id "power:GND") (at 182.88 46.99 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2c909d60-281d-4344-a023-3a67dd544113)
-    (property "Reference" "#PWR0109" (at 182.88 53.34 0)
+    (property "Reference" "#PWR022" (at 182.88 53.34 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 186.69 48.26 0)
@@ -2216,9 +2180,6 @@
     (pin "1" (uuid 6a6ad993-5414-49d1-bce6-0ab724099704))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0109") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR022") (unit 1)
         )
@@ -2267,7 +2228,7 @@
   (symbol (lib_id "power:+9V") (at 41.91 104.14 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3ad6f035-8dc4-46d0-aef6-c925acc489a4)
-    (property "Reference" "#PWR02" (at 41.91 107.95 0)
+    (property "Reference" "#PWR019" (at 41.91 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+9V" (at 41.91 100.5642 0)
@@ -2282,9 +2243,6 @@
     (pin "1" (uuid b44e5d07-3ca0-4c6b-9dd1-489a349afa6b))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR02") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR019") (unit 1)
         )
@@ -2295,7 +2253,7 @@
   (symbol (lib_id "power:GND") (at 217.17 64.77 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3af63762-f20f-42d2-b609-03ef291f1653)
-    (property "Reference" "#PWR0107" (at 217.17 71.12 0)
+    (property "Reference" "#PWR028" (at 217.17 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 213.36 64.77 0)
@@ -2310,9 +2268,6 @@
     (pin "1" (uuid 500fc1a9-46fd-4e9b-98ed-1b41b94e95b3))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0107") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR028") (unit 1)
         )
@@ -2323,7 +2278,7 @@
   (symbol (lib_id "power:GND") (at 86.36 101.6 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3d65366f-ab95-4474-8390-8d0e2b32c478)
-    (property "Reference" "#PWR0104" (at 86.36 107.95 0)
+    (property "Reference" "#PWR014" (at 86.36 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 86.36 106.0434 0)
@@ -2338,9 +2293,6 @@
     (pin "1" (uuid 735ff3f5-60d3-4836-b35d-dfd048c6cdcb))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0104") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR014") (unit 1)
         )
@@ -2367,9 +2319,6 @@
     (pin "2" (uuid 7a357746-5f2c-4f3c-b12f-6434e8e615a5))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R22") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R22") (unit 1)
         )
@@ -2396,9 +2345,6 @@
     (pin "2" (uuid ea49aac7-980c-422d-a0f6-5b7f6a4d44d1))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R5") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R5") (unit 1)
         )
@@ -2488,7 +2434,7 @@
   (symbol (lib_id "power:GND") (at 35.56 142.24 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 59f8fd9c-a5a2-498d-85a8-cb476c8904a0)
-    (property "Reference" "#PWR0104" (at 35.56 148.59 0)
+    (property "Reference" "#PWR050" (at 35.56 148.59 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 35.56 146.6834 0)
@@ -2503,9 +2449,6 @@
     (pin "1" (uuid 35c9177c-e9eb-4ef2-a661-c60c2e8669cb))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0104") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR050") (unit 1)
         )
@@ -2583,9 +2526,6 @@
     (pin "1" (uuid 7aeadacd-37fc-472c-9706-2d7a5047b1c2))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "TP1") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "TP1") (unit 1)
         )
@@ -2726,7 +2666,7 @@
   (symbol (lib_id "power:GND") (at 54.61 100.33 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 71a53afc-060e-4750-878d-ef10a2a333f3)
-    (property "Reference" "#PWR01" (at 54.61 106.68 0)
+    (property "Reference" "#PWR017" (at 54.61 106.68 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 54.61 104.7734 0)
@@ -2741,9 +2681,6 @@
     (pin "1" (uuid 62817cf5-52f9-4a56-98d9-99903921545d))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR01") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR017") (unit 1)
         )
@@ -2844,7 +2781,7 @@
   (symbol (lib_id "power:GND") (at 46.99 74.93 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7f516e06-a882-4461-ba7f-0d79e6c5ef74)
-    (property "Reference" "#PWR01" (at 46.99 81.28 0)
+    (property "Reference" "#PWR051" (at 46.99 81.28 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 46.99 79.3734 0)
@@ -2859,9 +2796,6 @@
     (pin "1" (uuid dbd4ba18-2158-4db1-8156-8ac68094b989))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR01") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR051") (unit 1)
         )
@@ -2926,9 +2860,6 @@
     (pin "4" (uuid bf7d35e7-9c10-499e-9504-01f555627d41))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U1") (unit 2)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "U1") (unit 2)
         )
@@ -2967,9 +2898,6 @@
     (pin "4" (uuid 8315bf08-4991-412a-8fc4-52d31deda8c7))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U1") (unit 3)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "U1") (unit 3)
         )
@@ -3018,7 +2946,7 @@
   (symbol (lib_id "power:GND") (at 87.63 144.78 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 827a1f64-f4a1-4c9e-acb3-4fde4e7ab558)
-    (property "Reference" "#PWR0104" (at 87.63 151.13 0)
+    (property "Reference" "#PWR021" (at 87.63 151.13 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 87.63 149.2234 0)
@@ -3033,9 +2961,6 @@
     (pin "1" (uuid 14d4bfb0-6e12-454d-994f-3d47ecad5e82))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0104") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR021") (unit 1)
         )
@@ -3141,9 +3066,6 @@
     (pin "3" (uuid e7d19173-cf0b-4300-bcd4-d35b802e5e06))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "J7") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "J7") (unit 1)
         )
@@ -3196,9 +3118,6 @@
     (pin "2" (uuid 3c9e82a2-b3b0-4743-951b-626be45ec09b))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "C1") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "C1") (unit 1)
         )
@@ -3289,9 +3208,6 @@
     (pin "4" (uuid 949bc103-e4ec-49cf-aeb8-03a51ae47140))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U1") (unit 5)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "U1") (unit 5)
         )
@@ -3302,7 +3218,7 @@
   (symbol (lib_id "power:+9V") (at 64.77 57.15 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9f555788-1f86-4fc8-bd92-88a29e3ebd00)
-    (property "Reference" "#PWR06" (at 64.77 60.96 0)
+    (property "Reference" "#PWR011" (at 64.77 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+9V" (at 64.77 53.5742 0)
@@ -3317,9 +3233,6 @@
     (pin "1" (uuid e5c746ea-fe05-4d95-a324-f9191aa660ab))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR06") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR011") (unit 1)
         )
@@ -3371,9 +3284,6 @@
     (pin "1" (uuid e1144a8a-5673-4a3a-8c0e-910b1c611420))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR01") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR01") (unit 1)
         )
@@ -3451,9 +3361,6 @@
     (pin "1" (uuid 2e38bc93-0d6c-48c4-869d-ce8396409900))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR015") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR015") (unit 1)
         )
@@ -3464,7 +3371,7 @@
   (symbol (lib_id "power:PWR_FLAG") (at 125.7548 127 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b1d64131-328d-44fb-a8a1-e9dc43bfbedb)
-    (property "Reference" "#FLG0102" (at 125.7548 125.095 0)
+    (property "Reference" "#FLG01" (at 125.7548 125.095 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "PWR_FLAG" (at 125.7548 123.4242 0)
@@ -3479,9 +3386,6 @@
     (pin "1" (uuid 5810069c-a5c1-4a8a-8588-2357a0f69e4a))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#FLG0102") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#FLG01") (unit 1)
         )
@@ -3634,7 +3538,7 @@
   (symbol (lib_id "power:GND") (at 180.34 40.64 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c4af93a6-d2db-4d1a-a047-eae1e53990c4)
-    (property "Reference" "#PWR0107" (at 180.34 34.29 0)
+    (property "Reference" "#PWR023" (at 180.34 34.29 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 176.53 40.64 0)
@@ -3649,9 +3553,6 @@
     (pin "1" (uuid 8b65cdd3-3429-46a5-b4c6-a7bdddd4179d))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0107") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR023") (unit 1)
         )
@@ -3678,9 +3579,6 @@
     (pin "2" (uuid f2afa467-a24d-4e9d-9a96-78955bdb23b9))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R25") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R25") (unit 1)
         )
@@ -3707,9 +3605,6 @@
     (pin "2" (uuid 63bea4bb-1071-494d-a967-0917df6fbc8c))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R19") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R19") (unit 1)
         )
@@ -3762,9 +3657,6 @@
     (pin "2" (uuid 1ee2f60b-30d5-4377-bb9d-4ff178c52e4b))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R1") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R1") (unit 1)
         )
@@ -3791,9 +3683,6 @@
     (pin "2" (uuid 8658395b-b82c-4b27-9190-1f28bacb2e10))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R23") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R23") (unit 1)
         )
@@ -3821,9 +3710,6 @@
     (pin "3" (uuid 5848fbac-cc01-40c9-bc7f-44e405d26a2a))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "RV1") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "RV1") (unit 1)
         )
@@ -3862,9 +3748,6 @@
     (pin "4" (uuid 09665c17-ff8e-42ea-a502-aa278a829f51))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U1") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "U1") (unit 1)
         )
@@ -3929,9 +3812,6 @@
     (pin "2" (uuid 9f24c38a-e215-4630-9711-91facf92189f))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R26") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R26") (unit 1)
         )
@@ -3970,9 +3850,6 @@
     (pin "4" (uuid e806ae8c-233b-46fb-9840-cc7a53088199))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U1") (unit 4)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "U1") (unit 4)
         )
@@ -3983,7 +3860,7 @@
   (symbol (lib_id "power:GND") (at 209.55 102.87 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e9d9e03c-5ec4-47d3-8f92-023ac9cbed06)
-    (property "Reference" "#PWR017" (at 209.55 109.22 0)
+    (property "Reference" "#PWR027" (at 209.55 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 209.55 107.3134 0)
@@ -3998,9 +3875,6 @@
     (pin "1" (uuid 2fdf2013-1bc8-4bf1-8dfc-16b2d26e6227))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR017") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR027") (unit 1)
         )
@@ -4027,9 +3901,6 @@
     (pin "2" (uuid 1c8bbfc7-f598-44ee-b5fb-56d67b96bad5))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R24") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R24") (unit 1)
         )
@@ -4056,9 +3927,6 @@
     (pin "2" (uuid 78ae795a-3a3c-456b-ae1d-ff4729d69a90))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R21") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R21") (unit 1)
         )
@@ -4069,7 +3937,7 @@
   (symbol (lib_id "power:GND") (at 49.53 167.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f1ca291b-3dc6-45dd-bd81-1c438db37375)
-    (property "Reference" "#PWR0104" (at 49.53 173.99 0)
+    (property "Reference" "#PWR020" (at 49.53 173.99 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 49.53 172.0834 0)
@@ -4084,9 +3952,6 @@
     (pin "1" (uuid 2c81f858-b4e2-4698-b37d-7e1fb4b3128d))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0104") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR020") (unit 1)
         )
@@ -4138,9 +4003,6 @@
     (pin "1" (uuid e5e0f7a2-3c3f-4d4e-8363-fe5e5896daf0))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "TP3") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "TP3") (unit 1)
         )
@@ -4151,7 +4013,7 @@
   (symbol (lib_id "power:GND") (at 120.65 127 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f4f00357-b913-4835-99ba-91bfa73a2c4b)
-    (property "Reference" "#PWR0104" (at 120.65 133.35 0)
+    (property "Reference" "#PWR06" (at 120.65 133.35 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 120.65 131.4434 0)
@@ -4166,9 +4028,6 @@
     (pin "1" (uuid 236523ff-8977-489a-af6d-2cac8c02a90a))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR0104") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR06") (unit 1)
         )
@@ -4179,7 +4038,7 @@
   (symbol (lib_id "power:+9V") (at 86.36 86.36 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f819c176-6f86-4d46-b66d-c70db6768baa)
-    (property "Reference" "#PWR02" (at 86.36 90.17 0)
+    (property "Reference" "#PWR029" (at 86.36 90.17 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+9V" (at 86.36 82.7842 0)
@@ -4194,9 +4053,6 @@
     (pin "1" (uuid a3d64024-e9a8-43c9-a18d-63b92a015049))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR02") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "#PWR029") (unit 1)
         )
@@ -4223,9 +4079,6 @@
     (pin "2" (uuid 5f8842f1-7c9e-4fdc-8a85-0f6098b74ecc))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R28") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R28") (unit 1)
         )
@@ -4253,9 +4106,6 @@
     (pin "3" (uuid 81d9b63d-67dc-4b69-96e5-07fb025ddc77))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "J3") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "J3") (unit 1)
         )
@@ -4308,9 +4158,6 @@
     (pin "2" (uuid d6605999-d7a8-4665-afb3-97b88d6b17c5))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R3") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
           (reference "R3") (unit 1)
         )

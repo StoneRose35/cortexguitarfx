@@ -961,7 +961,7 @@
   (symbol (lib_id "power:GND") (at 149.86 102.87 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0ebb9add-0360-40f4-aef2-9346cc61d841)
-    (property "Reference" "#PWR020" (at 149.86 109.22 0)
+    (property "Reference" "#PWR07" (at 149.86 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 149.86 107.3134 0)
@@ -976,9 +976,6 @@
     (pin "1" (uuid 5a59b8f6-2c4b-41a5-aa60-25223c78d1c3))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR020") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "#PWR07") (unit 1)
         )
@@ -1005,9 +1002,6 @@
     (pin "2" (uuid c68e6b6c-3ee0-49c9-9af8-a2661fa03c4a))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "SW1") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "SW1") (unit 1)
         )
@@ -1034,9 +1028,6 @@
     (pin "2" (uuid 7a91b146-8910-4da6-93c1-8b2e224d164e))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R13") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "R13") (unit 1)
         )
@@ -1063,9 +1054,6 @@
     (pin "2" (uuid 3f20e471-f1d3-49d0-a162-477932f3281c))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R11") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "R11") (unit 1)
         )
@@ -1092,9 +1080,6 @@
     (pin "2" (uuid 603da625-d21f-48d2-b6c1-a6cec03eac90))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R12") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "R12") (unit 1)
         )
@@ -1121,9 +1106,6 @@
     (pin "2" (uuid c9975e5e-da3c-4b8d-8c6c-b0e487484255))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R8") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "R8") (unit 1)
         )
@@ -1134,7 +1116,7 @@
   (symbol (lib_id "power:GND") (at 171.45 85.09 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3f08819d-d10e-4516-8de7-f500cd15908a)
-    (property "Reference" "#PWR022" (at 171.45 91.44 0)
+    (property "Reference" "#PWR09" (at 171.45 91.44 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 171.45 89.5334 0)
@@ -1149,9 +1131,6 @@
     (pin "1" (uuid 141fedd4-a87b-4ae4-a4a3-20983707538c))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR022") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "#PWR09") (unit 1)
         )
@@ -1184,9 +1163,6 @@
     (pin "8" (uuid bd169e02-c23a-4c42-8b0a-37e502fc88c3))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U6") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "U6") (unit 1)
         )
@@ -1213,9 +1189,6 @@
     (pin "2" (uuid e6556431-cb99-4d86-858d-f3d3aa5da9c2))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R7") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "R7") (unit 1)
         )
@@ -1272,9 +1245,6 @@
     (pin "9" (uuid f41bdbe1-d38c-4af0-a944-b9972ad76912))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "U5") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "U5") (unit 1)
         )
@@ -1301,9 +1271,6 @@
     (pin "2" (uuid fe089bb5-ba68-4501-a471-f594fbb81d3f))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "D2") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "D2") (unit 1)
         )
@@ -1330,9 +1297,6 @@
     (pin "2" (uuid 02e5e773-a718-4691-81d6-5c677da8ff48))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "SW2") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "SW2") (unit 1)
         )
@@ -1343,7 +1307,7 @@
   (symbol (lib_id "power:GND") (at 160.02 95.25 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7f92571f-248a-4f38-bbac-679b200727a0)
-    (property "Reference" "#PWR021" (at 160.02 101.6 0)
+    (property "Reference" "#PWR08" (at 160.02 101.6 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 160.02 99.6934 0)
@@ -1358,9 +1322,6 @@
     (pin "1" (uuid 3303848a-e697-4741-a463-f109e09f9b92))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR021") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "#PWR08") (unit 1)
         )
@@ -1387,9 +1348,6 @@
     (pin "2" (uuid 5ea27517-1fa3-4764-93e8-134d12fe2650))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R9") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "R9") (unit 1)
         )
@@ -1416,9 +1374,6 @@
     (pin "2" (uuid fb656766-0fcd-4122-828e-27169647d7ab))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "D7") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "D7") (unit 1)
         )
@@ -1445,9 +1400,6 @@
     (pin "2" (uuid 9e6dd5c6-a38b-4305-8af0-d36f884c17f7))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "D3") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "D3") (unit 1)
         )
@@ -1458,7 +1410,7 @@
   (symbol (lib_id "power:GND") (at 139.7 142.24 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9b49b1b0-d37c-4974-a126-43e0cb6bf585)
-    (property "Reference" "#PWR019" (at 139.7 148.59 0)
+    (property "Reference" "#PWR05" (at 139.7 148.59 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 139.7 146.6834 0)
@@ -1473,9 +1425,6 @@
     (pin "1" (uuid 8e817e24-3fdb-4d95-83b6-fb92cd9def48))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR019") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "#PWR05") (unit 1)
         )
@@ -1506,9 +1455,6 @@
     (pin "6" (uuid ad16df87-1167-408b-8157-837475174505))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "J5") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "J5") (unit 1)
         )
@@ -1519,7 +1465,7 @@
   (symbol (lib_id "power:GND") (at 88.9 158.75 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c066a5fb-ec32-4343-91c1-57aa564e6218)
-    (property "Reference" "#PWR012" (at 88.9 165.1 0)
+    (property "Reference" "#PWR03" (at 88.9 165.1 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 88.9 163.1934 0)
@@ -1534,9 +1480,6 @@
     (pin "1" (uuid 1b7f4f37-dc21-411e-ad59-25b218bac463))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR012") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "#PWR03") (unit 1)
         )
@@ -1563,9 +1506,6 @@
     (pin "2" (uuid 53b53dad-a51f-4120-8ed8-5e7352be1e44))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "SW3") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "SW3") (unit 1)
         )
@@ -1576,7 +1516,7 @@
   (symbol (lib_id "power:GND") (at 175.26 104.14 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c5b5d287-3fcf-4bc7-8e97-63c970251663)
-    (property "Reference" "#PWR023" (at 175.26 110.49 0)
+    (property "Reference" "#PWR010" (at 175.26 110.49 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 175.26 108.5834 0)
@@ -1591,9 +1531,6 @@
     (pin "1" (uuid 4ef84981-4b69-478e-9740-db0453683c91))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR023") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "#PWR010") (unit 1)
         )
@@ -1620,9 +1557,6 @@
     (pin "2" (uuid dc04958b-196d-4c56-b776-e8e026d0f5db))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "D4") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "D4") (unit 1)
         )
@@ -1649,9 +1583,6 @@
     (pin "2" (uuid 39cba1e1-20c8-4543-bef7-f186d173c4c9))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "D6") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "D6") (unit 1)
         )
@@ -1678,9 +1609,6 @@
     (pin "2" (uuid 9023383a-6a63-4a58-a540-917ac54af832))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "D5") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "D5") (unit 1)
         )
@@ -1707,9 +1635,6 @@
     (pin "2" (uuid 05d8f035-3147-4be7-afec-9e717c977ca1))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "R14") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "R14") (unit 1)
         )
@@ -1720,7 +1645,7 @@
   (symbol (lib_id "power:GND") (at 92.71 72.39 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f06ede44-fcc2-4051-b3fa-4e8a5ea3af97)
-    (property "Reference" "#PWR013" (at 92.71 78.74 0)
+    (property "Reference" "#PWR04" (at 92.71 78.74 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 96.52 73.66 0)
@@ -1735,9 +1660,6 @@
     (pin "1" (uuid 38e7df83-1390-447b-a999-3174ab440d63))
     (instances
       (project "mic_extension_board"
-        (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-          (reference "#PWR013") (unit 1)
-        )
         (path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/f9ef1368-05a5-440b-8b6f-d12c6284b642"
           (reference "#PWR04") (unit 1)
         )
