@@ -67,7 +67,8 @@
         "flash.h": "c",
         "sio.h": "c",
         "stompswitches.h": "c",
-        "bwgraphics.h": "c"
+        "bwgraphics.h": "c",
+        "fxprograms.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": true

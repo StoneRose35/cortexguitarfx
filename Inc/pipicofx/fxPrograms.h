@@ -16,10 +16,11 @@
 #include "audio/reverb2.h"
 #include "audio/reverb3.h"
 #include "audio/threebandeq.h"
+#include "audio/pitchshifter.h"
 #include "pipicofx/picofxCore.h"
 
 
-#define N_FX_PROGRAMS 12
+#define N_FX_PROGRAMS 13
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
 
@@ -236,6 +237,13 @@ typedef struct
 } FxProgram15DataType;
 
 
+typedef struct 
+{
+    PitchshifterDataType pitchShifter;
+    int16_t mix;
+} FxProgram16DataType;
+
+
 extern FxProgramType fxProgram1;
 extern FxProgramType fxProgram2;
 extern FxProgramType fxProgram3;
@@ -251,6 +259,7 @@ extern FxProgramType fxProgram12;
 extern FxProgramType fxProgram13;
 extern FxProgramType fxProgram14;
 extern FxProgramType fxProgram15;
+extern FxProgramType fxProgram16;
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
 #endif
