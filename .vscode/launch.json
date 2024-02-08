@@ -185,7 +185,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": ["-p", "./audiosamples/guit_riff_16bit.wav", "11", "3194", "0"],
+            "args": ["-p", "./audiosamples/tele_bridge_lick.wav", "11", "1691", "4095"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],

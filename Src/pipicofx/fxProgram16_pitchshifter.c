@@ -1,18 +1,23 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
+#include "drivers/adc.h"
 
 static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
     int16_t processedSample = pitchShifterProcessSample(sampleIn,&pData->pitchShifter);
-    int16_t sampleOut= ((processedSample)*((1 << 15) - pData->mix) >> 15) + ((sampleIn)*pData->mix >> 15);
+    int16_t sampleOut= ((sampleIn)*((1 << 15) - pData->mix) >> 15) + ((processedSample)*pData->mix >> 15);
     return sampleOut;
 }
 
 static void fxProgramParam1Callback(uint16_t val,void*data) // low
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
-    pData->pitchShifter.delayIncrement = val >> 9;
+    pData->pitchShifter.delayIncrement = (val >> 9) - 4;
+    if (pData->pitchShifter.delayIncrement>=0)
+    {
+        pData->pitchShifter.delayIncrement+=1;
+    }
     fxProgram16.parameters[0].rawValue = val;
 }
 
@@ -22,29 +27,29 @@ static void fxProgramParam1Display(void*data,char*res)
     *res=0;
     switch (pData->pitchShifter.delayIncrement)
     {
-    case 8:
+    case -4:
         appendToString(res,"OctUp");
         break;
-    case 7:
-        appendToString(res,"4thUp");
+    case -3:
+        appendToString(res,"MoreUp");
         break;
-    case 6:
-        appendToString(res,"5thUp");
+    case -2:
+        appendToString(res,"HalfUp");
         break;
-    case 5:
-        appendToString(res,"WeirdUp");
-        break;
-    case 4:
-        appendToString(res,"NoShift");
-        break;
-    case 3:
-        appendToString(res,"4thDown");
-        break;
-    case 2:
-        appendToString(res,"OctDown");
+    case -1:
+        appendToString(res,"LittleUp");
         break;
     case 1:
-        appendToString(res,"2OctDown");
+        appendToString(res,"LittleDown");
+        break;
+    case 2:
+        appendToString(res,"HalfDown");
+        break;
+    case 3:
+        appendToString(res,"MoreDown");
+        break;
+    case 4:
+        appendToString(res,"OctDown");
         break;
     default:
         appendToString(res,"Static");
@@ -68,6 +73,27 @@ static void fxProgramParam2Display(void*data,char*res)
     appendToString(res,"%");
 }
 
+static void fxProgramParam3Callback(uint16_t val,void*data) // BufferSize
+{
+    FxProgram16DataType* pData= (FxProgram16DataType*)data;
+    uint16_t newVal = (val >> 10)+9;
+    if (newVal != pData->pitchShifter.buffersizePowerTwo)
+    {
+        pData->pitchShifter.buffersizePowerTwo=newVal;
+        initPitchshifter(&pData->pitchShifter);
+    }
+    fxProgram16.parameters[1].rawValue = val;
+}
+
+static void fxProgramParam3Display(void*data,char*res)
+{
+    FxProgram16DataType* pData= (FxProgram16DataType*)data;
+    int16_t avgDelayMs=((pData->pitchShifter.buffersize >> 1) / (AUDIO_SAMPLING_RATE/1000));
+    Int16ToChar(avgDelayMs,res);
+    appendToString(res, "ms");
+}
+
+
 static void fxProgramSetup(void*data)
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
@@ -89,7 +115,7 @@ FxProgram16DataType fxProgram16data=
 
 FxProgramType fxProgram16 = {
     .name = "Pitchshifter",
-    .nParameters=2,
+    .nParameters=3,
     .parameters = {
         {
             .name = "ShiftAmt",
@@ -108,6 +134,15 @@ FxProgramType fxProgram16 = {
             .getParameterDisplay=&fxProgramParam2Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam2Callback
+        },
+        {
+            .name = "AvgDelay",
+            .control=2,
+            .increment=512,
+            .rawValue=0,
+            .getParameterDisplay=&fxProgramParam3Display,
+            .getParameterValue=0,
+            .setParameter=&fxProgramParam3Callback
         }
     },
     .processSample = &fxProgramProcessSample,

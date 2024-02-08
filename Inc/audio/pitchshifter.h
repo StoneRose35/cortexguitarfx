@@ -5,13 +5,15 @@
 
 typedef struct 
 {
-    uint16_t delayIndex1, delayIndex2,delayIndex3;
+    int16_t delayLength1, delayLength2;
     uint16_t currentDelayPosition;
-    uint16_t delayIncrement; // fixed point decimal 1=1/4, decimal point after bis position 1, position 0 being lsb
+    int16_t delayIncrement; // fixed point decimal 1=1/4, decimal point after bis position 1, position 0 being lsb
+    uint16_t buffersizePowerTwo;
+    uint16_t buffersize;
 } PitchshifterDataType;
 
-#define PITCHSHIFTER_BUFFER_SIZE 512
-#define PITSHIFTER_BUFFER_SIZE_TWOS_POWER 9
+#define PITSHIFTER_BUFFER_SIZE_TWOS_POWER 11
+#define PITCHSHIFTER_BUFFER_SIZE (1<<PITSHIFTER_BUFFER_SIZE_TWOS_POWER)
 int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data);
 void initPitchshifter(PitchshifterDataType*data);
 #endif
