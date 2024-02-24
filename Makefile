@@ -7,7 +7,7 @@
 
 PROJECT=microsys_audio
 MAIN_VERSION=0
-SUB_VERSION=6
+SUB_VERSION=7
 MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
