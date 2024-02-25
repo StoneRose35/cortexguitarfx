@@ -2,4 +2,5 @@
   (version 7)
   (lib (name "Raspberry Pi Pico")(type "KiCad")(uri "${KIPRJMOD}/MCU_RaspberryPi_and_Boards.kicad_sym")(options "")(descr ""))
   (lib (name "GraphicDisplay")(type "KiCad")(uri "${KIPRJMOD}/GraphicDisplay.kicad_sym")(options "")(descr ""))
+  (lib (name "DaisySeed")(type "KiCad")(uri "${KIPRJMOD}/DaisySeed.kicad_sym")(options "")(descr ""))
 )
