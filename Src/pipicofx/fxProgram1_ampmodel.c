@@ -4,8 +4,8 @@
 
 #define FXPROGRAM1_HIGHCUT_VAL1 0.61035f
 #define FXPROGRAM1_HIGHCUT_VAL2 0.9613037f
-
 #define FXPROGRAM1_HIGHCUT_DELTA (FXPROGRAM1_HIGHCUT_VAL2-FXPROGRAM1_HIGHCUT_VAL1)
+__attribute__((section (".qspi_code")))
 static float fxProgram1processSample(float sampleIn,void*data)
 {
     float out;
@@ -29,7 +29,7 @@ static float fxProgram1processSample(float sampleIn,void*data)
     return out;
 }
 
-
+__attribute__((section (".qspi_code")))
 static void fxProgram1Param1Callback(uint16_t val,void*data) // highpass cutoff before the nonlinear stage
 {
     float fval;
@@ -38,6 +38,7 @@ static void fxProgram1Param1Callback(uint16_t val,void*data) // highpass cutoff 
     pData->highpassCutoff = FXPROGRAM1_HIGHCUT_VAL1 + fval;
 }
 
+__attribute__((section (".qspi_code")))
 static void fxProgram1Param1Display(void*data,char*res)
 {
     uint32_t dval;
@@ -46,6 +47,7 @@ static void fxProgram1Param1Display(void*data,char*res)
     Int16ToChar(dval,res);
 }
 
+__attribute__((section (".qspi_code")))
 static void fxProgram1Param2Callback(uint16_t val,void*data) // number of waveshaper (more means more distortion)
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
@@ -55,13 +57,14 @@ static void fxProgram1Param2Callback(uint16_t val,void*data) // number of wavesh
     pData->nWaveshapers = val;
 }
 
+__attribute__((section (".qspi_code")))
 static void fxProgram1Param2Display(void*data,char*res)
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
     UInt8ToChar(pData->nWaveshapers,res);
 }
 
-
+__attribute__((section (".qspi_code")))
 static void fxProgram1Param3Callback(uint16_t val,void*data) // delay intensity
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
@@ -69,7 +72,7 @@ static void fxProgram1Param3Callback(uint16_t val,void*data) // delay intensity
     pData->delay->mix = ((float)val)/4096.0f; // up to 100%
     pData->delay->feedback = 0.25f;
 }
-
+__attribute__((section (".qspi_code")))
 static void fxProgram1Param3Display(void*data,char*res)
 {
     int16_t dVal;
@@ -78,7 +81,7 @@ static void fxProgram1Param3Display(void*data,char*res)
     Int16ToChar(dVal,res);
     appendToString(res,"%");
 }
-
+__attribute__((section (".qspi_code")))
 static void fxProgram1Setup(void*data)
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
@@ -87,7 +90,6 @@ static void fxProgram1Setup(void*data)
     pData->delay = getDelayData();
     initDelay(pData->delay);
 }
-
 
 FxProgram1DataType fxProgram1data = {
     /* butterworth lowpass @ 6000Hz */

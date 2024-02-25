@@ -7,7 +7,7 @@
 #define OVERSAMPLING_FACTOR 2 
 
 
-
+__attribute__((section (".qspi_code")))
 void initOversamplingWaveshaper(OversamplingWaveshaperDataType*data)
 {
     data->oldValue = 0;
@@ -16,6 +16,7 @@ void initOversamplingWaveshaper(OversamplingWaveshaperDataType*data)
 
 //uint16_t oversampledBuffer[AUDIO_BUFFER_SIZE*2*(1 << OVERSAMPLING_FACTOR)];
 
+__attribute__((section (".qspi_code")))
 void  applyOversamplingDistortion(uint16_t*data,OversamplingWaveshaperDataType* waveshaper)
 {
     int16_t oversample;

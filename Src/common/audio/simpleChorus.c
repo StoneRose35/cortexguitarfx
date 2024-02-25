@@ -75,6 +75,7 @@ int16_t simpleChorusProcessSample(int16_t sampleIn,SimpleChorusType*data)
 
 #else
 
+__attribute__((section (".qspi_code")))
 void initSimpleChorus(SimpleChorusType*data)
 {
     for(uint16_t c=0;c<SIMPLE_CHORUS_DELAY_SIZE;c++)
@@ -130,7 +131,7 @@ float simpleChorusProcessSample(float sampleIn,SimpleChorusType*data)
         return sampleOut;
 }
 
-
+__attribute__((section (".qspi_code")))
 float simpleChorusInterpolatedProcessSample(float sampleIn,SimpleChorusType*data)
 {
     uint16_t delayPtr,delayPtrNext;

@@ -25,6 +25,7 @@ int16_t gainStageProcessSample(int16_t sampleIn,gainStageData*data)
     return sampleOut;
 }
 #else
+__attribute__((section (".qspi_code")))
 void initGainstage(gainStageData*data)
 {
     data->gain=1.0f;

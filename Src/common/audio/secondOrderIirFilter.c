@@ -72,6 +72,7 @@ float secondOrderIirFilterProcessSample(float sampleIn,SecondOrderIirFilterType*
     return out;
 }
 
+__attribute__((section (".qspi_code")))
 void initSecondOrderIirFilter(SecondOrderIirFilterType* data)
 {
     data->w[0]=0.0f;

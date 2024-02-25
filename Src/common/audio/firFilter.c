@@ -91,6 +91,7 @@ void initfirFilter(FirFilterType*data)
 }
 #else
 
+__attribute__((section (".qspi_code")))
 void addSample(float sampleIn,FirFilterType*data)
 {
     data->delayPointer--;
@@ -119,6 +120,7 @@ float firFilterProcessSample(float sampleIn,FirFilterType*data)
     return res;
 }
 
+__attribute__((section (".qspi_code")))
 void initfirFilter(FirFilterType*data)
 {
     data->filterLength=64;

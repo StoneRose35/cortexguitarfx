@@ -4,12 +4,14 @@
 static const int16_t firstSineQuadrant[33] = {0,12,25,38,51,63,76,88,100,112,123,134,145,156,166,175,184,193,201,209,216,222,228,234,239,243,246,249,252,253,254,255,255};
 
 /** set frequency in Hz/100 */
+__attribute__((section (".qspi_code")))
 void sineChorusSetFrequency(uint16_t freq,SineChorusType*data)
 {
     data->lfoPhaseinc= freq*894; //*4294967296/4800000;
     data->frequency = freq;
 }
 
+__attribute__((section (".qspi_code")))
 int16_t getSineValue(uint32_t phase)
 {
     uint8_t index;
@@ -39,7 +41,7 @@ int16_t getSineValue(uint32_t phase)
 
 #ifndef FLOAT_AUDIO
 #else
-
+__attribute__((section (".qspi_code")))
 void initSineChorus(SineChorusType*data)
 {
     for(uint16_t c=0;c<SINE_CHORUS_DELAY_SIZE;c++)

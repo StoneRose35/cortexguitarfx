@@ -18,6 +18,7 @@ const uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111
  * @param cpuLoad 
  * @param data 
  */
+__attribute__((section (".qspi_code")))
 void updateAudioUi(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
     uint8_t bargraphBuffer[128];
@@ -120,6 +121,7 @@ void updateAudioUi(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
  * 
  * @param data 
  */
+__attribute__((section (".qspi_code")))
 void drawUi(PiPicoFxUiType*data)
 {                  
     char lineBuffer[24];
@@ -195,6 +197,7 @@ void drawUi(PiPicoFxUiType*data)
     }
 }
 
+__attribute__((section (".qspi_code")))
 inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)
 {
     if (data->locked == 0)
@@ -211,16 +214,19 @@ inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)
     } 
 }
 
+__attribute__((section (".qspi_code")))
 void knob0Callback(uint16_t val,PiPicoFxUiType*data)
 {
     knobCallback(val,data,0);
 }
 
+__attribute__((section (".qspi_code")))
 void knob1Callback(uint16_t val,PiPicoFxUiType*data)
 {
     knobCallback(val,data,1);
 }
 
+__attribute__((section (".qspi_code")))
 void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 {
     knobCallback(val,data,2);
@@ -231,6 +237,7 @@ void knob2Callback(uint16_t val,PiPicoFxUiType*data)
  * 
  * @param data 
  */
+__attribute__((section (".qspi_code")))
 void button1Callback(PiPicoFxUiType*data) 
 {
     switch (data->displayLevel)
@@ -258,6 +265,7 @@ void button1Callback(PiPicoFxUiType*data)
     }
 }
 
+__attribute__((section (".qspi_code")))
 void button2Callback(PiPicoFxUiType*data)
 {
     switch (data->displayLevel)
@@ -280,6 +288,7 @@ void button2Callback(PiPicoFxUiType*data)
     }
 }
 
+__attribute__((section (".qspi_code")))
 void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
 {
     int32_t diff = (encoderValue - data->oldEncoderValue);
@@ -341,7 +350,7 @@ void rotaryCallback(uint32_t encoderValue,PiPicoFxUiType*data)
     }
 }
 
-
+__attribute__((section (".qspi_code")))
 void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
 {
     piPicoUiController->currentProgram=fxPrograms[0];

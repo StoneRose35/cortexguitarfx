@@ -106,6 +106,7 @@ int16_t compressorProcessSample(int16_t sampleIn,CompressorDataType*data)
 
 #else
 
+__attribute__((section (".qspi_code")))
 float applyGain(float sample,float avgVolume,CompressorDataType*comp)
 {
     float sample_reduced;
@@ -142,7 +143,7 @@ void setRelease(int32_t releaseInUs,CompressorDataType*data)
     data->release= 20.833f/releaseFloat;
 }
 
-__attribute__ ((section (".qspi_code")))
+__attribute__((section (".qspi_code")))
 float compressorProcessSample(float sampleIn,CompressorDataType*data)
 {
     float absSample;

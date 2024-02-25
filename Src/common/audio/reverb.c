@@ -24,6 +24,7 @@ const uint16_t delayInSamples[4] = {2011, 2551, 3163, 4093};
 const uint16_t allpassDelays[3] = {1021,337,115};
 const float phaseshifts[4]= {0.7f,0.7f,0.7f,0.7f};
 
+__attribute__((section (".qspi_code")))
 float getFeedback(uint8_t delayLineIndex,float tau)
 {
     float feedbackVal=0.0f;
@@ -37,6 +38,7 @@ float getFeedback(uint8_t delayLineIndex,float tau)
     return feedbackVal;
 }
 
+__attribute__((section (".qspi_code")))
 void setReverbTime(float reverbTime,ReverbType*reverbData)
 {
     for(uint8_t c=0;c<4;c++)
@@ -45,6 +47,7 @@ void setReverbTime(float reverbTime,ReverbType*reverbData)
     }
 }
 
+__attribute__((section (".qspi_code")))
 float allpassProcessSample(float sampleIn,AllpassType*allpass)
 {
     float sampleOut;
@@ -59,6 +62,7 @@ float allpassProcessSample(float sampleIn,AllpassType*allpass)
     return sampleOut;
 }
 
+__attribute__((section (".qspi_code")))
 void initReverb(ReverbType*reverbData,float reverbTime)
 {
     DelayDataType * delaySingleton = getDelayData();

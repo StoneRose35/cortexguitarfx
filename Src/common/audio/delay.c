@@ -5,6 +5,7 @@ float delayLineSdram[DELAY_LINE_LENGTH];
 
 DelayDataType singletonDelay;
 
+__attribute__((section (".qspi_code")))
 DelayDataType * getDelayData()
 {
     return &singletonDelay;
@@ -26,7 +27,7 @@ void initDelay(DelayDataType*data)
     data->feebackData=0;
 }
 
-__attribute__ ((section (".qspi_code")))
+__attribute__((section (".qspi_code")))
 float delayLineProcessSample(float sampleIn,DelayDataType*data)
 {
     uint32_t delayIdx;
@@ -54,10 +55,12 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
     return sampleOut;
 }
 
+__attribute__((section (".qspi_code")))
 float * getDelayLine()
 {
     return (float*)singletonDelay.delayLine;
 }
+__attribute__((section (".qspi_code")))
 void emptyDelayLine(float*delayLine)
 {
     for (uint32_t c=0;c<DELAY_LINE_LENGTH;c++)
