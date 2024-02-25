@@ -48,9 +48,12 @@ void setReverbTime(float reverbTime,ReverbType*reverbData)
 float allpassProcessSample(float sampleIn,AllpassType*allpass)
 {
     float sampleOut;
-    sampleOut = allpass->coefficient*sampleIn + *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & 0x3FF));
+    float delayWriteSample;
+    delayWriteSample= sampleIn - allpass->coefficient * *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & 0x3FF));
+    *(allpass->delayLine + allpass->delayPtr)=delayWriteSample;
+    sampleOut = allpass->coefficient*delayWriteSample + *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & 0x3FF));
    // allpass->oldValues
-    *(allpass->delayLine + allpass->delayPtr) = sampleIn - allpass->coefficient*sampleOut;
+
     allpass->delayPtr++;
     allpass->delayPtr &= 0x3FF;
     return sampleOut;

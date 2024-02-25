@@ -18,17 +18,17 @@
 
 
 
-// i2s interface
+// i2s interface (internal)
 #define I2S_BCLK (4*16+5) // PE5  SCK
 #define I2S_LRCLK (4*16+4) // PE4 LRCLK
-#define I2S_DOUT (4*16+3) // PC1 sai 1: transmitter
+#define I2S_DOUT (4*16+3) // PE3 sai 1: transmitter
 #define I2S_DIN (4*16+6) // PE6 sai 1: receiver
 #define I2S_MCLK (4*16+2) // PE2 MCLK
 // i2c interface
 #define I2C_SDA (1*16+11) // PB11
 #define I2C_SCL (7*16+4) // PH4
 
-//cs4270 reset line
+//cs4270 reset line (unused)
 #define CS4270_RESET (0*16+0)
 
 //ssd1306 display interfaced using spi
