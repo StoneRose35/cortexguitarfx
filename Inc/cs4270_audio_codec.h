@@ -12,4 +12,14 @@
 #define CS4270_R4_DAC_DIF1_Pos (4)
 #define CS4270_R4_DAC_DIF0_Pos (3)
 #define CS4270_R4_ADC_DIF0_Pos (0)
+
+#define CS4270_R6 (6)
+#define CS4270_R7 (7)
+#define CS4270_R8 (8)
+
+#define CS4270_I2C_ADDRESS 72
+#define CS4270_CHANNEL_A 0 
+#define CS4270_CHANNEL_B 1
+#define CS4270_CHANNEL_BOTH 2
+
 #endif

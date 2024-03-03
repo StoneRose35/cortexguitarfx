@@ -60,3 +60,113 @@ void init_cs4270_audio_codec()
     cs4270_write(regdata);
 
 }
+
+/*
+    channel is either CS4270_CHANNEL_A or CS4270_CHANNEL_B,
+    val: 1 means unmuted (on) and 0 means muted (off)
+*/
+void cs4270SetInputState(uint8_t channel,uint8_t val)
+{
+    uint16_t regdata;
+    uint8_t regContent;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    regdata = (CS4270_R6 << 8);
+    regContent = cs4270Read(CS4270_R6);
+    if (val!=0)
+    {
+        if (channel == CS4270_CHANNEL_A || channel == CS4270_CHANNEL_BOTH)
+        {
+            regContent &= ~(1 << 3);
+        }
+        if (channel == CS4270_CHANNEL_B || channel == CS4270_CHANNEL_BOTH)
+        {
+            regContent &= ~(1 << 4);
+        }
+    }
+    else
+    {
+        if (channel == CS4270_CHANNEL_A || channel == CS4270_CHANNEL_BOTH)
+        {
+            regContent |= (1 << 3);
+        }
+        if (channel == CS4270_CHANNEL_B || channel == CS4270_CHANNEL_BOTH)
+        {
+            regContent |= (1 << 4);
+        }
+    }
+    regdata |= regContent;
+    cs4270Write(regdata);
+}
+
+/*
+    channel is either CS4270_CHANNEL_A or CS4270_CHANNEL_B,
+    byte 0: Channel A, byte 1: Channel B
+*/
+uint8_t cs4270GetInputState()
+{
+    uint8_t regContent;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    regContent = cs4270Read(CS4270_R6);
+    regContent >>= 3;
+    regContent &= (0x3);
+    regContent ^= (0x3);
+    return regContent;
+}
+
+void cs4270SetOutputVolume(uint8_t channel,uint8_t volume)
+{
+    uint16_t regdata;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    if (channel == CS4270_CHANNEL_A) 
+    {
+        regdata = (CS4270_R7 << 8);
+    }
+    else if (channel == CS4270_CHANNEL_B)
+    {
+        regdata = (CS4270_R8 << 8);
+    }
+    else
+    {
+        regdata = ((0x80 | CS4270_R7) << 8);
+    }
+    regdata |= (0xFF - volume);
+    if (channel != CS4270_CHANNEL_BOTH)
+    {
+        cs4270Write(regdata);
+    }
+    else
+    {
+        masterTransmit((0x80 | CS4270_R7),0);
+        masterTransmit((0xFF - volume),0);
+        masterTransmit((0xFF - volume),1);
+    }
+}
+
+/*
+returns the output volume for both channels
+A is in the MSB, B in the LSB 
+*/
+uint16_t cs4270GetOutputVolume()
+{
+    uint16_t outval=0;
+    uint8_t channelVal;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    masterTransmit((0x80 | CS4270_R7),1);
+    channelVal = 0xFF - masterReceive(0);
+    outval |= (channelVal << 8);
+    channelVal = 0xFF - masterReceive(0);
+    outval |= channelVal;
+    return outval;
+}

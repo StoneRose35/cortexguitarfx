@@ -24,12 +24,21 @@
 #define I2S_DOUT (4*16+3) // PE3 sai 1: transmitter
 #define I2S_DIN (4*16+6) // PE6 sai 1: receiver
 #define I2S_MCLK (4*16+2) // PE2 MCLK
+
+// i2s interface (external)
+#define I2S_EXT_BCLK (0*16+2) // PA2  SCK
+#define I2S_EXT_LRCLK (6*16+9) // PG9 LRCLK
+#define I2S_EXT_DOUT (0*16+0) // PA0 sai 2: transmitter
+#define I2S_EXT_DIN (3*16+11) // PD11 sai 2: receiver
+#define I2S_EXT_MCLK (0*16+1) // PA1 MCLK
+//cs4270 reset line 
+#define CS4270_RESET (2*16+11) //PC11
+
 // i2c interface
 #define I2C_SDA (1*16+11) // PB11
 #define I2C_SCL (7*16+4) // PH4
 
-//cs4270 reset line (unused)
-#define CS4270_RESET (0*16+0)
+
 
 //ssd1306 display interfaced using spi
 #define SSD1306_SCK (6*16+11) // PG11
