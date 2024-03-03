@@ -607,13 +607,13 @@
   (no_connect (at 100.33 132.08) (uuid 3430a785-81fd-44f3-98e3-4dcca2ff8c65))
   (no_connect (at 114.3 102.87) (uuid 53685a39-3e5c-4467-a7ef-e93a2c62c29c))
   (no_connect (at 114.3 87.63) (uuid 773429a0-4f87-4f07-93aa-1a472ae7924c))
+  (no_connect (at 114.3 110.49) (uuid 84f69c28-8542-4ed7-8607-56ca09400ec2))
   (no_connect (at 114.3 90.17) (uuid 8a61fe38-f134-4551-a5b5-21f33cb4cd1f))
   (no_connect (at 135.89 137.16) (uuid 929fa3b6-3fb8-4114-80e0-63348a3dae1c))
   (no_connect (at 127 110.49) (uuid 9b48712e-ac49-4859-9a07-80e27a1cef5d))
   (no_connect (at 100.33 124.46) (uuid 9cb26c49-73bb-4438-8328-2cca7d63d4f7))
   (no_connect (at 135.89 132.08) (uuid a38366c1-06e3-43bc-b069-ddd2ab21a788))
   (no_connect (at 135.89 149.86) (uuid b796b82c-61cb-4dcb-a89a-cd466a90126d))
-  (no_connect (at 127 85.09) (uuid b945d658-7135-4778-be45-b7e10cd65ff3))
   (no_connect (at 100.33 127) (uuid c383eee2-7850-437d-ae1e-c34e80f0d334))
   (no_connect (at 127 107.95) (uuid c705c613-0a53-4ca7-b3af-a3686b0e7946))
   (no_connect (at 114.3 100.33) (uuid c811609d-11e8-4652-a55d-a2049f36644e))
@@ -1088,7 +1088,7 @@
     (property "Datasheet" "" (at 135.89 154.94 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bd))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
@@ -1113,7 +1113,7 @@
     (property "Datasheet" "" (at 135.89 142.24 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96be))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
@@ -1138,7 +1138,7 @@
     (property "Datasheet" "" (at 135.89 129.54 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bf))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
@@ -1148,22 +1148,22 @@
     )
   )
 
-  (symbol (lib_id "power:GND") (at 114.3 110.49 270) (unit 1)
+  (symbol (lib_id "power:GND") (at 127 85.09 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 79398d4f-fa76-4f5f-b17a-dc3fbb005fa1)
-    (property "Reference" "#PWR02" (at 107.95 110.49 0)
+    (property "Reference" "#PWR02" (at 133.35 85.09 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "GND" (at 110.49 110.49 90)
+    (property "Value" "GND" (at 130.81 85.09 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Footprint" "" (at 114.3 110.49 0)
+    (property "Footprint" "" (at 127 85.09 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "" (at 114.3 110.49 0)
+    (property "Datasheet" "" (at 127 85.09 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96c0))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
@@ -1188,7 +1188,7 @@
     (property "Datasheet" "" (at 135.89 167.64 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96c1))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
@@ -1213,7 +1213,7 @@
     (property "Datasheet" "" (at 100.33 142.24 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96c2))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
@@ -1238,7 +1238,7 @@
     (property "Datasheet" "" (at 100.33 129.54 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96c3))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
@@ -1263,7 +1263,7 @@
     (property "Datasheet" "" (at 114.3 85.09 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96c4))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
@@ -1288,7 +1288,7 @@
     (property "Datasheet" "" (at 100.33 167.64 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96bc))
+    (pin "1" (uuid 14b8622e-6b15-4d37-8f67-b829de2b96c5))
     (instances
       (project "adapter_pico"
         (path "/07f9e45b-1164-48e1-a01a-ed69d9c46014"
