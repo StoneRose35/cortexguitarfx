@@ -35,9 +35,14 @@
 #define CS4270_RESET (2*16+11) //PC11
 
 // i2c interface
+#ifdef INTERNAL_CODEC
 #define I2C_SDA (1*16+11) // PB11
 #define I2C_SCL (7*16+4) // PH4
-
+#endif
+#ifdef EXTERNAL_CODEC
+#define I2C_SDA (1*16+9) // PB9
+#define I2C_SCL (1*16+8) // PB8
+#endif
 
 
 //ssd1306 display interfaced using spi

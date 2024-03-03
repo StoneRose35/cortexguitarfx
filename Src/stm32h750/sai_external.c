@@ -8,6 +8,8 @@
 #include "gpio.h"
 #include "stm32h750/daisy_seed_pins.h"
 
+#ifdef EXTERNAL_CODEC
+
 #define AVERAGING_LOWPASS_CUTOFF 0.0001f
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 256
 
@@ -270,4 +272,6 @@ void toggleAudioInputBuffer()
 {
 
 }
+#endif
+
 #endif

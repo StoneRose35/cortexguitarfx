@@ -11,6 +11,7 @@ void initI2c(uint8_t slaveAdress);
 
 uint8_t masterTransmit(uint8_t data,uint8_t lastCmd);
 uint8_t masterReceive(uint8_t lastCmd);
-
+void setTargetAddress(uint8_t address);
+uint8_t getTargetAddress();
 
 #endif

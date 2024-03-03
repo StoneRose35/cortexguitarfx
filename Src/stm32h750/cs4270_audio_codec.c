@@ -6,10 +6,28 @@
 #include "cs4270_audio_codec.h"
 
 
-void cs4270_write(uint16_t data)
+
+
+static uint8_t cs4270Write(uint16_t data)
 {
-    masterTransmit((uint8_t)((data >> 8)&0xFF),0);
-    masterTransmit((uint8_t)(data&0xFF),1);
+    uint8_t res=0;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    res += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
+    res += masterTransmit((uint8_t)(data&0xFF),1);
+    return res;
+}
+
+static uint8_t cs4270Read(uint8_t reg)
+{
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    masterTransmit(reg,1);
+    return masterReceive(1);
 }
 
 void init_cs4270_audio_codec()
@@ -48,16 +66,16 @@ void init_cs4270_audio_codec()
         __asm__("nop");
     }
     regdata = (CS4270_R2 << 8) | (1 << CS4270_R2_PDN_Pos); // power down
-    cs4270_write(regdata);
+    cs4270Write(regdata);
 
     regdata = (CS4270_R3 << 8); // set single speed master, no pop protection
-    cs4270_write(regdata);
+    cs4270Write(regdata);
 
     regdata = (CS4270_R4 << 8) | (1 << CS4270_R4_DAC_DIF0_Pos) | (1 << CS4270_R4_ADC_DIF0_Pos); // set i2s for dac and adc
-    cs4270_write(regdata);
+    cs4270Write(regdata);
 
     regdata = (CS4270_R2 << 8); // power up again
-    cs4270_write(regdata);
+    cs4270Write(regdata);
 
 }
 

@@ -43,9 +43,6 @@ void initI2c(uint8_t slaveAdress)
 
     RCC->APB1LENR |= (1 << RCC_APB1LENR_I2C2EN_Pos);
     
-    // clock frequency of 120MHZ ,divided by (37+38)*16
-    //I2C2->TIMINGR = (0xF << I2C_TIMINGR_PRESC_Pos) | ((37-1) << I2C_TIMINGR_SCLH_Pos) | 
-    //((38-1) << I2C_TIMINGR_SCLL_Pos) | (4 << I2C_TIMINGR_SDADEL_Pos) | (10 << I2C_TIMINGR_SCLDEL_Pos);
 
     // taken from the libDaisy code
     I2C2->TIMINGR = (0x6 << I2C_TIMINGR_PRESC_Pos) 
@@ -114,4 +111,13 @@ uint8_t masterReceive(uint8_t lastCmd)
     while ((I2C2->ISR & (1 << I2C_ISR_RXNE_Pos))==0);
     res = (uint8_t)I2C2->RXDR;
     return res;
+}
+
+void setTargetAddress(uint8_t address)
+{
+    slave_address = address;
+}
+uint8_t getTargetAddress()
+{
+    return slave_address;
 }

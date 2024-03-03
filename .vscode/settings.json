@@ -49,7 +49,8 @@
         "helpers.h": "c",
         "termios.h": "c",
         "systemchoice.h": "c",
-        "stm32h7xx.h": "c"
+        "stm32h7xx.h": "c",
+        "systick.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false
