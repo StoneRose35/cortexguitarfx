@@ -41,11 +41,11 @@ void dummy_read(volatile uint32_t reg)
 void initI2c(uint8_t slaveAdress)
 {
 
-    RCC->APB1LENR |= (1 << RCC_APB1LENR_I2C2EN_Pos);
+    RCC->APB1LENR |= (1 << I2C_ENR);
     
 
     // taken from the libDaisy code
-    I2C2->TIMINGR = (0x6 << I2C_TIMINGR_PRESC_Pos) 
+    I2C_BLOCK->TIMINGR = (0x6 << I2C_TIMINGR_PRESC_Pos) 
                     | (0x9 << I2C_TIMINGR_SCLDEL_Pos)
                     | (0 << I2C_TIMINGR_SDADEL_Pos)
                     | (0x43 << I2C_TIMINGR_SCLH_Pos)
@@ -53,7 +53,7 @@ void initI2c(uint8_t slaveAdress)
     config_i2c_pin(I2C_SCL);
     config_i2c_pin(I2C_SDA);
 
-    I2C2->CR1 |= (1 << I2C_CR1_PE_Pos);
+    I2C_BLOCK->CR1 |= (1 << I2C_CR1_PE_Pos);
     slave_address = slaveAdress;
     firstCommand = 1;
 }
@@ -72,18 +72,18 @@ uint8_t I2CsendMultiple()
 {
     uint32_t regbfr;
     uint16_t sCnt=0;
-    while ((I2C2->ISR & (1 << I2C_ISR_TXE_Pos))==0);
+    while ((I2C_BLOCK->ISR & (1 << I2C_ISR_TXE_Pos))==0);
     
-    regbfr = I2C2->CR2;
+    regbfr = I2C_BLOCK->CR2;
     regbfr &= ~((I2C_CR2_SADD_Msk) | (1 << I2C_CR2_RD_WRN_Pos) | (0xFF << I2C_CR2_NBYTES_Pos));
     regbfr |= (slave_address << (I2C_CR2_SADD_Pos+1)) | (1 << I2C_CR2_START_Pos) | (nSend << I2C_CR2_NBYTES_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
-    I2C2->CR2 = regbfr;
+    I2C_BLOCK->CR2 = regbfr;
 
     while (sCnt < nSend)
     {
-        I2C2->TXDR = sendBfr[sCnt];
+        I2C_BLOCK->TXDR = sendBfr[sCnt];
         sCnt++;
-        while ((I2C2->ISR & I2C_ISR_TXE)==0);
+        while ((I2C_BLOCK->ISR & I2C_ISR_TXE)==0);
     }
     nSend=0;
 
@@ -94,22 +94,22 @@ uint8_t masterReceive(uint8_t lastCmd)
 {
     uint8_t res;
     uint32_t regbfr;
-    while ((I2C2->ISR & (1 << I2C_ISR_BUSY_Pos))!=0);
+    while ((I2C_BLOCK->ISR & (1 << I2C_ISR_BUSY_Pos))!=0);
     if (firstCommand==1)
     {
-        regbfr = I2C2->CR2;
+        regbfr = I2C_BLOCK->CR2;
         regbfr &= ~((I2C_CR2_SADD_Msk) | (1 << I2C_CR2_RD_WRN_Pos));
         regbfr |= (slave_address << I2C_CR2_SADD_Pos) | (1 << I2C_CR2_START_Pos) | (0xFF << I2C_CR2_NBYTES_Pos) 
                   | (1 << I2C_CR2_RD_WRN_Pos);
-        I2C1->CR2 |= regbfr;
+        I2C_BLOCK->CR2 |= regbfr;
         firstCommand=0;
     }
     if (lastCmd != 0)
     {
         firstCommand = 1;
     }
-    while ((I2C2->ISR & (1 << I2C_ISR_RXNE_Pos))==0);
-    res = (uint8_t)I2C2->RXDR;
+    while ((I2C_BLOCK->ISR & (1 << I2C_ISR_RXNE_Pos))==0);
+    res = (uint8_t)I2C_BLOCK->RXDR;
     return res;
 }
 

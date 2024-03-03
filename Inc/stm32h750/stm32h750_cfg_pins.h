@@ -34,14 +34,19 @@
 //cs4270 reset line 
 #define CS4270_RESET (2*16+11) //PC11
 
+
 // i2c interface
 #ifdef INTERNAL_CODEC
 #define I2C_SDA (1*16+11) // PB11
 #define I2C_SCL (7*16+4) // PH4
+#define I2C_BLOCK I2C2
+#define I2C_ENR RCC_APB1LENR_I2C2EN_Pos
 #endif
 #ifdef EXTERNAL_CODEC
-#define I2C_SDA (1*16+9) // PB9
-#define I2C_SCL (1*16+8) // PB8
+#define I2C_SDA (1*16+7) // PB7
+#define I2C_SCL (1*16+6) // PB6
+#define I2C_BLOCK I2C1
+#define I2C_ENR RCC_APB1LENR_I2C1EN_Pos
 #endif
 
 
