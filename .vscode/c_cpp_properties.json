@@ -13,7 +13,8 @@
                 "STM32",
                 "STM32F7",
                 "STM32H750xx",
-                "FLOAT_AUDIO"
+                "FLOAT_AUDIO",
+                "HARDWARE"
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "cStandard": "c11",

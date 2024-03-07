@@ -122,12 +122,23 @@ int main(void)
 	encoderVal=getEncoderValue();
     initDebugLed();
 
+    // wait for flashing when button 0 (Enter switch) is pressed during startup 
+    // allows flashing the QSPI from a corrupted state
+    volatile uint8_t currentSwitchVal = getMomentarySwitchValue(0);
+    if ((currentSwitchVal & 0x01)==1)
+    {
+        while ((task & (1 << TASK_FLASH_QSPI)) == 0);    
+        flashingTask();
+        task &= ~(1 << TASK_FLASH_QSPI);
+    }
+
     //Initialize Background Services
 	//initCliApi();
 	initRoundRobinReading(); // internal adc for reading parameters
 	context |= (1 << CONTEXT_USB);
 	//printf("Microsys v1.1 running on DaisySeed 1.1\r\n");
-	piPicoFxUiSetup(&piPicoUiController);
+	
+    piPicoFxUiSetup(&piPicoUiController);
 	ssd1306ClearDisplay();
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
 	{
@@ -138,9 +149,11 @@ int main(void)
 	}
 	drawUi(&piPicoUiController);
     
+    
     //enable audio engine last (when fx programs have been set up)
     initSAI();
     enableAudioEngine();
+    
     
     
 

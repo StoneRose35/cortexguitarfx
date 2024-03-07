@@ -39,6 +39,8 @@ void processExternalInterrupt()
     }
 }
 
+
+
 void EXTI0_IRQHandler()
 {
     processExternalInterrupt();
@@ -203,6 +205,18 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     lastTrigger = 0;
 }
 
+
+uint8_t getMomentarySwitchValue(uint8_t sw)
+{
+    GPIO_TypeDef * gpio;
+    gpio = (GPIO_TypeDef*)(GPIOA_BASE + (switchPins[sw] >> 4)*0x400);
+
+    if ((gpio->IDR & (1 << (switchPins[sw] & 0xF)))==0)
+    {
+        return 1;
+    }
+    return 0;
+}
 
 uint32_t getEncoderValue()
 {
