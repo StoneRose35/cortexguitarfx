@@ -6,20 +6,38 @@
 #ifndef FLOAT_AUDIO
 typedef struct 
 {
-    int16_t transferFunctionPoints[128];
+    int16_t * transferFunctionPoints;
 
 } WaveShaperDataType;
 
-extern const WaveShaperDataType waveShaperUnity;
-extern const WaveShaperDataType waveShaperDefaultOverdrive;
-extern const WaveShaperDataType waveShaperSoftOverdrive;
-extern const WaveShaperDataType waveShaperDistortion;
-extern const WaveShaperDataType waveShaperCurvedOverdrive;
-extern const WaveShaperDataType waveShaperAsymm; 
+
+typedef struct 
+{
+    int16_t transferFunctionPoints[128];
+
+} WaveShaperDataTypeRO;
+
+typedef struct 
+{
+    int16_t * transferFunctions[64];
+    uint8_t functionIndex;
+} MultiWaveShaperDataType;
+
+typedef struct 
+{
+    int16_t transferFunctions[64][WAVESHAPER_CURVE_LENGTH];
+} MultiWaveShaperDataTypeRO;
+
+extern const WaveShaperDataTypeRO waveShaperUnity;
+extern const WaveShaperDataTypeRO waveShaperDefaultOverdrive;
+extern const WaveShaperDataTypeRO waveShaperSoftOverdrive;
+extern const WaveShaperDataTypeRO waveShaperDistortion;
+extern const WaveShaperDataTypeRO waveShaperCurvedOverdrive;
+extern const WaveShaperDataTypeRO waveShaperAsymm; 
+extern const MultiWaveShaperDataTypeRO multiWaveshaper1;
 
 
-
-
+int16_t multiWaveShaperProcessSample(int16_t sampleIn,MultiWaveShaperDataType*data);
 int16_t waveShaperProcessSample(int16_t sampleIn,WaveShaperDataType*data);
 #else
 
@@ -60,8 +78,10 @@ extern const MultiWaveShaperDataTypeRO multiWaveshaper1;
 float multiWaveShaperProcessSample(float sampleIn,MultiWaveShaperDataType*data);
 float waveShaperProcessSample(float sampleIn,WaveShaperDataType*data);
 
+
 #endif
 
 void initMultiWaveShaper(MultiWaveShaperDataType * data,const MultiWaveShaperDataTypeRO *copyFrom);
 void initWaveShaper(WaveShaperDataType * data,const WaveShaperDataTypeRO* copyFrom);
+
 #endif

@@ -2,29 +2,15 @@
 #define _GAINSTAGE_H_
 #include <stdint.h>
 
-#ifndef FLOAT_AUDIO
-
 typedef struct
 {
     int16_t gain; // 256 is unity gain
     int16_t offset; // full range
     /* data */
-} gainStageData;
+} GainStageDataType;
 
-int16_t gainStageProcessSample(int16_t sampleIn,gainStageData*data);
-#else
+void initGainstage(GainStageDataType*data);
 
-typedef struct
-{
-    float gain; 
-    float offset; 
-    /* data */
-} gainStageData;
-
-float gainStageProcessSample(float sampleIn,gainStageData*data);
-
-#endif
-
-void initGainstage(gainStageData*data);
+int16_t gainStageProcessSample(int16_t sampleIn,GainStageDataType*data);
 
 #endif

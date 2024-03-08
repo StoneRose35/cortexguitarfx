@@ -1,47 +1,34 @@
 #ifndef _DELAY_H_
 #define _DELAY_H_
 #include <stdint.h>
-#define DELAY_LINE_LENGTH (0x800000UL)
+#define DELAY_LINE_LENGTH 65536
 
-#ifndef FLOAT_AUDIO
 typedef int16_t(*feedbackProcessor)(int16_t,void*);
 
 typedef struct 
 {
-    int16_t delayLine[DELAY_LINE_LENGTH]; 
+    int16_t * delayLine; 
     uint32_t delayLinePtr;
     int32_t delayInSamples;
     int16_t feedback; 
+    uint32_t delayBufferLength;
     int16_t mix;
     feedbackProcessor feedbackFunction;
     void * feebackData;
 } DelayDataType;
  
+void initDelay(DelayDataType*data,int16_t * memoryPointer,uint32_t bufferLength);
+
 int16_t delayLineProcessSample(int16_t sampleIn,DelayDataType*data);
-#else
-typedef float(*feedbackProcessor)(float,void*);
 
-typedef struct 
-{
-    float * delayLine; 
-    uint32_t delayLinePtr;
-    int32_t delayInSamples;
-    float feedback; 
-    float mix;
-    feedbackProcessor feedbackFunction;
-    void * feebackData;
-} DelayDataType;
- 
-float delayLineProcessSample(float sampleIn,DelayDataType*data);
-float * getDelayLine();
-void emptyDelayLine(float*delayLine);
+// simply returnes the sample delayed 
+int16_t getDelayedSample(DelayDataType*data);
 
-#endif
-void initDelay(DelayDataType*data);
+// adds a sample to the delay line
+void addSampleToDelayline(int16_t sampleIn,DelayDataType*data);
 
+int16_t * getDelayMemoryPointer();
 
-
-DelayDataType * getDelayData();
-
+__attribute__ ((section (".ramfunc"))) void clearDelayLine();
 
 #endif
