@@ -28,15 +28,7 @@ int16_t firstOrderIirHighpassProcessSample(int16_t sampleIn,FirstOrderIirType*da
 __attribute__ ((section (".qspi_code")))
 float firstOrderIirLowpassProcessSample(float sampleIn,FirstOrderIirType*data)
 {
-    data->oldVal = data->alpha*data->oldVal + (1.0f - data->alpha)*sampleIn;
-    return data->oldVal;
-}
-
-__attribute__ ((section (".qspi_code")))
-float firstOrderIirHighpassProcessSample(float sampleIn,FirstOrderIirType*data)
-{
-    data->oldVal = (1.0f + data->alpha)/2.0f*(sampleIn - data->oldXVal) + data->alpha*data->oldVal;
-    data->oldXVal = sampleIn;
+    data->oldVal = sampleIn = data->alpha*(data->oldVal - sampleIn);
     return data->oldVal;
 }
 
@@ -45,14 +37,22 @@ float firstOrderIirDualCoeffLPProcessSample(float sampleIn,FirstOrderIirDualCoef
 {
     if (sampleIn > data->oldVal)
     {
-        data->oldVal = sampleIn + data->alphaRising*(sampleIn - data->oldVal);
+        data->oldVal = sampleIn + data->alphaRising*(data->oldVal - sampleIn);
         return data->oldVal;
     }
     else
     {
-        data->oldVal = sampleIn + data->alphaFalling*(sampleIn - data->oldVal);
+        data->oldVal = sampleIn + data->alphaFalling*(data->oldVal - sampleIn);
         return data->oldVal;
     }
+}
+
+__attribute__ ((section (".qspi_code")))
+float firstOrderIirHighpassProcessSample(float sampleIn,FirstOrderIirType*data)
+{
+    data->oldVal = (1.0f + data->alpha)/2.0f*(sampleIn - data->oldXVal) + data->alpha*data->oldVal;
+    data->oldXVal = sampleIn;
+    return data->oldVal;
 }
 
 __attribute__ ((section (".qspi_code")))
