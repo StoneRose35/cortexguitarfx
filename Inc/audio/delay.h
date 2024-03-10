@@ -3,32 +3,32 @@
 #include <stdint.h>
 #define DELAY_LINE_LENGTH 65536
 
-typedef int16_t(*feedbackProcessor)(int16_t,void*);
+typedef float(*feedbackProcessor)(float,void*);
 
 typedef struct 
 {
-    int16_t * delayLine; 
+    float * delayLine; 
     uint32_t delayLinePtr;
     int32_t delayInSamples;
-    int16_t feedback; 
+    float feedback; 
     uint32_t delayBufferLength;
-    int16_t mix;
+    float mix;
     feedbackProcessor feedbackFunction;
     void * feebackData;
 } DelayDataType;
  
-void initDelay(DelayDataType*data,int16_t * memoryPointer,uint32_t bufferLength);
+void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength);
 
-int16_t delayLineProcessSample(int16_t sampleIn,DelayDataType*data);
+float delayLineProcessSample(float sampleIn,DelayDataType*data);
 
 // simply returnes the sample delayed 
-int16_t getDelayedSample(DelayDataType*data);
+float getDelayedSample(DelayDataType*data);
 
 // adds a sample to the delay line
-void addSampleToDelayline(int16_t sampleIn,DelayDataType*data);
+void addSampleToDelayline(float sampleIn,DelayDataType*data);
 
-int16_t * getDelayMemoryPointer();
+float * getDelayMemoryPointer();
 
-__attribute__ ((section (".ramfunc"))) void clearDelayLine();
+void clearDelayLine();
 
 #endif
