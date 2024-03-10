@@ -18,6 +18,7 @@ typedef struct
     const uint16_t allpassDelays[4];
 } reverbParameterType;
 
+__attribute__((section (".qspi_data")))
 static const reverbParameterType reverbParameterSet[4]= {
     {
         .name="solid",
@@ -86,9 +87,10 @@ static const reverbParameterType reverbParameterSet[4]= {
     }
 };
 
-
+__attribute__((section (".qspi_data")))
 const float phaseshifts[4]= {0.7f,0.7f,0.7f,0.7f};
 
+__attribute__((section (".qspi_code")))
 const char * getReverbParameterSetName(ReverbType*reverbData)
 {
     return reverbParameterSet[reverbData->paramNr].name;
