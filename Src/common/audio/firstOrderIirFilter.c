@@ -39,4 +39,34 @@ float firstOrderIirHighpassProcessSample(float sampleIn,FirstOrderIirType*data)
     data->oldXVal = sampleIn;
     return data->oldVal;
 }
+
+__attribute__ ((section (".qspi_code")))
+float firstOrderIirDualCoeffLPProcessSample(float sampleIn,FirstOrderIirDualCoeffLPType*data)
+{
+    if (sampleIn > data->oldVal)
+    {
+        data->oldVal = sampleIn + data->alphaRising*(sampleIn - data->oldVal);
+        return data->oldVal;
+    }
+    else
+    {
+        data->oldVal = sampleIn + data->alphaFalling*(sampleIn - data->oldVal);
+        return data->oldVal;
+    }
+}
+
+__attribute__ ((section (".qspi_code")))
+void firstOrderIirReset(FirstOrderIirType*data)
+{
+    data->oldVal=0.0f;
+    data->oldXVal=0.0f;
+}
+
+__attribute__ ((section (".qspi_code")))
+void firstOrderIirDualCoeffLPReset(FirstOrderIirDualCoeffLPType*data)
+{
+    data->oldVal=0.0f;
+    data->oldXVal=0.0f;
+}
+
 #endif

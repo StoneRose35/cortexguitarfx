@@ -16,7 +16,7 @@ typedef struct
     float currentAvg;
 } CompressorDataType;
 
-int16_t getMaxGain(CompressorDataType*comp);
+float getMaxGain(CompressorDataType*comp);
 float compressorProcessSample(float sampleIn,CompressorDataType*data);
 float compressor2ProcessSample(float sampleIn,CompressorDataType*data);
 float compressor3ProcessSample(float sampleIn,CompressorDataType*data);

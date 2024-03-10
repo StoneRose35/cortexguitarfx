@@ -1,62 +1,62 @@
 #include "stdint.h"
 #include "audio/compressor.h"
-#include "romfunc.h"
 #include "stdio.h"
+#include "fastExpLog.h"
 
 
 
 __attribute__((section (".qspi_code")))
 float applyGain(float sample,float avgVolume,CompressorDataType*comp)
 {
-    float sample_reduced;
-    float sampleOut;
-    if (avgVolume < comp->gainFunction.threshhold)
+    float logAvg;
+    float sampleInterm;
+    float gainFactor;
+
+    logAvg=fastlog(avgVolume);
+    if (logAvg < comp->gainFunction.threshhold)
     {
-        sample_reduced = avgVolume;
-        sampleOut=sample;
+        sampleInterm =sample;
     }
     else if (comp->gainFunction.gainReduction > 16.0f)
     {
-        sample_reduced = comp->gainFunction.threshhold;
-        sampleOut=sample*sample_reduced;
+        gainFactor = fastexp(comp->gainFunction.threshhold);
         if (avgVolume > 0.000001f)
         {
-            sampleOut = sampleOut/avgVolume;
+            gainFactor /= avgVolume;
+            sampleInterm = sample*gainFactor;
         }
     }
     else
     {
-        sample_reduced =  comp->gainFunction.threshhold + (avgVolume-comp->gainFunction.threshhold)/comp->gainFunction.gainReduction;
-        sampleOut=sample*sample_reduced;
+        gainFactor = fastexp(comp->gainFunction.threshhold + (logAvg-comp->gainFunction.threshhold)/comp->gainFunction.gainReduction);
         if (avgVolume > 0.000001f)
         {
-            sampleOut = sampleOut = avgVolume;
+            gainFactor /=avgVolume;
+            sampleInterm = sample*gainFactor;
         }
     }
-
-    return sampleOut;
+    return sampleInterm;
 }
 
-void setAttack(int32_t attackInUs,CompressorDataType*data)
+__attribute__((section (".qspi_code")))
+float getMaxGain(CompressorDataType*comp)
 {
-    float attackFloat;
-    attackFloat = (float)(attackInUs);
-    data->attack= 20.833f/attackFloat;
-}
-
-void setRelease(int32_t releaseInUs,CompressorDataType*data)
-{
-    float releaseFloat;
-    releaseFloat = (float)releaseInUs;
-    data->release= 20.833f/releaseFloat;
+    if (comp->gainFunction.gainReduction > 16.0f)
+    {
+        return fastexp(comp->gainFunction.threshhold);
+    }
+    else
+    {
+        return fastexp(comp->gainFunction.threshhold + ((-comp->gainFunction.threshhold)/(comp->gainFunction.gainReduction)));
+    }
 }
 
 __attribute__((section (".qspi_code")))
 float compressorProcessSample(float sampleIn,CompressorDataType*data)
 {
     float absSample;
-    float delta;
     float sampleOut;
+    float intermAvg;
 
     sampleOut = applyGain(sampleIn,data->currentAvg,data);
     if(sampleOut < 0.0f)
@@ -67,36 +67,12 @@ float compressorProcessSample(float sampleIn,CompressorDataType*data)
     {
         absSample = sampleOut;
     }
-    delta = absSample - data->currentAvg;
-    if (delta < 0.0f)
-    {
-        if(-delta > data->release)
-        {
-            data->currentAvg -= data->release;
-        }
-        else
-        {
-            data->currentAvg += delta;
-        }
-        if (data->currentAvg < 0)
-        {
-            data->currentAvg=0.0f;
-        }
-    }
-    else
-    {
-        if(delta > data->attack)
-        {
-            data->currentAvg += data->attack;
-        }
-        else
-        {
-            data->currentAvg += delta;
-        }
-        if (data->currentAvg > 1.0f) // overflow in this case
-        {
-            data->currentAvg=1.0f;
-        }
-    }
+    data->currentAvg = firstOrderIirDualCoeffLPProcessSample(absSample,&data->avgLowpass);
     return sampleOut;
+}
+
+void compressorReset(CompressorDataType*data)
+{
+    firstOrderIirDualCoeffLPReset(&data->avgLowpass);
+    data->currentAvg = 0.0f;
 }
