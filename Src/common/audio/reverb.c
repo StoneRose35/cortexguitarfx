@@ -159,7 +159,7 @@ float reverbProcessSample(float sampleIn,ReverbType*reverbData)
     
     for (uint8_t rc=0;rc<4;rc++)
     {
-        sampleInterm = sampleIn + ((reverbData->delayPointers[rc][(reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc] & 0xFFF)]+
+        sampleInterm = sampleIn + ((reverbData->delayPointers[rc][((reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]) & 0xFFF)]+
         reverbData->delayPointers[rc][(reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]-1) & 0xFFF] )*0.5f)*reverbData->feedbackValues[rc];
         reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF]=clip(sampleInterm,audioStatePtr);
     }

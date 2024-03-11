@@ -29,6 +29,29 @@ void DMA1_Stream2_IRQHandler(void)
     OledWriteNextLine();
 }
 
+static void config_spi_pin(uint8_t pinnr,uint8_t alternateFunction)
+{
+    GPIO_TypeDef *gpio;
+    uint32_t port;
+    uint32_t regbfr;
+    port = pinnr >> 4;
+    RCC->AHB1ENR |= (1 << port);
+    gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
+    regbfr = gpio->MODER;
+    regbfr &= ~(3 << ((pinnr & 0xF)<<1));
+    regbfr |= (2 << ((pinnr & 0xF)<<1));
+    gpio->MODER=regbfr;
+    regbfr = gpio->OSPEEDR;
+    //regbfr &=~(3 << ((pinnr & 0xF)<<1));
+    regbfr |= (3 << ((pinnr & 0xF)<<1));
+    gpio->OSPEEDR = regbfr;
+    gpio->PUPDR &= ~(3 << ((pinnr & 0xF)<<1));
+    regbfr = gpio->AFR[(pinnr & 0xF)>>3];
+    regbfr &= ~(0xF << ((pinnr & 0x7) << 2));
+    regbfr |= alternateFunction << ((pinnr & 0x7) << 2);
+    gpio->AFR[(pinnr & 0xF)>>3] = regbfr; 
+}
+
 void ssd1306SendCommand(uint8_t cmd)
 {
     gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF)+16)); // cs low

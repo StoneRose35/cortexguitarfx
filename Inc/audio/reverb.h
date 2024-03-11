@@ -14,15 +14,6 @@ typedef struct
 
 } ReverbType;
 
-typedef struct 
-{
-    float coefficient;
-    uint16_t delayPtr;
-    uint16_t delayInSamples;
-    float oldValues;
-    float * delayLine;
-} AllpassType;
-
 
 float reverbProcessSample(float sampleIn,ReverbType*reverbData);
 void initReverb(ReverbType*reverbData,float);

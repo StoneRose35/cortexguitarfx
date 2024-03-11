@@ -1,12 +1,12 @@
 #include "audio/waveShaper.h"
 
-__attribute__ ((section (".qspi_data")))
+__attribute__ ((section (".qspi_code")))
 void initWaveShaper(WaveShaperDataType * data,const WaveShaperDataTypeRO* copyFrom)
 {
     data->transferFunctionPoints = (float*)copyFrom->transferFunctionPoints;
 }
 
-__attribute__ ((section (".qspi_data")))
+__attribute__ ((section (".qspi_code")))
 void initMultiWaveShaper(MultiWaveShaperDataType * data,const MultiWaveShaperDataTypeRO *copyFrom)
 {
     for(uint8_t c=0;c<64;c++)

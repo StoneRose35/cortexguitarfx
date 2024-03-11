@@ -14,6 +14,6 @@ typedef struct
 
 #define PITSHIFTER_BUFFER_SIZE_TWOS_POWER 11
 #define PITCHSHIFTER_BUFFER_SIZE (1<<PITSHIFTER_BUFFER_SIZE_TWOS_POWER)
-int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data);
+float pitchShifterProcessSample(float sampleIn,PitchshifterDataType*data);
 void initPitchshifter(PitchshifterDataType*data);
 #endif

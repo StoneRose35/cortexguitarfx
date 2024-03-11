@@ -36,7 +36,7 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
     uint32_t delayIdx;
     float sampleOut;
     float sampleFedBack;
-    uint32_t * audioStatePtr = getAudioStatePtr();
+    volatile uint32_t * audioStatePtr = getAudioStatePtr();
     delayIdx = (data->delayLinePtr - data->delayInSamples) & (data->delayBufferLength -1);
 
     sampleOut = *(data->delayLine +delayIdx)*data->mix + sampleIn*(1.0f - data->mix);

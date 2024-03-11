@@ -5,7 +5,6 @@
 __attribute__((section (".qspi_code")))
 float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t*audioStatePtr)
 {
-    float sampleOut;
     float sampleInterm;
     sampleInterm= allpass->coefficient*sampleIn + *(allpass->delayLineIn + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))
     -

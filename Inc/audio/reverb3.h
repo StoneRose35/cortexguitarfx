@@ -12,7 +12,7 @@ typedef struct
     HadamardDiffuserType diffusers[8];
     DelayDataType delay;
     int16_t delayModulationTime;
-    int16_t delayModulationDepth;
+    float delayModulationDepth;
     int16_t sampleCounter;
     uint16_t delayLength;
     uint8_t modulatorState; // 0: rising, 1: falling
@@ -20,7 +20,7 @@ typedef struct
 } Reverb3Type;
 
 void initReverb3(Reverb3Type*data);
-int16_t reverb3processSample(int16_t sampleIn,Reverb3Type*data);
+float reverb3processSample(float sampleIn,Reverb3Type*data);
 
 
 #endif

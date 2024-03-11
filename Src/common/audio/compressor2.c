@@ -8,7 +8,7 @@ __attribute__((section (".qspi_code")))
 float applyGain2(float sample,float avgVolume,CompressorDataType*comp)
 {
     float logAvg, expAvg;
-    float sampleInterm;
+    float sampleInterm=0.0f;
     float gainFactor;
 
     logAvg=avgVolume;

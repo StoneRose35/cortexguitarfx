@@ -1,4 +1,4 @@
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "romfunc.h"
 
@@ -25,8 +25,15 @@ static float fxProgram1processSample(float sampleIn,void*data)
     out = secondOrderIirFilterProcessSample(out,&pData->filter1);
     //out = out/2.0f;
     out = firFilterProcessSample(out,&pData->filter3);
-    out = delayLineProcessSample(out, pData->delay);
+    out = delayLineProcessSample(out, &pData->delay);
     return out;
+}
+
+__attribute__((section (".qspi_code")))
+static float analogDelayFeedbackFunction(float sampleIn,void*fbkFilterData)
+{
+    FirstOrderIirType* tData = (FirstOrderIirType*)fbkFilterData;
+    return firstOrderIirLowpassProcessSample(sampleIn,tData);
 }
 
 __attribute__((section (".qspi_code")))
@@ -36,6 +43,7 @@ static void fxProgram1Param1Callback(uint16_t val,void*data) // highpass cutoff 
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
     fval = ((FXPROGRAM1_HIGHCUT_DELTA*(float)val)/4096.0f);
     pData->highpassCutoff = FXPROGRAM1_HIGHCUT_VAL1 + fval;
+    fxProgram1.parameters[0].rawValue=val;
 }
 
 __attribute__((section (".qspi_code")))
@@ -52,6 +60,7 @@ static void fxProgram1Param2Callback(uint16_t val,void*data) // number of wavesh
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
     // map 0-4095 to 1-8
+    fxProgram1.parameters[1].rawValue=val;
     val >>= 9;
     val += 1; 
     pData->nWaveshapers = val;
@@ -68,16 +77,17 @@ __attribute__((section (".qspi_code")))
 static void fxProgram1Param3Callback(uint16_t val,void*data) // delay intensity
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
-    pData->delay->delayInSamples = 2400 + (val << 3);
-    pData->delay->mix = ((float)val)/4096.0f; // up to 100%
-    pData->delay->feedback = 0.25f;
+    pData->delay.delayInSamples = 2400 + (val << 3);
+    pData->delay.mix = ((float)val)/4096.0f; // up to 100%
+    pData->delay.feedback = 0.25f;
+    fxProgram1.parameters[2].rawValue=val;
 }
 __attribute__((section (".qspi_code")))
 static void fxProgram1Param3Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
-    dVal=(int16_t)(pData->delay->mix*100.0f);
+    dVal=(int16_t)(pData->delay.mix*100.0f);
     Int16ToChar(dVal,res);
     appendToString(res,"%");
 }
@@ -87,8 +97,7 @@ static void fxProgram1Setup(void*data)
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
     initfirFilter(&pData->filter3);
     initWaveShaper(&pData->waveshaper1,&waveShaperDefaultOverdrive);
-    pData->delay = getDelayData();
-    initDelay(pData->delay);
+    initDelay(&pData->delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
 }
 
 FxProgram1DataType fxProgram1data = {
@@ -96,7 +105,11 @@ FxProgram1DataType fxProgram1data = {
     .filter1 = {
         	.coeffB = {0.09763107f, 0.19526215f, 0.09763107f},
             .coeffA = {-0.94280904f, 0.33333333f},
-            .w= {0.0f,0.0f,0.0f}
+            .x1=0.0f,
+            .x2=0.0f,
+            .y1=0.0f,
+            .y2=0.0f,
+            .acc=0.0f
     },
     .filter3 = {
         .coefficients = {0.016731f, 0.017496f, 0.021249f, 0.031896f, 0.051696f, 0.083098f, 0.125237f, 0.160554f, 0.158897f, 0.113163f, 0.059528f, 0.022957f, -0.017582f, -0.054411f, -0.064864f, -0.061696f, -0.053666f, -0.033009f, -0.007943f, 0.008333f, 0.015584f, 0.018759f, 0.015862f, 0.012281f, 0.016486f, 0.020179f, 0.022272f, 0.020375f, 0.007048f, -0.009343f, -0.016356f, -0.011307f, 0.000459f, 0.011650f, 0.015174f, 0.007995f, 0.000715f, 0.000025f, -0.004465f, -0.010208f, -0.007323f, 0.001944f, 0.012667f, 0.022059f, 0.027738f, 0.028239f, 0.024619f, 0.019782f, 0.017925f, 0.018693f, 0.019640f, 0.018431f, 0.012868f, 0.005646f, -0.000878f, -0.006494f, -0.005713f, -0.000488f, 0.005790f, 0.010304f, 0.013693f, 0.016206f, 0.017209f, 0.016596f, }    },
@@ -104,14 +117,27 @@ FxProgram1DataType fxProgram1data = {
     .highpass_old_out=0.0f,
     .highpass_out=0.0f,
     .highpassCutoff = 0.9460737f,
-    .nWaveshapers = 1
+    .nWaveshapers = 1,
+    .feedbackFilter.alpha = 14000.0f/32768.0f,
+    .feedbackFilter.oldVal=0.0f,
+    .feedbackFilter.oldXVal=0.0f,
+    .delay.feedbackFunction=&analogDelayFeedbackFunction
+    
 };
 
-__attribute__((section (".qspi_data")))
-static const char pname[]  = "Amp-Simulator        ";
+__attribute__((section (".qspi_code")))
+static void fxProgram1Reset(void*data)
+{
+    FxProgram1DataType* pData = (FxProgram1DataType*)data;
+    pData->highpass_old_in=0.0f;
+    pData->highpass_old_out=0.0f;
+    secondOrderIirFilterReset(&pData->filter1);
+    firFilterReset(&pData->filter3);
+}
 
+__attribute__((section (".qspi_data")))
 FxProgramType fxProgram1 = {
-    .name = pname,
+    .name = "Amp-Simulator",
     .nParameters = 3,
     .parameters = {
         {
@@ -144,5 +170,6 @@ FxProgramType fxProgram1 = {
     },
     .processSample = &fxProgram1processSample,
     .setup = &fxProgram1Setup,
+    .reset = &fxProgram1Reset,
     .data = (void*)&fxProgram1data
 } ;

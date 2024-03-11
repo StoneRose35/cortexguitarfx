@@ -3,7 +3,7 @@
 #include <stdint.h>
 typedef struct 
 {
-    uint16_t bitmask;
+    uint32_t bitmask;
 } BitCrusherDataType;
 
 

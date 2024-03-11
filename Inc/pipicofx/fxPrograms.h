@@ -24,18 +24,6 @@
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
 
-#ifndef FLOAT_AUDIO
-typedef struct {
-    int16_t highpassCutoff;
-    uint8_t nWaveshapers;
-    int16_t highpass_out,highpass_old_out,highpass_old_in;
-    WaveShaperDataType waveshaper1;
-    FirFilterType filter3;
-    SecondOrderIirFilterType filter1;
-    DelayDataType delay;
-    FirstOrderIirType feedbackFilter;
-} FxProgram1DataType;
-#else
 typedef struct {
     float highpassCutoff;
     uint8_t nWaveshapers;
@@ -43,9 +31,9 @@ typedef struct {
     WaveShaperDataType waveshaper1;
     FirFilterType filter3;
     SecondOrderIirFilterType filter1;
-    DelayDataType * delay;
+    DelayDataType delay;
+    FirstOrderIirType feedbackFilter;
 } FxProgram1DataType;
-#endif
 
 
 #ifndef FLOAT_AUDIO
@@ -128,7 +116,7 @@ typedef struct {
 } FxProgram4DataType;
 #else
 typedef struct {
-    gainStageData gainStage;
+    GainStageDataType gainStage;
     uint8_t cabSimType;
     uint8_t nWaveshapers;
     uint8_t waveshaperType;
@@ -136,7 +124,7 @@ typedef struct {
     const char cabNames[6][24];
     const char waveShaperNames[4][24];
     FirFilterType hiwattFir;
-    MultiWaveShaperDataType waveshaper1;
+    OversamplingWaveshaperDataType waveshaper1;
     SecondOrderIirFilterType hiwattIir1;
     SecondOrderIirFilterType hiwattIir2;
     SecondOrderIirFilterType hiwattIir3;

@@ -8,12 +8,12 @@ typedef struct
     SecondOrderIirFilterType * midBand;
     SecondOrderIirFilterType * highShelf;
 
-    int16_t lowFactor; // as q12, thus ranging from 8 to 0 in the usual q15 range
-    int16_t midFactor; 
-    int16_t highFactor; 
+    float lowFactor; // ranging from 0 to 8
+    float midFactor; 
+    float highFactor; 
 } ThreeBandEQType;
 
 void initThreeBandEq(ThreeBandEQType*data);
-int16_t threeBandEqProcessSample(int16_t sampleIn,ThreeBandEQType*data);
+float threeBandEqProcessSample(float sampleIn,ThreeBandEQType*data);
 void threeBandEqReset(ThreeBandEQType*data);
 #endif

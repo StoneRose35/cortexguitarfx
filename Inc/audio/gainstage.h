@@ -4,13 +4,13 @@
 
 typedef struct
 {
-    int16_t gain; // 256 is unity gain
-    int16_t offset; // full range
+    float gain; // 256 is unity gain
+    float offset; // full range
     /* data */
 } GainStageDataType;
 
 void initGainstage(GainStageDataType*data);
 
-int16_t gainStageProcessSample(int16_t sampleIn,GainStageDataType*data);
+float gainStageProcessSample(float sampleIn,GainStageDataType*data);
 
 #endif

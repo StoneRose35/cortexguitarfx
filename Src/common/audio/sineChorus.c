@@ -92,7 +92,7 @@ float sineChorusInterpolatedProcessSample(float sampleIn,SineChorusType*data)
         lfoValInterp = data->lfoVal;
         // compute current index of the delay pointer
         totalDelay = (((uint32_t)((lfoValInterp + 0xFF)*data->depth)) >> 6);
-        delayPtr = (data->delayInputPtr -5 - (totalDelay >> 3)) & (SINE_CHORUS_DELAY_SIZE-1);
+        delayPtr = (data->delayInputPtr - data->offset - (totalDelay >> 3)) & (SINE_CHORUS_DELAY_SIZE-1);
         delayPtrNext = (delayPtr - 1) & (SINE_CHORUS_DELAY_SIZE-1);
         q =((float)(totalDelay & 0x7))/8.0f;
         sampleOut=sampleIn*(1.0f-data->mix) + data->mix*(data->delayBuffer[delayPtr]*(1.0f - q) + data->delayBuffer[delayPtrNext]*q);

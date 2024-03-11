@@ -9,7 +9,7 @@ __attribute__((section (".qspi_code")))
 float applyGain(float sample,float avgVolume,CompressorDataType*comp)
 {
     float logAvg;
-    float sampleInterm;
+    float sampleInterm=0.0f;
     float gainFactor;
 
     logAvg=fastlog(avgVolume);
@@ -56,7 +56,6 @@ float compressorProcessSample(float sampleIn,CompressorDataType*data)
 {
     float absSample;
     float sampleOut;
-    float intermAvg;
 
     sampleOut = applyGain(sampleIn,data->currentAvg,data);
     if(sampleOut < 0.0f)
