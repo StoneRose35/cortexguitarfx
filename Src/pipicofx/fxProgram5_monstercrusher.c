@@ -1,4 +1,4 @@
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
 static float fxProgram5processSample(float sampleIn,void*data)
@@ -14,6 +14,7 @@ static void fxProgram5Param1Callback(uint16_t val,void*data) // set bit mask
     resolution = (4096 - val)*24;
     resolution >>= 12;
     pData->resolution = (uint8_t)resolution;
+    fxProgram5.parameters[0].rawValue = val;
     setBitMask((uint8_t)resolution,&pData->bitcrusher);
 }
 
@@ -54,5 +55,6 @@ FxProgramType fxProgram5 = {
     },
     .processSample = &fxProgram5processSample,
     .setup = &fxProgram5Setup,
+    .reset = 0,
     .data = (void*)&fxProgram5data
 };

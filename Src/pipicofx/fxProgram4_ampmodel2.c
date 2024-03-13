@@ -177,6 +177,62 @@ static void fxProgram4Setup(void*data)
     initfirFilter(&pData->voxAC15Fir);
 }
 
+static void fxProgram4Reset(void*data)
+{
+    FxProgram4DataType* pData = (FxProgram4DataType*)data;
+    pData->hiwattIir1.x1=0.0f;
+    pData->hiwattIir1.x2=0.0f;
+    pData->hiwattIir1.y1=0.0f;
+    pData->hiwattIir1.y1=0.0f;
+    pData->hiwattIir1.acc=0.0f;
+    pData->hiwattIir2.x1=0.0f;
+    pData->hiwattIir2.x2=0.0f;
+    pData->hiwattIir2.y1=0.0f;
+    pData->hiwattIir2.y1=0.0f;
+    pData->hiwattIir2.acc=0.0f;
+    pData->hiwattIir3.x1=0.0f;
+    pData->hiwattIir3.x2=0.0f;
+    pData->hiwattIir3.y1=0.0f;
+    pData->hiwattIir3.y1=0.0f;
+    pData->hiwattIir3.acc=0.0f;
+    
+    pData->frontmanIir1.x1=0.0f;
+    pData->frontmanIir1.x2=0.0f;
+    pData->frontmanIir1.y1=0.0f;
+    pData->frontmanIir1.y1=0.0f;
+    pData->frontmanIir1.acc=0.0f;
+    pData->frontmanIir2.x1=0.0f;
+    pData->frontmanIir2.x2=0.0f;
+    pData->frontmanIir2.y1=0.0f;
+    pData->frontmanIir2.y1=0.0f;
+    pData->frontmanIir2.acc=0.0f;
+    pData->frontmanIir3.x1=0.0f;
+    pData->frontmanIir3.x2=0.0f;
+    pData->frontmanIir3.y1=0.0f;
+    pData->frontmanIir3.y1=0.0f;
+    pData->frontmanIir3.acc=0.0f; 
+
+    pData->voxAC15Iir1.x1=0.0f;
+    pData->voxAC15Iir1.x2=0.0f;
+    pData->voxAC15Iir1.y1=0.0f;
+    pData->voxAC15Iir1.y1=0.0f;
+    pData->voxAC15Iir1.acc=0.0f;
+    pData->voxAC15Iir2.x1=0.0f;
+    pData->voxAC15Iir2.x2=0.0f;
+    pData->voxAC15Iir2.y1=0.0f;
+    pData->voxAC15Iir2.y1=0.0f;
+    pData->voxAC15Iir2.acc=0.0f;
+    pData->voxAC15Iir3.x1=0.0f;
+    pData->voxAC15Iir3.x2=0.0f;
+    pData->voxAC15Iir3.y1=0.0f;
+    pData->voxAC15Iir3.y1=0.0f;
+    pData->voxAC15Iir3.acc=0.0f;   
+
+    initfirFilter(&pData->frontmanFir);
+    initfirFilter(&pData->hiwattFir);
+    initfirFilter(&pData->voxAC15Fir);
+}
+
 FxProgram4DataType fxProgram4data = {
     .hiwattFir = {
         .coefficients={-0.0017023176900787217f, -0.0017005268239144186f, -0.0002766393406549576f, 0.01256757041350998f, 0.054334614505846146f, 0.14155816701882798f, 0.27757270218921326f, 0.4416399616001655f, 0.572964700555003f, 0.5718977731210754f, 0.36095148035982844f, 0.00016757643365051793f, -0.2979448304135627f, -0.3658070862900467f, -0.3208742968977083f, -0.26302463634936424f, -0.157722049401935f, -0.02285093562091892f, 0.09005723522672653f, 0.12150493898307178f, 0.06888695592185305f, 0.008413404785681415f, 0.010248397117904838f, 0.032237922081451605f, 0.026056849646679217f, 0.013304316297298205f, -0.0017226964920602041f, -0.018826221776161764f, -0.018798010475040147f, -0.012576004397197497f, -0.0209095685291596f, -0.030871892222157714f, -0.015317825458749804f, 0.023597736223356494f, 0.04907733102160324f, 0.02991884693117229f, -0.02520356224985369f, -0.06463771271320064f, -0.08060429017830055f, -0.07498587573631023f, -0.042868942066002856f, -0.008488205257352593f, 0.01459429004800938f, 0.017053010942626373f, 0.001283191421817481f, -0.011462552843207572f, -0.00516728180421877f, 0.005265678481851653f, 0.005808467642090153f, 0.0058450906443413995f, 0.005663194999486701f, -0.002789344927011968f, -0.012473611719398542f, -0.019760659686461873f, -0.02283930810937319f, -0.01907222795358099f, -0.012567329282514044f, -0.007775787898556212f, -0.0036223929087269386f, 0.0008532298181232878f, 0.0020345896097381053f, 0.0003218540337240706f, -0.00043645456294634326f, -0.0f,} 
@@ -292,5 +348,6 @@ FxProgramType fxProgram4 = {
     },
     .processSample = &fxProgram4processSample,
     .setup = &fxProgram4Setup,
+    .reset = &fxProgram4Reset,
     .data = (void*)&fxProgram4data
 };

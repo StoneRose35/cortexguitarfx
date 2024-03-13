@@ -1,10 +1,10 @@
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
 static float fxProgram6processSample(float sampleIn,void*data)
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
-    return delayLineProcessSample(sampleIn, pData->delay);
+    return delayLineProcessSample(sampleIn, &pData->delay);
 }
 
 static void fxProgram6Param1Callback(uint16_t val,void*data) // Delay Time
@@ -13,14 +13,15 @@ static void fxProgram6Param1Callback(uint16_t val,void*data) // Delay Time
     int32_t wVal;
     wVal = val;
     wVal <<= 2;
-    pData->delay->delayInSamples = wVal; //pData->delay->delayInSamples + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(wVal - pData->delay->delayInSamples)) >> 8);
+    pData->delay.delayInSamples = wVal; //pData->delay->delayInSamples + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(wVal - pData->delay->delayInSamples)) >> 8);
+    fxProgram6.parameters[0].rawValue = val;
 }
 
 static void fxProgram6Param1Display(void*data,char*res)
 {
     int16_t dval;
     FxProgram6DataType* pData = (FxProgram6DataType*)data;
-    dval = pData->delay->delayInSamples/48; // in ms
+    dval = pData->delay.delayInSamples/48; // in ms
     Int16ToChar(dval,res);
     for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-2;c++)
     {
@@ -37,13 +38,13 @@ static void fxProgram6Param1Display(void*data,char*res)
 static void fxProgram6Param2Callback(uint16_t val,void*data) // Feedback
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
-    pData->delay->feedback=((float)val)/4096.0f;
+    pData->delay.feedback=((float)val)/4096.0f;
 }
 
 static void fxProgram6Param2Display(void*data,char*res)
 {
     FxProgram6DataType* pData = (FxProgram6DataType*)data;
-    Int16ToChar((int16_t)(pData->delay->feedback*100.0f),res);
+    Int16ToChar((int16_t)(pData->delay.feedback*100.0f),res);
     for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
     {
         if(*(res+c)==0)
@@ -58,13 +59,13 @@ static void fxProgram6Param2Display(void*data,char*res)
 static void fxProgram6Param3Callback(uint16_t val,void*data) // Mix
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
-    pData->delay->mix = ((float)val)/4096.0f;
+    pData->delay.mix = ((float)val)/4096.0f;
 }
 
 static void fxProgram6Param3Display(void*data,char*res)
 {
     FxProgram6DataType* pData = (FxProgram6DataType*)data;
-    Int16ToChar(pData->delay->mix*100.0f,res);
+    Int16ToChar(pData->delay.mix*100.0f,res);
     for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
     {
         if(*(res+c)==0)
@@ -79,8 +80,7 @@ static void fxProgram6Param3Display(void*data,char*res)
 static void fxProgram6Setup(void*data)
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
-    pData->delay = getDelayData();
-    initDelay(pData->delay);
+    initDelay(&pData->delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
 }
 
 FxProgram6DataType fxProgram6data;
@@ -119,5 +119,6 @@ FxProgramType fxProgram6 = {
     },
     .processSample = &fxProgram6processSample,
     .setup = &fxProgram6Setup,
+    .reset = 0,
     .data = (void*)&fxProgram6data
 };
