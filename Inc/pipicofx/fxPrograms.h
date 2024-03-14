@@ -36,11 +36,10 @@ typedef struct {
 } FxProgram1DataType;
 
 
-#ifndef FLOAT_AUDIO
 typedef struct {
-    int16_t highpassCutoff;
+    float highpassCutoff;
     uint8_t nWaveshapers;
-    int16_t highpass_out,highpass_old_out,highpass_old_in;
+    float highpass_out,highpass_old_out,highpass_old_in;
     const char cabNames[9][24];
     const char waveShaperNames[4][24];
     uint8_t modType;
@@ -48,6 +47,7 @@ typedef struct {
     MultiWaveShaperDataType waveshaper1;
     DelayDataType delay;
     ReverbType reverb;
+   
     FirFilterType customCabFir;
     SecondOrderIirFilterType customCabIir;
 
@@ -71,50 +71,13 @@ typedef struct {
     SecondOrderIirFilterType voxAC15Iir2;
     SecondOrderIirFilterType voxAC15Iir3;
 } FxProgram9DataType;
-#else
-typedef struct {
-    float highpassCutoff;
-    float highpass_out,highpass_old_out,highpass_old_in;
-    MultiWaveShaperDataType waveshaper;
-    FirFilterType filter3;
-    SecondOrderIirFilterType filter1;
-    DelayDataType * delay;
-} FxProgram9DataType;
-#endif
+
 
 typedef struct {
     SimpleChorusType chorusData;
 } FxProgram2DataType;
 
-#ifndef FLOAT_AUDIO
-typedef struct {
-    GainStageDataType gainStage;
-    uint8_t cabSimType;
-    uint8_t nWaveshapers;
-    uint8_t waveshaperType;
-    int16_t highpass_out,highpass_old_out,highpass_old_in;
-    const char cabNames[6][24];
-    const char waveShaperNames[4][24];
-    FirFilterType hiwattFir;
-    OversamplingWaveshaperDataType waveshaper1;
-    SecondOrderIirFilterType hiwattIir1;
-    SecondOrderIirFilterType hiwattIir2;
-    SecondOrderIirFilterType hiwattIir3;
-    
-    FirFilterType frontmanFir;
-    SecondOrderIirFilterType frontmanIir1;
-    SecondOrderIirFilterType frontmanIir2;
-    SecondOrderIirFilterType frontmanIir3;
 
-    FirFilterType voxAC15Fir;
-    SecondOrderIirFilterType voxAC15Iir1;
-    SecondOrderIirFilterType voxAC15Iir2;
-    SecondOrderIirFilterType voxAC15Iir3;
-    
-
-    //uint8_t updateLock;
-} FxProgram4DataType;
-#else
 typedef struct {
     GainStageDataType gainStage;
     uint8_t cabSimType;
@@ -142,7 +105,7 @@ typedef struct {
 
     //uint8_t updateLock;
 } FxProgram4DataType;
-#endif
+
 
 
 typedef struct 
@@ -190,7 +153,7 @@ typedef struct
 typedef struct
 {
     ReverbType reverb;
-    int16_t reverbTime;
+    float reverbTime;
 } FxProgram10DataType;
 
 typedef struct 

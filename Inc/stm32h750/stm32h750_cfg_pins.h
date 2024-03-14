@@ -49,6 +49,8 @@
 #define I2C_ENR RCC_APB1LENR_I2C1EN_Pos
 #endif
 
+#define CLIPPING_LED_INPUT (2*16 + 10)
+#define CLIPPING_LED_OUTPUT (2*16 + 9)
 
 //ssd1306 display interfaced using spi
 #define SSD1306_SCK (6*16+11) // PG11

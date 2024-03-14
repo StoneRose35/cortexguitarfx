@@ -7,59 +7,59 @@
 __attribute__ ((section (".qspi_code")))
 static float fxProgram4processSample(float sampleIn,void*data)
 {
-    float out;
+
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
 
-    pData->highpass_out = ((((1.0f + P4_HIGHPASS)/2.0f)*(out - pData->highpass_old_in))) + ((P4_HIGHPASS *pData->highpass_old_out));
-    pData->highpass_old_in = out;
+    pData->highpass_out = ((((1.0f + P4_HIGHPASS)/2.0f)*(sampleIn - pData->highpass_old_in))) + ((P4_HIGHPASS *pData->highpass_old_out));
+    pData->highpass_old_in = sampleIn;
     pData->highpass_old_out = pData->highpass_out;
-    out = pData->highpass_out;
+    sampleIn = pData->highpass_out;
 
-    out = gainStageProcessSample(out, &pData->gainStage);
+    sampleIn = gainStageProcessSample(sampleIn, &pData->gainStage);
 
     for (uint8_t c=0;c<pData->nWaveshapers;c++)
     {
-        out = waveShaperProcessSample(out,&pData->waveshaper1.waveshaper); 
+        sampleIn = waveShaperProcessSample(sampleIn,&pData->waveshaper1.waveshaper); 
     }
 
 
     if (pData->cabSimType == 0)
     {
-        out /=4.0f;
-        out = firFilterProcessSample(out,&pData->hiwattFir);
+        sampleIn /=4.0f;
+        sampleIn = firFilterProcessSample(sampleIn,&pData->hiwattFir);
     }
     else if (pData->cabSimType == 1)
     {
-        out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir1);
-        out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir2);
-        out = secondOrderIirFilterProcessSample(out,&pData->hiwattIir3);
-        out=out*1.6f;
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->hiwattIir1);
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->hiwattIir2);
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->hiwattIir3);
+        sampleIn=sampleIn*1.6f;
     }
     else if (pData->cabSimType == 2)
     {
-        out /=4.0f;
-        out = firFilterProcessSample(out,&pData->frontmanFir);
+        sampleIn /=4.0f;
+        sampleIn = firFilterProcessSample(sampleIn,&pData->frontmanFir);
     }
     else if (pData->cabSimType == 3)
     {
-        out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir1);
-        out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir2);
-        out = secondOrderIirFilterProcessSample(out,&pData->frontmanIir3);
-        out=out*3.0f;
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->frontmanIir1);
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->frontmanIir2);
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->frontmanIir3);
+        sampleIn = sampleIn*3.0f;
     }
     else if (pData->cabSimType == 4)
     {
-        out /=4.0f;
-        out = firFilterProcessSample(out,&pData->voxAC15Fir);
+        sampleIn /=4.0f;
+        sampleIn = firFilterProcessSample(sampleIn,&pData->voxAC15Fir);
     }
     else if (pData->cabSimType == 5)
     {
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir1);
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir2);
-        out = secondOrderIirFilterProcessSample(out,&pData->voxAC15Iir3);
-        out=out*2.0f;
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->voxAC15Iir1);
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->voxAC15Iir2);
+        sampleIn = secondOrderIirFilterProcessSample(sampleIn,&pData->voxAC15Iir3);
+        sampleIn = sampleIn*2.0f;
     }
-    return out;
+    return sampleIn;
 }
 
 
@@ -171,7 +171,7 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgram4Setup(void*data)
 {
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    initMultiWaveShaper(&pData->waveshaper1,&multiWaveshaper1);
+    initWaveShaper(&pData->waveshaper1.waveshaper,&waveShaperAsymm);
     initfirFilter(&pData->frontmanFir);
     initfirFilter(&pData->hiwattFir);
     initfirFilter(&pData->voxAC15Fir);
@@ -180,53 +180,17 @@ static void fxProgram4Setup(void*data)
 static void fxProgram4Reset(void*data)
 {
     FxProgram4DataType* pData = (FxProgram4DataType*)data;
-    pData->hiwattIir1.x1=0.0f;
-    pData->hiwattIir1.x2=0.0f;
-    pData->hiwattIir1.y1=0.0f;
-    pData->hiwattIir1.y1=0.0f;
-    pData->hiwattIir1.acc=0.0f;
-    pData->hiwattIir2.x1=0.0f;
-    pData->hiwattIir2.x2=0.0f;
-    pData->hiwattIir2.y1=0.0f;
-    pData->hiwattIir2.y1=0.0f;
-    pData->hiwattIir2.acc=0.0f;
-    pData->hiwattIir3.x1=0.0f;
-    pData->hiwattIir3.x2=0.0f;
-    pData->hiwattIir3.y1=0.0f;
-    pData->hiwattIir3.y1=0.0f;
-    pData->hiwattIir3.acc=0.0f;
+    secondOrderIirFilterReset(&pData->hiwattIir1);
+    secondOrderIirFilterReset(&pData->hiwattIir2);
+    secondOrderIirFilterReset(&pData->hiwattIir3);
     
-    pData->frontmanIir1.x1=0.0f;
-    pData->frontmanIir1.x2=0.0f;
-    pData->frontmanIir1.y1=0.0f;
-    pData->frontmanIir1.y1=0.0f;
-    pData->frontmanIir1.acc=0.0f;
-    pData->frontmanIir2.x1=0.0f;
-    pData->frontmanIir2.x2=0.0f;
-    pData->frontmanIir2.y1=0.0f;
-    pData->frontmanIir2.y1=0.0f;
-    pData->frontmanIir2.acc=0.0f;
-    pData->frontmanIir3.x1=0.0f;
-    pData->frontmanIir3.x2=0.0f;
-    pData->frontmanIir3.y1=0.0f;
-    pData->frontmanIir3.y1=0.0f;
-    pData->frontmanIir3.acc=0.0f; 
+    secondOrderIirFilterReset(&pData->frontmanIir1);
+    secondOrderIirFilterReset(&pData->frontmanIir2);
+    secondOrderIirFilterReset(&pData->frontmanIir3);
 
-    pData->voxAC15Iir1.x1=0.0f;
-    pData->voxAC15Iir1.x2=0.0f;
-    pData->voxAC15Iir1.y1=0.0f;
-    pData->voxAC15Iir1.y1=0.0f;
-    pData->voxAC15Iir1.acc=0.0f;
-    pData->voxAC15Iir2.x1=0.0f;
-    pData->voxAC15Iir2.x2=0.0f;
-    pData->voxAC15Iir2.y1=0.0f;
-    pData->voxAC15Iir2.y1=0.0f;
-    pData->voxAC15Iir2.acc=0.0f;
-    pData->voxAC15Iir3.x1=0.0f;
-    pData->voxAC15Iir3.x2=0.0f;
-    pData->voxAC15Iir3.y1=0.0f;
-    pData->voxAC15Iir3.y1=0.0f;
-    pData->voxAC15Iir3.acc=0.0f;   
+    secondOrderIirFilterReset(&pData->voxAC15Iir1);
+    secondOrderIirFilterReset(&pData->voxAC15Iir2);
+    secondOrderIirFilterReset(&pData->voxAC15Iir3);
 
     initfirFilter(&pData->frontmanFir);
     initfirFilter(&pData->hiwattFir);
@@ -316,12 +280,12 @@ FxProgram4DataType fxProgram4data = {
 
 FxProgramType fxProgram4 = {
     .name = "Amp Model 2          ",
-    .nParameters=3,
+    .nParameters=5,
     .parameters = {
         {
             .name = "Gain           ",
             .control=0,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram4Param1Display,
             .getParameterValue=0,
@@ -330,7 +294,7 @@ FxProgramType fxProgram4 = {
         {
             .name = "DC-Offset      ",
             .control=1,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram4Param2Display,
             .getParameterValue=0,
@@ -339,11 +303,29 @@ FxProgramType fxProgram4 = {
         {
             .name = "Cab Type       ",
             .control=2,
-            .increment=64,
+            .increment=32,
             .rawValue=0,
             .getParameterDisplay=&fxProgram4Param3Display,
             .getParameterValue=0,
             .setParameter=&fxProgram4Param3Callback
+        },
+        {
+            .name = "Gainstages     ",
+            .control=0xFF,
+            .increment=1024,
+            .rawValue=0,
+            .getParameterDisplay=&fxProgram4Param4Display,
+            .getParameterValue=0,
+            .setParameter=&fxProgram4Param4Callback
+        },
+        {
+            .name = "OD/Dist Type",
+            .control = 0xFF,
+            .increment = 1024,
+            .rawValue = 0,
+            .getParameterDisplay=&fxProgram4Param5Display,
+            .getParameterValue=0,
+            .setParameter=&fxProgram4Param5Callback
         }  
     },
     .processSample = &fxProgram4processSample,

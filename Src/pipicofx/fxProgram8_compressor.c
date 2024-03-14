@@ -3,7 +3,7 @@
 #include "stringFunctions.h"
 #include "ln.h"
 
-
+__attribute__ ((section (".qspi_code")))
 static float fxProgramProcessSample(float sampleIn,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -23,6 +23,7 @@ static float fxProgramProcessSample(float sampleIn,void*data)
     return sampleIn;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP1Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -30,6 +31,7 @@ static void fxProgramP1Callback(uint16_t val,void*data)
     fxProgram8.parameters[0].rawValue = val;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP1Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -40,13 +42,13 @@ static void fxProgramP1Display(void*data,char*res)
     attackFloat = pData->compressor.avgLowpass.alphaRising;
     t60 = -0.143911568f/fln(attackFloat);
 
-    ival = float2int(t60);
+    ival = (int)t60;
     i16val = (int16_t)ival;
     Int16ToChar(i16val,res);
     appendToString(res, " ms");
 }
 
-
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP2Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -54,6 +56,7 @@ static void fxProgramP2Callback(uint16_t val,void*data)
     fxProgram8.parameters[1].rawValue = val;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP2Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -64,12 +67,13 @@ static void fxProgramP2Display(void*data,char*res)
     attackFloat = pData->compressor.avgLowpass.alphaFalling;
     t60 = -0.143911568f/fln(attackFloat);
 
-    ival = float2int(t60);
+    ival = (int)t60;
     i16val = (int16_t)ival;
     Int16ToChar(i16val,res);
     appendToString(res, " ms");
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP3Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -99,6 +103,7 @@ static void fxProgramP3Callback(uint16_t val,void*data)
     }
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP3Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -124,6 +129,7 @@ static void fxProgramP3Display(void*data,char*res)
     }
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP4Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -131,6 +137,7 @@ static void fxProgramP4Callback(uint16_t val,void*data)
     fxProgram8.parameters[3].rawValue = val;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP4Display(void*data,char*res)
 {
     int16_t dbval;
@@ -140,6 +147,7 @@ static void fxProgramP4Display(void*data,char*res)
     appendToString(res," dB");
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP5Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -147,6 +155,7 @@ static void fxProgramP5Callback(uint16_t val,void*data)
     fxProgram8.parameters[4].rawValue = val;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP5Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -155,6 +164,7 @@ static void fxProgramP5Display(void*data,char*res)
     decimalInt16ToChar((int16_t)dval,res,2);
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP6Callback(uint16_t val,void*data) 
 {
     uint8_t intermVal;
@@ -168,6 +178,7 @@ static void fxProgramP6Callback(uint16_t val,void*data)
     fxProgram8.parameters[5].rawValue = val;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramP6Display(void*data,char*res)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
@@ -200,6 +211,7 @@ FxProgram8DataType fxProgram8Data =
     .makeupGain.offset = 0.0f
 };
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgramReset(void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;

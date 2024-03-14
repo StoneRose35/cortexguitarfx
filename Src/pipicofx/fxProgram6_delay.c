@@ -1,12 +1,14 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
+__attribute__ ((section (".qspi_code")))
 static float fxProgram6processSample(float sampleIn,void*data)
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
     return delayLineProcessSample(sampleIn, &pData->delay);
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram6Param1Callback(uint16_t val,void*data) // Delay Time
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
@@ -17,6 +19,7 @@ static void fxProgram6Param1Callback(uint16_t val,void*data) // Delay Time
     fxProgram6.parameters[0].rawValue = val;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram6Param1Display(void*data,char*res)
 {
     int16_t dval;
@@ -35,12 +38,14 @@ static void fxProgram6Param1Display(void*data,char*res)
     }
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram6Param2Callback(uint16_t val,void*data) // Feedback
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
     pData->delay.feedback=((float)val)/4096.0f;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram6Param2Display(void*data,char*res)
 {
     FxProgram6DataType* pData = (FxProgram6DataType*)data;
@@ -56,12 +61,14 @@ static void fxProgram6Param2Display(void*data,char*res)
     }
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram6Param3Callback(uint16_t val,void*data) // Mix
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
     pData->delay.mix = ((float)val)/4096.0f;
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram6Param3Display(void*data,char*res)
 {
     FxProgram6DataType* pData = (FxProgram6DataType*)data;
@@ -77,6 +84,7 @@ static void fxProgram6Param3Display(void*data,char*res)
     }
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram6Setup(void*data)
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;

@@ -2,7 +2,7 @@
 
 #include "stdint.h"
 #include "stm32h750/helpers.h"
-#include "audio/fxprogram/fxProgram.h"
+#include "pipicofx/fxPrograms.h"
 
 
 int32_t convolvetest()

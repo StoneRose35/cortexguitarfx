@@ -6,7 +6,7 @@ __attribute__ ((section (".qspi_code")))
 static float fxProgram2processSample(float sampleIn,void*data)
 {
     FxProgram2DataType* pData = (FxProgram2DataType*)data;
-    return simpleChorusInterpolatedProcessSample(sampleIn,&pData->chorusData);
+    return simpleChorusProcessSample(sampleIn,&pData->chorusData);
 }
 
 __attribute__ ((section (".qspi_code")))

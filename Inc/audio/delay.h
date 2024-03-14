@@ -1,7 +1,7 @@
 #ifndef _DELAY_H_
 #define _DELAY_H_
 #include <stdint.h>
-#define DELAY_LINE_LENGTH 65536
+#define DELAY_LINE_LENGTH (1<<23)
 
 typedef float(*feedbackProcessor)(float,void*);
 

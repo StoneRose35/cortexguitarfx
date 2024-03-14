@@ -19,6 +19,8 @@ int16_t getStickyIncrementDelta();
 
 void clearStickyIncrementDelta();
 
+uint8_t getMomentarySwitchValue(uint8_t sw);
+
 uint32_t getRotaryDeltaT();
 
 #endif

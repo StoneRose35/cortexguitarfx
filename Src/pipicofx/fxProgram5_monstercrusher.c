@@ -1,12 +1,14 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 
+__attribute__ ((section (".qspi_code")))
 static float fxProgram5processSample(float sampleIn,void*data)
 {
     FxProgram5DataType* pData= (FxProgram5DataType*)data;
     return bitCrusherProcessSample(sampleIn,&pData->bitcrusher);
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram5Param1Callback(uint16_t val,void*data) // set bit mask
 {
     FxProgram5DataType* pData= (FxProgram5DataType*)data;
@@ -18,6 +20,7 @@ static void fxProgram5Param1Callback(uint16_t val,void*data) // set bit mask
     setBitMask((uint8_t)resolution,&pData->bitcrusher);
 }
 
+__attribute__ ((section (".qspi_code")))
 static void fxProgram5Param1Display(void*data,char*res)
 {
     uint8_t resolution;
@@ -27,7 +30,7 @@ static void fxProgram5Param1Display(void*data,char*res)
     UInt8ToChar(resolution,res);
 }
 
-
+__attribute__ ((section (".qspi_code")))
 void fxProgram5Setup(void*data)
 {
 

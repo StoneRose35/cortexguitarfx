@@ -14,6 +14,7 @@ typedef struct
     int16_t depth; // 0 to 255
     float mix; // 0.0 to 1.0
     int16_t offset; // 48 to ~3000
+    float feedback;
     int16_t lfoVal; // from -255 to +255
     int16_t lfoValOld;
     int16_t lfoPhaseinc;
@@ -23,6 +24,7 @@ typedef struct
 } SineChorusType;
 
 float sineChorusProcessSample(float sampleIn,SineChorusType*data);
+float sineChorusInterpolatedProcessSample(float sampleIn,SineChorusType*data);
 void initSineChorus(SineChorusType*data);
 void sineChorusSetFrequency(uint16_t freq,SineChorusType*data);
 

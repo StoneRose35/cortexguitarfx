@@ -5,7 +5,7 @@
 typedef struct 
 {
     float threshhold;
-    uint8_t gainReduction; // power of two 1 1:2,2 1:4, 3 1:8, 4 1:16 ,5 1: inf
+    float gainReduction; // power of two 1 1:2,2 1:4, 3 1:8, 4 1:16 ,5 1: inf
 } GainFunctionType;
 
 
