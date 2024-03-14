@@ -42,4 +42,15 @@ void initfirFilter(FirFilterType*data)
     }
 }
 
+__attribute__((section (".qspi_code")))
+void firFilterReset(FirFilterType*data)
+{
+    data->filterLength=64;
+    data->delayPointer=0;
+    for(uint8_t c=0;c<data->filterLength;c++)
+    {
+        data->delayBuffer[c]=0.0f;
+    }
+}
+
 

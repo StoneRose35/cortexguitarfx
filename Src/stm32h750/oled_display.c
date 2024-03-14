@@ -23,7 +23,7 @@ static GPIO_TypeDef *gpio_cs;
 #define SPI1_TXDR_BYTE  *((uint8_t*)&SPI1->TXDR) 
 
 
-void DMA1_Stream2_IRQHandler(void) 
+void DMA1_Stream3_IRQHandler(void) 
 {
     DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF2_Pos); 
     OledWriteNextLine();
@@ -132,15 +132,15 @@ void initOledDisplay()
     config_spi_pin(SSD1306_SCK,5);
 
 
-    DMA1_Stream2->PAR=(uint32_t)&(SPI1_TXDR_BYTE);
-    DMA1_Stream2->M0AR=(uint32_t)0;
-    DMA1_Stream2->M1AR=(uint32_t)0;
-    DMA1_Stream2->CR = (0 << DMA_SxCR_MSIZE_Pos) | (0 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
+    DMA1_Stream3->PAR=(uint32_t)&(SPI1_TXDR_BYTE);
+    DMA1_Stream3->M0AR=(uint32_t)0;
+    DMA1_Stream3->M1AR=(uint32_t)0;
+    DMA1_Stream3->CR = (0 << DMA_SxCR_MSIZE_Pos) | (0 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
                        (0 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) | (1 << DMA_SxCR_DIR_Pos) |
                        (0 << DMA_SxCR_HTIE_Pos);
 
-    DMA1_Stream2->NDTR=SSD1306_DISPLAY_N_COLUMNS;
-    DMAMUX1_Channel2->CCR = ((38) << DMAMUX_CxCR_DMAREQ_ID_Pos); //spi1_tx_dma 
+    DMA1_Stream3->NDTR=SSD1306_DISPLAY_N_COLUMNS;
+    DMAMUX1_Channel3->CCR = ((38) << DMAMUX_CxCR_DMAREQ_ID_Pos); //spi1_tx_dma 
 
 
     SPI1->CR1 &= ~(1 << SPI_CR1_SPE_Pos);
@@ -200,8 +200,8 @@ void initOledDisplay()
     waitSysticks(11);
 
     // enable interrupt on channel2
-    DMA1_Stream2->CR |= (1 << DMA_SxCR_EN_Pos);
-    NVIC_EnableIRQ(DMA1_Stream2_IRQn);
+    DMA1_Stream3->CR |= (1 << DMA_SxCR_EN_Pos);
+    NVIC_EnableIRQ(DMA1_Stream3_IRQn);
 }
 
 /**

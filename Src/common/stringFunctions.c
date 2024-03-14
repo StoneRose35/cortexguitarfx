@@ -866,3 +866,19 @@ uint16_t appendToString(char * appendee,const char *  appender)
 	*(appendee + c) = 0;
 	return c;
 }
+
+__attribute__((section (".qspi_code")))
+uint16_t appendToStringUntil(char * appendee,const char *  appender,uint8_t maxLen)
+{
+	uint16_t c=0,c2=0;
+	while (*(appendee + c) != 0)
+	{
+		c++;
+	}
+	while(*(appender + c2) != 0 && c<maxLen)
+	{
+		*(appendee + c++) = *(appender + c2++); 
+	}
+	*(appendee + c) = 0;
+	return c;
+}

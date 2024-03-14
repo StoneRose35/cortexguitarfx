@@ -73,7 +73,9 @@ uint8_t enterSwitchVal;
 uint8_t exitSwitchVal;
 char displayData[128];
 uint16_t adcVal;
-
+FxPresetType presets[3];
+volatile uint8_t currentBank;
+volatile uint8_t currentPreset;
 
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
