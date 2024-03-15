@@ -17,7 +17,7 @@
  * 
  * Fetched from: http://dimensionalrift.homelinux.net/combuster/mos3/?p=viewsource&file=/modules/gfx/font8_8.asm
  **/
-
+__attribute__((section (".qspi_data")))
 char font8x8_sga[26][8] = {
     { 0x00, 0x00, 0x38, 0x66, 0x06, 0x06, 0x07, 0x00},   // U+E541 (SGA A)
     { 0x00, 0x00, 0x0C, 0x0C, 0x18, 0x30, 0x7F, 0x00},   // U+E542 (SGA B)

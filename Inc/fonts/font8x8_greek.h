@@ -20,6 +20,7 @@
 
 // Constant: font8x8_0390
 // Contains an 8x8 font map for unicode points U+0390 - U+03C9 (greek characters)
+__attribute__((section (".qspi_data")))
 char font8x8_greek[58][8] = {
     { 0x2D, 0x00, 0x0C, 0x0C, 0x0C, 0x2C, 0x18, 0x00},   // U+0390 (iota with tonos and diaeresis)
     { 0x0C, 0x1E, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x00},   // U+0391 (Alpha)

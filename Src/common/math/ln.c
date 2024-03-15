@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 // taken from https://gist.github.com/LingDong-/7e4c4cae5cbbc44400a05fba65f06f23
+__attribute__((section (".qspi_code")))
 float fln(float x) {
   uint32_t bx = * (uint32_t*) (&x);
   uint32_t ex = bx >> 23;

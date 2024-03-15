@@ -20,6 +20,7 @@
 
 // Constant: font8x8_2580
 // Contains an 8x8 font map for unicode points U+2580 - U+259F (block elements)
+__attribute__((section (".qspi_data")))
 char font8x8_block[32][8] = {
     { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00},   // U+2580 (top half)
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF},   // U+2581 (box 1/8)

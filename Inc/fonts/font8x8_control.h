@@ -20,6 +20,7 @@
 
 // Constant: font8x8_0080
 // Contains an 8x8 font map for unicode points U+0080 - U+009F (C1/C2 control)
+__attribute__((section (".qspi_data")))
 char font8x8_control[32][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0080
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0081

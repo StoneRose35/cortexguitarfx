@@ -20,6 +20,7 @@
 
 // Constant: font8x8_00A0
 // Contains an 8x8 font map for unicode points U+00A0 - U+00FF (extended latin)
+__attribute__((section (".qspi_data")))
 char font8x8_ext_latin[96][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+00A0 (no break space)
     { 0x18, 0x18, 0x00, 0x18, 0x18, 0x18, 0x18, 0x00},   // U+00A1 (inverted !)

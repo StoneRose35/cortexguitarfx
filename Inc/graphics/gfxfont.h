@@ -8,7 +8,7 @@
 #define _GFXFONT_H_
 #include "stdint.h"
 
-#define PROGMEM
+#define PROGMEM __attribute__((section (".qspi_data")))
 /// Font data stored PER GLYPH
 typedef struct __attribute__((__packed__)) {
   uint16_t bitmapOffset; ///< Pointer into GFXfont->bitmap

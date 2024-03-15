@@ -20,6 +20,7 @@
 
 // Constant: font8x8_2500
 // Contains an 8x8 font map for unicode points U+2500 - U+257F (box drawing)
+__attribute__((section (".qspi_data")))
 char font8x8_box[128][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00},   // U+2500 (thin horizontal)
     { 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00},   // U+2501 (thick horizontal)

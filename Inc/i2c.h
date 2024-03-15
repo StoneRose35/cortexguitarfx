@@ -6,6 +6,7 @@
 #define I2C_ERROR_ARBITRATION_LOST 1
 #define I2C_ERROR_SLAVE_ADDRESS_NACK 2
 #define I2C_ERROR_DATA_NACK 3
+#define I2C_BUFFER_LENGTH 128
 void initI2c(uint8_t slaveAdress);
 
 

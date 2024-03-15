@@ -30,6 +30,17 @@ static uint8_t cs4270Read(uint8_t reg)
     return masterReceive(1);
 }
 
+void cs4270PowerDown()
+{
+    uint16_t regdata;
+    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    {
+        setTargetAddress(CS4270_I2C_ADDRESS);
+    }
+    regdata = (CS4270_R2 << 8) | (1 << CS4270_R2_PDN_Pos); // power down
+    cs4270Write(regdata);
+}
+
 void init_cs4270_audio_codec()
 {
     // reset

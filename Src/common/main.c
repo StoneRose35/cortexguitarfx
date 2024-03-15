@@ -73,9 +73,18 @@ uint8_t enterSwitchVal;
 uint8_t exitSwitchVal;
 char displayData[128];
 uint16_t adcVal;
+volatile uint8_t programsActivated=0;
+const uint8_t stompswitch_progs[]={8,7,1};
+volatile uint8_t programsToInitialize[3];
 FxPresetType presets[3];
-volatile uint8_t currentBank;
-volatile uint8_t currentPreset;
+volatile uint8_t currentBank=0;
+volatile uint8_t currentPreset=0;
+// 0: done
+// 1: change request
+// 2: fade out
+// 3: in bypass / change in progress
+// 4: fade in
+volatile uint8_t programChangeState;
 
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
@@ -165,7 +174,7 @@ int main(void)
     /* Loop forever */
 	for(;;)
 	{
-		cliApiTask(task);
+		//cliApiTask(task);
 
         if ((task & (1 << TASK_FLASH_QSPI)) != 0)
         {

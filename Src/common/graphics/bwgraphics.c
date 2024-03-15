@@ -30,6 +30,7 @@ float fsin(float x)
 
 extern const uint8_t oled_font_5x7[98][5];
 
+__attribute__((section (".qspi_code")))
 void changeLine(float spx,float spy,float epx, float epy,uint8_t draw,BwImageType* img)
 {
 	float dy,dx,absdy,absdx,delta;
@@ -257,16 +258,19 @@ void changeLine(float spx,float spy,float epx, float epy,uint8_t draw,BwImageTyp
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
 {
 	changeLine(spx,spy,epx,epy,1,img);
 }
 
+__attribute__((section (".qspi_code")))
 void clearLine(float spx,float spy,float epx, float epy,BwImageType* img)
 {
 	changeLine(spx,spy,epx,epy,0,img);
 }
 
+__attribute__((section (".qspi_code")))
 void drawHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
 {
 	if (sx > ex)
@@ -285,6 +289,7 @@ void drawHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void drawVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 {
 	if (sy > ey)
@@ -303,6 +308,7 @@ void drawVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void clearHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
 {
 	if (sx > ex)
@@ -321,6 +327,7 @@ void clearHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void clearVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 {
 	if (sy > ey)
@@ -338,6 +345,8 @@ void clearVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 		}
 	}
 }
+
+__attribute__((section (".qspi_code")))
 void drawOval(float ax,float ay,float cx,float cy,BwImageType*img)
 {
 	float fix,fiy,dr;
@@ -356,6 +365,7 @@ void drawOval(float ax,float ay,float cx,float cy,BwImageType*img)
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void clearOval(float ax,float ay,float cx,float cy,BwImageType*img)
 {
 	float fix,fiy,dr;
@@ -374,6 +384,7 @@ void clearOval(float ax,float ay,float cx,float cy,BwImageType*img)
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 {
 	uint32_t dx,dy;
@@ -391,6 +402,7 @@ void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void clearSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageType* img)
 {
 	uint32_t dx,dy;
@@ -406,6 +418,7 @@ void clearSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageT
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 {
 	uint32_t dx,dy;
@@ -423,6 +436,7 @@ void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void drawSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageType* img)
 {
 	uint32_t dx,dy;
@@ -438,6 +452,7 @@ void drawSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageTy
 	}
 }
 
+__attribute__((section (".qspi_code")))
 uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageType* img,const void* font)
 {
 	if (font==(void*)0)
@@ -450,6 +465,7 @@ uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageType* img,const void* fon
 	}
 }
 
+__attribute__((section (".qspi_code")))
 uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GFXfont* font)
 {
 	GFXglyph* glyph;
@@ -488,6 +504,7 @@ uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GF
 	return glyph->xAdvance;
 }
 
+__attribute__((section (".qspi_code")))
 uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageType* img)
 {   
 	uint8_t bitarray; 
@@ -513,6 +530,7 @@ uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageType* img)
 	return 6;
 }
 
+__attribute__((section (".qspi_code")))
 void drawText(uint8_t px, uint8_t py,const char * txt,BwImageType* img,const void* font)
 {
 	uint8_t ppx,ppy;
@@ -551,6 +569,7 @@ void drawText(uint8_t px, uint8_t py,const char * txt,BwImageType* img,const voi
 	}
 }
 
+__attribute__((section (".qspi_code")))
 void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgBuffer)
 {
 	uint8_t pixel;
@@ -577,6 +596,7 @@ void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgB
 	}
 }
 
+__attribute__((section (".qspi_code")))
 uint8_t getPixel(int32_t px,int32_t py,const BwImageType*img)
 {
 if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
@@ -593,6 +613,7 @@ else
 }
 }
 
+__attribute__((section (".qspi_code")))
 void setPixel(int32_t px,int32_t py,BwImageType*img)
 {
 if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
@@ -609,6 +630,7 @@ else
 }
 }
 
+__attribute__((section (".qspi_code")))
 void clearPixel(int32_t px,int32_t py,BwImageType*img)
 {
 if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
@@ -625,7 +647,7 @@ else
 }
 }
 
-
+__attribute__((section (".qspi_code")))
 void clearImage(BwImageType*img)
 {
 	for(uint16_t c=0;c<((img->sx*img->sy) >> 5);c++) // /8 /4, since one byte extends over 8 pixels,

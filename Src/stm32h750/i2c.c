@@ -5,7 +5,7 @@
 static volatile uint8_t slave_address;
 static volatile uint8_t firstCommand;
 
-static volatile uint8_t sendBfr[4];
+static volatile uint8_t sendBfr[I2C_BUFFER_LENGTH];
 static volatile uint8_t nSend=0;
 
 uint8_t I2CsendMultiple();
