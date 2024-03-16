@@ -8,14 +8,13 @@
                 "Inc"
             ],
             "defines": [
-                "I2S_INPUT",
-                "DEBUG",
+                "DEBUG", 
                 "STM32",
-                "STM32F7",
+                "STM32F7", 
                 "STM32H750xx",
-                "FLOAT_AUDIO",
-                "EXTERNAL_CODEC",
-                "HARDWARE"
+                "I2S_INPUT", 
+                "FLOAT_AUDIO", 
+                "INTERNAL_CODEC"
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "cStandard": "c11",

@@ -25,7 +25,7 @@ static GPIO_TypeDef *gpio_cs;
 
 void DMA1_Stream3_IRQHandler(void) 
 {
-    DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF2_Pos); 
+    DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF3_Pos); 
     OledWriteNextLine();
 }
 
@@ -132,7 +132,7 @@ void initOledDisplay()
     config_spi_pin(SSD1306_SCK,5);
 
 
-    DMA1_Stream3->PAR=(uint32_t)&(SPI1_TXDR_BYTE);
+    DMA1_Stream3->PAR=(uint32_t)&(SPI1->TXDR);
     DMA1_Stream3->M0AR=(uint32_t)0;
     DMA1_Stream3->M1AR=(uint32_t)0;
     DMA1_Stream3->CR = (0 << DMA_SxCR_MSIZE_Pos) | (0 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
@@ -151,7 +151,7 @@ void initOledDisplay()
     SPI1->CR1 = regbfr;
 
     regbfr = SPI1->CFG1;
-    regbfr |= (5 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos); // 8 bits, 120MKz/16 as SPI clock
+    regbfr |= (5 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos) | (1 << SPI_CFG1_TXDMAEN_Pos); // 8 bits, 120MKz/16 as SPI clock, DMA enable for TX
     SPI1->CFG1 = regbfr;
     SPI1->CFG2 |= (1 << SPI_CFG2_MASTER_Pos) | (1 << SPI_CFG2_SSM_Pos);
     SPI1->CR1 |= (1 << SPI_CR1_SPE_Pos);
@@ -159,8 +159,8 @@ void initOledDisplay()
 
 
 
-
-    // reset high
+/*
+  // reset high
     gpio_reset->BSRR = (1 << (SSD1306_RESET & 0xF));
     waitSysticks(1);
     // reset low
@@ -193,14 +193,49 @@ void initOledDisplay()
     // columns remap (flip horizontal)
     ssd1306SendCommand(0xA1);
     #endif
+*/
 
+
+    // reset high
+    gpio_reset->BSRR = (1 << (SSD1306_RESET & 0xF));
+    waitSysticks(1);
+    //reset low
+    gpio_reset->BSRR = (1 << ((SSD1306_RESET & 0xF)+16));
+    waitSysticks(1);
+    // reset high
+    gpio_reset->BSRR = (1 << (SSD1306_RESET & 0xF));
+    waitSysticks(1);
+
+
+    // manually set display offset and  startline since these two values turned out to be wrong after reset
+    ssd1306SendCommand(0x40);// set startline 0
+    ssd1306SendCommand(0xD3);// set displayoffset 0
+    ssd1306SendCommand(0x0);
+
+    // column remap
+    ssd1306SendCommand(0xA1);
+    // flip common output scan direction
+    ssd1306SendCommand(0xC8);
+    
     // send display on command
-
     ssd1306SendCommand(0xAF);
     waitSysticks(11);
 
-    // enable interrupt on channel2
-    DMA1_Stream3->CR |= (1 << DMA_SxCR_EN_Pos);
+
+
+
+
+
+
+
+
+    // send display on command
+/*
+    ssd1306SendCommand(0xAF);
+    waitSysticks(11);
+*/
+    // enable interrupt on channel3
+    //DMA1_Stream3->CR |= (1 << DMA_SxCR_EN_Pos);
     NVIC_EnableIRQ(DMA1_Stream3_IRQn);
 }
 
@@ -217,19 +252,23 @@ void setCursor(uint8_t row, uint8_t col)
     // set column, low nibble
     ssd1306SendCommand((col+HORIZONTAL_OFFSET) & 0x0F);
     // set column, high nibble
-    ssd1306SendCommand((col+HORIZONTAL_OFFSET) >> 4);
+    ssd1306SendCommand(0x10 | (col+HORIZONTAL_OFFSET) >> 4);
 }
 
 void OledClearDisplay()
 {
-    uint8_t zeroVal=0;
+    uint8_t zeroVals[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
     for(uint8_t r=0;r<SSD1306_DISPLAY_N_PAGES;r++)
     {
-        for(uint8_t c=0;c<SSD1306_DISPLAY_N_COLUMNS;c++)
-        {
-            setCursor(r,c);
-            ssd1306SendData(&zeroVal,1);
-        }
+        setCursor(r,0);
+        ssd1306SendData(zeroVals,128);
     }   
 }
 
@@ -380,22 +419,28 @@ void OledWriteTextLine(const char * str,uint8_t posV)
 
 void OledWriteLineAsync(volatile uint8_t * data)
 {
-    DMA1_Stream2->CR &= ~(1 << DMA_SxCR_EN_Pos);
-    DMA1_Stream2->M0AR=(uint32_t)data;
-    DMA1_Stream2->M1AR=(uint32_t)data;
-    DMA1_Stream2->CR |= (1 << DMA_SxCR_EN_Pos);
+    DMA1_Stream3->CR &= ~(1 << DMA_SxCR_EN_Pos);
+    DMA1_Stream3->M0AR=(uint32_t)data;
+    DMA1_Stream3->M1AR=(uint32_t)data;
+    DMA1_Stream3->CR |= (1 << DMA_SxCR_EN_Pos);
 
 }
 
 void OledWriteNextLine(void)
 {
-    if (currentDmaRow <SSD1306_DISPLAY_N_PAGES )
+    if (currentDmaRow == SSD1306_DISPLAY_N_PAGES)
+    {
+        gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // cs high
+    }
+    else if (currentDmaRow <SSD1306_DISPLAY_N_PAGES )
     {
         setCursor(currentDmaRow,0);
+        gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF)+16)); // cs low
         gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF))); // cd high
         OledWriteLineAsync(currentFrameBuffer + currentDmaRow*SSD1306_DISPLAY_N_COLUMNS);
         currentDmaRow++;
     }
+
 }
 
 void OledwriteFramebufferAsync(uint8_t * fb)

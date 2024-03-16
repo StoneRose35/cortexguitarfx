@@ -135,7 +135,6 @@ static void fxProgram1Reset(void*data)
     firFilterReset(&pData->filter3);
 }
 
-__attribute__((section (".qspi_data")))
 FxProgramType fxProgram1 = {
     .name = "Amp-Simulator",
     .nParameters = 3,

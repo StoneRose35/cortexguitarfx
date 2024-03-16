@@ -4,15 +4,6 @@
 __attribute__ ((section (".sdram_bss")))
 float delayLineSdram[DELAY_LINE_LENGTH];
 
-DelayDataType singletonDelay;
-
-__attribute__((section (".qspi_code")))
-DelayDataType * getDelayData()
-{
-    return &singletonDelay;
-}
-
-
 __attribute__((section (".qspi_code")))
 void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
 {
@@ -69,7 +60,7 @@ float getDelayedSample(DelayDataType*data)
 __attribute__((section (".qspi_code")))
 float * getDelayMemoryPointer()
 {
-    return (float*)singletonDelay.delayLine;
+    return (float*)delayLineSdram;
 }
 
 __attribute__((section (".qspi_code")))

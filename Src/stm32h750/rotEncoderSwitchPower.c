@@ -6,10 +6,7 @@
 #include "drivers/systick.h"
 
 static uint32_t oldtickenc,oldtickswitch;
-static volatile uint32_t encoderVal = 0x7FFFFFFF;
-static volatile uint32_t encoderValOld = 0x7FFFFFFF;
-static volatile int16_t encoderStickyIncrement=0;
-static volatile int16_t encoderStickyDecrement=0;
+static volatile uint32_t encoderLastVal=0;
 static volatile uint32_t currentUsVal;
 static volatile uint32_t lastUsVal;
 static volatile uint8_t switchVal;
@@ -237,7 +234,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
 
 uint32_t getEncoderValue()
 {
-    return encoderVal;
+    return TIM3->CNT;
 }
 
 uint8_t getSwitchValue(uint8_t nr)
@@ -257,7 +254,8 @@ void clearReleasedStickyBit(uint8_t nr)
 
 int16_t getStickyIncrementDelta()
 {
-    return encoderStickyIncrement-encoderStickyDecrement;
+    int16_t nval = (int16_t)(TIM3->CNT - encoderLastVal);
+    return nval;
 }
 
 uint8_t getMomentarySwitchValue(uint8_t sw)
@@ -284,6 +282,5 @@ uint32_t getRotaryDeltaT()
 
 void clearStickyIncrementDelta()
 {
-    encoderStickyDecrement=0;
-    encoderStickyIncrement=0;
+    encoderLastVal = TIM3->CNT;
 }
