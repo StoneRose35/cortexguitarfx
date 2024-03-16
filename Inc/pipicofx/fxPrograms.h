@@ -169,7 +169,7 @@ typedef struct
 
 typedef struct 
 {
-    int16_t mix;
+    float mix;
     Reverb3Type reverb;
 } FxProgram13DataType;
 

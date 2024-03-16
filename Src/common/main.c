@@ -32,7 +32,7 @@
 #include "qspiFlasher.h"
 #include "stringFunctions.h"
 #include "charDisplay.h"
-#include "rotaryEncoder.h"
+#include "drivers/stompswitches.h"
 #include "cliApiTask.h"
 #include "sai.h"
 #include "i2c.h"
@@ -148,7 +148,17 @@ int main(void)
 
     //Initialize Background Services
 	//initCliApi();
-	initRoundRobinReading(); // internal adc for reading parameters
+    #ifdef EXTENSION_BOARD
+    initStompSwitchesInterface();
+    #endif
+    initRoundRobinReading(); // internal adc for reading parameters
+
+    setAsOutput(CLIPPING_LED_INPUT);
+    setAsOutput(CLIPPING_LED_OUTPUT);
+
+    #ifdef EXTENSION_BOARD
+    setStompswitchColorRaw(0);
+    #endif
 	context |= (1 << CONTEXT_USB);
 	//printf("Microsys v1.1 running on DaisySeed 1.1\r\n");
 	

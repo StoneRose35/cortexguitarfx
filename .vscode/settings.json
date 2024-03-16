@@ -52,7 +52,9 @@
         "stm32h7xx.h": "c",
         "systick.h": "c",
         "firstorderiirfilter.h": "c",
-        "secondorderiirfilter.h": "c"
+        "secondorderiirfilter.h": "c",
+        "fxprograms.h": "c",
+        "math.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

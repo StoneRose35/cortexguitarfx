@@ -8,7 +8,7 @@ typedef struct
     SecondOrderIirFilterType * midBand;
     SecondOrderIirFilterType * highShelf;
 
-    float lowFactor; // ranging from 0 to 8
+    float lowFactor; // ranging from -1 to 8
     float midFactor; 
     float highFactor; 
 } ThreeBandEQType;

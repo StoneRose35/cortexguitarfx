@@ -4,7 +4,7 @@
 
 typedef struct
 {
-    float gain; // 256 is unity gain
+    float gain; // 1.0f is unity gain
     float offset; // full range
     /* data */
 } GainStageDataType;
