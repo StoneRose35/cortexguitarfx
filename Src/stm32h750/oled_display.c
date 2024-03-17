@@ -25,7 +25,11 @@ static GPIO_TypeDef *gpio_cs;
 
 void DMA1_Stream3_IRQHandler(void) 
 {
-    DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF3_Pos); 
+    // clear dma transfer complete flag
+    DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF3_Pos);
+
+    // wait until transmission through spi is done 
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
     OledWriteNextLine();
 }
 
@@ -158,44 +162,6 @@ void initOledDisplay()
     SPI1->CR1 |= (1 << SPI_CR1_CSTART_Pos);
 
 
-
-/*
-  // reset high
-    gpio_reset->BSRR = (1 << (SSD1306_RESET & 0xF));
-    waitSysticks(1);
-    // reset low
-    gpio_reset->BSRR = (1 << ((SSD1306_RESET & 0xF)+16));
-    waitSysticks(1);
-    // reset high
-    gpio_reset->BSRR = (1 << (SSD1306_RESET & 0xF));
-    waitSysticks(1);
-
-    // manually set display offset and  startline since these two values turned out to be wrong after reset
-    // set startline 0
-    #ifdef SH1107
-    ssd1306SendCommand(0xDC);
-    ssd1306SendCommand(0x00);
-    #endif
-    #ifdef SH1106
-    ssd1306SendCommand(0x40);
-    #endif
-
-
-    // set displayoffset 0
-    ssd1306SendCommand(0xD3);// set displayoffset 0
-    ssd1306SendCommand(0x0);
-
-    // COM remap to vertically flip the display
-    #ifdef VERTICAL_FLIP
-    ssd1306SendCommand(0xC8);
-    #endif
-    #ifdef HORIZONTAL_FLIP
-    // columns remap (flip horizontal)
-    ssd1306SendCommand(0xA1);
-    #endif
-*/
-
-
     // reset high
     gpio_reset->BSRR = (1 << (SSD1306_RESET & 0xF));
     waitSysticks(1);
@@ -222,20 +188,6 @@ void initOledDisplay()
     waitSysticks(11);
 
 
-
-
-
-
-
-
-
-    // send display on command
-/*
-    ssd1306SendCommand(0xAF);
-    waitSysticks(11);
-*/
-    // enable interrupt on channel3
-    //DMA1_Stream3->CR |= (1 << DMA_SxCR_EN_Pos);
     NVIC_EnableIRQ(DMA1_Stream3_IRQn);
 }
 
@@ -252,7 +204,7 @@ void setCursor(uint8_t row, uint8_t col)
     // set column, low nibble
     ssd1306SendCommand((col+HORIZONTAL_OFFSET) & 0x0F);
     // set column, high nibble
-    ssd1306SendCommand(0x10 | (col+HORIZONTAL_OFFSET) >> 4);
+    ssd1306SendCommand(0x10 | ((col+HORIZONTAL_OFFSET) >> 4));
 }
 
 void OledClearDisplay()
@@ -431,12 +383,14 @@ void OledWriteNextLine(void)
     if (currentDmaRow == SSD1306_DISPLAY_N_PAGES)
     {
         gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF))); // cs high
+        short_nop_delay();
     }
     else if (currentDmaRow <SSD1306_DISPLAY_N_PAGES )
     {
         setCursor(currentDmaRow,0);
         gpio_cs->BSRR = (1 << ((SSD1306_CS & 0xF)+16)); // cs low
         gpio_cd->BSRR = (1 << ((SSD1306_CD & 0xF))); // cd high
+        short_nop_delay();
         OledWriteLineAsync(currentFrameBuffer + currentDmaRow*SSD1306_DISPLAY_N_COLUMNS);
         currentDmaRow++;
     }

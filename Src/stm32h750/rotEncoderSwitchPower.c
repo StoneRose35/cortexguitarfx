@@ -254,7 +254,7 @@ void clearReleasedStickyBit(uint8_t nr)
 
 int16_t getStickyIncrementDelta()
 {
-    int16_t nval = (int16_t)(TIM3->CNT - encoderLastVal);
+    int16_t nval = (int16_t)((TIM3->CNT>>2) - encoderLastVal);
     return nval;
 }
 
@@ -282,5 +282,5 @@ uint32_t getRotaryDeltaT()
 
 void clearStickyIncrementDelta()
 {
-    encoderLastVal = TIM3->CNT;
+    encoderLastVal = TIM3->CNT >> 2;
 }
