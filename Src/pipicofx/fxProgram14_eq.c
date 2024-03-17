@@ -34,7 +34,7 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgramParam1Display(void*data,char*res)
 {
     FxProgram14DataType* pData= (FxProgram14DataType*)data;
-    decimalInt16ToChar((int16_t)(pData->eq.lowFactor),res,2);
+    decimalInt16ToChar((int16_t)(pData->eq.lowFactor*100.f),res,2);
 }
 
 __attribute__ ((section (".qspi_code")))
@@ -49,7 +49,7 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgramParam2Display(void*data,char*res)
 {
     FxProgram14DataType* pData= (FxProgram14DataType*)data;
-    decimalInt16ToChar((int16_t)(pData->eq.midFactor),res,2);
+    decimalInt16ToChar((int16_t)(pData->eq.midFactor*100.f),res,2);
 }
 
 __attribute__ ((section (".qspi_code")))
@@ -64,7 +64,7 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgramParam3Display(void*data,char*res)
 {
     FxProgram14DataType* pData= (FxProgram14DataType*)data;
-    decimalInt16ToChar((int16_t)(pData->eq.highFactor),res,2);
+    decimalInt16ToChar((int16_t)(pData->eq.highFactor*100.f),res,2);
 }
 
 

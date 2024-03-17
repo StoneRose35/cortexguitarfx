@@ -22,7 +22,7 @@ void initReverb2(Reverb2Type*reverbData)
     {
         reverbData->aps[c].delayLineIn = delayMemoryPointer + c*1024;
         reverbData->aps[c].delayLineOut = delayMemoryPointer + c*1024+ 512;
-        reverbData->aps[c].coefficient = 16383;
+        reverbData->aps[c].coefficient = 0.5f;
         reverbData->aps[c].delayPtr = 0;
         reverbData->aps[c].oldValues = 0;
         reverbData->aps[c].delayInSamples=ap_delays[c];
@@ -54,7 +54,6 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
     float reverbSignal=0;
     volatile uint32_t * audioStatePtr = getAudioStatePtr();
     float processSignal = sampleIn*0.5f + (reverbData->decay*reverbData->outs[3]);
-    processSignal = clip(processSignal,audioStatePtr);
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[0],audioStatePtr);
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[1],audioStatePtr);
     //processSignal = firstOrderIirLowpassProcessSample(processSignal, &reverbData->lowpass);
@@ -63,7 +62,6 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
     reverbSignal +=  reverbData->outs[0]*0.5f;
 
     processSignal = sampleIn*0.5f + (reverbData->decay*reverbData->outs[0]);
-    processSignal = clip(processSignal,audioStatePtr);
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[2],audioStatePtr);
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[3],audioStatePtr);
     //processSignal = firstOrderIirLowpassProcessSample(processSignal, &reverbData->lowpass);
@@ -72,7 +70,6 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
     reverbSignal += reverbData->outs[1]*0.5f;
 
     processSignal = sampleIn*0.5 + (reverbData->decay*reverbData->outs[1]);
-    processSignal = clip(processSignal,audioStatePtr);
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[4],audioStatePtr);
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[5],audioStatePtr);
     //processSignal = firstOrderIirLowpassProcessSample(processSignal, &reverbData->lowpass);
@@ -81,7 +78,6 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
     reverbSignal += reverbData->outs[2]*0.5f;
 
     processSignal = sampleIn*0.5f + (reverbData->decay*reverbData->outs[2]);
-    processSignal = clip(processSignal,audioStatePtr);
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[6],audioStatePtr);
     processSignal = allpassProcessSample(processSignal,&reverbData->aps[7],audioStatePtr);
     processSignal = firstOrderIirLowpassProcessSample(processSignal, &reverbData->lowpass);

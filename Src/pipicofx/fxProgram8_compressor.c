@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
-#include "ln.h"
+#include "math.h"
 
 __attribute__ ((section (".qspi_code")))
 static float fxProgramProcessSample(float sampleIn,void*data)
@@ -40,7 +40,7 @@ static void fxProgramP1Display(void*data,char*res)
     int32_t ival;
     int16_t i16val;
     attackFloat = pData->compressor.avgLowpass.alphaRising;
-    t60 = -0.143911568f/fln(attackFloat);
+    t60 = -0.143911568f/logf(attackFloat);
 
     ival = (int)t60;
     i16val = (int16_t)ival;
@@ -65,7 +65,7 @@ static void fxProgramP2Display(void*data,char*res)
     int32_t ival;
     int16_t i16val;
     attackFloat = pData->compressor.avgLowpass.alphaFalling;
-    t60 = -0.143911568f/fln(attackFloat);
+    t60 = -0.143911568f/logf(attackFloat);
 
     ival = (int)t60;
     i16val = (int16_t)ival;
@@ -142,7 +142,7 @@ static void fxProgramP4Display(void*data,char*res)
 {
     int16_t dbval;
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    dbval = 20.0f* fln(pData->compressor.gainFunction.threshhold)/fln(10.0f);
+    dbval = 20.0f* logf(pData->compressor.gainFunction.threshhold)/logf(10.0f);
     decimalInt16ToChar(dbval,res,1);
     appendToString(res," dB");
 }

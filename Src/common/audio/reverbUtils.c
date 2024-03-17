@@ -9,7 +9,7 @@ float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t
     sampleInterm= allpass->coefficient*sampleIn + *(allpass->delayLineIn + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))
     -
     *(allpass->delayLineOut + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))*allpass->coefficient;
-    sampleInterm = clip(sampleInterm,audioStatePtr);
+    //sampleInterm = clip(sampleInterm,audioStatePtr);
     *(allpass->delayLineIn + allpass->delayPtr)=sampleIn;
     *(allpass->delayLineOut + allpass->delayPtr)=sampleInterm;
     allpass->delayPtr++;

@@ -39,6 +39,7 @@
                 "-g",
                 "./Tests/processThroughFxProgram.c",
                 "./Src/common/audio/*.c",
+                "./Src/common/math/*.c",
                 "./Src/common/stringFunctions.c",
                 "./Src/pipicofx/fxProgram*.c",
                 "./Tests/libs/wavReader.c",

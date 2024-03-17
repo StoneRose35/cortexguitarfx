@@ -60,6 +60,6 @@ float fastexp(float x)
     {
         c++;
     }
-    return (exptable[c] - exptable[c-1])/(dbvalues[c] - dbvalues[c-1])*(x-dbvalues[c-1]);
+    return exptable[c-1] + (exptable[c] - exptable[c-1])/(dbvalues[c] - dbvalues[c-1])*(x-dbvalues[c-1]);
 }
 

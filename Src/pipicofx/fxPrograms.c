@@ -34,8 +34,9 @@ void savePreset(FxPresetType* preset,uint16_t presetPos)
     }
     preset->magicNr = cs;
     address = presetPos*sizeof(FxPresetType);
+    #ifdef STM32
     eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArrayPtr);
-
+    #endif
 }
 
 uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
@@ -45,7 +46,9 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     uint8_t * presetArrayPtr;
     presetArrayPtr = (uint8_t*)preset;
     address = presetPos*sizeof(FxPresetType);
+    #ifdef STM32
     eeprom24lc128ReadArray(address,sizeof(FxPresetType),presetArrayPtr);
+    #endif
     for (uint8_t c=0;c<sizeof(FxPresetType)-2;c++)
     {
         cs += *(presetArrayPtr + c);

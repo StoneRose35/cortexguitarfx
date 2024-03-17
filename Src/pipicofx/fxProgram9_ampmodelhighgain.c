@@ -241,8 +241,8 @@ static void fxProgram9Reset(void*data)
 FxProgram9DataType fxProgram9data = {
     /* butterworth lowpass @ 6000Hz */
         .customCabIir = {
-            .coeffB = {1599.0f/32768.0f, 3199.0f/32768.0f, 1599.0f/32768.0f},
-            .coeffA = {-15446.0f/32768.0f, 5461.0f/32768.0f},
+            .coeffB = {1599.0f/16384.0f, 3199.0f/16384.0f, 1599.0f/16384.0f},
+            .coeffA = {-15446.0f/16384.0f, 5461.0f/16384.0f},
             .y1=0.0f,
             .y2=0.0f,
             .x1=0.0f,
@@ -261,8 +261,8 @@ FxProgram9DataType fxProgram9data = {
          0x50d/32768.0f, 0x5fa/32768.0f, 0x659/32768.0f, 0x61f/32768.0f}
     },
     .customIir1 = {
-        .coeffA={-28250.0f/32768.0f, 13700.0f/32768.0f},
-        .coeffB={229.0f/32768.0f,459.0f/32768.0f,229.0f/32768.0f},
+        .coeffA={-28250.0f/16384.0f, 13700.0f/16384.0f},
+        .coeffB={229.0f/16384.0f,459.0f/16384.0f,229.0f/16384.0f},
         .y1=0.0f,
         .y2=0.0f,
         .x1=0.0f,
@@ -270,8 +270,8 @@ FxProgram9DataType fxProgram9data = {
         .acc=0.0f
     },
     .customIir2 = {
-        .coeffA={-29836.0f/32768.0f,14408.0f/32768.0f},
-        .coeffB={119.0f/32768.0f,239.0f/32768.0f,119.0f/32768.0f},
+        .coeffA={-29836.0f/16384.0f,14408.0f/16384.0f},
+        .coeffB={119.0f/16384.0f,239.0f/16384.0f,119.0f/16384.0f},
         .y1=0.0f,
         .y2=0.0f,
         .x1=0.0f,
@@ -279,8 +279,8 @@ FxProgram9DataType fxProgram9data = {
         .acc=0.0f
     },
     .customIir3 = {
-        .coeffA={-32700.0f/32768.0f,16325.0f/32768.0f},
-        .coeffB={2591.0f/32768.0f,-5183.0f/32768.0f,2591.0f/32768.0f},
+        .coeffA={-32700.0f/16384.0f,16325.0f/16384.0f},
+        .coeffB={2591.0f/16384.0f,-5183.0f/16384.0f,2591.0f/16384.0f},
         .y1=0.0f,
         .y2=0.0f,
         .x1=0.0f,
@@ -288,8 +288,8 @@ FxProgram9DataType fxProgram9data = {
         .acc=0.0f
     },
     .customIir4 = {
-        .coeffA={-31856.0f/32768.0f,15497.0f/32768.0f},
-        .coeffB={15934.0f/32768.0f,-31868.0f/32768.0f,15934.0f/32768.0f},
+        .coeffA={-31856.0f/16384.0f,15497.0f/16384.0f},
+        .coeffB={15934.0f/16384.0f,-31868.0f/16384.0f,15934.0f/16384.0f},
         .y1=0.0f,
         .y2=0.0f,
         .x1=0.0f,

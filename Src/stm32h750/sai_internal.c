@@ -5,6 +5,7 @@
 #include "system.h"
 #include "timer.h"
 #include "pipicofx/pipicofxui.h"
+#include "audio/audiotools.h"
 #include "gpio.h"
 #include "stm32h750/daisy_seed_pins.h"
 
@@ -33,6 +34,7 @@ int32_t inputSampleInt,inputSampleInt2;
 float inputSample, avgIn, avgOut;
 uint32_t ticStart, ticEnd;
 
+__attribute__((section (".qspi_code")))
 void DMA1_Stream0_IRQHandler(void) // adc
 {
     if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
@@ -117,8 +119,8 @@ void DMA1_Stream0_IRQHandler(void) // adc
                 avgOut = inputSample;
             }
             avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
-
-            inputSampleInt=((int32_t)(inputSample*8388608.0f));
+            inputSample=clip(inputSample,getAudioStatePtr());
+            inputSampleInt=((int32_t)(inputSample*8388607.0f));
             //inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);
             *(audioBufferPtr+c) = inputSampleInt;  
             *(audioBufferPtr+c+1) = inputSampleInt;

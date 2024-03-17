@@ -1,6 +1,6 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
-#include "ln.h"
+#include "math.h"
 
 __attribute__ ((section (".qspi_code")))
 static float fxProgramprocessSample(float sampleIn,void*data)
@@ -38,7 +38,7 @@ static void fxProgramParam1Display(void*data,char*res)
     }
     else
     {
-        t60=(int16_t)(-589.03004f/fln(ffbk)); // t60 in ms
+        t60=(int16_t)(-589.03004f/logf(ffbk)); // t60 in ms
     }
     Int16ToChar(t60,res);
     appendToString(res," ms");

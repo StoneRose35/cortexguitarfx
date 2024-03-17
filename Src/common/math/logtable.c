@@ -59,6 +59,6 @@ float fastlog(float x)
     {
         c++;
     }
-    return (logtable[c] - logtable[c-1])/(linvalues[c] - linvalues[c-1])*(x-linvalues[c-1]);
+    return logtable[c-1] + (logtable[c] - logtable[c-1])/(linvalues[c] - linvalues[c-1])*(x-linvalues[c-1]);
 }
 

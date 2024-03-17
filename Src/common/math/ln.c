@@ -1,5 +1,5 @@
 #include <stdint.h>
-
+/*
 // taken from https://gist.github.com/LingDong-/7e4c4cae5cbbc44400a05fba65f06f23
 __attribute__((section (".qspi_code")))
 float fln(float x) {
@@ -11,3 +11,4 @@ float fln(float x) {
   x = * (float *) (&bx);
   return -1.49278f+(2.11263f+(-0.729104f+0.10969f*x)*x)*x+0.6931471806f*t;
 }
+*/

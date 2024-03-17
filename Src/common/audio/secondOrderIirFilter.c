@@ -12,11 +12,11 @@ void initSecondOrderIirFilter(SecondOrderIirFilterType* data)
 __attribute__ ((section (".qspi_code")))
 float secondOrderIirFilterProcessSample(float sampleIn,SecondOrderIirFilterType*data)
 {
-    data->acc += data->coeffB[0]*sampleIn +
-                 data->coeffB[1]*data->x1 + 
-                 data->coeffB[2]*data->x2 -
-                 data->coeffA[0]*data->y1 -
-                 data->coeffA[2]*data->y2;
+    data->acc = data->coeffB[0]*sampleIn;
+    data->acc += data->coeffB[1]*data->x1; 
+    data->acc += data->coeffB[2]*data->x2;
+    data->acc -= data->coeffA[0]*data->y1;
+    data->acc -= data->coeffA[1]*data->y2;
     data->x2 = data->x1;
     data->x1 = sampleIn;
     data->y2 = data->y1;
