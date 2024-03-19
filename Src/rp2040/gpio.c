@@ -8,7 +8,7 @@
 #include "drivers/gpio.h"
 
 
-void setAsOuput(uint8_t pinNr)
+void setAsOutput(uint8_t pinNr)
 {
     *GPIO_OE |= (1 << pinNr);
     uint32_t* pinCtrl = ((uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*pinNr));

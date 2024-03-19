@@ -136,7 +136,7 @@ void initReverb(ReverbType*reverbData,int16_t reverbTime)
         reverbData->allpasses[c].oldValues=0;
         reverbData->allpasses[c].coefficient=phaseshifts[c];
         reverbData->allpasses[c].delayPtr=0;
-        reverbData->allpasses[c].bufferSize=0x3FF;
+        reverbData->allpasses[c].bufferSize=0x1FF;
         reverbData->allpasses[c].delayInSamples=reverbParameterSet[reverbData->paramNr].allpassDelays[c];
     }
     setReverbTime(reverbTime,reverbData);

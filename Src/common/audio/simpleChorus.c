@@ -1,6 +1,6 @@
 
 #include "audio/simpleChorus.h"
-
+#include "audio/delay.h"
 //static int16_t delayBuffer[2048];
 
 //static volatile SimpleChorusType simpleChorusData;
@@ -8,6 +8,7 @@
 
 void initSimpleChorus(SimpleChorusType*data)
 {
+    data->delayBuffer = (int16_t*)getDelayMemoryPointer();
     for(uint16_t c=0;c<2048;c++)
     {
         data->delayBuffer[c]=0;

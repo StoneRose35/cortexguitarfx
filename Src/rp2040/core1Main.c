@@ -80,8 +80,8 @@ void core1Main()
     #endif
     initRoundRobinReading(); // internal adc for reading parameters
 
-    setAsOuput(CLIPPING_LED_INPUT);
-    setAsOuput(CLIPPING_LED_OUTPUT);
+    setAsOutput(CLIPPING_LED_INPUT);
+    setAsOutput(CLIPPING_LED_OUTPUT);
 
     #ifdef EXTENSION_BOARD
     setStompswitchColorRaw(0);
