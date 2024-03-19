@@ -9,7 +9,6 @@ float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t
     sampleInterm= allpass->coefficient*sampleIn + *(allpass->delayLineIn + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))
     -
     *(allpass->delayLineOut + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))*allpass->coefficient;
-    //sampleInterm = clip(sampleInterm,audioStatePtr);
     *(allpass->delayLineIn + allpass->delayPtr)=sampleIn;
     *(allpass->delayLineOut + allpass->delayPtr)=sampleInterm;
     allpass->delayPtr++;
@@ -25,7 +24,7 @@ void hadamardDiffuserProcessArray(float * channels,HadamardDiffuserType*data,vol
     float diff_first, diff_second;
         for(uint8_t c=0;c<4;c++)
     {
-        data->delayPointers[c][data->delayPointer] = clip(channels[c],audioStatePtr);
+        data->delayPointers[c][data->delayPointer] = channels[c];
     }
 
     sum_first = (data->delayPointers[0][(data->delayPointer - data->delayTimes[0]) & (data->diffusorSize -1)] ) +

@@ -52,7 +52,7 @@ static void fxProgram2Param2Display(void*data,char*res)
 {
     int16_t dVal;
     FxProgram2DataType* fData=(FxProgram2DataType*)data;
-    dVal = (fData->chorusData.depth*100.0f); ///164;
+    dVal = (fData->chorusData.depth*100) >> 8; ///164;
     Int16ToChar(dVal,res);
     appendToString(res,"%");
 }

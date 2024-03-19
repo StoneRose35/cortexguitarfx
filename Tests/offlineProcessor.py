@@ -68,11 +68,11 @@ class OfflineProcessorGui:
 
         self.lblSampleTimeText = tk.StringVar(self.w)
         self.lblSampleTime = tk.Label(self.w, textvariable=self.lblSampleTimeText)
-        self.lblSampleTime.grid(column=0, row=5, padx=15, pady=15, sticky="w")
+        self.lblSampleTime.grid(column=0, row=6, padx=15, pady=15, sticky="w")
 
         self.entCommandLineText = tk.StringVar(self.w)
         self.entCommandLine = ttk.Entry(self.w, textvariable=self.entCommandLineText)
-        self.entCommandLine.grid(column=0, row=6, padx=15, pady=15, sticky="ew", columnspan=3)
+        self.entCommandLine.grid(column=0, row=4, padx=15, pady=15, sticky="ew", columnspan=3)
 
         self.the_queue = queue.Queue()
         self.listen_for_playback_update()
@@ -150,7 +150,7 @@ class OfflineProcessorGui:
         ax.yaxis.grid(True, which="major")
         ax.set_frame_on(False)
         chart_type = FigureCanvasTkAgg(figure, self.w)
-        chart_type.get_tk_widget().grid(sticky="we", columnspan=3, row=4, padx=15, pady=15)
+        chart_type.get_tk_widget().grid(sticky="we", columnspan=3, row=5, padx=15, pady=15)
         if os.path.exists(self.currentSample):
             if self.audioplayer_thread.is_alive():
                 self.audio_playing = False

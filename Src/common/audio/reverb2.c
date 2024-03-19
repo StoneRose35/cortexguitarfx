@@ -85,7 +85,7 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
     reverbData->outs[3] = getDelayedSample(reverbData->delaylines+3);
     reverbSignal += reverbData->outs[3]*0.5f;  
 
-    sampleOut = ((1.0f - reverbData->mix)*sampleIn) + (reverbData->mix*clip(reverbSignal,audioStatePtr));
+    sampleOut = ((1.0f - reverbData->mix)*sampleIn) + (reverbData->mix*reverbSignal);
     //sampleOut = firstOrderIirLowpassProcessSample(sampleOut,&reverbData->lowpass);
     return sampleOut;  
 }

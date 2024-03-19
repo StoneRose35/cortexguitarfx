@@ -137,7 +137,7 @@ void initReverb(ReverbType*reverbData,float reverbTime)
         reverbData->allpasses[c].oldValues=0.0f;
         reverbData->allpasses[c].coefficient=phaseshifts[c];
         reverbData->allpasses[c].delayPtr=0;
-        reverbData->allpasses->bufferSize=0x3FF;
+        reverbData->allpasses->bufferSize=0x1FF;
         reverbData->allpasses[c].delayInSamples=reverbParameterSet[reverbData->paramNr].allpassDelays[c];
     }
     setReverbTime(reverbTime,reverbData);
@@ -163,14 +163,14 @@ float reverbProcessSample(float sampleIn,ReverbType*reverbData)
         reverbData->delayPointers[rc][(reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]-1) & 0xFFF] )*0.5f)*reverbData->feedbackValues[rc];
         reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF]=sampleInterm;
     }
-    reverbData->delayPointer++;
+    
 
     for (uint8_t c=0;c < 4;c++)
     {
         reverbSignal += reverbData->delayPointers[c][(reverbData->delayPointer -reverbParameterSet[reverbData->paramNr].delayInSamples[c]) & 0xFFF]*0.25f;
     }
 
-    
+    reverbData->delayPointer++;    
 
     for (uint8_t c=0;c<4;c++)
     {

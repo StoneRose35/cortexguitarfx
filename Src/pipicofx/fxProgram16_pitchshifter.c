@@ -7,7 +7,7 @@ static float fxProgramProcessSample(float sampleIn,void*data)
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
     float processedSample = pitchShifterProcessSample(sampleIn,&pData->pitchShifter);
-    int16_t sampleOut= (sampleIn*(1.0f - pData->mix)) + (processedSample*pData->mix);
+    float sampleOut= (sampleIn*(1.0f - pData->mix)) + (processedSample*pData->mix);
     return sampleOut;
 }
 

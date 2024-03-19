@@ -63,12 +63,11 @@ float reverb3processSample(float sampleIn,Reverb3Type*data)
     diffusorTaps[2] = diffuserChannels[1];
     hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[3],audioState);
     sampleOut = diffuserChannels[2];
-    sampleOut = clip(
-        delayLineProcessSample(clip(sampleOut,audioState),&data->delay) + 
+    sampleOut = 
+        delayLineProcessSample(sampleOut,&data->delay) + 
         diffusorTaps[0] + 
         diffusorTaps[1] + 
-        diffusorTaps[2]
-    ,audioState);
+        diffusorTaps[2];
     data->sampleCounter++;
     if((data->sampleCounter & (data->delayModulationTime -1)) == 0)
     {

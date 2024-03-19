@@ -9,7 +9,7 @@
 
 typedef struct 
 {
-    float delayBuffer[SINE_CHORUS_DELAY_SIZE];
+    float * delayBuffer;
     int16_t frequency; // in Hz/100, max 9375 --> 93.75 Hz
     int16_t depth; // 0 to 255
     float mix; // 0.0 to 1.0
@@ -17,8 +17,8 @@ typedef struct
     float feedback;
     int16_t lfoVal; // from -255 to +255
     int16_t lfoValOld;
-    int16_t lfoPhaseinc;
-    int16_t lfoPhase;
+    uint32_t lfoPhaseinc;
+    uint32_t lfoPhase;
     uint16_t delayInputPtr;
     uint16_t lfoUpdateCnt;
 } SineChorusType;

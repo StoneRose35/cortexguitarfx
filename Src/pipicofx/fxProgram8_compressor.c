@@ -28,7 +28,7 @@ static void fxProgramP1Callback(uint16_t val,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     pData->compressor.avgLowpass.alphaRising = 1.0f - 2.0f/32768.0f -val/64.0f/32768.0;
-    fxProgram8.parameters[0].rawValue = val;
+    fxProgram8.parameters[3].rawValue = val;
 }
 
 __attribute__ ((section (".qspi_code")))
@@ -53,7 +53,7 @@ static void fxProgramP2Callback(uint16_t val,void*data)
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
     pData->compressor.avgLowpass.alphaFalling = 1.0f - 2.0f/32768.0f - val/64.0f/32768.0f;
-    fxProgram8.parameters[1].rawValue = val;
+    fxProgram8.parameters[4].rawValue = val;
 }
 
 __attribute__ ((section (".qspi_code")))
@@ -82,7 +82,7 @@ static void fxProgramP3Callback(uint16_t val,void*data)
     {
         enumVal=5;
     }
-    fxProgram8.parameters[2].rawValue = val;
+    fxProgram8.parameters[1].rawValue = val;
     switch (enumVal)
     {
         case 1:
@@ -133,17 +133,15 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgramP4Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->compressor.gainFunction.threshhold = ((float)val)/4095.0f*0.99f+0.01f;
-    fxProgram8.parameters[3].rawValue = val;
+    pData->compressor.gainFunction.threshhold = -60.0f + (float)val/4095.f*60.0;
+    fxProgram8.parameters[0].rawValue = val;
 }
 
 __attribute__ ((section (".qspi_code")))
 static void fxProgramP4Display(void*data,char*res)
 {
-    int16_t dbval;
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    dbval = 20.0f* logf(pData->compressor.gainFunction.threshhold)/logf(10.0f);
-    decimalInt16ToChar(dbval,res,1);
+    decimalInt16ToChar((int16_t)(pData->compressor.gainFunction.threshhold*10.0f),res,1);
     appendToString(res," dB");
 }
 

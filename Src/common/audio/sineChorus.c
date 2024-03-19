@@ -1,5 +1,6 @@
 
 #include "audio/sineChorus.h"
+#include "audio/delay.h"
 
 static const int16_t firstSineQuadrant[33] = {0,12,25,38,51,63,76,88,100,112,123,134,145,156,166,175,184,193,201,209,216,222,228,234,239,243,246,249,252,253,254,255,255};
 
@@ -39,11 +40,11 @@ int16_t getSineValue(uint32_t phase)
     return val;
 }
 
-#ifndef FLOAT_AUDIO
-#else
+
 __attribute__((section (".qspi_code")))
 void initSineChorus(SineChorusType*data)
 {
+    data->delayBuffer = getDelayMemoryPointer();
     for(uint16_t c=0;c<SINE_CHORUS_DELAY_SIZE;c++)
     {
         data->delayBuffer[c]=0.0f;
@@ -96,8 +97,7 @@ float sineChorusInterpolatedProcessSample(float sampleIn,SineChorusType*data)
         delayPtrNext = (delayPtr - 1) & (SINE_CHORUS_DELAY_SIZE-1);
         q =((float)(totalDelay & 0x7))/8.0f;
         sampleOut=sampleIn*(1.0f-data->mix) + data->mix*(data->delayBuffer[delayPtr]*(1.0f - q) + data->delayBuffer[delayPtrNext]*q);
-        *(data->delayBuffer + data->delayInputPtr++)=sampleIn;
+        *(data->delayBuffer + data->delayInputPtr++)=sampleIn + (data->feedback*sampleOut);
         return sampleOut;
 }
 
-#endif

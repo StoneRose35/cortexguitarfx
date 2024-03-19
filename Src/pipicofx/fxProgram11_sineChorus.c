@@ -94,7 +94,7 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgramParam5Display(void*data,char*res)
 {
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
-    Int16ToChar((int16_t)pData->sineChorus.feedback*100.0f,res);
+    Int16ToChar((int16_t)(pData->sineChorus.feedback*100.0f),res);
     appendToString(res,"%");
 }
 

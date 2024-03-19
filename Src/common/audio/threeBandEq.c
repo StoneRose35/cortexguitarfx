@@ -32,7 +32,6 @@ __attribute__ ((section (".qspi_code")))
 float threeBandEqProcessSample(float sampleIn,ThreeBandEQType*data)
 {
     float lp, bp,hp, sampleOutw;
-    volatile uint32_t * audioState = getAudioStatePtr(); 
     lp = secondOrderIirFilterProcessSample(sampleIn,data->lowShelf);
     bp = secondOrderIirFilterProcessSample(sampleIn,data->midBand);
     hp = secondOrderIirFilterProcessSample(sampleIn,data->highShelf);
@@ -41,7 +40,7 @@ float threeBandEqProcessSample(float sampleIn,ThreeBandEQType*data)
     bp = (bp*data->midFactor);
     hp = (hp*data->highFactor);
 
-    sampleOutw = clip(sampleIn + lp + bp + hp,audioState);
+    sampleOutw = sampleIn + lp + bp + hp;
     return sampleOutw;
 }
 

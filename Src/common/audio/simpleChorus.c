@@ -1,5 +1,5 @@
 #include "audio/simpleChorus.h"
-
+#include "audio/delay.h"
 
 /** set frequency in Hz/100 */
 void simpleChorusSetFrequency(uint16_t freq,SimpleChorusType*data)
@@ -12,6 +12,7 @@ void simpleChorusSetFrequency(uint16_t freq,SimpleChorusType*data)
 __attribute__((section (".qspi_code")))
 void initSimpleChorus(SimpleChorusType*data)
 {
+    data->delayBuffer = getDelayMemoryPointer();
     for(uint16_t c=0;c<SIMPLE_CHORUS_DELAY_SIZE;c++)
     {
         data->delayBuffer[c]=0.0f;

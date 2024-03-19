@@ -191,7 +191,7 @@ typedef struct
 typedef struct 
 {
     PitchshifterDataType pitchShifter;
-    int16_t mix;
+    float mix;
 } FxProgram16DataType;
 
 

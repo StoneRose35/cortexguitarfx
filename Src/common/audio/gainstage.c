@@ -13,9 +13,8 @@ __attribute__ ((section (".qspi_code")))
 float gainStageProcessSample(float sampleIn,GainStageDataType*data)
 {
     float sampleOut;
-    volatile uint32_t * audioStatePtr = getAudioStatePtr();
     sampleOut = sampleIn * data->gain + data->offset;
     
-    sampleOut=clip(sampleOut,audioStatePtr);
+    sampleOut=sampleOut;
     return sampleOut;
 }

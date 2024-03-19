@@ -7,10 +7,10 @@
 #define SIMPLE_CHORUS_MIN_DELAY 384
 typedef struct 
 {
-    int16_t delayBuffer[SIMPLE_CHORUS_DELAY_SIZE];
+    float * delayBuffer;
     int16_t frequency; // in Hz/100, max 9375 --> 93.75 Hz
     int16_t depth; // 0 to 255
-    int16_t mix; // 0 to 255
+    float mix; // 0.0 to 1.0
     int16_t lfoVal; // from -255 to +255
     int16_t lfoValOld;
     uint8_t lfoQuadrant; // 0 (ascending) or 1 (descending)

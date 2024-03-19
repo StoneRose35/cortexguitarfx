@@ -117,7 +117,7 @@ void DMA1_Stream0_IRQHandler(void) // adc
                 avgOut = inputSample;
             }
             avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
-
+            inputSample=clip(inputSample,getAudioStatePtr());
             inputSampleInt=((int32_t)(inputSample*8388607.0f));
             //inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);
             *(audioBufferPtr+c) = inputSampleInt;  

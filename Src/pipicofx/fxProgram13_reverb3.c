@@ -31,7 +31,7 @@ static void fxProgramParam1Display(void*data,char*res)
     float ffbk;
     int16_t t60;
     FxProgram13DataType* pData= (FxProgram13DataType*)data;
-    ffbk = (float)(pData->reverb.delay.feedback)/32767.0f;
+    ffbk = (float)(pData->reverb.delay.feedback);
     if (ffbk < 0.0000305f)
     {
         t60=0;
