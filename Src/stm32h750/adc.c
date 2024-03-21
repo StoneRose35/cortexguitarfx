@@ -6,12 +6,15 @@
 extern uint32_t task;
 
 volatile uint16_t adcChannelValues[3];
-
+uint16_t adcValuesBuffer[3];
 
 void DMA1_Stream2_IRQHandler() //raised when all 3 adc values have been read
 {
-    TIM2->CR1 &= ~(1 << TIM_CR1_CEN_Pos);
+    //TIM2->CR1 &= ~(1 << TIM_CR1_CEN_Pos);
     DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF2_Pos);
+    adcValuesBuffer[0]=adcChannelValues[0];
+    adcValuesBuffer[1]=adcChannelValues[1];
+    adcValuesBuffer[2]=adcChannelValues[2];
     task |= (1 << TASK_UPDATE_POTENTIOMETER_VALUES);
 }
 
@@ -105,8 +108,8 @@ void initRoundRobinReading()
     NVIC_EnableIRQ(DMA1_Stream2_IRQn);
     DMA1_Stream2->CR |=(1 << DMA_SxCR_EN_Pos);
 
-    // use Timer 2 CC2 as a Trigger source
-    ADC1->CFGR |= (1 << ADC_CFGR_EXTEN_Pos) | (3 << ADC_CFGR_EXTSEL_Pos) | (1 << ADC_CFGR_CONT_Pos) | (3 << ADC_CFGR_DMNGT_Pos);
+    // no external trigger, DMA Circular Mode
+    ADC1->CFGR = (1 << ADC_CFGR_JQDIS_Pos) | (3 << ADC_CFGR_DMNGT_Pos);
     ADC1->CR |= (1 << ADC_CR_ADEN_Pos);
     while ((ADC1->ISR & (1 << ADC_ISR_ADRDY_Pos))==0);
     ADC1->CR |= (1 << ADC_CR_ADSTART_Pos);
@@ -114,27 +117,21 @@ void initRoundRobinReading()
 
 void restartAdc()
 {
-    //DMA2_Stream0->M0AR=(uint32_t)adcChannelValues;
-    //DMA2_Stream0->NDTR = 3;
-    //DMA2_Stream0->CR |= (1 << DMA_SxCR_EN_Pos);
-    //ADC1->CR2 &= ~(1 << ADC_CR2_DMA_Pos);
-    //ADC1->CR2 |= (1 << ADC_CR2_DMA_Pos);
-    TIM2->SR &= ~(1 << TIM_SR_CC2IF_Pos);
-    //TIM2->CNT=0;
-    TIM2->CR1 |= (1 << TIM_CR1_CEN_Pos);
+
+    ADC1->CR |= (1 << ADC_CR_ADSTART_Pos);
 }
 
 uint16_t getChannel0Value()
 {
-    return adcChannelValues[0]>>4;
+    return adcValuesBuffer[0]>>4;
 }
 
 uint16_t getChannel1Value()
 {
-    return adcChannelValues[1]>>4;
+    return adcValuesBuffer[1]>>4;
 }
 
 uint16_t getChannel2Value()
 {
-    return adcChannelValues[2]>>4;
+    return adcValuesBuffer[2]>>4;
 }

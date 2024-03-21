@@ -192,51 +192,7 @@ int main(void)
             task &= ~(1 << TASK_FLASH_QSPI);
         }
         
-        
-        if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
-        {
-            // call the update function of the chosen program
-            adcChannel = getChannel0Value();
-            adcChannel0 = adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
-            if ((adcChannel0 > adcChannelOld0) && (adcChannel0-adcChannelOld0) > UI_DMIN )
-            {
-                onKnob0(adcChannel0,&piPicoUiController);
-                adcChannelOld0=adcChannel0;
-            }
-            else if ((adcChannel0 < adcChannelOld0) && (adcChannelOld0-adcChannel0) > UI_DMIN )
-            {
-                onKnob0(adcChannel0,&piPicoUiController);
-                adcChannelOld0=adcChannel0;
-            }
 
-            adcChannel = getChannel1Value();
-            adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
-            if ((adcChannel1 > adcChannelOld1) && (adcChannel1-adcChannelOld1) > UI_DMIN )
-            {
-                onKnob1(adcChannel1,&piPicoUiController);
-                adcChannelOld1=adcChannel1;
-            }
-            else if ((adcChannel1 < adcChannelOld1) && (adcChannelOld1-adcChannel1) > UI_DMIN )
-            {
-                onKnob1(adcChannel1,&piPicoUiController);
-                adcChannelOld1=adcChannel1;
-            }
-
-            adcChannel = getChannel2Value();
-            adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
-            if ((adcChannel2 > adcChannelOld2) && (adcChannel2-adcChannelOld2) > UI_DMIN )
-            {
-                onKnob2(adcChannel2,&piPicoUiController);
-                adcChannelOld2=adcChannel2;
-            }
-            else if ((adcChannel2 < adcChannelOld2) && (adcChannelOld2-adcChannel) > UI_DMIN )
-            {
-                onKnob2(adcChannel2,&piPicoUiController);
-                adcChannelOld2=adcChannel;
-            }
-            task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
-            restartAdc();
-        }
         
 		
         if ((task & (1 << TASK_UPDATE_AUDIO_UI)) == (1 << TASK_UPDATE_AUDIO_UI))
@@ -264,6 +220,53 @@ int main(void)
                 setPin(CLIPPING_LED_OUTPUT,0);
             }
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
+
+
+                    
+            if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
+            {
+                // call the update function of the chosen program
+                adcChannel = getChannel0Value();
+                adcChannel0 = adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
+                if ((adcChannel0 > adcChannelOld0) && (adcChannel0-adcChannelOld0) > UI_DMIN )
+                {
+                    onKnob0(adcChannel0,&piPicoUiController);
+                    adcChannelOld0=adcChannel0;
+                }
+                else if ((adcChannel0 < adcChannelOld0) && (adcChannelOld0-adcChannel0) > UI_DMIN )
+                {
+                    onKnob0(adcChannel0,&piPicoUiController);
+                    adcChannelOld0=adcChannel0;
+                }
+
+                adcChannel = getChannel1Value();
+                adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
+                if ((adcChannel1 > adcChannelOld1) && (adcChannel1-adcChannelOld1) > UI_DMIN )
+                {
+                    onKnob1(adcChannel1,&piPicoUiController);
+                    adcChannelOld1=adcChannel1;
+                }
+                else if ((adcChannel1 < adcChannelOld1) && (adcChannelOld1-adcChannel1) > UI_DMIN )
+                {
+                    onKnob1(adcChannel1,&piPicoUiController);
+                    adcChannelOld1=adcChannel1;
+                }
+
+                adcChannel = getChannel2Value();
+                adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
+                if ((adcChannel2 > adcChannelOld2) && (adcChannel2-adcChannelOld2) > UI_DMIN )
+                {
+                    onKnob2(adcChannel2,&piPicoUiController);
+                    adcChannelOld2=adcChannel2;
+                }
+                else if ((adcChannel2 < adcChannelOld2) && (adcChannelOld2-adcChannel) > UI_DMIN )
+                {
+                    onKnob2(adcChannel2,&piPicoUiController);
+                    adcChannelOld2=adcChannel;
+                }
+                task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
+                restartAdc();
+            }
         }
 		
         switchVals[0] = getSwitchValue(0);

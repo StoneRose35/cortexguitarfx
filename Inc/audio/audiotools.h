@@ -20,7 +20,7 @@ inline float clip(float sample,volatile uint32_t*audioStatePtr)
         *audioStatePtr |= (1 << AUDIO_STATE_OUTPUT_CLIPPED);
         return 1.0f;
     }
-    else if (sample < 1.0f)
+    else if (sample < -1.0f)
     {
         *audioStatePtr |= (1 << AUDIO_STATE_OUTPUT_CLIPPED);
         return -1.0f;

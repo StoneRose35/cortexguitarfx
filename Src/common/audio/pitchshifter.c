@@ -10,7 +10,6 @@ float pitchShifterProcessSample(float sampleIn,PitchshifterDataType*data)
     float sampleOut=0;
     int16_t deltaIndex;
     float envelopeVal;
-    volatile  uint32_t* audioStatePtr=getAudioStatePtr();
     deltaIndex = (data->currentDelayPosition - (data->delayLength1>>2)) &(data->buffersize-1);
     if (data->delayLength1 <(data->buffersize<<1))
     {
@@ -55,7 +54,7 @@ float pitchShifterProcessSample(float sampleIn,PitchshifterDataType*data)
     }
 
     *(delayMemoryPointer + data->currentDelayPosition) = sampleIn;
-    return clip(sampleOut,audioStatePtr);
+    return sampleOut;
 }
 
 __attribute__ ((section (".qspi_code")))
