@@ -34,36 +34,24 @@ __attribute__((section (".qspi_code")))
 float toLin(float y)
 {
   float x1=0.000001f, x2=1.0f;
-  float y1,y2;
-  float delta;
+  float xnew,ynew;
   if (y<-120.0f)
   {
     return 0.f;
   }
 
-  y1 = toDb(x1) - y;
-  y2 = toDb(x2) - y;
-  delta = x2 - x1;
-
-  while (delta > TOL)
+  while (x2-x1 > TOL)
   {
-    if (y1 < 0 && y2 < 0)
+    xnew = (x1 + x2)*0.5f;
+    ynew = toDb(xnew)-y;
+    if (ynew < 0 )
     {
-      x2 += delta;
-      x1 += delta;
-    }
-    else if (y1 > 0 && y2 > 0)
-    {
-      x1 -= delta;
-      x2 -= delta;
+      x1 = xnew;
     }
     else
     {
-      delta /= 2.0f;
-      x2 -= delta;
+      x2 = xnew;
     }
-    y1 = toDb(x1) - y;
-    y2 = toDb(x2) - y;
   }
   return x1;
 }

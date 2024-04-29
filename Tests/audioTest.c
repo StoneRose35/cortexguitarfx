@@ -182,6 +182,6 @@ int main()
     //sineFunctionTest();
     //multiWaveShaperTest();
     //logComparisonTest();
-    //linComparisonTest();
-    logAndInverseTest2();
+    linComparisonTest();
+    //logAndInverseTest2();
 }

@@ -5,7 +5,7 @@
 #include "ln.h"
 #include "uart.h"
 
-#define SPEEDTEST_N_ITERATION_FOR_LOG 1000000
+#define SPEEDTEST_N_ITERATION_FOR_LOG 100000
 #define SPEEDTEST_FOR_LOG_INCREMENT 0.01f
 #define SPEEDTEST_FOR_LIN_INCREMENT 0.1f
 float testSpeed()
@@ -88,7 +88,7 @@ float testSpeed()
         tEnd = getTickValue();
         unusedResult = unusedSum;
         copyToString(charBfr,"toLin for ");
-        UInt16ToChar((uint16_t)(xval/SPEEDTEST_FOR_LIN_INCREMENT),ncBfr);
+        Int16ToChar((uint16_t)(xval/SPEEDTEST_FOR_LIN_INCREMENT),ncBfr);
         appendToString(charBfr,ncBfr);
         appendToString(charBfr,", ticks used ");
         UInt32ToChar(tEnd-tStart,ncBfr);

@@ -2,6 +2,7 @@
 #include "audio/compressor.h"
 #include "stdio.h"
 #include "fastExpLog.h"
+#include "ln.h"
 
 
 __attribute__((section (".qspi_code")))
@@ -18,8 +19,8 @@ float applyGain2(float sample,float avgVolume,CompressorDataType*comp)
     }
     else if (comp->gainFunction.gainReduction > 16.0f)
     {
-        expAvg = fastexp(avgVolume);
-        gainFactor = fastexp(comp->gainFunction.threshhold);
+        expAvg = toLin(avgVolume);
+        gainFactor = toLin(comp->gainFunction.threshhold);
         if (expAvg > 0.000001f)
         {
             gainFactor /= expAvg;
@@ -28,8 +29,8 @@ float applyGain2(float sample,float avgVolume,CompressorDataType*comp)
     }
     else
     {
-        expAvg = fastexp(avgVolume);
-        gainFactor = fastexp(comp->gainFunction.threshhold + (logAvg-comp->gainFunction.threshhold)/comp->gainFunction.gainReduction);
+        expAvg = toLin(avgVolume);
+        gainFactor = toLin(comp->gainFunction.threshhold + (logAvg-comp->gainFunction.threshhold)/comp->gainFunction.gainReduction);
         if (avgVolume > 0.000001f)
         {
             gainFactor /=expAvg;
@@ -55,7 +56,7 @@ float compressor2ProcessSample(float sampleIn,CompressorDataType*data)
     {
         absSample = sampleOut;
     }
-    absSample = fastlog(absSample);
+    absSample = toDb(absSample);
     intermAvg = firstOrderIirDualCoeffLPProcessSample(absSample,&data->avgLowpass);
     data->currentAvg = intermAvg; 
     return sampleOut;
