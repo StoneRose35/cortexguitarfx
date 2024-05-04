@@ -14,7 +14,7 @@ static void fxProgram6Param1Callback(uint16_t val,void*data) // Delay Time
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
     int32_t wVal;
     wVal = val;
-    wVal <<= 2;
+    wVal <<= 4;
     pData->delay.delayInSamples = wVal; //pData->delay->delayInSamples + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(wVal - pData->delay->delayInSamples)) >> 8);
     fxProgram6.parameters[0].rawValue = val;
 }

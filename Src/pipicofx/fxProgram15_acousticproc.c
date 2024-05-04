@@ -100,7 +100,7 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgramParam5Callback(uint16_t val,void*data) // reverb time
 {
     FxProgram15DataType* pData= (FxProgram15DataType*)data;
-    pData->reverbTime = (((uint32_t)val*1900)>>12) + 100;
+    pData->reverbTime = 0.1f + val/4095.f*1.9f;
     setReverbTime(pData->reverbTime,&pData->reverb);
     fxProgram15.parameters[4].rawValue = val;
 }
@@ -109,7 +109,7 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgramParam5Display(void*data,char*res)
 {
     FxProgram15DataType* pData= (FxProgram15DataType*)data;
-    Int16ToChar(pData->reverbTime,res);
+    Int16ToChar((float)(pData->reverbTime*1000.0f),res);
     appendToString(res," ms");
 }
 

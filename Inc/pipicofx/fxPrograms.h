@@ -180,7 +180,7 @@ typedef struct
 
 typedef struct 
 {
-    int16_t reverbTime;
+    float reverbTime;
     ThreeBandEQType eq;
     CompressorDataType comp;
     GainStageDataType postGain;
