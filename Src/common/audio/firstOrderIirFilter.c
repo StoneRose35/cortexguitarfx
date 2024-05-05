@@ -28,7 +28,7 @@ int16_t firstOrderIirHighpassProcessSample(int16_t sampleIn,FirstOrderIirType*da
 __attribute__ ((section (".qspi_code")))
 float firstOrderIirLowpassProcessSample(float sampleIn,FirstOrderIirType*data)
 {
-    data->oldVal = sampleIn = data->alpha*(data->oldVal - sampleIn);
+    data->oldVal = sampleIn + data->alpha*(data->oldVal - sampleIn);
     return data->oldVal;
 }
 
