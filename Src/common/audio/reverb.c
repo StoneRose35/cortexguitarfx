@@ -157,7 +157,7 @@ int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData)
         sampleInterm = sampleIn + 
         ((((reverbData->delayPointers[rc][(reverbData->delayPointer-reverbParameterSet[reverbData->paramNr].delayInSamples[rc]) & 0xFFF] >> 1) + 
            (reverbData->delayPointers[rc][(reverbData->delayPointer-reverbParameterSet[reverbData->paramNr].delayInSamples[rc]-1) & 0xFFF] >> 1))
-        *(reverbData->feedbackValues[0])) >> 15);
+        *(reverbData->feedbackValues[rc])) >> 15);
         reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF] = (int16_t)clip(sampleInterm,audioStatePtr);
     }
     reverbData->delayPointer++;
