@@ -30,7 +30,8 @@ extern volatile uint32_t task;
 extern uint32_t ticStart,ticEnd;
 extern uint16_t bufferCnt;
 volatile int16_t avgOut=0,avgIn=0;
-extern int16_t avgOutOld,avgInOld;
+extern volatile int16_t avgOutOld;
+extern volatile int16_t avgInOld;
 extern uint32_t cpuLoad;
 extern volatile uint8_t programChangeState;
 extern PiPicoFxUiType piPicoUiController;
@@ -160,13 +161,13 @@ void isr_c0_dma_irq0_irq11()
 				programChangeState = 2;
 			}
 
-			if (inputSample < 0)
+			if (outputSample < 0)
 			{
-				avgOut = -inputSample;
+				avgOut = -outputSample;
 			}
 			else
 			{
-				avgOut = inputSample;
+				avgOut = outputSample;
 			}
 			avgOutOld = ((AVERAGING_LOWPASS_CUTOFF*avgOut) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgOutOld) >> 15);
 

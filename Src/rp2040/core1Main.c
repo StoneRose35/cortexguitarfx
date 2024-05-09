@@ -26,7 +26,8 @@
 int16_t firstHalfOut;
 FirFilterType**core1FirData;
 extern volatile uint32_t task;
-extern volatile int16_t avgOutOld,avgInOld;
+extern volatile int16_t avgOutOld;
+extern volatile int16_t avgInOld;
 extern volatile uint8_t fxProgramIdx;
 extern volatile uint32_t cpuLoad;
 extern volatile uint8_t programsActivated;
