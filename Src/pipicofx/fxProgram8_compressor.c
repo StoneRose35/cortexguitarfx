@@ -151,7 +151,7 @@ __attribute__ ((section (".qspi_code")))
 static void fxProgramP5Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->makeupGain.gain = (float)val/4095.0f + 1.0f;
+    pData->makeupGain.gain = (float)val/256.0f + 1.0f;
     fxProgram8.parameters[2].rawValue = val;
 }
 
