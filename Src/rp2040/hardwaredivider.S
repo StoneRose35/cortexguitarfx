@@ -6,10 +6,10 @@
 
 .align 2
 
-.global __aeabi_idiv
-.type __aeabi_idiv,%function
+.global __wrap___aeabi_idiv
+.type __wrap___aeabi_idiv,%function
 .thumb_func
-__aeabi_idiv:
+__wrap___aeabi_idiv:
     ldr r3, =SIO_BASE
     str r0, [r3, #SIO_DIV_SDIVIDEND_OFFSET]
     str r1, [r3, #SIO_DIV_SDIVISOR_OFFSET]

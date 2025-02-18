@@ -18,7 +18,7 @@ OPT=-Og
 PAD_CKECKSUM=./tools/pad_checksum
 DEFINES=-DRP2040_FEATHER -DI2S_INPUT -DCS4270 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
-LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -Wl,--wrap=__aeabi_idiv -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -lgcc -Wl,--end-group
 LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary
 BOOTLOADER=bs2_fast_qspi2
