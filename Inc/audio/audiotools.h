@@ -29,6 +29,24 @@ inline int32_t clip(int32_t sample,volatile uint32_t*audioStatePtr)
         return sample;
     }
 }
+
+inline int32_t clip_input(int32_t sample,volatile uint32_t*audioStatePtr)
+{
+    if (sample > 32767)
+    {
+        *audioStatePtr |= (1 << AUDIO_STATE_INPUT_CLIPPED);
+        return 32767;
+    }
+    else if (sample < -32768)
+    {
+        *audioStatePtr |= (1 << AUDIO_STATE_INPUT_CLIPPED);
+        return -32768;
+    }
+    else
+    {
+        return sample;
+    }
+}
 #else
 int32_t clip(int32_t sample,volatile uint32_t *);
 #endif

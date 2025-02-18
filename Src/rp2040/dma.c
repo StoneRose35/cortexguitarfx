@@ -111,7 +111,7 @@ void isr_c0_dma_irq0_irq11()
 			#ifndef I2S_INPUT
 			inputSample = (*(audioBufferInputPtr + c) << 4) - 0x7FFF;
 			#else
-			inputSample=*(audioBufferInputPtr + c*2 + 1) + *(audioBufferInputPtr + c*2);
+			inputSample= clip_input(*(audioBufferInputPtr + c*2 + 1) + *(audioBufferInputPtr + c*2),audioStatePtr); 
 			#endif
 
 			if (inputSample < 0)
@@ -121,10 +121,6 @@ void isr_c0_dma_irq0_irq11()
 			else
 			{
 				avgIn = inputSample;
-			}
-			if ((avgIn & (0x7FFF - 0x3)) == (0x7FFF - 0x3)) // give a little margin to prematurely indicate clipping
-			{
-				*audioStatePtr |= (1 << AUDIO_STATE_INPUT_CLIPPED);
 			}
 			avgInOld = ((AVERAGING_LOWPASS_CUTOFF*avgIn) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgInOld) >> 15);
 
