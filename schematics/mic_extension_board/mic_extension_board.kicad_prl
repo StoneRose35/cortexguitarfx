@@ -67,6 +67,12 @@
     "visible_layers": "000d0ff_80000001",
     "zone_display_mode": 0
   },
+  "git": {
+    "repo_password": "",
+    "repo_type": "",
+    "repo_username": "",
+    "ssh_key": ""
+  },
   "meta": {
     "filename": "mic_extension_board.kicad_prl",
     "version": 3
