@@ -50,10 +50,11 @@ int16_t delayLineProcessSample(int16_t sampleIn,DelayDataType*data)
     {
         sampleFedBack = (int32_t)data->feedbackFunction((int16_t)sampleFedBack,data->feebackData);
     }
-    sampleFedBack = ((data->feedback*sampleFedBack) >> 14);
+    sampleFedBack = ((data->feedback*sampleFedBack) >> 15);
 
-    sampleFedBack = clip(sampleFedBack,audioStatePtr);
-    *(data->delayLine + data->delayLinePtr) = (sampleIn>>1) + (((int16_t)sampleFedBack)>>1);
+    //sampleFedBack = clip(sampleFedBack,audioStatePtr);
+    sampleFedBack = clip(sampleIn + sampleFedBack,audioStatePtr);
+    *(data->delayLine + data->delayLinePtr) = (int16_t)sampleFedBack;
     data->delayLinePtr++;
     data->delayLinePtr &= (data->delayBufferLength -1);
     return sampleOut;

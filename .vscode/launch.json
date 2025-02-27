@@ -2,7 +2,7 @@
     "configurations": [
         {
             "name": "Python: Aktuelle Datei",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
@@ -185,7 +185,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": ["-p", "./audiosamples/tele_bridge_lick.wav", "11", "1691", "4095"],
+            "args": [ "-p", "./audiosamples/tele_middle_bluespicking.wav", "12", "0", "746", "1424"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],

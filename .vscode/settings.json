@@ -68,7 +68,8 @@
         "sio.h": "c",
         "stompswitches.h": "c",
         "bwgraphics.h": "c",
-        "fxprograms.h": "c"
+        "fxprograms.h": "c",
+        "romfunc.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": true

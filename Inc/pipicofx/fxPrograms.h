@@ -20,7 +20,7 @@
 #include "pipicofx/picofxCore.h"
 
 
-#define N_FX_PROGRAMS 13
+#define N_FX_PROGRAMS 14
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
 
@@ -244,6 +244,16 @@ typedef struct
 } FxProgram16DataType;
 
 
+typedef struct 
+{
+
+    PitchshifterDataType pitchShifter;
+    DelayDataType delays[4];
+    AllpassType allpasses[2];
+    int16_t mix;
+} FxProgram17DataType;
+
+
 extern FxProgramType fxProgram1;
 extern FxProgramType fxProgram2;
 extern FxProgramType fxProgram3;
@@ -260,6 +270,7 @@ extern FxProgramType fxProgram13;
 extern FxProgramType fxProgram14;
 extern FxProgramType fxProgram15;
 extern FxProgramType fxProgram16;
+extern FxProgramType fxProgram17;
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
 #endif

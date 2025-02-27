@@ -53,4 +53,6 @@ int32_t clip(int32_t sample,volatile uint32_t *);
 
 volatile uint32_t * getAudioStatePtr(); 
 
+typedef int16_t(*AudioProcessor)(int16_t,void*,volatile uint32_t*); 
+
 #endif

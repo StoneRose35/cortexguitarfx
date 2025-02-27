@@ -23,6 +23,27 @@ int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass,volatile uint
 }
 
 
+int16_t morphingAllpassProcessSample(int16_t sampleIn,AllpassType*allpass,AudioProcessor processor,void * processorData,volatile uint32_t * audioStatePtr)
+{
+    int16_t sampleOut;
+    int32_t sampleInterm;
+    //sampleInterm = sampleIn - (((*(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize)))*allpass->coefficient) >> 15);
+    sampleInterm =  ((allpass->coefficient*sampleIn) >> 15) + *(allpass->delayLineIn + 
+                    ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize)) -
+                    ((*(allpass->delayLineOut + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))*allpass->coefficient) >> 15);  
+    //*(allpass->delayLine + allpass->delayPtr) = (int16_t)clip(sampleInterm);
+    // allpass->oldValues
+    //sampleInterm = ((allpass->coefficient*sampleInterm) >> 15) + *(allpass->delayLine + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize));
+    sampleInterm=clip(sampleInterm,audioStatePtr);
+    sampleOut = (int16_t)sampleInterm;
+    *(allpass->delayLineIn + allpass->delayPtr) = sampleIn;
+    *(allpass->delayLineOut + allpass->delayPtr) = processor(sampleOut,processorData,audioStatePtr);
+    allpass->delayPtr++;
+    allpass->delayPtr &= allpass->bufferSize;
+    return sampleOut;
+}
+
+
 void hadamardDiffuserProcessArray(int32_t * channels,HadamardDiffuserType*data,volatile uint32_t * audioStatePtr)
 {
     int32_t sum_first, sum_second;

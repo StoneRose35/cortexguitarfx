@@ -1,6 +1,7 @@
 #ifndef _REVERB_UTILS_C_
 #define _REVERB_UTILS_C_
 #include "stdint.h"
+#include "audiotools.h"
 
 typedef struct 
 {
@@ -22,6 +23,7 @@ typedef struct
 } HadamardDiffuserType;
 
 int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass,volatile uint32_t*);
+int16_t morphingAllpassProcessSample(int16_t sampleIn,AllpassType*allpass,AudioProcessor processor,void * processorData,volatile uint32_t * audioStatePtr);
 void hadamardDiffuserProcessArray(int32_t * channels,HadamardDiffuserType*data,volatile uint32_t * audioStatePtr);
 
 #endif
