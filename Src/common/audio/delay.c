@@ -48,7 +48,7 @@ int16_t delayLineProcessSample(int16_t sampleIn,DelayDataType*data)
 
     if (data->feedbackFunction != 0)
     {
-        sampleFedBack = (int32_t)data->feedbackFunction((int16_t)sampleFedBack,data->feebackData);
+        sampleFedBack = (int32_t)data->feedbackFunction((int16_t)sampleFedBack,data->feebackData,audioStatePtr);
     }
     sampleFedBack = ((data->feedback*sampleFedBack) >> 15);
 

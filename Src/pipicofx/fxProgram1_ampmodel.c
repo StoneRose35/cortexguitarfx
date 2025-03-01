@@ -30,7 +30,7 @@ static int16_t fxProgram1processSample(int16_t sampleIn,void*data)
     return out;
 }
 
-static int16_t analogDelayFeedbackFunction(int16_t sampleIn,void*fbkFilterData)
+static int16_t analogDelayFeedbackFunction(int16_t sampleIn,void*fbkFilterData,volatile uint32_t*audioStatePtr)
 {
     FirstOrderIirType* tData = (FirstOrderIirType*)fbkFilterData;
     return firstOrderIirLowpassProcessSample(sampleIn,tData);

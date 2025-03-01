@@ -2,8 +2,7 @@
 #define _DELAY_H_
 #include <stdint.h>
 #define DELAY_LINE_LENGTH 65536
-
-typedef int16_t(*feedbackProcessor)(int16_t,void*);
+#include "audiotools.h"
 
 typedef struct 
 {
@@ -13,7 +12,7 @@ typedef struct
     int16_t feedback; 
     uint32_t delayBufferLength;
     int16_t mix;
-    feedbackProcessor feedbackFunction;
+    AudioProcessor feedbackFunction;
     void * feebackData;
 } DelayDataType;
  

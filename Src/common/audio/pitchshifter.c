@@ -2,13 +2,12 @@
 #include "audio/pitchshifter.h"
 #include "audio/delay.h"
 #include "audio/audiotools.h"
-int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data)
+int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data,volatile uint32_t*audioStatePtr)
 {
     int16_t * delayMemoryPointer = getDelayMemoryPointer();
     int32_t sampleOut=0;
     int16_t deltaIndex;
     int16_t envelopeVal;
-    volatile  uint32_t* audioStatePtr=getAudioStatePtr();
     deltaIndex = (data->currentDelayPosition - (data->delayLength1>>2)) &(data->buffersize-1);
     if (data->delayLength1 <(data->buffersize<<1))
     {

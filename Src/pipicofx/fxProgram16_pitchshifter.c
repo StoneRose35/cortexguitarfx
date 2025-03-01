@@ -5,7 +5,7 @@
 static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
-    int16_t processedSample = pitchShifterProcessSample(sampleIn,&pData->pitchShifter);
+    int16_t processedSample = pitchShifterProcessSample(sampleIn,&pData->pitchShifter,getAudioStatePtr());
     int16_t sampleOut= ((sampleIn)*((1 << 15) - pData->mix) >> 15) + ((processedSample)*pData->mix >> 15);
     return sampleOut;
 }
