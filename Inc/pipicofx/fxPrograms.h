@@ -239,7 +239,7 @@ typedef struct
 
 typedef struct 
 {
-    PitchshifterDataType pitchShifter;
+    Pitchshifter2DataType pitchShifter;
     int16_t mix;
 } FxProgram16DataType;
 
@@ -247,9 +247,11 @@ typedef struct
 typedef struct 
 {
 
-    PitchshifterDataType pitchShifter;
+    Pitchshifter2DataType pitchShifter;
     DelayDataType delays[4];
     AllpassType allpasses[2];
+    int16_t oldVal;
+    int16_t feedback;
     int16_t mix;
 } FxProgram17DataType;
 

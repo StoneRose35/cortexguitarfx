@@ -5,29 +5,28 @@
 
 int16_t fxProgram17processSample(int16_t sampleIn,void*data)
 {
-    int16_t sampleProc = sampleIn;
+    
     FxProgram17DataType * pData = (FxProgram17DataType*)data;
+    int32_t sampleProc = sampleIn;// + ((pData->feedback*pData->oldVal) >> 15);
     volatile uint32_t * audioStatePtr = getAudioStatePtr();
     int32_t summedDelay=0;
+    sampleProc = delayLineProcessSample(sampleProc,pData->delays+3);
     summedDelay += delayLineProcessSample(sampleProc,pData->delays);
-    summedDelay = clip(summedDelay,audioStatePtr);
     summedDelay += delayLineProcessSample(sampleProc,pData->delays+1);
-    summedDelay = clip(summedDelay,audioStatePtr);
     summedDelay += delayLineProcessSample(sampleProc,pData->delays+2);
+    //summedDelay += delayLineProcessSample(sampleProc,pData->delays+3);
     summedDelay = clip(summedDelay,audioStatePtr);
-    summedDelay += delayLineProcessSample(sampleProc,pData->delays+3);
-    summedDelay = clip(summedDelay,audioStatePtr);
-    sampleProc = (int16_t)summedDelay;
-    sampleProc = morphingAllpassProcessSample(sampleProc,pData->allpasses,(AudioProcessor)pitchShifterProcessSample,&pData->pitchShifter,audioStatePtr);
+    sampleProc = summedDelay;
+    sampleProc = allpassProcessSample(sampleProc,pData->allpasses,audioStatePtr);
     sampleProc = allpassProcessSample(sampleProc,pData->allpasses+1,audioStatePtr);
-
+    pData->oldVal = sampleProc;
     return ((((1 << 15) - pData->mix)*sampleIn) >> 15) + ((pData->mix*sampleProc) >> 15);
 }
 
 static void fxProgramParam1Callback(uint16_t val,void*data) // Shimmer
 {
     FxProgram17DataType* pData= (FxProgram17DataType*)data;
-    pData->pitchShifter.delayIncrement = (val >> 9) - 4;
+    pData->pitchShifter.delayIncrement = (val >> 9) + 1;
     if (pData->pitchShifter.delayIncrement>=0)
     {
         pData->pitchShifter.delayIncrement+=1;
@@ -41,32 +40,32 @@ static void fxProgramParam1Display(void*data,char*res)
     *res=0;
     switch (pData->pitchShifter.delayIncrement)
     {
-    case -4:
-        appendToString(res,"OctUp");
-        break;
-    case -3:
-        appendToString(res,"MoreUp");
-        break;
-    case -2:
-        appendToString(res,"HalfUp");
-        break;
-    case -1:
-        appendToString(res,"LittleUp");
-        break;
-    case 1:
-        appendToString(res,"LittleDown");
+        case 1:
+        appendToString(res,"2OctDown");
         break;
     case 2:
-        appendToString(res,"HalfDown");
-        break;
-    case 3:
-        appendToString(res,"MoreDown");
-        break;
-    case 4:
         appendToString(res,"OctDown");
         break;
+    case 3:
+        appendToString(res,"FourthDown");
+        break;
+    case 4:
+        appendToString(res,"NoShift");
+        break;
+    case 5:
+        appendToString(res,"ThirdUp");
+        break;
+    case 6:
+        appendToString(res,"FifthUp");
+        break;
+    case 7:
+        appendToString(res,"Devil666");
+        break;
+    case 8:
+        appendToString(res,"OctUp");
+        break;
     default:
-        appendToString(res,"Static");
+        appendToString(res,"ERROR");
         break;
     }
 }
@@ -78,6 +77,7 @@ static void fxProgramParam2Callback(uint16_t val,void*data) // Decay
     (pData->delays+1)->feedback = val << 3;
     (pData->delays+2)->feedback = val << 3;
     (pData->delays+3)->feedback = val << 3;
+    pData->feedback = val << 3;
     fxProgram17.parameters[1].rawValue = val;
 }
 
@@ -119,29 +119,38 @@ static void fxProgramParam3Display(void*data,char*res)
 FxProgram17DataType fxProgram17data=
 {
     .pitchShifter.currentDelayPosition=0,
-    .pitchShifter.delayIncrement=-2, // half up according to program 16
+    .pitchShifter.delayIncrement=8,
     .pitchShifter.buffersizePowerTwo = 11,  // longest buffer size in program 16
-    .mix=0
+    .pitchShifter.crossFadeWidthPwr2=7,
+    .mix=0,
+    .oldVal = 0,
+    .feedback = 0
 };
 
 void fxProgram17Setup(void*data)
 {
     int16_t * delayMemoryPointer = getDelayMemoryPointer();
     FxProgram17DataType * pData = (FxProgram17DataType*)data;
-    initPitchshifter(&pData->pitchShifter);
+    initPitchshifter2(&pData->pitchShifter);
 
     initDelay(pData->delays,delayMemoryPointer+2048,4096);
-    pData->delays[0].delayInSamples = 3943;
+    pData->delays[0].delayInSamples = 149;
+    pData->delays[0].mix = ((1 << 15) -1) ;
     initDelay(pData->delays+1,delayMemoryPointer+4096+2048,4096);
-    pData->delays[1].delayInSamples = 3617;
+    pData->delays[1].delayInSamples = 337;
+    pData->delays[1].mix = ((1 << 15) -1) ;
     initDelay(pData->delays+2,delayMemoryPointer+2*4096+2048,4096);
-    pData->delays[2].delayInSamples = 3943;
+    pData->delays[2].delayInSamples = 1597;
+    pData->delays[2].mix = ((1 << 15) -1) ;
     initDelay(pData->delays+3,delayMemoryPointer+3*4096+2048,4096);
-    pData->delays[3].delayInSamples = 3823;
+    pData->delays[3].delayInSamples = 3989;
+    pData->delays[3].mix = ((1 << 15) -1) ;
+    pData->delays[3].feedbackFunction = (AudioProcessor)pitchShifter2ProcessSample;
+    pData->delays[3].feebackData = &pData->pitchShifter;
 
     pData->allpasses[0].delayLineIn = delayMemoryPointer + 4*4096+2048;
     pData->allpasses[0].delayLineOut = delayMemoryPointer + 4*4096+ 1024+2048;
-    pData->allpasses[0].coefficient = 16383;
+    pData->allpasses[0].coefficient = 22936;
     pData->allpasses[0].delayPtr = 0;
     pData->allpasses[0].oldValues = 0;
     pData->allpasses[0].delayInSamples=617;
@@ -149,7 +158,7 @@ void fxProgram17Setup(void*data)
 
     pData->allpasses[1].delayLineIn = delayMemoryPointer + 4*4096+2*1024+2048;
     pData->allpasses[1].delayLineOut = delayMemoryPointer + 4*4096+ 3*1024+2048;
-    pData->allpasses[1].coefficient = 16383;
+    pData->allpasses[1].coefficient = 22936;
     pData->allpasses[1].delayPtr = 0;
     pData->allpasses[1].oldValues = 0;
     pData->allpasses[1].delayInSamples=617;

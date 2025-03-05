@@ -185,7 +185,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": [ "-p", "./audiosamples/tele_middle_bluespicking.wav", "12", "0", "746", "1424"],
+            "args": [ "-p", "./audiosamples/tele_middle_bluespicking.wav", "11", "790", "4095", "4095"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],
@@ -254,7 +254,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "compile offline audio processor",
+            "preLaunchTask": "compile audio tests",
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {

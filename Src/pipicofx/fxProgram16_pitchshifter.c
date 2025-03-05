@@ -5,7 +5,7 @@
 static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
-    int16_t processedSample = pitchShifterProcessSample(sampleIn,&pData->pitchShifter,getAudioStatePtr());
+    int16_t processedSample = pitchShifter2ProcessSample(sampleIn,&pData->pitchShifter,getAudioStatePtr());
     int16_t sampleOut= ((sampleIn)*((1 << 15) - pData->mix) >> 15) + ((processedSample)*pData->mix >> 15);
     return sampleOut;
 }
@@ -13,11 +13,7 @@ static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
 static void fxProgramParam1Callback(uint16_t val,void*data) // low
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
-    pData->pitchShifter.delayIncrement = (val >> 9) - 4;
-    if (pData->pitchShifter.delayIncrement>=0)
-    {
-        pData->pitchShifter.delayIncrement+=1;
-    }
+    pData->pitchShifter.delayIncrement = (val >> 9) + 1;
     fxProgram16.parameters[0].rawValue = val;
 }
 
@@ -27,32 +23,32 @@ static void fxProgramParam1Display(void*data,char*res)
     *res=0;
     switch (pData->pitchShifter.delayIncrement)
     {
-    case -4:
-        appendToString(res,"OctUp");
-        break;
-    case -3:
-        appendToString(res,"MoreUp");
-        break;
-    case -2:
-        appendToString(res,"HalfUp");
-        break;
-    case -1:
-        appendToString(res,"LittleUp");
-        break;
     case 1:
-        appendToString(res,"LittleDown");
+        appendToString(res,"2OctDown");
         break;
     case 2:
-        appendToString(res,"HalfDown");
-        break;
-    case 3:
-        appendToString(res,"MoreDown");
-        break;
-    case 4:
         appendToString(res,"OctDown");
         break;
+    case 3:
+        appendToString(res,"FourthDown");
+        break;
+    case 4:
+        appendToString(res,"NoShift");
+        break;
+    case 5:
+        appendToString(res,"ThirdUp");
+        break;
+    case 6:
+        appendToString(res,"FifthUp");
+        break;
+    case 7:
+        appendToString(res,"Devil666");
+        break;
+    case 8:
+        appendToString(res,"OctUp");
+        break;
     default:
-        appendToString(res,"Static");
+        appendToString(res,"ERROR");
         break;
     }
 }
@@ -80,7 +76,7 @@ static void fxProgramParam3Callback(uint16_t val,void*data) // BufferSize
     if (newVal != pData->pitchShifter.buffersizePowerTwo)
     {
         pData->pitchShifter.buffersizePowerTwo=newVal;
-        initPitchshifter(&pData->pitchShifter);
+        initPitchshifter2(&pData->pitchShifter);
     }
     fxProgram16.parameters[1].rawValue = val;
 }
@@ -97,20 +93,21 @@ static void fxProgramParam3Display(void*data,char*res)
 static void fxProgramSetup(void*data)
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
-    initPitchshifter(&pData->pitchShifter);
+    initPitchshifter2(&pData->pitchShifter);
     
 }
 
 static void fxProgramReset(void*data)
 {
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
-    initPitchshifter(&pData->pitchShifter);  
+    initPitchshifter2(&pData->pitchShifter);  
 }
 
 FxProgram16DataType fxProgram16data=
 {
     .pitchShifter.currentDelayPosition=0,
-    .pitchShifter.delayIncrement=0x4
+    .pitchShifter.delayIncrement=0x4,
+    .pitchShifter.crossFadeWidthPwr2=7
 };
 
 FxProgramType fxProgram16 = {

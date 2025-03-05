@@ -28,7 +28,7 @@
                 "-I./../Inc",
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}", "../Src/common/stringFunctions.c", "../Src/common/piRegulator.c",
+                "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
@@ -160,7 +160,9 @@
                 "-I./Tests/inc",
                 "-fdiagnostics-color=always",
                 "-g",
-                "./Tests/audioTest.c", "./Src/common/audio/*.c","./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "./Tests/audioTest.c", "./Src/common/audio/*.c",
+                "./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
+                "./Src/common/math/*.c",
                 "-o",
                 "./Tests/audioTest", "-lm"
             ],

@@ -15,7 +15,19 @@ def get_primes_fct(n_max):
                 break
         if is_prime:
             primes.append(i)
-    return primes     
+    return primes
+
+def get_next_prime_from(n_start):
+    prime_found = False
+    n_current = n_start
+    while not prime_found:
+        prime_found = True
+        for k in range(2,n_current):
+            if n_current%k==0:
+                prime_found = False
+                n_current += 1
+                break
+    return n_current
         
 
 ''' computes delay prime number of n_delays by placing the prime number in bin of equal space
