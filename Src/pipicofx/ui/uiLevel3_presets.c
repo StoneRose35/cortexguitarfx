@@ -20,7 +20,7 @@ extern uint8_t currentBank;
 extern uint8_t currentPreset;
 static volatile uint8_t overlayNr=0xFF;
 static volatile uint8_t bankChanged=0; // flag indicating that the bank has been changed upon stomp switch release
-                                       // used to prohob action when the second stomp switch is released
+                                       // used to prohibit action when the second stomp switch is released
 const BwImageType* overlays[]={&editOverlay_streamimg, &settingsOverlay_streamimg, &aboutoverlay_streamimg, &fwUpgradeOverlay_streamimg};
 extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
