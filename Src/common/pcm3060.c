@@ -1,0 +1,177 @@
+
+#include "drivers/pcm3060.h"
+#include "stdint.h"
+#include "hardware/regs/addressmap.h"
+#include "hardware/regs/sio.h"
+#include "hardware/regs/io_bank0.h"
+#include "hardware/regs/resets.h"
+#include "hardware/rp2040_registers.h"
+#include "drivers/systick.h"
+#include "drivers/i2c.h"
+
+
+static uint8_t pcm3060Write(uint16_t data)
+{
+    uint8_t res=0;
+    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
+    {
+        setTargetAddress(PCM3060_I2C_ADDRESS);
+    }
+    res += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
+    res += masterTransmit((uint8_t)(data&0xFF),1);
+    return res;
+}
+
+static uint8_t pcm3060Read(uint8_t reg)
+{
+    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
+    {
+        setTargetAddress(PCM3060_I2C_ADDRESS);
+    }
+    masterTransmit(reg,1);
+    return masterReceive(1);
+}
+
+void pcm3060PowerDown()
+{
+    uint16_t regdata;
+    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
+    {
+        setTargetAddress(PCM3060_I2C_ADDRESS);
+    }
+    regdata = (PCM3060_R64 << 8) | (1 << PCM3060_R64_ADPSV) | (1 << PCM3060_R64_DAPSV); // power down
+    pcm3060Write(regdata);
+}
+
+void setupPCM3060()
+{
+    // reset
+    volatile uint8_t i2c_error = 0;
+
+    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
+    {
+        setTargetAddress(PCM3060_I2C_ADDRESS);
+    }
+
+    // switch on master oscillator
+    // reset low
+    *(GPIO_OUT + 2) = (1 << AUDIO_CODEC_RESET);
+    waitSysticks(1);
+    // reset high
+    *(GPIO_OUT + 1) = (1 << AUDIO_CODEC_RESET);
+    waitSysticks(1);
+
+
+    // master mode for adc, systemclock is 256*fs
+    i2c_error += pcm3060Write((PCM3060_R72 << 8) | (4 << PCM3060_R72_MS));
+
+    // disable power save, enable single ended mode
+    i2c_error += pcm3060Write((PCM3060_R64 << 8 )
+                |(0 << PCM3060_R64_ADPSV)
+                |(0 << PCM3060_R64_DAPSV)
+                |(1 << PCM3060_R64_MRST)
+                |(1 << PCM3060_R64_SRST)
+                |(1 << PCM3060_R64_SE)
+            );
+
+}
+
+/*
+    channel is either LEFT(1) RIGHT(0) or BOTH (2)
+    val: 1 means unmuted (on) and 0 means muted (off)
+*/
+void pcm3060SetInputState(uint8_t channel,uint8_t val)
+{
+    uint8_t regContent;
+    regContent = pcm3060Read(PCM3060_R73);
+    if (val)
+    {
+        if (channel==PCM3060_CHANNEL_BOTH)
+        {
+            regContent &= ~(3 << (PCM3060_R73_MUT));
+        }
+        else
+        {
+            regContent &= ~(1 << (PCM3060_R73_MUT+channel));
+        }
+    }
+    else
+    {
+        if (channel==PCM3060_CHANNEL_BOTH)
+        {
+            regContent |= (3 << (PCM3060_R73_MUT));
+        }
+        else
+        {
+            regContent |= (1 << (PCM3060_R73_MUT+channel));
+        }
+    }
+    pcm3060Write((PCM3060_R73 << 8) | regContent);
+}
+
+/*
+    channel is either LEFT (1), RIGHT (0) or BOTH 2
+    bit 0: channel Left, bit 1: channel right
+*/
+uint8_t pcm3060GetInputState()
+{
+    uint8_t regContent;
+    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
+    {
+        setTargetAddress(PCM3060_I2C_ADDRESS);
+    }
+    regContent = pcm3060Read(PCM3060_R73);
+    regContent &= 0x3;
+    regContent = ((regContent & 0x2) >> 1) | (regContent &0x1 << 1);
+    return regContent;
+}
+
+void pcm3060SetOutputVolume(uint8_t channel,uint8_t volume)
+{
+    uint16_t regData;
+    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
+    {
+        setTargetAddress(PCM3060_I2C_ADDRESS);
+    }
+
+    if (channel ==PCM3060_CHANNEL_LEFT || channel == PCM3060_CHANNEL_BOTH)
+    {
+        regData = (PCM3060_R65 << 8);
+    }
+    else
+    {
+        regData = (PCM3060_R66 << 8);
+    }
+    if (channel != PCM3060_CHANNEL_BOTH)
+    {
+        regData |= volume;
+        pcm3060Write(regData);
+    }
+    else
+    {
+        masterTransmit(PCM3060_R65,0);
+        masterTransmit(volume,0);
+        masterTransmit(volume,1);
+    }
+}
+
+
+/*
+returns the output volume for both channels
+LEFT is in the MSB, RIGHT in the LSB
+*/
+uint16_t pcm3060GetOutputVolume()
+{
+    uint16_t outval=0;
+    uint8_t channelVal;
+    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
+    {
+        setTargetAddress(PCM3060_I2C_ADDRESS);
+    }
+    masterTransmit(PCM3060_R65,1);
+    channelVal = masterReceive(0);
+    outval |= (channelVal << 8);
+    channelVal = masterReceive(0);
+    outval |= channelVal;
+    return outval;
+}

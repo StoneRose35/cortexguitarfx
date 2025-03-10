@@ -171,6 +171,7 @@
 #include "usb/usb_common.h"
 #include "usb/usb_cdc.h"
 #include "drivers/cs4270_audio_codec.h"
+#include "drivers/pcm3060.h"
 #include "drivers/debugLed.h"
 #include "consoleHandler.h"
 #include "apiHandler.h"
@@ -193,6 +194,7 @@
 #include "core1Main.h"
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
+#include "globalConfig.h"
 
 volatile uint32_t task=0;
 volatile uint8_t context;
@@ -259,15 +261,21 @@ int main(void)
 	#ifdef WM8731
 	initI2c(26);
 	#endif
-	#ifdef CS4270
+	#ifdef CS4270_AUDIO_CODEC
 	initI2c(CS4270_I2C_ADDRESS); //72 
+	#endif
+	#ifdef PCM3060_AUDIO_CODEC
+	initI2c(PCM3060_I2C_ADDRESS);
 	#endif
 	#ifdef WM8731
 	setupWm8731(SAMPLEDEPTH_16BIT,SAMPLERATE_48KHZ);
 	#endif
-	#ifdef CS4270
+	#ifdef CS4270_AUDIO_CODEC
 	setupCS4270();
-#endif
+	#endif
+	#ifdef PCM3060_AUDIO_CODEC
+	setupPCM3060();
+	#endif
 	startCore1(&core1Main);
 	// sync with core 1
 	while ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_VLD_LSB)) != (1 << SIO_FIFO_ST_VLD_LSB));

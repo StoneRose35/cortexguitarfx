@@ -69,7 +69,9 @@
         "stompswitches.h": "c",
         "bwgraphics.h": "c",
         "fxprograms.h": "c",
-        "romfunc.h": "c"
+        "romfunc.h": "c",
+        "rotencoderswitchpower.h": "c",
+        "chardisplay.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": true
