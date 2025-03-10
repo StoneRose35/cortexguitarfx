@@ -2814,7 +2814,6 @@
 	(hierarchical_label "codec_in_b"
 		(shape input)
 		(at 142.24 121.92 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2826,7 +2825,6 @@
 	(hierarchical_label "codec_sclk"
 		(shape input)
 		(at 91.44 123.19 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2838,7 +2836,6 @@
 	(hierarchical_label "codec_reset"
 		(shape input)
 		(at 102.87 124.46 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2850,7 +2847,6 @@
 	(hierarchical_label "codec_out_a_plus"
 		(shape input)
 		(at 147.32 121.92 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2862,7 +2858,6 @@
 	(hierarchical_label "codec_sdin"
 		(shape input)
 		(at 86.36 123.19 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2874,7 +2869,6 @@
 	(hierarchical_label "codec_vcom"
 		(shape input)
 		(at 149.86 121.92 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2886,7 +2880,6 @@
 	(hierarchical_label "SCL"
 		(shape input)
 		(at 99.06 123.19 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2898,7 +2891,6 @@
 	(hierarchical_label "codec_sdout"
 		(shape input)
 		(at 93.98 123.19 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2910,7 +2902,6 @@
 	(hierarchical_label "SDA"
 		(shape input)
 		(at 96.52 123.19 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2922,7 +2913,6 @@
 	(hierarchical_label "codec_out_b_plus"
 		(shape input)
 		(at 152.4 121.92 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2934,7 +2924,6 @@
 	(hierarchical_label "codec_lrckl"
 		(shape input)
 		(at 88.9 123.19 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2946,7 +2935,6 @@
 	(hierarchical_label "codec_in_a"
 		(shape input)
 		(at 139.7 121.92 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3104,7 +3092,7 @@
 		(at 91.44 39.37 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -3237,7 +3225,7 @@
 		(at 133.35 71.12 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -3304,7 +3292,7 @@
 		(at 128.27 101.6 180)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "367dadc1-6390-49ee-9d6b-4cd645dde20a")
@@ -3518,7 +3506,7 @@
 		(at 124.46 68.58 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "4019ae64-5658-48aa-b355-eba0583b3b3a")
@@ -3590,7 +3578,7 @@
 		(fields_autoplaced yes)
 		(uuid "46709b7d-1432-49f4-bf3e-278a991e632c")
 		(property "Reference" "C16"
-			(at 257.81 83.82 0)
+			(at 257.81 83.8199 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3598,8 +3586,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "0.1u"
-			(at 257.81 86.36 0)
+		(property "Value" "0.1uF"
+			(at 257.81 86.3599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3654,7 +3642,7 @@
 		(at 125.73 86.36 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "499793f0-56c9-4bf4-94d1-417f05884b82")
@@ -3786,7 +3774,7 @@
 		(at 123.19 93.98 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "6384d16f-9a08-4cfe-8d0d-85b06ebf0802")
@@ -3984,7 +3972,7 @@
 		(at 129.54 88.9 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "85d7e501-8854-4ff4-9072-30f9c15a224f")
@@ -4494,7 +4482,7 @@
 		(fields_autoplaced yes)
 		(uuid "e3f3fba4-355a-4155-ac88-6bbb3c89cd54")
 		(property "Reference" "C8"
-			(at 247.65 82.931 0)
+			(at 247.65 82.9309 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4502,8 +4490,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "10u"
-			(at 247.65 85.471 0)
+		(property "Value" "10uF"
+			(at 247.65 85.4709 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4564,15 +4552,15 @@
 		(fields_autoplaced yes)
 		(uuid "ed1e2d52-05c0-4d6e-a543-895e1a378f0b")
 		(property "Reference" "X1"
-			(at 110.0009 43.5316 0)
+			(at 116.84 40.6714 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "SG-5032CAN"
-			(at 110.0009 46.0685 0)
+		(property "Value" "SG-5032CAN 12.288MHz"
+			(at 116.84 43.2114 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4704,7 +4692,7 @@
 		(at 133.35 101.6 180)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "fc356a0e-6d91-4f68-b768-c8b533d8b88f")

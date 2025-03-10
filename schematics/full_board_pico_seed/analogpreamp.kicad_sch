@@ -4321,7 +4321,6 @@
 	(hierarchical_label "VCom"
 		(shape input)
 		(at 88.9 34.29 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4333,7 +4332,6 @@
 	(hierarchical_label "DacR+"
 		(shape input)
 		(at 134.62 88.9 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4345,7 +4343,6 @@
 	(hierarchical_label "Mic"
 		(shape input)
 		(at 116.84 62.23 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4357,7 +4354,6 @@
 	(hierarchical_label "DacL+"
 		(shape input)
 		(at 125.73 48.26 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4369,7 +4365,6 @@
 	(hierarchical_label "Right Analog Out"
 		(shape output)
 		(at 177.8 81.28 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4381,7 +4376,6 @@
 	(hierarchical_label "Left Analog Out"
 		(shape output)
 		(at 176.53 30.48 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4393,7 +4387,6 @@
 	(hierarchical_label "HiZ"
 		(shape input)
 		(at 91.44 140.97 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5026,7 +5019,7 @@
 		(at 34.29 57.15 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -5056,7 +5049,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" " ~"
+		(property "Datasheet" "~"
 			(at 34.29 57.15 0)
 			(effects
 				(font
@@ -5162,7 +5155,7 @@
 		(at 207.01 27.94 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -5192,7 +5185,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" " ~"
+		(property "Datasheet" "~"
 			(at 207.01 27.94 0)
 			(effects
 				(font
@@ -6010,7 +6003,7 @@
 		(at 87.63 140.97 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -6149,7 +6142,7 @@
 		(at 115.57 62.23 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -7379,7 +7372,7 @@
 		(at 210.82 81.28 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -7409,7 +7402,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" " ~"
+		(property "Datasheet" "~"
 			(at 210.82 81.28 0)
 			(effects
 				(font
@@ -8821,7 +8814,7 @@
 		(at 99.06 69.85 270)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "d6c3ad92-ca42-4a10-ab71-71ce0c88bb6d")
@@ -8891,7 +8884,7 @@
 		(at 76.2 64.77 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -9528,7 +9521,7 @@
 		(at 22.86 134.62 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -9662,7 +9655,7 @@
 		(at 77.47 34.29 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -9729,7 +9722,7 @@
 		(at 114.3 73.66 180)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "fb1c95ed-ea71-4cda-a2ab-eeb173ef25e8")
