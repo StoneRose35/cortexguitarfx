@@ -72,7 +72,7 @@ int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType * data
     int16_t * delayMemoryPointer = getDelayMemoryPointer();
     int16_t sampleOut;
     int16_t deltaIndex;
-    int16_t delayPointerTemp;
+    int16_t delayPointerTemp=0;
 
     if (data->delayIncrement > 4)
     {
