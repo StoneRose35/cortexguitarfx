@@ -29,4 +29,5 @@
 /schematics/guitarpreamp/report.txt
 /schematics/guitarpreamp_sim/guitarpreamp_sim-backups/*
 /schematics/guitarpreamp_sim/TL072.301
+__pycache__/
 
