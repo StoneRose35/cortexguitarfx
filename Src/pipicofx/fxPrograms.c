@@ -19,6 +19,7 @@ FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     &fxProgram13, // hadamard diffusor reverb
     &fxProgram16, // pitch shifter
     &fxProgram17, // shimmer reverb
+    &fxProgram18, // tremolo
     &fxProgram3 // Off
     };
 

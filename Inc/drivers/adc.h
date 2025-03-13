@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #define AUDIO_INPUT_BUFFER_SIZE 16
-#define AUDIO_SAMPLING_RATE 48000
 #define UI_UPDATE_RATE 10
 
 

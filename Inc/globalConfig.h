@@ -1,6 +1,7 @@
 #ifndef __GLOBAL_CONFIG_H_
 #define __GLOBAL_CONFIG_H_
 
+#define AUDIO_SAMPLING_RATE 48000
 
 // uncomment if compiling for useage with the stomp extension board
 #define EXTENSION_BOARD

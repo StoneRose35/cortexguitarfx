@@ -1,3 +1,4 @@
+#include "globalConfig.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/adc.h"
