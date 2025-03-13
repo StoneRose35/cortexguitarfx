@@ -160,7 +160,7 @@
 #include "drivers/datetimeClock.h"
 #include "drivers/systick.h"
 #include "drivers/uart.h"
-#include "consoleBase.h"
+//#include "consoleBase.h"
 #include "drivers/dma.h"
 #include "drivers/pio.h"
 #include "drivers/adc.h"
@@ -195,12 +195,12 @@
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
 #include "globalConfig.h"
-
+#include "stdio.h"
 volatile uint32_t task=0;
 volatile uint8_t context;
 
 
-CommBufferType usbCommBuffer __attribute__((aligned (256)));
+//CommBufferType usbCommBuffer __attribute__((aligned (256)));
 ConsoleType usbConsole;
 ApiType usbApi;
 BufferedInputType bufferedInput;
@@ -287,9 +287,6 @@ int main(void)
 	}
 
 
-
-
-
 	//initUSB();
 	//initUart(57600,&usbCommBuffer);
 
@@ -322,7 +319,7 @@ int main(void)
 		}
 	}
 	enterLevel0(&piPicoUiController);
-	initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
+	//initCliApi(&bufferedInput,&usbConsole,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 
 
 

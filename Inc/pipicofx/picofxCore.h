@@ -23,7 +23,7 @@ typedef struct {
     int16_t increment;
     const getParameterValueFct getParameterValue; // returns the converted parameter value, data type depends on the implementation
     const getParameterDisplayFct getParameterDisplay; // returns the display value as a string of a Parameter
-    paramChangeCallback setParameter; // sets the parameter in a meaningful way in the individual program
+    const paramChangeCallback setParameter; // sets the parameter in a meaningful way in the individual program
 } FxProgramParameterType;
 
 typedef struct {

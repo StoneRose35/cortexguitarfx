@@ -1,6 +1,7 @@
 #include "drivers/adc.h"
 #include "drivers/dma.h"
 #include "system.h"
+#include "globalConfig.h"
 #include "drivers/irq.h"
 #include "hardware/regs/resets.h"
 #include "hardware/regs/addressmap.h"
@@ -107,7 +108,7 @@ void initDoubleBufferedReading(uint8_t channelnr)
     *(PADS_ADC0 + channelnr) &= ~(1 << PADS_BANK0_GPIO26_OD_LSB);
 
     // set samping rate
-    //*ADC_DIV=((F_ADC_USB/AUDIO_SAMPLING_RATE) - 1) << 8; 
+    *ADC_DIV=((F_ADC_USB/AUDIO_SAMPLING_RATE) - 1) << 8; 
 
     // enable fifo and dreq and set thresh to 1
     *ADC_FCS = (1 << ADC_FCS_EN_LSB) | (1 << ADC_FCS_DREQ_EN_LSB) | (1 << ADC_FCS_THRESH_LSB); 
