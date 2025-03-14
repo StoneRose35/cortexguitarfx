@@ -185,7 +185,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",
-            "args": [ "-p", "./audiosamples/tele_middle_bluespicking.wav", "11", "790", "4095", "4095"],
+            "args": [ "-p", "./audiosamples/tele_middle_bluespicking.wav", "13", "790", "4095", "2048","17"],
             "cwd": "${workspaceFolder}/Tests",
             "stopAtEntry": false,
             "environment": [],

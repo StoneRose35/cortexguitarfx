@@ -1,5 +1,6 @@
 #include "audio/phaseDistortedSineSquare.h"
 #include "globalConfig.h"
+#include "romfunc.h"
 const int16_t sinetable[1024]={
 0,
 201,
@@ -1035,28 +1036,45 @@ int16_t phaseDistortedSineSquareNextSample(PhaseDistortedSineSquareType*data)
     }
     else
     {
-        data->currentPhase += data->phaseIncrement - data->phaseIncrementCorrection1;
+        data->currentPhase += data->phaseIncrement + data->phaseIncrementCorrection2;
     }
     data->currentPhase &= 0xFFFF;
-    return (sinetable[data->currentPhase>>6] * (0xFF - data->squareRatio) + (((data->currentPhase & 0x8000)-0x4000) << 1)*data->squareRatio) >> 8;
+    return (sinetable[data->currentPhase>>6] * (0xFF - data->squareRatio) - (((data->currentPhase & 0x8000)-0x4000) << 1)*data->squareRatio) >> 8;
 };
 
 void phaseDistortedSineSquarePulseWidth(int16_t value,PhaseDistortedSineSquareType*data)
 {
-    data->phaseIncrementCorrection1 = (value*(data->phaseIncrement >> 1) >> 15);
-    data->phaseIncrementCorrection2 = -(value*(data->phaseIncrement >> 1) >> 15);
+    if (value <= 0)
+    {
+        data->phaseIncrementCorrection1 = ((value*(data->phaseIncrement >> 1)) >> 15);
+        float pi_f = int2float(data->phaseIncrement);
+        float corr_f = int2float(data->phaseIncrementCorrection1);
+
+        data->phaseIncrementCorrection2 = float2int(-(pi_f*(pi_f + corr_f))/(pi_f - 2.0f*(pi_f + corr_f))-pi_f); // data->phaseIncrement*(data->phaseIncrement+data->phaseIncrementCorrection1)/(data->phaseIncrement - 2*(data->phaseIncrement + data->phaseIncrementCorrection1));
+    }
+    else
+    {
+        data->phaseIncrementCorrection1 = ((-value*(data->phaseIncrement >> 1)) >> 15);
+        float pi_f = int2float(data->phaseIncrement);
+        float corr_f = int2float(data->phaseIncrementCorrection1);
+
+        data->phaseIncrementCorrection2 = float2int(-(pi_f*(pi_f + corr_f))/(pi_f - 2.0f*(pi_f + corr_f))-pi_f); 
+        int32_t swap = data->phaseIncrementCorrection1;
+        data->phaseIncrementCorrection1 = data->phaseIncrementCorrection2;
+        data->phaseIncrementCorrection2 = swap;
+    }
     data->pulseWidth = value;
 };
 
 
 void phaseDistortedSineSquareSetFrequency(float f,PhaseDistortedSineSquareType*data)
 {
-    float n_samples = ((float)AUDIO_SAMPLING_RATE)/f;
+    float n_samples = ((float)PHASE_DISTORTED_SINE_SQUARE_SR)/f;
     data->phaseIncrement = 0xFFFF/((int16_t)n_samples);
     phaseDistortedSineSquarePulseWidth(data->pulseWidth,data);
 }
 
 float phaseDistortedSineSquareGetFrequency(PhaseDistortedSineSquareType*data)
 {
-    return (((float)data->phaseIncrement)/65535.0f)*((float)AUDIO_SAMPLING_RATE);
+    return (((float)data->phaseIncrement)/65535.0f)*((float)PHASE_DISTORTED_SINE_SQUARE_SR);
 }

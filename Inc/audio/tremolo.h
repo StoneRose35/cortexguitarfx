@@ -4,9 +4,6 @@
 #include "audio/phaseDistortedSineSquare.h"
 
 
-#define TREMOLO_LFO_UPDATE_DIV_POW2 5
-#define TREMOLO_LFO_UPDATE_DIV (1<<TREMOLO_LFO_UPDATE_DIV_POW2)
-
  typedef struct {
     int16_t depth;
     uint16_t lfoUpdateCnt;

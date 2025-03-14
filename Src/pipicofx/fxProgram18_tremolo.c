@@ -14,7 +14,7 @@ int16_t fxProgram18processSample(int16_t sampleIn,void*data)
 static void fxProgramParam1Callback(uint16_t val,void*data) // Rate
 {
     FxProgram18DataType* pData= (FxProgram18DataType*)data;
-    float rateVal = ((float)val)/400.f + 0.2f;
+    float rateVal = ((float)val)/200.f + 0.2f;
     phaseDistortedSineSquareSetFrequency(rateVal,&pData->tremolo.modulator);
     fxProgram18.parameters[0].rawValue = val;
 }
@@ -22,9 +22,9 @@ static void fxProgramParam1Callback(uint16_t val,void*data) // Rate
 static void fxProgramParam1Display(void*data,char*res)
 {
     FxProgram18DataType* pData= (FxProgram18DataType*)data;
-    float f = phaseDistortedSineSquareGetFrequency(&pData->tremolo.modulator)*100.0;
+    float f = phaseDistortedSineSquareGetFrequency(&pData->tremolo.modulator)*8.0f;
     uint16_t intf = (uint16_t)float2int(f);
-    fixedPointInt16ToChar(res,intf,2);
+    fixedPointInt16ToChar(res,intf,3);
     appendToString(res," Hz");
 
 }
@@ -62,6 +62,7 @@ static void fxProgramParam4Callback(uint16_t val,void*data) // Pulse Width
 {
     FxProgram18DataType* pData= (FxProgram18DataType*)data;
     pData->tremolo.modulator.pulseWidth = ((int16_t)val - 2048) << 4;
+    phaseDistortedSineSquarePulseWidth(pData->tremolo.modulator.pulseWidth,&pData->tremolo.modulator);
     fxProgram18.parameters[3].rawValue = val;
 }
 
@@ -121,7 +122,7 @@ FxProgramType fxProgram18 = {
         },
         {
             .name="PulseWidth",
-            .control=2,
+            .control=255,
             .increment=16,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam4Display,
