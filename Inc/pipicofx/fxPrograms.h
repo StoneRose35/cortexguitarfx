@@ -249,6 +249,7 @@ typedef struct
 {
 
     Pitchshifter2DataType pitchShifter;
+    FirstOrderIirType glitterTamer;
     DelayDataType delays[4];
     AllpassType allpasses[2];
     int16_t oldVal;

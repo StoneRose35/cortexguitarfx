@@ -10,15 +10,15 @@ int16_t fxProgram17processSample(int16_t sampleIn,void*data)
     int32_t sampleProc = sampleIn;// + ((pData->feedback*pData->oldVal) >> 15);
     volatile uint32_t * audioStatePtr = getAudioStatePtr();
     int32_t summedDelay=0;
-    sampleProc = delayLineProcessSample(sampleProc,pData->delays+3);
+    
     summedDelay += delayLineProcessSample(sampleProc,pData->delays);
     summedDelay += delayLineProcessSample(sampleProc,pData->delays+1);
     summedDelay += delayLineProcessSample(sampleProc,pData->delays+2);
-    //summedDelay += delayLineProcessSample(sampleProc,pData->delays+3);
     summedDelay = clip(summedDelay,audioStatePtr);
     sampleProc = summedDelay;
     sampleProc = allpassProcessSample(sampleProc,pData->allpasses,audioStatePtr);
     sampleProc = allpassProcessSample(sampleProc,pData->allpasses+1,audioStatePtr);
+    sampleProc = delayLineProcessSample(sampleProc,pData->delays+3);
     pData->oldVal = sampleProc;
     return ((((1 << 15) - pData->mix)*sampleIn) >> 15) + ((pData->mix*sampleProc) >> 15);
 }
@@ -120,12 +120,22 @@ FxProgram17DataType fxProgram17data=
 {
     .pitchShifter.currentDelayPosition=0,
     .pitchShifter.delayIncrement=8,
-    .pitchShifter.buffersizePowerTwo = 11,  // longest buffer size in program 16
-    .pitchShifter.crossFadeWidthPwr2=7,
+    .pitchShifter.buffersizePowerTwo = 12,  // longest buffer size in program 16
+    .pitchShifter.crossFadeWidthPwr2=10,
+    .glitterTamer.alpha = 20000,
+    .glitterTamer.oldVal = 0,
+    .glitterTamer.oldXVal = 0,
     .mix=0,
     .oldVal = 0,
     .feedback = 0
 };
+
+int16_t unicornGlitter(int16_t sampleIn,Pitchshifter2DataType*data,volatile uint32_t * audioState)
+{
+    FxProgram17DataType* pData= (FxProgram17DataType*)data;
+    sampleIn = pitchShifter2ProcessSample(sampleIn,&pData->pitchShifter,audioState);
+    return firstOrderIirLowpassProcessSample(sampleIn,&pData->glitterTamer);
+}
 
 void fxProgram17Setup(void*data)
 {
@@ -133,35 +143,35 @@ void fxProgram17Setup(void*data)
     FxProgram17DataType * pData = (FxProgram17DataType*)data;
     initPitchshifter2(&pData->pitchShifter);
 
-    initDelay(pData->delays,delayMemoryPointer+2048,4096);
+    initDelay(pData->delays,delayMemoryPointer+4096,256);
     pData->delays[0].delayInSamples = 149;
     pData->delays[0].mix = ((1 << 15) -1) ;
-    initDelay(pData->delays+1,delayMemoryPointer+4096+2048,4096);
+    initDelay(pData->delays+1,delayMemoryPointer+256+4096,512);
     pData->delays[1].delayInSamples = 337;
     pData->delays[1].mix = ((1 << 15) -1) ;
-    initDelay(pData->delays+2,delayMemoryPointer+2*4096+2048,4096);
+    initDelay(pData->delays+2,delayMemoryPointer+512+256+4096,2048);
     pData->delays[2].delayInSamples = 1597;
     pData->delays[2].mix = ((1 << 15) -1) ;
-    initDelay(pData->delays+3,delayMemoryPointer+3*4096+2048,4096);
+    initDelay(pData->delays+3,delayMemoryPointer+2048+512+256+4096,4096);
     pData->delays[3].delayInSamples = 3989;
     pData->delays[3].mix = ((1 << 15) -1) ;
-    pData->delays[3].feedbackFunction = (AudioProcessor)pitchShifter2ProcessSample;
-    pData->delays[3].feebackData = &pData->pitchShifter;
+    pData->delays[3].feedbackFunction = (AudioProcessor)unicornGlitter;
+    pData->delays[3].feebackData = pData;
 
-    pData->allpasses[0].delayLineIn = delayMemoryPointer + 4*4096+2048;
-    pData->allpasses[0].delayLineOut = delayMemoryPointer + 4*4096+ 1024+2048;
+    pData->allpasses[0].delayLineIn = delayMemoryPointer + 4096+2048+512+256+4096;
+    pData->allpasses[0].delayLineOut = delayMemoryPointer + 1024+4096+2048+512+256+4096;
     pData->allpasses[0].coefficient = 22936;
     pData->allpasses[0].delayPtr = 0;
     pData->allpasses[0].oldValues = 0;
     pData->allpasses[0].delayInSamples=617;
     pData->allpasses[0].bufferSize = 0x3FF;
 
-    pData->allpasses[1].delayLineIn = delayMemoryPointer + 4*4096+2*1024+2048;
-    pData->allpasses[1].delayLineOut = delayMemoryPointer + 4*4096+ 3*1024+2048;
+    pData->allpasses[1].delayLineIn = delayMemoryPointer + 1024+1024+4096+2048+512+256+4096;
+    pData->allpasses[1].delayLineOut = delayMemoryPointer + 1024+1024+1024+4096+2048+512+256+4096;
     pData->allpasses[1].coefficient = 22936;
     pData->allpasses[1].delayPtr = 0;
     pData->allpasses[1].oldValues = 0;
-    pData->allpasses[1].delayInSamples=617;
+    pData->allpasses[1].delayInSamples=907;
     pData->allpasses[1].bufferSize = 0x3FF;
 }
 

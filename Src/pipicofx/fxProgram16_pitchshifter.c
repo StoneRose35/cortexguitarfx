@@ -77,6 +77,7 @@ static void fxProgramParam3Callback(uint16_t val,void*data) // BufferSize
     if (newVal != pData->pitchShifter.buffersizePowerTwo)
     {
         pData->pitchShifter.buffersizePowerTwo=newVal;
+        pData->pitchShifter.crossFadeWidthPwr2 = newVal-2;
         initPitchshifter2(&pData->pitchShifter);
     }
     fxProgram16.parameters[1].rawValue = val;
@@ -108,7 +109,7 @@ FxProgram16DataType fxProgram16data=
 {
     .pitchShifter.currentDelayPosition=0,
     .pitchShifter.delayIncrement=0x4,
-    .pitchShifter.crossFadeWidthPwr2=7
+    .pitchShifter.crossFadeWidthPwr2=8
 };
 
 FxProgramType fxProgram16 = {
