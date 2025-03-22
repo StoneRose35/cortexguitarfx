@@ -52,6 +52,8 @@ void setupPCM3060()
     {
         setTargetAddress(PCM3060_I2C_ADDRESS);
     }
+    *GPIO_OE |= (1 << AUDIO_CODEC_RESET);
+    *AUDIO_CODEC_RESET_PIN_CNTR = 5;
 
     // switch on master oscillator
     // reset low

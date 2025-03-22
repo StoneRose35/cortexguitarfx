@@ -10,10 +10,10 @@
 #define JOYIT_128X64_DISPLAY
 
 // use CS4270 audio codec
-#define CS4270_AUDIO_CODEC
+//#define CS4270_AUDIO_CODEC
 
 // use PCM3060 audio codec
-//#define PCM3060_AUDIO_CODEC
+#define PCM3060_AUDIO_CODEC
 
 //------------------------------------------
 // derived definitions
