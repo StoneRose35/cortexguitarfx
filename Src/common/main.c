@@ -258,6 +258,7 @@ int main(void)
 	initTimer();
 	initAdc();
 	initDatetimeClock();
+	initI2SSlave();
 	#ifdef WM8731
 	initI2c(26);
 	#endif
@@ -328,11 +329,9 @@ int main(void)
 	ticStart=0;
 	programsToInitialize[0]=0xFF;
 
-	#ifdef WM8731
-	initI2SSlave();
-	#else
-	initI2SSlave();
-	#endif
+
+
+
     /* Loop forever */
 	for(;;)
 	{
