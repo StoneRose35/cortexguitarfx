@@ -3,7 +3,7 @@
 
 #include "stdint.h"
 
-#define PCM3060_I2C_ADDRESS 35
+#define PCM3060_I2C_ADDRESS 70
 
 #define PCM3060_R64 64
 #define PCM3060_R65 65
