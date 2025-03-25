@@ -4424,7 +4424,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "01bdc92a-013a-4763-867c-86382a01f473")
-		(property "Reference" "R27"
+		(property "Reference" "R15"
 			(at 184.15 105.41 90)
 			(effects
 				(font
@@ -4476,7 +4476,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R27")
+					(reference "R15")
 					(unit 1)
 				)
 			)
@@ -4491,7 +4491,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "020ff0e8-fe31-4de6-a68c-869312570bc4")
-		(property "Reference" "U4"
+		(property "Reference" "U1"
 			(at 69.85 58.42 0)
 			(effects
 				(font
@@ -4561,7 +4561,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U4")
+					(reference "U1")
 					(unit 1)
 				)
 			)
@@ -4642,7 +4642,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "05295848-8c21-4c1f-8c4e-b8ffb42435b2")
-		(property "Reference" "R20"
+		(property "Reference" "R13"
 			(at 143.51 93.98 90)
 			(effects
 				(font
@@ -4694,7 +4694,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R20")
+					(reference "R13")
 					(unit 1)
 				)
 			)
@@ -4709,7 +4709,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "05d22e9d-3d10-44ac-a798-55619d8c49f7")
-		(property "Reference" "R28"
+		(property "Reference" "R9"
 			(at 179.07 55.88 90)
 			(effects
 				(font
@@ -4761,7 +4761,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R28")
+					(reference "R9")
 					(unit 1)
 				)
 			)
@@ -4909,7 +4909,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "106831ea-e49e-4c45-b924-1028efd2ffea")
-		(property "Reference" "R32"
+		(property "Reference" "R26"
 			(at 180.34 35.56 90)
 			(effects
 				(font
@@ -4961,7 +4961,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R32")
+					(reference "R26")
 					(unit 1)
 				)
 			)
@@ -4976,7 +4976,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "155e7f44-6ffb-4c05-a27d-5b6b330f4001")
-		(property "Reference" "R2"
+		(property "Reference" "R1"
 			(at 40.64 60.96 90)
 			(effects
 				(font
@@ -5028,7 +5028,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R2")
+					(reference "R1")
 					(unit 1)
 				)
 			)
@@ -5180,7 +5180,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "1a368e1b-5008-4901-8869-72d210b43ea3")
-		(property "Reference" "J8"
+		(property "Reference" "J5"
 			(at 207.01 19.2872 0)
 			(effects
 				(font
@@ -5235,7 +5235,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "J8")
+					(reference "J5")
 					(unit 1)
 				)
 			)
@@ -5250,7 +5250,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "221ad1f6-e636-4ea8-a400-b5d1bfe8d32b")
-		(property "Reference" "C21"
+		(property "Reference" "C15"
 			(at 128.27 99.06 90)
 			(effects
 				(font
@@ -5302,7 +5302,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C21")
+					(reference "C15")
 					(unit 1)
 				)
 			)
@@ -5384,7 +5384,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "24f59345-afe4-4228-9e99-3a82d3a7cd71")
-		(property "Reference" "R10"
+		(property "Reference" "R16"
 			(at 212.09 97.79 0)
 			(effects
 				(font
@@ -5438,7 +5438,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R10")
+					(reference "R16")
 					(unit 1)
 				)
 			)
@@ -5519,7 +5519,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "2937f8a4-c617-47c3-809c-bb5ce1339e96")
-		(property "Reference" "R35"
+		(property "Reference" "R24"
 			(at 215.9 50.8 0)
 			(effects
 				(font
@@ -5573,7 +5573,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R35")
+					(reference "R24")
 					(unit 1)
 				)
 			)
@@ -5589,7 +5589,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2ab378fd-eae2-4e9c-8ec4-2730223c54f9")
-		(property "Reference" "C7"
+		(property "Reference" "C9"
 			(at 110.871 54.61 90)
 			(effects
 				(font
@@ -5641,7 +5641,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C7")
+					(reference "C9")
 					(unit 1)
 				)
 			)
@@ -5721,7 +5721,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "35b4e7b3-cfe0-4d6c-809d-4f060caeba1a")
-		(property "Reference" "R25"
+		(property "Reference" "R12"
 			(at 163.83 53.34 90)
 			(effects
 				(font
@@ -5773,7 +5773,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R25")
+					(reference "R12")
 					(unit 1)
 				)
 			)
@@ -5788,7 +5788,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "375bc2cb-0a68-44ad-bd83-c2e300e87728")
-		(property "Reference" "U9"
+		(property "Reference" "U3"
 			(at 158.75 82.55 0)
 			(effects
 				(font
@@ -5876,7 +5876,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U9")
+					(reference "U3")
 					(unit 4)
 				)
 			)
@@ -5891,7 +5891,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "396d1231-fe60-41a2-b766-00f1c89dd2d0")
-		(property "Reference" "C28"
+		(property "Reference" "C11"
 			(at 137.16 82.55 0)
 			(effects
 				(font
@@ -5945,7 +5945,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C28")
+					(reference "C11")
 					(unit 1)
 				)
 			)
@@ -6029,7 +6029,7 @@
 		(fields_autoplaced yes)
 		(uuid "4edf5727-6d4b-49f0-86af-501c3a33e760")
 		(property "Reference" "RV2"
-			(at 85.09 139.7 0)
+			(at 85.09 139.6999 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6037,8 +6037,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "10k"
-			(at 85.09 142.24 0)
+		(property "Value" "50k"
+			(at 85.09 142.2399 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6167,7 +6167,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5b0f1d8f-61e3-40dd-82b8-72f1da19d2ca")
-		(property "Reference" "TP3"
+		(property "Reference" "TP1"
 			(at 118.11 57.658 0)
 			(effects
 				(font
@@ -6218,7 +6218,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "TP3")
+					(reference "TP1")
 					(unit 1)
 				)
 			)
@@ -6233,7 +6233,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5b897bd9-904e-45c0-931c-2494b63164bf")
-		(property "Reference" "R41"
+		(property "Reference" "R35"
 			(at 50.8 151.13 0)
 			(effects
 				(font
@@ -6287,7 +6287,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R41")
+					(reference "R35")
 					(unit 1)
 				)
 			)
@@ -6302,7 +6302,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "632ef020-cafc-4d54-8971-813f8d592958")
-		(property "Reference" "C10"
+		(property "Reference" "C27"
 			(at 41.91 157.48 0)
 			(effects
 				(font
@@ -6356,7 +6356,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C10")
+					(reference "C27")
 					(unit 1)
 				)
 			)
@@ -6371,7 +6371,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "648b6dc9-8137-4ca1-95a0-b7f7cbd2a3e6")
-		(property "Reference" "C27"
+		(property "Reference" "C14"
 			(at 130.81 41.91 0)
 			(effects
 				(font
@@ -6425,7 +6425,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C27")
+					(reference "C14")
 					(unit 1)
 				)
 			)
@@ -6441,7 +6441,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "65689354-2f98-4776-b203-6bccdb6f3e7f")
-		(property "Reference" "R40"
+		(property "Reference" "R6"
 			(at 52.07 123.19 0)
 			(effects
 				(font
@@ -6495,7 +6495,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R40")
+					(reference "R6")
 					(unit 1)
 				)
 			)
@@ -6510,7 +6510,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "67cdca7d-4618-48ec-a17b-b4b8c01d87bb")
-		(property "Reference" "R6"
+		(property "Reference" "R19"
 			(at 204.47 100.33 90)
 			(effects
 				(font
@@ -6562,7 +6562,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R6")
+					(reference "R19")
 					(unit 1)
 				)
 			)
@@ -6578,7 +6578,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6c9b8cb6-ec4f-485c-b117-9f212f42bb94")
-		(property "Reference" "D9"
+		(property "Reference" "D1"
 			(at 38.1 137.16 90)
 			(effects
 				(font
@@ -6632,7 +6632,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "D9")
+					(reference "D1")
 					(unit 1)
 				)
 			)
@@ -6647,7 +6647,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "7993a2c1-6dce-44ec-9574-d70420682e61")
-		(property "Reference" "R22"
+		(property "Reference" "R10"
 			(at 132.08 48.26 90)
 			(effects
 				(font
@@ -6699,7 +6699,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R22")
+					(reference "R10")
 					(unit 1)
 				)
 			)
@@ -6715,7 +6715,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "7de3015d-dd1e-401e-a685-75ca4a066bd3")
-		(property "Reference" "R31"
+		(property "Reference" "R8"
 			(at 223.52 92.71 0)
 			(effects
 				(font
@@ -6769,7 +6769,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R31")
+					(reference "R8")
 					(unit 1)
 				)
 			)
@@ -6784,7 +6784,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "7f911b4e-0325-4286-9302-767a964adfd9")
-		(property "Reference" "C4"
+		(property "Reference" "C7"
 			(at 101.6 77.47 90)
 			(effects
 				(font
@@ -6836,7 +6836,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C4")
+					(reference "C7")
 					(unit 1)
 				)
 			)
@@ -6851,7 +6851,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8077650a-a2b1-470f-b586-056c5c3e3141")
-		(property "Reference" "C42"
+		(property "Reference" "C3"
 			(at 45.72 71.12 90)
 			(effects
 				(font
@@ -6903,7 +6903,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C42")
+					(reference "C3")
 					(unit 1)
 				)
 			)
@@ -6918,7 +6918,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "811ef952-361c-4b94-a330-b87f4e0771a0")
-		(property "Reference" "U9"
+		(property "Reference" "U3"
 			(at 106.68 118.11 0)
 			(effects
 				(font
@@ -7008,7 +7008,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U9")
+					(reference "U3")
 					(unit 5)
 				)
 			)
@@ -7089,7 +7089,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8288441f-b986-491d-b17b-7f396c798244")
-		(property "Reference" "C22"
+		(property "Reference" "C10"
 			(at 128.27 60.96 90)
 			(effects
 				(font
@@ -7141,7 +7141,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C22")
+					(reference "C10")
 					(unit 1)
 				)
 			)
@@ -7156,7 +7156,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8363c5e2-e2ce-42e3-b5c7-1c1157f0d023")
-		(property "Reference" "R30"
+		(property "Reference" "R14"
 			(at 189.23 83.82 90)
 			(effects
 				(font
@@ -7208,7 +7208,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R30")
+					(reference "R14")
 					(unit 1)
 				)
 			)
@@ -7223,7 +7223,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "860fe72c-c6fe-424f-a4fe-0cf95993915a")
-		(property "Reference" "U7"
+		(property "Reference" "U2"
 			(at 118.11 118.11 0)
 			(effects
 				(font
@@ -7295,7 +7295,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U7")
+					(reference "U2")
 					(unit 3)
 				)
 			)
@@ -7311,7 +7311,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8934afd1-2b65-4428-8d50-5ba3071fc609")
-		(property "Reference" "U7"
+		(property "Reference" "U2"
 			(at 58.42 127 0)
 			(effects
 				(font
@@ -7381,7 +7381,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U7")
+					(reference "U2")
 					(unit 2)
 				)
 			)
@@ -7397,7 +7397,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "897bc85e-b7ab-408f-8af8-ab9f3bb39862")
-		(property "Reference" "J7"
+		(property "Reference" "J6"
 			(at 210.82 72.6272 0)
 			(effects
 				(font
@@ -7452,7 +7452,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "J7")
+					(reference "J6")
 					(unit 1)
 				)
 			)
@@ -7467,7 +7467,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8d4f3ac5-4a74-48ca-9374-f2e83085f619")
-		(property "Reference" "C3"
+		(property "Reference" "C12"
 			(at 168.91 80.01 90)
 			(effects
 				(font
@@ -7519,7 +7519,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C3")
+					(reference "C12")
 					(unit 1)
 				)
 			)
@@ -7603,7 +7603,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8ef1e03d-f2c8-4f2c-bccb-c452c04fc303")
-		(property "Reference" "R33"
+		(property "Reference" "R22"
 			(at 203.2 53.34 90)
 			(effects
 				(font
@@ -7655,7 +7655,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R33")
+					(reference "R22")
 					(unit 1)
 				)
 			)
@@ -7671,7 +7671,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "95006ce7-aad0-4923-acfc-f3ccd3239947")
-		(property "Reference" "C20"
+		(property "Reference" "C6"
 			(at 74.041 129.54 90)
 			(effects
 				(font
@@ -7723,7 +7723,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C20")
+					(reference "C6")
 					(unit 1)
 				)
 			)
@@ -7869,7 +7869,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a61aa03d-c28f-4b7a-9366-1a5904099d16")
-		(property "Reference" "U9"
+		(property "Reference" "U3"
 			(at 181.61 40.64 0)
 			(effects
 				(font
@@ -7957,7 +7957,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U9")
+					(reference "U3")
 					(unit 2)
 				)
 			)
@@ -7972,7 +7972,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a96e1c71-5e42-48cb-b5e5-3c38ff96b17e")
-		(property "Reference" "R42"
+		(property "Reference" "R34"
 			(at 64.77 140.97 90)
 			(effects
 				(font
@@ -8026,7 +8026,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R42")
+					(reference "R34")
 					(unit 1)
 				)
 			)
@@ -8042,7 +8042,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "abc12429-0bca-4715-bf03-1dcd9a17a208")
-		(property "Reference" "C19"
+		(property "Reference" "C4"
 			(at 45.339 127 90)
 			(effects
 				(font
@@ -8094,7 +8094,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C19")
+					(reference "C4")
 					(unit 1)
 				)
 			)
@@ -8242,7 +8242,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b4fa5a4b-6add-43ab-8db5-4a48948969e3")
-		(property "Reference" "U7"
+		(property "Reference" "U2"
 			(at 97.79 52.07 0)
 			(effects
 				(font
@@ -8312,7 +8312,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U7")
+					(reference "U2")
 					(unit 1)
 				)
 			)
@@ -8327,7 +8327,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "b6c91804-1766-439f-b4e2-6f48563ee355")
-		(property "Reference" "C18"
+		(property "Reference" "C25"
 			(at 60.96 157.48 90)
 			(effects
 				(font
@@ -8379,7 +8379,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C18")
+					(reference "C25")
 					(unit 1)
 				)
 			)
@@ -8394,7 +8394,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bb677f64-6f52-490a-9f67-992eee6f862c")
-		(property "Reference" "U9"
+		(property "Reference" "U3"
 			(at 182.88 88.9 0)
 			(effects
 				(font
@@ -8482,7 +8482,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U9")
+					(reference "U3")
 					(unit 3)
 				)
 			)
@@ -8498,7 +8498,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c0bf5ea4-87b9-46dc-a415-9ed9104f8443")
-		(property "Reference" "C17"
+		(property "Reference" "C18"
 			(at 166.751 30.48 90)
 			(effects
 				(font
@@ -8550,7 +8550,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C17")
+					(reference "C18")
 					(unit 1)
 				)
 			)
@@ -8565,7 +8565,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c9539946-e838-4893-809f-2fc6f3a2271d")
-		(property "Reference" "R19"
+		(property "Reference" "R18"
 			(at 139.7 88.9 90)
 			(effects
 				(font
@@ -8617,7 +8617,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R19")
+					(reference "R18")
 					(unit 1)
 				)
 			)
@@ -8632,7 +8632,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cd32e565-b000-48f3-9832-0cf3c9a43f0e")
-		(property "Reference" "R1"
+		(property "Reference" "R2"
 			(at 53.34 55.88 0)
 			(effects
 				(font
@@ -8686,7 +8686,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R1")
+					(reference "R2")
 					(unit 1)
 				)
 			)
@@ -8702,7 +8702,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d38ff2bd-6899-4d75-9c8a-c632962dbe3e")
-		(property "Reference" "R34"
+		(property "Reference" "R23"
 			(at 213.36 40.64 0)
 			(effects
 				(font
@@ -8756,7 +8756,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R34")
+					(reference "R23")
 					(unit 1)
 				)
 			)
@@ -8771,7 +8771,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d49490c8-cd97-435a-a673-655772a1b614")
-		(property "Reference" "R23"
+		(property "Reference" "R11"
 			(at 138.43 54.61 90)
 			(effects
 				(font
@@ -8823,7 +8823,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R23")
+					(reference "R11")
 					(unit 1)
 				)
 			)
@@ -8907,7 +8907,6 @@
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "dbce1c5a-e686-4503-b8a8-b71af9da2345")
 		(property "Reference" "TP2"
 			(at 78.74 60.198 0)
@@ -8919,7 +8918,7 @@
 			)
 		)
 		(property "Value" "TestPoint"
-			(at 78.74 62.738 0)
+			(at 78.232 58.166 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8975,7 +8974,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e22c6188-abc6-4b53-ba1e-cf6d405f7ef0")
-		(property "Reference" "U9"
+		(property "Reference" "U3"
 			(at 153.67 39.37 0)
 			(effects
 				(font
@@ -9063,7 +9062,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "U9")
+					(reference "U3")
 					(unit 1)
 				)
 			)
@@ -9144,7 +9143,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e84f6100-16d6-461f-b87d-b7badc689fe2")
-		(property "Reference" "R26"
+		(property "Reference" "R17"
 			(at 156.21 96.52 90)
 			(effects
 				(font
@@ -9196,7 +9195,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R26")
+					(reference "R17")
 					(unit 1)
 				)
 			)
@@ -9277,7 +9276,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ece9e9fe-9a8b-44f6-9dd6-fd7f8b016031")
-		(property "Reference" "R24"
+		(property "Reference" "R20"
 			(at 152.4 54.61 90)
 			(effects
 				(font
@@ -9329,7 +9328,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R24")
+					(reference "R20")
 					(unit 1)
 				)
 			)
@@ -9344,7 +9343,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ee06474b-4408-4aaa-bc28-f6408f83025c")
-		(property "Reference" "R21"
+		(property "Reference" "R7"
 			(at 168.91 100.33 90)
 			(effects
 				(font
@@ -9396,7 +9395,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "R21")
+					(reference "R7")
 					(unit 1)
 				)
 			)
@@ -9412,7 +9411,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f1660b2e-584b-4016-a0bc-94610e50f0c4")
-		(property "Reference" "C41"
+		(property "Reference" "C2"
 			(at 46.609 54.61 90)
 			(effects
 				(font
@@ -9464,7 +9463,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C41")
+					(reference "C2")
 					(unit 1)
 				)
 			)
@@ -9546,7 +9545,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f24ac71a-e800-4857-81c2-89fba43b0529")
-		(property "Reference" "J4"
+		(property "Reference" "J3"
 			(at 23.495 129.54 0)
 			(effects
 				(font
@@ -9598,7 +9597,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "J4")
+					(reference "J3")
 					(unit 1)
 				)
 			)
@@ -9680,7 +9679,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f8a57536-e7c4-4a5e-b419-ec064476af0d")
-		(property "Reference" "TP1"
+		(property "Reference" "TP3"
 			(at 80.01 29.718 0)
 			(effects
 				(font
@@ -9731,7 +9730,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "TP1")
+					(reference "TP3")
 					(unit 1)
 				)
 			)
@@ -9746,7 +9745,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "fb1c95ed-ea71-4cda-a2ab-eeb173ef25e8")
-		(property "Reference" "J3"
+		(property "Reference" "J2"
 			(at 114.935 66.963 0)
 			(effects
 				(font
@@ -9801,7 +9800,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "J3")
+					(reference "J2")
 					(unit 1)
 				)
 			)
@@ -9817,7 +9816,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fdaaf1d9-1eb5-4fc7-98b5-0569c255cf53")
-		(property "Reference" "C15"
+		(property "Reference" "C16"
 			(at 189.611 48.26 90)
 			(effects
 				(font
@@ -9869,7 +9868,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/9b4677b6-5618-4dd2-a345-e4ce8cf01c2f"
-					(reference "C15")
+					(reference "C16")
 					(unit 1)
 				)
 			)
