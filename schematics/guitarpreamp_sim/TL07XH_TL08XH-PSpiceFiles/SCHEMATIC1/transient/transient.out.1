@@ -1,0 +1,355 @@
+
+**** 08/20/21 15:58:19 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     CIRCUIT DESCRIPTION
+
+
+******************************************************************************
+
+
+
+
+** Creating circuit file "transient.cir" 
+** WARNING: THIS AUTOMATICALLY GENERATED FILE MAY BE OVERWRITTEN BY SUBSEQUENT SIMULATIONS
+
+*Libraries: 
+* Profile Libraries :
+* Local Libraries :
+.LIB "../../../tl07xh_tl08xh.lib" 
+* From [PSPICE NETLIST] section of C:\SPB_Data\cdssetup\OrCAD_PSpiceTIPSpice_Install\17.4.0\PSpice.ini file:
+.lib "nom_pspti.lib" 
+.lib "nom.lib" 
+
+*Analysis directives: 
+.TRAN  0 1m 0 
+.OPTIONS ADVCONV
+.OPTIONS FILEMODELSEARCH
+.PROBE64 V(alias(*)) I(alias(*)) W(alias(*)) D(alias(*)) NOISE(alias(*)) 
+.INC "..\SCHEMATIC1.net" 
+
+
+
+**** INCLUDING SCHEMATIC1.net ****
+* source TL07XH_TL08XH
+V_V1         VCC 0 20
+V_V2         0 VEE 20
+X_U1         VIN VOUT VCC VEE VOUT TL07XH_TL08XH
+V_V3         VIN 0  
++SIN 0 1 1k 0 0 0
+
+**** RESUMING transient.cir ****
+.END
+
+INFO(ORPSIM-15423): Unable to find index file tl07xh_tl08xh.ind for library file tl07xh_tl08xh.lib.
+
+INFO(ORPSIM-15422): Making new index file tl07xh_tl08xh.ind for library file tl07xh_tl08xh.lib.
+
+Index has 19 entries from 1 file(s).
+
+**** 08/20/21 15:58:19 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     Diode MODEL PARAMETERS
+
+
+******************************************************************************
+
+
+
+
+               X_U1.Xe_n.DVN   
+          IS  100.000000E-18 
+          KF   10.000000E-12 
+
+
+**** 08/20/21 15:58:19 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     Resistor MODEL PARAMETERS
+
+
+******************************************************************************
+
+
+
+
+               X_U1.R_RES_1    X_U1.R_RES_2    X_U1.R_RES_3    X_U1.R_RES_4    
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_5    X_U1.R_RES_6    X_U1.R_RES_7    X_U1.R_RES_8    
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_9    X_U1.R_RES_10   X_U1.R_RES_11   X_U1.R_RES_12   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_13   X_U1.R_RES_14   X_U1.R_RES_15   X_U1.R_RES_16   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_17   X_U1.R_RES_18   X_U1.R_RES_19   X_U1.R_RES_20   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_21   X_U1.R_RES_22   X_U1.R_RES_23   X_U1.R_RES_24   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_25   X_U1.R_RES_26   X_U1.R_RES_27   X_U1.R_RES_28   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_29   X_U1.R_RES_30   X_U1.R_RES_31   X_U1.R_RES_32   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_33   X_U1.R_RES_34   X_U1.R_RES_35   X_U1.R_RES_36   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_37   X_U1.R_RES_38   X_U1.R_RES_39   X_U1.R_RES_40   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_41   X_U1.R_RES_42   X_U1.R_RES_43   X_U1.R_RES_44   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_45   X_U1.R_RES_46   X_U1.R_RES_47   X_U1.R_RES_48   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_49   X_U1.R_RES_50   X_U1.R_RES_51   X_U1.R_RES_52   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_53   X_U1.R_RES_54   X_U1.R_RES_55   X_U1.R_RES_56   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_57   X_U1.R_RES_58   X_U1.R_RES_59   X_U1.R_RES_60   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_61   X_U1.R_RES_62   X_U1.R_RES_63   X_U1.R_RES_64   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_65   X_U1.R_RES_66   X_U1.R_RES_67   X_U1.R_RES_68   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_69   X_U1.R_RES_70   X_U1.R_RES_71   X_U1.R_RES_72   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_73   X_U1.R_RES_74   X_U1.R_RES_75   X_U1.R_RES_76   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_77   X_U1.R_RES_78   X_U1.R_RES_79   X_U1.R_RES_80   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_81   X_U1.R_RES_82   X_U1.R_RES_83   X_U1.R_RES_84   
+  T_Measured   27              27              27              27            
+   T_Current -273.15         -273.15         -273.15         -273.15         
+           R    1               1               1               1            
+
+
+               X_U1.R_RES_85   X_U1.R_RES_86   X_U1.R_RES_87   
+  T_Measured   27              27              27            
+   T_Current -273.15         -273.15         -273.15         
+           R    1               1               1            
+
+
+**** 08/20/21 15:58:19 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     Voltage Controlled Switch MODEL PARAMETERS
+
+
+******************************************************************************
+
+
+
+
+               X_U1.S_VSWITCH_1 
+         RON  100            
+        ROFF    1.000000E+12 
+         VON    1            
+        VOFF     .1          
+
+
+               X_U1.S_VSWITCH_2 
+         RON  100            
+        ROFF    1.000000E+12 
+         VON    1            
+        VOFF     .1          
+
+
+               X_U1.S_VSWITCH_3 
+         RON   50            
+        ROFF    1.000000E+12 
+         VON     .5          
+        VOFF     .1          
+
+
+               X_U1.S_VSWITCH_4 
+         RON   50            
+        ROFF    1.000000E+12 
+         VON     .5          
+        VOFF     .1          
+
+
+               X_U1.S_VSWITCH_5 
+         RON     .01         
+        ROFF    1.000000E+09 
+         VON     .01         
+        VOFF    0            
+
+
+               X_U1.S_VSWITCH_6 
+         RON     .01         
+        ROFF    1.000000E+09 
+         VON     .01         
+        VOFF    0            
+
+
+               X_U1.S_VSWITCH_7 
+         RON    1.000000E-03 
+        ROFF    1.000000E+09 
+         VON     .9          
+        VOFF     .8          
+
+
+               X_U1.S_VSWITCH_8 
+         RON   50            
+        ROFF    1.000000E+12 
+         VON     .5          
+        VOFF     .45         
+
+
+               X_U1.S_VSWITCH_9 
+         RON   50            
+        ROFF    1.000000E+12 
+         VON     .5          
+        VOFF     .45         
+
+
+ERROR(ORPSIM-16583): Detected an imported model containing transistors or diodes. For such models, PSpice for TI supports a minimum of one and maximum of three traces. Reduce the number of traces and simulate again.
+
+
+ABORTING SIMULATION
+**** 08/20/21 15:58:19 ******* PSpice 17.4.0 (Nov 2018) ******* ID# 0 ********
+
+ ** Profile: "SCHEMATIC1-transient"  [ C:\Users\a0232292\Desktop\Models\TL07XH_TL08XH\TL07XH_TL08XH-PSpiceFiles\SCHEMATIC1\transient.
+
+
+ ****     JOB STATISTICS SUMMARY
+
+
+******************************************************************************
+
+
+
+Node counts:
+  Top level (NUNODS)                =           4
+  External (NCNODS)                 =         101
+  Total (NUMNOD)                    =         101
+
+Total device count (NUMEL)          =         216
+  Capacitors (C)                    =          33
+  Diodes (D)                        =           2
+  VCVS (E)                          =          11
+  VCCS (G)                          =          41
+  CCVS (H)                          =           3
+  Current Sources (I)               =           5
+  Resistors (R)                     =          98
+  VSwitches (S)                     =           9
+  Voltage Sources (V)               =          14
+
+Number of subcircuits (X)           =          21
+
+Matrix statistics:
+  Matrix size (NSTOP)               =         129
+  Initial no. elements (NTTAR)      =         516
+  No. elements w/ fillin (NTTBR)    =         516
+  No. fillins (IFILL)               =           0
+  No. overflows (NTTOV)             =           0
+  No. LU operations (IOPS)          =           0
+  Percent sparsity (PERSPA)         =      96.899
+
+Analysis statistics:
+  No. total time points (NUMTTP)    =           0
+  No. rejected time points (NUMRTP) =           0
+  No. iterations (NUMNIT)           =           0
+
+Load Threads                        =           1
+
+Runtime statistics:                       Seconds      Iterations
+  Matrix load                       =        0.00
+  Matrix solution                   =        0.00               1
+  Readin                            =        1.39
+  General setup                     =         .03
+  CMI setup                     =        0.00
+  Setup                             =        0.00
+  DC sweep                          =        0.00               0
+  Bias point                        =        0.00               0
+  AC and noise                      =        0.00               0
+  Total transient analysis          =        0.00
+  Output                            =        0.00
+  Overhead                          =         .05
+  Total job time (using Solver 1)   =        1.42
+

@@ -1,0 +1,6 @@
+* source TL07XH_TL08XH
+V_V1         VCC 0 20
+V_V2         0 VEE 20
+X_U1         VIN VOUT VCC VEE VOUT TL07XH_TL08XH
+V_V3         VIN 0  
++SIN 0 1 1k 0 0 0

@@ -524,6 +524,18 @@
       {
         "netclass": "Vsupply",
         "pattern": "AC"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "VGND"
+      },
+      {
+        "netclass": "Ground",
+        "pattern": "3V3"
+      },
+      {
+        "netclass": "Ground",
+        "pattern": "Vin"
       }
     ]
   },
