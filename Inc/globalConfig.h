@@ -15,6 +15,15 @@
 // use PCM3060 audio codec
 #define PCM3060_AUDIO_CODEC
 
+// uncomment to bypass the audio codec triggering the UI update
+// the audio codec clocks are held at reset in this case
+//#define TRIGGER_UI_BY_CORE_0
+
+// uncomment to enable UART over USB
+//#define USB_UART
+
+// comment in to flash a test program useful for hardware integrity check
+//#define FORCE_TEST_MODE
 //------------------------------------------
 // derived definitions
 #ifdef WAVESHARE_64X128_DISPLAY
@@ -38,5 +47,9 @@
 #error Choose an audio codec.
 #endif
 
+#ifdef USB_UART
+#define USB_CDC_DRIVER
+#define USB_HW_DRIVER
+#endif
 
 #endif

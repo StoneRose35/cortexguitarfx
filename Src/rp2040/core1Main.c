@@ -92,20 +92,6 @@ void core1Main()
     *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
     *NVIC_ISER = (1 << 16) | (1 << 11); // enable interrupt for dma and sio of proc1 
     setInterruptPriority(11,1);
-    /*
-    preset1.bankNr = 0;
-    preset1.bankPos = 1;
-    preset1.name[0]=0;
-    appendToString(preset1.name,"ShortRev");
-    preset1.programNr = 8;
-    preset1.parameters[0]=2222;
-    preset1.parameters[1]=2568;
-    preset1.parameters[2]=0;
-    savePreset(&preset1,0);
-    waitSysticks(10);
-    loadPreset(&preset2,0);
-    waitSysticks(10);
-    */
 
     for(;;)
     {
@@ -158,24 +144,27 @@ void core1Main()
             avgOldOutBfr = avgOutOld >> 8;
             cpuLoadBfr = (cpuLoad >> 1);
             onUpdate(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
+            #ifndef FORCE_TEST_MODE
             if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
             {
-                setPin(CLIPPING_LED_INPUT,1);
+                setPin(CLIPPING_LED_INPUT,0);
                 *audioStatePtr &= ~(1 << AUDIO_STATE_INPUT_CLIPPED);
             }
             else
             {
-                setPin(CLIPPING_LED_INPUT,0);
+                setPin(CLIPPING_LED_INPUT,1);
             }
             if ((*audioStatePtr & (1 << AUDIO_STATE_OUTPUT_CLIPPED)) == (1 << AUDIO_STATE_OUTPUT_CLIPPED))
             {
-                setPin(CLIPPING_LED_OUTPUT,1);
+                setPin(CLIPPING_LED_OUTPUT,0);
                 *audioStatePtr &= ~(1 << AUDIO_STATE_OUTPUT_CLIPPED);
             }
             else
             {
-                setPin(CLIPPING_LED_OUTPUT,0);
+                setPin(CLIPPING_LED_OUTPUT,1);
             }
+            #endif
+            
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
 

@@ -1,7 +1,7 @@
 #include "stdint.h"
 #include "hardware/usb_rp2040.h"
 #include "usb/usb_cdc.h"
-
+#include "globalConfig.h"
 #include "usb/usb_common.h"
 #include "usb/usb_config.h"
 #include "bufferedInputHandler.h"

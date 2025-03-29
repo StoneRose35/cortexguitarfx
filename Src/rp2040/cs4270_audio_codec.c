@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "globalConfig.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
 #include "hardware/regs/io_bank0.h"
@@ -45,8 +46,7 @@ void cs4270PowerDown()
 void setupCS4270()
 {
     // reset
-    uint32_t regdata;
-    volatile uint8_t i2c_error = 0;
+
 
     if (getTargetAddress()!=CS4270_I2C_ADDRESS)
     {
@@ -61,6 +61,9 @@ void setupCS4270()
     waitSysticks(1);
     // reset low
     *(GPIO_OUT + 2) = (1 << AUDIO_CODEC_RESET);
+    #ifndef TRIGGER_UI_BY_CORE_0
+    uint32_t regdata;
+    volatile uint8_t i2c_error = 0;
     waitSysticks(1);
     // reset high
     *(GPIO_OUT + 1) = (1 << AUDIO_CODEC_RESET);
@@ -83,6 +86,7 @@ void setupCS4270()
 
     regdata = (CS4270_R2 << 8); // power up again
     i2c_error += cs4270Write(regdata);
+    #endif
 }
 
 /*

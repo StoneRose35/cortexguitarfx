@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "globalConfig.h"
 #include "hardware/regs/clocks.h"
 #include "hardware/regs/pll.h"
 #include "hardware/regs/addressmap.h"
@@ -133,6 +134,8 @@ char const* pipicofxStringDescriptors[] = {
     "Default Config", // 4: Configuration
 };
 #endif
+
+#ifdef USB_HW_DRIVER
 //
 // *************************************************************************************************************************
 //
@@ -344,7 +347,7 @@ void isr_c0_usbctrl_irq5()
                 case SETUP_PACKET_REQ_SET_CONFIGURATION:
 
                     // configure the endpoints independent of the actual configuration requested since i'm only 
-                    // consider devices havin one configuration
+                    // considering devices having one configuration
                     initUsbDeviceDriver(endpointsIn,endpointsOut,&onConfigured);
                     #ifdef USB_DBG
                     printf("set configuration\r\n");
@@ -578,3 +581,4 @@ void initUSB()
     // become connectable by enabling the pullup
     usb_hw->sie_ctrl |= (1 << USB_SIE_CTRL_PULLUP_EN_LSB);
 }
+#endif

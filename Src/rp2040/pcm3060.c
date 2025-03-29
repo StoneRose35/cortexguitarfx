@@ -8,6 +8,7 @@
 #include "hardware/rp2040_registers.h"
 #include "drivers/systick.h"
 #include "drivers/i2c.h"
+#include "globalConfig.h"
 
 
 static uint8_t pcm3060Write(uint16_t data)
@@ -46,7 +47,7 @@ void pcm3060PowerDown()
 void setupPCM3060()
 {
     // reset
-    volatile uint8_t i2c_error = 0;
+
 
     if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
     {
@@ -58,6 +59,8 @@ void setupPCM3060()
     // switch on master oscillator
     // reset low
     *(GPIO_OUT + 2) = (1 << AUDIO_CODEC_RESET);
+    #ifndef TRIGGER_UI_BY_CORE_0
+    volatile uint8_t i2c_error = 0;
     waitSysticks(1);
     // reset high
     *(GPIO_OUT + 1) = (1 << AUDIO_CODEC_RESET);
@@ -75,6 +78,8 @@ void setupPCM3060()
                 |(1 << PCM3060_R64_SRST)
                 |(1 << PCM3060_R64_SE)
             );
+
+    #endif
 
 }
 
