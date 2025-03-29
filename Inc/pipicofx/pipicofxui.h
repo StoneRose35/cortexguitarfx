@@ -74,6 +74,7 @@ void enterLevel3(PiPicoFxUiType*data);
 void enterLevel4(PiPicoFxUiType*data);
 void enterLevel5(PiPicoFxUiType*data);
 void enterLevel6(PiPicoFxUiType*data);
+void enterLevel7(PiPicoFxUiType*data);
 
 uint8_t uiStackPush(PiPicoFxUiType* piPicoUiController,uint8_t val);
 uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController);
