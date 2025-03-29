@@ -1761,7 +1761,7 @@
 	)
 	(wire
 		(pts
-			(xy 144.78 66.04) (xy 153.67 66.04)
+			(xy 144.78 66.04) (xy 170.18 66.04)
 		)
 		(stroke
 			(width 0)
@@ -1778,16 +1778,6 @@
 			(type default)
 		)
 		(uuid "2f20d90a-aec6-4298-95bb-244c740ba419")
-	)
-	(wire
-		(pts
-			(xy 161.29 63.5) (xy 170.18 63.5)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3007bb7e-60e2-4f26-89e0-b85e3d1556a0")
 	)
 	(wire
 		(pts
@@ -1951,16 +1941,6 @@
 	)
 	(wire
 		(pts
-			(xy 170.18 66.04) (xy 161.29 66.04)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5642c048-1bf1-421a-9df2-0cebca51e86c")
-	)
-	(wire
-		(pts
 			(xy 170.18 86.36) (xy 163.83 86.36)
 		)
 		(stroke
@@ -2041,7 +2021,7 @@
 	)
 	(wire
 		(pts
-			(xy 142.24 58.42) (xy 142.24 121.92)
+			(xy 142.24 63.5) (xy 142.24 121.92)
 		)
 		(stroke
 			(width 0)
@@ -2281,7 +2261,7 @@
 	)
 	(wire
 		(pts
-			(xy 142.24 58.42) (xy 153.67 58.42)
+			(xy 142.24 63.5) (xy 170.18 63.5)
 		)
 		(stroke
 			(width 0)
@@ -2548,16 +2528,6 @@
 			(type default)
 		)
 		(uuid "ea7bf551-5d37-4612-8c8b-a88f7d9c6b88")
-	)
-	(wire
-		(pts
-			(xy 161.29 58.42) (xy 161.29 63.5)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ef35c5e7-2a67-450c-82b3-a7d8cba80763")
 	)
 	(wire
 		(pts
@@ -3198,7 +3168,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "276d6d39-b432-4570-893a-d25824812617")
-		(property "Reference" "TP8"
+		(property "Reference" "TP7"
 			(at 153.67 76.708 0)
 			(effects
 				(font
@@ -3249,7 +3219,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "TP8")
+					(reference "TP7")
 					(unit 1)
 				)
 			)
@@ -3264,7 +3234,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "367dadc1-6390-49ee-9d6b-4cd645dde20a")
-		(property "Reference" "TP5"
+		(property "Reference" "TP4"
 			(at 203.2 75.184 90)
 			(effects
 				(font
@@ -3315,7 +3285,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "TP5")
+					(reference "TP4")
 					(unit 1)
 				)
 			)
@@ -3330,7 +3300,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4019ae64-5658-48aa-b355-eba0583b3b3a")
-		(property "Reference" "TP9"
+		(property "Reference" "TP8"
 			(at 130.81 96.52 0)
 			(effects
 				(font
@@ -3381,7 +3351,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "TP9")
+					(reference "TP8")
 					(unit 1)
 				)
 			)
@@ -3396,7 +3366,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "46709b7d-1432-49f4-bf3e-278a991e632c")
-		(property "Reference" "C28"
+		(property "Reference" "C26"
 			(at 222.758 83.312 0)
 			(effects
 				(font
@@ -3450,7 +3420,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "C28")
+					(reference "C26")
 					(unit 1)
 				)
 			)
@@ -3465,7 +3435,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "499793f0-56c9-4bf4-94d1-417f05884b82")
-		(property "Reference" "TP10"
+		(property "Reference" "TP9"
 			(at 113.03 74.93 0)
 			(effects
 				(font
@@ -3516,7 +3486,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "TP10")
+					(reference "TP9")
 					(unit 1)
 				)
 			)
@@ -3663,7 +3633,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6384d16f-9a08-4cfe-8d0d-85b06ebf0802")
-		(property "Reference" "TP7"
+		(property "Reference" "TP10"
 			(at 157.48 87.63 0)
 			(effects
 				(font
@@ -3714,7 +3684,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "TP7")
+					(reference "TP10")
 					(unit 1)
 				)
 			)
@@ -3919,80 +3889,7 @@
 			)
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "R33")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C_Polarized")
-		(at 157.48 66.04 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "9b389b33-b8c3-474d-8c62-255ba012c65e")
-		(property "Reference" "C12"
-			(at 152.146 69.342 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "10uF"
-			(at 152.4 67.31 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:CP_Elec_4x4.5"
-			(at 153.67 67.0052 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 157.48 66.04 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 157.48 66.04 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "3c29ea76-5bef-480d-a942-66791d99565f")
-		)
-		(pin "2"
-			(uuid "93486470-205b-4fc3-b995-0c43be4c808d")
-		)
-		(instances
-			(project "guitarpreamp"
-				(path "/565fa02a-6c9c-4bdd-8ba2-36fe749429c4"
-					(reference "C12")
-					(unit 1)
-				)
-			)
-			(project "full_board_pico_seed"
-				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "C8")
+					(reference "R30")
 					(unit 1)
 				)
 			)
@@ -4065,80 +3962,7 @@
 			)
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "C29")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C_Polarized")
-		(at 157.48 58.42 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "a97cd5b3-ac27-48d7-9bc1-575f1cac8950")
-		(property "Reference" "C10"
-			(at 151.638 61.468 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "10uF"
-			(at 152.4 59.69 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:CP_Elec_4x4.5"
-			(at 153.67 59.3852 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 157.48 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 157.48 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "c4240816-c0f7-4e31-9208-04bd13fd6551")
-		)
-		(pin "2"
-			(uuid "4c40f611-5da8-4ca5-8ade-8f216edc01d8")
-		)
-		(instances
-			(project "guitarpreamp"
-				(path "/565fa02a-6c9c-4bdd-8ba2-36fe749429c4"
-					(reference "C10")
-					(unit 1)
-				)
-			)
-			(project "full_board_pico_seed"
-				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "C24")
+					(reference "C23")
 					(unit 1)
 				)
 			)
@@ -4211,7 +4035,7 @@
 			)
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "C30")
+					(reference "C24")
 					(unit 1)
 				)
 			)
@@ -4284,7 +4108,7 @@
 			)
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "R32")
+					(reference "R28")
 					(unit 1)
 				)
 			)
@@ -4299,7 +4123,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e3f3fba4-355a-4155-ac88-6bbb3c89cd54")
-		(property "Reference" "C5"
+		(property "Reference" "C7"
 			(at 212.598 83.566 0)
 			(effects
 				(font
@@ -4353,7 +4177,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "C5")
+					(reference "C7")
 					(unit 1)
 				)
 			)
@@ -4515,7 +4339,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "fc356a0e-6d91-4f68-b768-c8b533d8b88f")
-		(property "Reference" "TP4"
+		(property "Reference" "TP5"
 			(at 203.2 68.834 90)
 			(effects
 				(font
@@ -4566,7 +4390,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/6ec17984-49ce-45c2-b1f4-ed6e904b8c80"
-					(reference "TP4")
+					(reference "TP5")
 					(unit 1)
 				)
 			)

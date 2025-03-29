@@ -1210,10 +1210,9 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "3cb3b122-bb40-41d1-9f2a-5b99a98ce937")
 		(property "Reference" "R25"
-			(at 95.25 53.34 90)
+			(at 95.25 55.118 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1221,7 +1220,7 @@
 			)
 		)
 		(property "Value" "22k"
-			(at 95.25 55.88 90)
+			(at 95.25 57.404 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1364,7 +1363,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "78b4e241-08da-46f0-baf5-bbbd0628e539")
-		(property "Reference" "R27"
+		(property "Reference" "R24"
 			(at 175.26 57.15 0)
 			(effects
 				(font
@@ -1418,7 +1417,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
-					(reference "R27")
+					(reference "R24")
 					(unit 1)
 				)
 			)
@@ -1433,8 +1432,8 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "88edc1c2-3bbb-452d-90ac-a925bb9c246b")
-		(property "Reference" "R29"
-			(at 102.87 58.42 0)
+		(property "Reference" "R22"
+			(at 102.616 56.134 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1443,7 +1442,7 @@
 			)
 		)
 		(property "Value" "22k"
-			(at 101.6 50.8 0)
+			(at 102.616 54.102 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1487,7 +1486,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
-					(reference "R29")
+					(reference "R22")
 					(unit 1)
 				)
 			)
@@ -1701,7 +1700,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "cdace8af-94e6-49ab-99ab-fca72a75448c")
-		(property "Reference" "R21"
+		(property "Reference" "R23"
 			(at 172.72 68.58 0)
 			(effects
 				(font
@@ -1755,7 +1754,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
-					(reference "R21")
+					(reference "R23")
 					(unit 1)
 				)
 			)
@@ -1771,7 +1770,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d23d391d-cc17-41c7-99e9-515c7f92744f")
-		(property "Reference" "J4"
+		(property "Reference" "J5"
 			(at 123.19 30.641 90)
 			(effects
 				(font
@@ -1826,7 +1825,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
-					(reference "J4")
+					(reference "J5")
 					(unit 1)
 				)
 			)
@@ -1842,7 +1841,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d4a7a26b-c960-4117-99a0-009625ad1dd6")
-		(property "Reference" "C17"
+		(property "Reference" "C16"
 			(at 109.22 44.069 0)
 			(effects
 				(font
@@ -1896,7 +1895,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
-					(reference "C17")
+					(reference "C16")
 					(unit 1)
 				)
 			)
@@ -1912,7 +1911,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d621f628-d38c-4b67-a6aa-89e633326620")
-		(property "Reference" "C20"
+		(property "Reference" "C19"
 			(at 129.54 44.069 0)
 			(effects
 				(font
@@ -1966,7 +1965,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
-					(reference "C20")
+					(reference "C19")
 					(unit 1)
 				)
 			)
@@ -1982,7 +1981,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d98496e1-ad47-4a60-924e-c6510f8df205")
-		(property "Reference" "C19"
+		(property "Reference" "C17"
 			(at 101.6 63.881 0)
 			(effects
 				(font
@@ -2036,7 +2035,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
-					(reference "C19")
+					(reference "C17")
 					(unit 1)
 				)
 			)
@@ -2052,7 +2051,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f4c70fda-08af-4e20-99df-10c56578eadf")
-		(property "Reference" "R28"
+		(property "Reference" "R21"
 			(at 180.34 62.23 0)
 			(effects
 				(font
@@ -2106,7 +2105,7 @@
 		(instances
 			(project "full_board_pico_seed"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/5b76a2fc-3494-4cf0-b601-f44157bc070a"
-					(reference "R28")
+					(reference "R21")
 					(unit 1)
 				)
 			)
