@@ -12,12 +12,13 @@
         {
             "cwd": "${workspaceFolder}",
             "executable": "./out/microsys_audio.elf",
-            "name": "Program&Debug with ST-Link",
+            "name": "Program&Debug with ST-Util",
             "request": "launch",
-            "interface": "jtag",
+            "interface": "swd",
             "preLaunchTask": "Build using make",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
+            "device": "STM32H74x_H75x",
             "showDevDebugOutput": "parsed",
             "servertype": "stlink",
             "svdFile": "STM32H750x.svd"
