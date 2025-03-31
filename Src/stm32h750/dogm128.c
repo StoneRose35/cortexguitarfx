@@ -1,19 +1,9 @@
-/**
- * @file ssd1306_display.c
- * @author philipp fuerholz
- * @brief driver for a 128*64 oled display driven by a ssd1306 interface using 4-pin spi
- * @version 0.1
- * @date 2022-03-10
- * 
- * @copyright Copyright (c) 2022
- * 
- */
 #include "globalConfig.h"
-#ifdef JOYIT_128X64_DISPLAY
 
-#include "drivers/oled_display.h"
-#include "drivers/display128x64.h"
+#ifdef DOGM128_DISPLAY
 #include "fonts/oled_font_5x7.h"
+#include "drivers/dogm128.h"
+#include "drivers/display128x64.h"
 #include "drivers/systick.h"
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
@@ -21,7 +11,8 @@
 #include "system.h"
 
 
-static volatile uint8_t currentDmaRow=SSD1306_DISPLAY_N_PAGES;
+
+static volatile uint8_t currentDmaRow=DOGM128_N_PAGES;
 static volatile uint8_t * currentFrameBuffer=0;
 static GPIO_TypeDef *gpio_cd;
 static GPIO_TypeDef *gpio_reset;
@@ -60,7 +51,8 @@ static void config_spi_pin(uint8_t pinnr,uint8_t alternateFunction)
     gpio->AFR[(pinnr & 0xF)>>3] = regbfr; 
 }
 
-void ssd1306SendCommand(uint8_t cmd)
+
+void dogm128SendCommand(uint8_t cmd)
 {
     gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF)+16)); // cs low
     gpio_cd->BSRR = (1 << ((DISPLAY_CD & 0xF)+16)); // cd low
@@ -71,7 +63,7 @@ void ssd1306SendCommand(uint8_t cmd)
     gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF))); // cs high
 }
 
-void ssd1306SendData(const uint8_t*data,uint8_t l)
+void dogm128SendData(const uint8_t*data,uint8_t l)
 {
     gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF)+16)); // cs low
     gpio_cd->BSRR = (1 << ((DISPLAY_CD & 0xF))); // cd high
@@ -147,7 +139,7 @@ void initDisplay()
                        (0 << DMA_SxCR_CIRC_Pos) | (1 << DMA_SxCR_TCIE_Pos) | (1 << DMA_SxCR_DIR_Pos) |
                        (0 << DMA_SxCR_HTIE_Pos);
 
-    DMA1_Stream3->NDTR=SSD1306_DISPLAY_N_COLUMNS;
+    DMA1_Stream3->NDTR=DOGM128_DISPLAY_N_COLUMNS;
     DMAMUX1_Channel3->CCR = ((38) << DMAMUX_CxCR_DMAREQ_ID_Pos); //spi1_tx_dma 
 
 
@@ -159,7 +151,7 @@ void initDisplay()
     SPI1->CR1 = regbfr;
 
     regbfr = SPI1->CFG1;
-    regbfr |= (5 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos) | (1 << SPI_CFG1_TXDMAEN_Pos); // 8 bits, 120MKz/16 as SPI clock, DMA enable for TX
+    regbfr |= (5 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos) | (1 << SPI_CFG1_TXDMAEN_Pos); // 8 bits, 120MHz/16 as SPI clock, DMA enable for TX
     SPI1->CFG1 = regbfr;
     SPI1->CFG2 |= (1 << SPI_CFG2_MASTER_Pos) | (1 << SPI_CFG2_SSM_Pos);
     SPI1->CR1 |= (1 << SPI_CR1_SPE_Pos);
@@ -177,18 +169,21 @@ void initDisplay()
     waitSysticks(1);
 
 
-    // manually set display offset and  startline since these two values turned out to be wrong after reset
-    ssd1306SendCommand(0x40);// set startline 0
-    ssd1306SendCommand(0xD3);// set displayoffset 0
-    ssd1306SendCommand(0x0);
-
-    // column remap
-    ssd1306SendCommand(0xA1);
-    // flip common output scan direction
-    ssd1306SendCommand(0xC8);
     
-    // send display on command
-    ssd1306SendCommand(0xAF);
+    dogm128SendCommand(0x40);// set startline 0
+    dogm128SendCommand(0xA1);// ADC reverse, set A0 to flip display
+    dogm128SendCommand(0xC0); //Normal COM0-COM63, set C8 to reverse display
+    dogm128SendCommand(0xA6); //display normal
+    dogm128SendCommand(0xA2); // set bias 1/9 (Duty 1/65)
+    dogm128SendCommand(0x2F); // Booster, regulator and follower on 
+    dogm128SendCommand(0xF8); // internal booster to x4 
+    dogm128SendCommand(0x00);  
+    dogm128SendCommand(0x27); // constrast: voltage regulator set
+    dogm128SendCommand(0x81); // constrast: electronic volume set 
+    dogm128SendCommand(0x16);
+    dogm128SendCommand(0xAC); // static indicator: no indicator
+    dogm128SendCommand(0x00);
+    dogm128SendCommand(0xAF); // finally: display on 
     waitSysticks(11);
 
 
@@ -204,12 +199,13 @@ void initDisplay()
 void setCursor(uint8_t row, uint8_t col)
 {
     // set row / page
-    ssd1306SendCommand(0xB0 | row);
-    // set column, low nibble
-    ssd1306SendCommand((col+HORIZONTAL_OFFSET) & 0x0F);
+    dogm128SendCommand(0xB0 | row);
     // set column, high nibble
-    ssd1306SendCommand(0x10 | ((col+HORIZONTAL_OFFSET) >> 4));
+    dogm128SendCommand(0x10 | ((col+HORIZONTAL_OFFSET) >> 4));
+    // set column, low nibble
+    dogm128SendCommand((col+HORIZONTAL_OFFSET) & 0x0F);
 }
+
 
 void ClearDisplay()
 {
@@ -221,18 +217,18 @@ void ClearDisplay()
                         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
-    for(uint8_t r=0;r<SSD1306_DISPLAY_N_PAGES;r++)
+    for(uint8_t r=0;r<DOGM128_N_PAGES;r++)
     {
         setCursor(r,0);
-        ssd1306SendData(zeroVals,128);
+        dogm128SendData(zeroVals,128);
     }   
 }
 
 /**
  * @brief fill a full or parts of a row with bytes
  * 
- * @param row the row from 0 to SSD1306_DISPLAY_N_PAGES-1
- * @param col starting column from 0 to SSD1306_DISPLAY_N_COLUMNS-1
+ * @param row the row from 0 to DOGM128_DISPLAY_N_PAGES-1
+ * @param col starting column from 0 to DOGM128_DISPLAY_N_COLUMNS-1
  * @param arr the data array (lsb is on top)
  * @param arrayLength the length of the array
  */
@@ -241,52 +237,7 @@ void DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayL
     setCursor(row,col);
     for (uint16_t c=0;c<arrayLength;c++)
     {
-        ssd1306SendData(arr+c,1);
-    }
-}
-
-/**
- * @brief displays an image defines as a row-first array
- * 
- * @param px x value of the top left position (0 to SSD1306_DISPLAY_N_COLUMNS-1)
- * @param py y values of the top left position (0 to SSD1306_DISPLAY_N_PAGES-1)
- * @param sx x size of the image
- * @param sy y size of the image in pages (8 bit)
- * @param img the image data, the number of bytes must be sx*sy
- */
-void OledDisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
-{
-    gpio_cd->BSRR = (1 << ((DISPLAY_CD & 0xF)+16)); // cd low: command
-
-    // set vertical addressing mode
-    SPI1_TXDR_BYTE = 0x20;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    SPI1_TXDR_BYTE = 0x02;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
-
-    // set column address
-    SPI1_TXDR_BYTE = 0x21;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
-    SPI1_TXDR_BYTE =px;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);    
-    SPI1_TXDR_BYTE =px+sx;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);  
-
-    // set page address
-    SPI1_TXDR_BYTE = 0x22;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);
-    SPI1_TXDR_BYTE =py;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);    
-    SPI1_TXDR_BYTE =py+sy;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0);        
-
-    uint16_t c=0;
-    gpio_cd->BSRR = (1 << (DISPLAY_CD & 0xF)); // cd high: data
-    while(c<sx*sy)
-    {
-        SPI1_TXDR_BYTE = *(img + c);
-        c++;
-        while ((SPI3->SR & (1 << SPI_SR_TXC_Pos))==0);
+        dogm128SendData(arr+c,1);
     }
 }
 
@@ -314,7 +265,7 @@ void DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,u
         for(uint8_t c=0;c<sx;c++)
         {
             index=c + cc*sx;
-            ssd1306SendData(img+index,1);
+            dogm128SendData(img+index,1);
 
         }
     }
@@ -327,9 +278,10 @@ void DisplayWriteChar(char chr)
     fontIdx = (uint8_t)chr - ' ';
     uint8_t zeros[2]={0,0};
 
-    ssd1306SendData(oled_font_5x7[fontIdx],5);
-    ssd1306SendData(zeros,1);
+    dogm128SendData(oled_font_5x7[fontIdx],5);
+    dogm128SendData(zeros,1);
 }
+
 
 void DisplayWriteText(const char * str,uint8_t posH,uint8_t posV)
 {
@@ -345,7 +297,7 @@ void DisplayWriteText(const char * str,uint8_t posH,uint8_t posV)
     }
     if (hCurrent==21) // last horizontal position written, clear the last two columns
     {
-        ssd1306SendData(zeros,2);
+        dogm128SendData(zeros,2);
     }
 }
 
@@ -370,7 +322,7 @@ void DisplayWriteTextLine(const char * str,uint8_t posV)
         DisplayWriteChar(' ');
         cnt++;
     }
-    ssd1306SendData(zeros,2);
+    dogm128SendData(zeros,2);
 }
 
 void DisplayWriteLineAsync(volatile uint8_t * data)
@@ -384,18 +336,18 @@ void DisplayWriteLineAsync(volatile uint8_t * data)
 
 void DisplayWriteNextLine(void)
 {
-    if (currentDmaRow == SSD1306_DISPLAY_N_PAGES)
+    if (currentDmaRow == DOGM128_N_PAGES)
     {
         gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF))); // cs high
         short_nop_delay();
     }
-    else if (currentDmaRow <SSD1306_DISPLAY_N_PAGES )
+    else if (currentDmaRow < DOGM128_N_PAGES )
     {
         setCursor(currentDmaRow,0);
         gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF)+16)); // cs low
         gpio_cd->BSRR = (1 << ((DISPLAY_CD & 0xF))); // cd high
         short_nop_delay();
-        DisplayWriteLineAsync(currentFrameBuffer + currentDmaRow*SSD1306_DISPLAY_N_COLUMNS);
+        DisplayWriteLineAsync(currentFrameBuffer + currentDmaRow*DOGM128_DISPLAY_N_COLUMNS);
         currentDmaRow++;
     }
 
@@ -403,7 +355,7 @@ void DisplayWriteNextLine(void)
 
 void DisplayWriteFramebufferAsync(uint8_t * fb)
 {
-    if(currentDmaRow==SSD1306_DISPLAY_N_PAGES) // only write when previous transfer ended
+    if(currentDmaRow==DOGM128_N_PAGES) // only write when previous transfer ended
     {
         currentDmaRow=0;
         currentFrameBuffer=fb;

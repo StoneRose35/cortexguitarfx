@@ -2,13 +2,16 @@
 #define __GLOBAL_CONFIG_H_
 
 
-// added these definition to the makefile accordingly
-
 // #define EXTENSION_BOARD
 // #define PCM3060_CODEC
 // #define WAVESHARE_64X128_DISPLAY
 // #define JOYIT_128X64_DISPLAY
 
+#define INTERNAL_CODEC 
+#define WM8731_CODEC
+
+#define JOYIT_128X64_DISPLAY
+//#define DOGM128_DISPLAY
 
 #ifdef WAVESHARE_64X128_DISPLAY
 #define VERTICAL_DISPLAY

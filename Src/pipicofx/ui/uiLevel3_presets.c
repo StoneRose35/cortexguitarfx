@@ -1,7 +1,8 @@
 #include "stdlib.h"
+#include "globalConfig.h"
 #include "graphics/bwgraphics.h"
 #include "graphics/gfxfont.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
@@ -114,7 +115,7 @@ static void enterCallback(PiPicoFxUiType*data)
         else if (overlayNr == OVERLAY_NR_FWUPDATE)
         {
             drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
-            OledDisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
+            DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
             //reset_usb_boot(1 << 17,2);
         }
     }

@@ -16,19 +16,9 @@
 #define SSD1306_DISPLAY_N_COLUMNS 128
 #define HORIZONTAL_OFFSET 2
 #endif
-void initOledDisplay();
 
-
-void OledWriteChar(char chr);
-void OledWriteText(const char * str,uint8_t posH,uint8_t posV);
-void OledWriteTextLine(const char * str,uint8_t posV);
-void OledDisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayLength);
 void OledDisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img);
-void OledDisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img);
-void OledClearDisplay();
-void OledWriteLineAsync(volatile uint8_t * data);
-void OledWriteNextLine(void);
-void OledwriteFramebufferAsync(uint8_t * fb);
+
 
 
 #endif

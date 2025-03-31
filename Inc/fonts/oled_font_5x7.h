@@ -1,4 +1,6 @@
 
+#ifndef _OLED_FONT_5_X_7_H_
+#define _OLED_FONT_5_X_7_H_
 #include <stdint.h>
 const uint8_t oled_font_5x7[98][5] = {
     {0x00, 0x00, 0x00, 0x00, 0x00}, // (space)
@@ -100,3 +102,5 @@ const uint8_t oled_font_5x7[98][5] = {
     {0x08, 0x1C, 0x2A, 0x08, 0x08}, // <- (ALT + 0135) ‡
     {0x00, 0x00, 0x07, 0x05, 0x07}  // °
     };
+
+    #endif

@@ -88,7 +88,7 @@ float testSpeed()
         tEnd = getTickValue();
         unusedResult = unusedSum;
         copyToString(charBfr,"toLin for ");
-        Int16ToChar((uint16_t)(xval/SPEEDTEST_FOR_LIN_INCREMENT),ncBfr);
+        Int16ToChar((int16_t)(xval/SPEEDTEST_FOR_LIN_INCREMENT),ncBfr);
         appendToString(charBfr,ncBfr);
         appendToString(charBfr,", ticks used ");
         UInt32ToChar(tEnd-tStart,ncBfr);

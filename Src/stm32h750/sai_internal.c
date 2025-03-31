@@ -8,6 +8,7 @@
 #include "audio/audiotools.h"
 #include "gpio.h"
 #include "stm32h750/daisy_seed_pins.h"
+#include "globalConfig.h"
 
 #ifdef INTERNAL_CODEC
 

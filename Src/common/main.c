@@ -9,7 +9,7 @@
 //#include <neopixelDriver.h>
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
-
+#include "globalConfig.h"
 #include "system.h"
 #include "core.h"
 #include "systemClock.h"
@@ -23,6 +23,7 @@
 #include "timer.h"
 #include "gpio.h"
 #include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "drivers/rotEncoderSwitchPower.h"
 #include "debugLed.h"
 #include "consoleHandler.h"
@@ -136,7 +137,7 @@ int main(void)
     #endif
 
 	//Initialise Component-specific drivers
-	initOledDisplay();
+	initDisplay();
 
     initRotaryEncoder(switchesPins,2);
 
@@ -161,7 +162,8 @@ int main(void)
     }
 	#ifdef PCM3060_CODEC
     setupPCM3060();
-    #else
+    #endif
+    #ifdef WM8731_CODEC
     setupWm8731(SAMPLEDEPTH_24BIT,SAMPLERATE_48KHZ);
     #endif
 
@@ -187,7 +189,7 @@ int main(void)
 	//printf("Microsys v1.1 running on DaisySeed 1.1\r\n");
 	
     piPicoFxUiSetup(&piPicoUiController);
-	OledClearDisplay();
+	ClearDisplay();
     clearDelayLine();
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
 	{
@@ -228,7 +230,7 @@ int main(void)
             avgOldOutBfr = (int32_t)(avgOutOld*128.0f);
             cpuLoadBfr = cpuLoad >> 1;
             onUpdate(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
-            OledwriteFramebufferAsync(fb);
+            DisplayWriteFramebufferAsync(fb);
             if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
             {
                 setPin(CLIPPING_LED_INPUT,1);
@@ -301,7 +303,7 @@ int main(void)
         {
             // wait until transmission through spi is done 
             while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-            OledWriteNextLine();
+            DisplayWriteNextLine();
             task &= ~(2 << TASK_DISPLAY_NEXT_LINE);
         }
 		
