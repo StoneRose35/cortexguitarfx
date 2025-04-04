@@ -83,12 +83,17 @@ volatile uint8_t programsToInitialize[3];
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0;
+
+#ifdef EXTENSION_BOARD
 // 0: done
 // 1: change request
 // 2: fade out
 // 3: in bypass / change in progress
 // 4: fade in
 volatile uint8_t programChangeState;
+volatile uint8_t stompSwitchState;
+#endif
+
 
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
@@ -233,21 +238,21 @@ int main(void)
             DisplayWriteFramebufferAsync(fb);
             if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
             {
-                setPin(CLIPPING_LED_INPUT,1);
+                setPin(CLIPPING_LED_INPUT,0);
                 *audioStatePtr &= ~(1 << AUDIO_STATE_INPUT_CLIPPED);
             }
             else
             {
-                setPin(CLIPPING_LED_INPUT,0);
+                setPin(CLIPPING_LED_INPUT,1);
             }
             if ((*audioStatePtr & (1 << AUDIO_STATE_OUTPUT_CLIPPED)) == (1 << AUDIO_STATE_OUTPUT_CLIPPED))
             {
-                setPin(CLIPPING_LED_OUTPUT,1);
+                setPin(CLIPPING_LED_OUTPUT,0);
                 *audioStatePtr &= ~(1 << AUDIO_STATE_OUTPUT_CLIPPED);
             }
             else
             {
-                setPin(CLIPPING_LED_OUTPUT,0);
+                setPin(CLIPPING_LED_OUTPUT,1);
             }
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
 
@@ -344,6 +349,67 @@ int main(void)
             onRotaryChange(encoderDelta,&piPicoUiController);
             clearStickyIncrementDelta();
         }
+
+        /*
+        *
+        * Stomp Switches Callback
+        * 
+       */
+      #ifdef EXTENSION_BOARD
+      stompSwitchState = getStompSwitchState(0);
+      if ((stompSwitchState & (1 << 1)) != 0) 
+      {
+          clearStompSwitchStickyPressed(0);
+          onStompSwitch1Pressed(&piPicoUiController);
+      }
+      if ((stompSwitchState & (1 << 2)) != 0)
+      {
+          clearStompSwitchStickyReleased(0);
+          onStompSwitch1Released(&piPicoUiController);
+      }
+      stompSwitchState = getStompSwitchState(1);
+      if ((stompSwitchState & (1 << 1)) != 0) 
+      {
+          clearStompSwitchStickyPressed(1);
+          onStompSwitch2Pressed(&piPicoUiController);
+      }
+      if ((stompSwitchState & (1 << 2)) != 0)
+      {
+          clearStompSwitchStickyReleased(1);
+          onStompSwitch2Released(&piPicoUiController);
+      }
+      stompSwitchState = getStompSwitchState(2);
+      if ((stompSwitchState & (1 << 1)) != 0) 
+      {
+          clearStompSwitchStickyPressed(2);
+          onStompSwitch3Pressed(&piPicoUiController);
+      }
+      if ((stompSwitchState & (1 << 2)) != 0)
+      {
+          clearStompSwitchStickyReleased(2);
+          onStompSwitch3Released(&piPicoUiController);
+      }
+
+
+      if (programChangeState == 3)
+      {
+          clearDelayLine();
+          if (programsToInitialize[0] != 0xFF)
+          {
+              if (fxPrograms[programsToInitialize[0]]->reset != 0)
+              {
+                  fxPrograms[programsToInitialize[0]]->reset(fxPrograms[programsToInitialize[0]]->data);
+              }
+              piPicoUiController.currentProgramIdx = programsToInitialize[0];
+              programsToInitialize[0]=0xFF;
+              piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
+              onCreate(&piPicoUiController);
+          }
+
+          programChangeState = 4;
+      }
+      requestSwitchesUpdate();
+      #endif
 	}
 }
 #endif

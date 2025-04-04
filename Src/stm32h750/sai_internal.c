@@ -42,7 +42,7 @@ void DMA1_Stream1_IRQHandler(void) // adc
 void DMA1_Stream0_IRQHandler(void) // adc
 #endif
 {
-    /*
+    
     if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
     {
         audioState &= ~(1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
@@ -50,7 +50,7 @@ void DMA1_Stream0_IRQHandler(void) // adc
     else
     {
         audioState  |= (1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
-    }*/
+    }
     #ifdef PCM3060_CODEC
     NVIC_DisableIRQ(DMA1_Stream1_IRQn);
     if ((DMA1->LISR & DMA_LISR_TCIF1) != 0) // receiver transfer complete
@@ -114,16 +114,25 @@ void DMA1_Stream0_IRQHandler(void) // adc
     {
         
         // convert raw input to float
-        //inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
-        #ifdef PCM3060_CODEC
-        inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8);
+        #ifdef EXTENSION_BOARD
+            inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8) + 
+                          ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8);
         #else
-        inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
-    
+
+            #ifdef PCM3060_CODEC
+            inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8);
+            #else
+            inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
+            #endif
         #endif
         inputSample=(float)inputSampleInt;
         inputSample /= 8388608.0f;
-        
+        #ifdef EXTENSION_BOARD
+        if (inputSample < -1.0f || inputSample > 1.0f)
+        {
+            audioState |= AUDIO_STATE_INPUT_CLIPPED;
+        }
+        #endif
 
 
         if (inputSample < 0.0f)

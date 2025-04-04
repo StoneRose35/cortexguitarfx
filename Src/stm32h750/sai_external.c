@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "pipicofx/pipicofxui.h"
 #include "gpio.h"
+#include "audio/audiotools.h"
 #include "stm32h750/daisy_seed_pins.h"
 
 #ifdef EXTERNAL_CODEC
@@ -32,6 +33,7 @@ int32_t *  audioBufferInputPtr;
 int32_t inputSampleInt,inputSampleInt2;
 float inputSample, avgIn, avgOut;
 uint32_t ticStart, ticEnd;
+__attribute__((section (".qspi_code")))
 
 void DMA1_Stream0_IRQHandler(void) // adc
 {
@@ -80,16 +82,26 @@ void DMA1_Stream0_IRQHandler(void) // adc
         audioBufferInputPtr = getInputAudioBufferHiRes();
         for (uint32_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
         {
-            
-            // convert raw input to float
+            // convert raw input to float   
+            #ifdef EXTENSION_BOARD
+            inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8) + 
+                          ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8);
+            #else
             inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
+            #endif
 
+        
             //inputSampleInt = ((int32_t)((((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF) << 16) 
                               //| (((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF0000L) >> 16))) >> 8;  
                               // flip halfwords, then shift right by 8bits since input data is 24bit left-aligned
             inputSample=(float)inputSampleInt;
             inputSample /= 8388608.0f;
-            
+            #ifdef EXTENSION_BOARD
+            if (inputSample < -1.0f || inputSample > 1.0f)
+            {
+                audioState |= AUDIO_STATE_INPUT_CLIPPED;
+            }
+            #endif
     
 
             if (inputSample < 0.0f)
