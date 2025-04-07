@@ -18,6 +18,9 @@ void(*ep6OUTHandler)(void*data)=0;
 void(*ep7OUTHandler)(void*data)=0;
 void(*ep8OUTHandler)(void*data)=0;
 
+volatile uint32_t * ep0InDataBfr;
+volatile uint16_t usbAddressChangePending;
+
 void OTG_FS_EP1_OUT_IRQHandler(void)
 {
 
@@ -54,11 +57,15 @@ void OTG_FS_IRQHandler(void)
         USB2_OTG_FS_DEVICE->DIEPMSK |= (1 << USB_OTG_DIEPMSK_XFRCM_Pos) | (1 << USB_OTG_DIEPMSK_TOM_Pos);
 
         // set fifo ram size to 64 bytes plus 12*4bytes, rounded up -> 128bytes
-        USB2_OTG_FS->GRXFSIZ=0x80;//0x400; // stay with default
-        USB2_OTG_FS->DIEPTXF0_HNPTXFSIZ= (0x200 << 16) | (0x200 << 16);
+        // set fifo sizes
+        USB2_OTG_FS->GRXFSIZ = 0x80; // receiver fifo
+        USB2_OTG_FS->DIEPTXF0_HNPTXFSIZ = (0x40 << 16) | 0x80; // transmit fifo 0 
+        USB2_OTG_FS->DIEPTXF[0] = ((uint32_t)0x80 << 16) | (0x80 + 0x40); // transmit fifo 1
 
         // set setupcount to 3 to receive up to 3 setup packages at once
-        ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE))->DOEPTSIZ |= 3 << USB_OTG_DOEPTSIZ_STUPCNT_Pos;
+        USB_OTG_OUTEndpointTypeDef* outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE));
+        outEndpoint->DOEPTSIZ |= 3 << USB_OTG_DOEPTSIZ_STUPCNT_Pos;
+        outEndpoint->DOEPCTL |= (1 << USB_OTG_DOEPCTL_CNAK_Pos); // clear NAK
 
         USB2_OTG_FS_DEVICE->DCFG &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); // set device address 0 on reset
         USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_USBRST_Pos);
@@ -68,7 +75,42 @@ void OTG_FS_IRQHandler(void)
     // RX FIFO not empty: something has been received
     if (coreInterrupts & (1 << USB_OTG_GINTSTS_RXFLVL_Pos))
     {
+        #ifdef USB_DBG
+            sendStringBlocking("USB RX\r\n");
+        #endif
+        uint32_t statusRegisterPopped = USB2_OTG_FS->GRXSTSP;
+        uint16_t bCnt = (statusRegisterPopped >> 4) & 0x7FF;
+        uint8_t packetStatus = (statusRegisterPopped >> 17) & 0xF;
+        uint8_t epNr = (statusRegisterPopped) & 0xF;
+        uint8_t dPid = (statusRegisterPopped >> 15) & 0x3;
+        if (bCnt > 0 && epNr == 0)
+        {
+            ep0InDataBfr = malloc(bCnt);
+            for (uint8_t c=0;c< bCnt >> 2;c++)
+            {
+                *(ep0InDataBfr + c) = *((uint32_t*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE));
+            }
+        }
+        else if (epNr==0 && dPid == 2) // status stage received: enpoint 0 and data pid 1, data size 0
+        {
+            if((usbAddressChangePending & 0xFF00) != 0)
+            {
+                uint32_t dcfg = USB2_OTG_FS_DEVICE->DCFG;
+                dcfg &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); 
+                dcfg |= usbAddressChangePending & 0xFF;
+                USB2_OTG_FS_DEVICE->DCFG = dcfg;
+                usbAddressChangePending =0;
+            }
+        }
+        if (epNr==0 && packetStatus == PKSTS_SETUP_DATA_PACKET_RECEIVED && bCnt == 8)
+        {
+            //setup data package received: read two words, then decode the setup information
+            UsbSetupPacket setupPacket = (UsbSetupPacket)ep0InDataBfr;
+            ProcessUsbSetupPackage(setupPacket);
+            free((void*)ep0InDataBfr);
+        }
 
+        USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_RXFLVL_Pos);
     }
 
     // enumeration done
@@ -89,6 +131,12 @@ void OTG_FS_IRQHandler(void)
             sendStringBlocking("\r\n");
         }
         #endif
+
+        uint32_t diepctl0 = ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE))->DIEPCTL; 
+        diepctl0 &= ~(0x7FF);
+        diepctl0 |= 0x40;
+        ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE))->DIEPCTL = diepctl0;
+
         USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_ENUMDNE_Pos);
     }
     
@@ -142,6 +190,7 @@ void OTG_FS_IRQHandler(void)
     }
 
 
+
     // ----------------------------------
     // ----------------------------------
     // Endpoint interrupts
@@ -149,16 +198,18 @@ void OTG_FS_IRQHandler(void)
     // then read daint to find out which endpoint has been adressed
     // do what needs to be done...
     // then clear the interrupt flag using OTG_DOEPINTx or OTG_DIEPINTx
-    if (coreInterrupts & (1 << USB_OTG_GINTSTS_OEPINT_Pos))
+    if ((coreInterrupts & (1 << USB_OTG_GINTSTS_OEPINT_Pos)) == (1 << USB_OTG_GINTSTS_OEPINT_Pos))
     {
         uint32_t deviceInterrupts = (USB2_OTG_FS_DEVICE->DAINT >> 16) & 0xFFFF;
         for (uint8_t c=0;c<9;c++)
         {
-            if (deviceInterrupts & 1)
+            if ((deviceInterrupts & 1) == 1)
             {
+                USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*c));
+                
                 if (c==0) // endpoint 0 OUT, check for setup packets
                 {
-                    if (((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE))->DOEPINT & (1 << USB_OTG_DOEPINT_STUP_Pos))
+                    if (outEndpoint->DOEPINT & (1 << USB_OTG_DOEPINT_STUP_Pos))
                     {
                         // handle setup phase
                         uint32_t packageInfo = USB2_OTG_FS->GRXSTSP;
@@ -176,12 +227,7 @@ void OTG_FS_IRQHandler(void)
                             }
                             // do whatever is needed when a setup packet has been received
                             UsbSetupPacketType * setupPacket = (UsbSetupPacketType*)setupdata;
-                            switch (setupPacket->mbRequestType)
-                            {
-                                case SETUP_PACKET_REQ_GET_DESCRIPTOR:
-                                    
-                                    break;
-                            }
+                            ProcessUsbSetupPackage(setupPacket);
                             free(setupdata);
                         }
                         
@@ -196,6 +242,7 @@ void OTG_FS_IRQHandler(void)
                 {
 
                 }
+                outEndpoint->DOEPINT = 0xFFFF; // clear all interrupts
             }
             deviceInterrupts >>=1;
         }
@@ -336,6 +383,11 @@ USB_OTG_GINTMSK_PXFRM_IISOOXFRM | USB_OTG_GINTMSK_WUIM;
 
 USB2_OTG_FS_DEVICE->DCFG &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); // set device address 0
 
+// set fifo sizes
+USB2_OTG_FS->GRXFSIZ = 0x80; // receiver fifo
+USB2_OTG_FS->DIEPTXF0_HNPTXFSIZ = (0x40 << 16) | 0x80; // transmit fifo 0 
+USB2_OTG_FS->DIEPTXF[0] = ((uint32_t)0x80 << 16) | (0x80 + 0x40); // transmit fifo 1
+
 // start phy clock and stop HCLK gating
 *(volatile uint32_t*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_PCGCCTL_BASE) &= ~((1 << USB_OTG_PCGCCTL_GATECLK_Pos) | (1 << USB_OTG_PCGCCTL_STOPCLK_Pos));
 USB2_OTG_FS_DEVICE->DCTL |= (1 << USB_OTG_DCTL_SDIS_Pos); // soft diconnect
@@ -344,40 +396,52 @@ USB2_OTG_FS_DEVICE->DCTL &= ~(1 << USB_OTG_DCTL_SDIS_Pos); // finally: connect!
 
 //NVIC: Enable USB interrupts
 NVIC_EnableIRQ(OTG_FS_IRQn);
+}
+/**
+ * sends data out over usb
+ * epNr: the endpoint number starting at 0
+ * data: pointer to the data to be sent
+ * dlen: length of the data
+ * setDATA0: first PID is DATA0 if 1, DATA1 if 0  unaffected
+ */
+void sendUSBData(uint8_t epNr,const void*data,uint16_t dlen,uint8_t setDATA0)
+{
+    USB_OTG_INEndpointTypeDef * inEndpoint = ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + epNr*0x20));
+    uint32_t epCtrl = inEndpoint->DIEPCTL;
+    uint16_t mpsiz = inEndpoint->DIEPCTL & 0x7FF;
+    uint16_t fifoOffset; //, fifoSize;
+    if (setDATA0 == 1)
+    {
+        epCtrl |= (1 << USB_OTG_DIEPCTL_SD0PID_SEVNFRM_Pos);
+    }
+    else if (setDATA0 == 0)
+    {
+        epCtrl |= (1 << USB_OTG_DIEPCTL_SODDFRM_Pos);
+    }
+    uint16_t npackets = (dlen / mpsiz) + 1;
+    if (epNr == 0)
+    {
+        inEndpoint->DIEPTSIZ =  (npackets << USB_OTG_DIEPTSIZ_PKTCNT_Pos) | mpsiz;
+        fifoOffset = USB2_OTG_FS->DIEPTXF0_HNPTXFSIZ & 0xFFFF;
+        //fifoSize = (USB2_OTG_FS->DIEPTXF0_HNPTXFSIZ >> 16) & 0xFFFF;
+        USB2_OTG_FS->DIEPTXF[0] = ((uint32_t)0x80 << 16) | (0x80 + 0x40); // transmit fifo 1
+    }
+    else
+    {
+        fifoOffset = USB2_OTG_FS->DIEPTXF[epNr-1] & 0xFFFF;
+        //fifoSize = (USB2_OTG_FS->DIEPTXF[epNr-1] >> 16) & 0xFFFF;
+    }
+    epCtrl |= (1 << USB_OTG_DIEPCTL_EPENA_Pos) | (1 << USB_OTG_DIEPCTL_CNAK_Pos);
+    inEndpoint->DIEPCTL = epCtrl;
 
-// so far everythin is done, the remaining initialization is interrupt based
+    for (uint16_t c=0;c<(dlen >> 2);c++)
+    {
+        while (inEndpoint->DTXFSTS == 0);
+        *((uint32_t*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE + fifoOffset)) = *((uint32_t*)data + c);
+    }
+}
 
-/*
-
-// core initialization according to 57.15.1 from reference manual
-USB2_OTG_FS->GAHBCFG |= (1 << USB_OTG_GAHBCFG_GINT_Pos);// | (1 << USB_OTG_GAHBCFG_PTXFELVL_Pos);
-//USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_RXFLVL_Pos); // Rx FIFO non-empty
-
-USB2_OTG_FS->GUSBCFG &= ~((1 << USB_OTG_GUSBCFG_HNPCAP_Pos));
-USB2_OTG_FS->GUSBCFG |= (1 << USB_OTG_GUSBCFG_PHYSEL_Pos) | (1 << USB_OTG_GUSBCFG_SRPCAP_Pos) | (1 << USB_OTG_GUSBCFG_FDMOD_Pos); // set usb 1.1 full speed with internal transceiver
-
-while (!(USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL));
-USB2_OTG_FS->GRSTCTL |= USB_OTG_GRSTCTL_CSRST;
-while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_CSRST) == USB_OTG_GRSTCTL_CSRST);
-
-//USB2_OTG_FS->GCCFG |= (1 << USB_OTG_GCCFG_PWRDWN_Pos);
-
-USB2_OTG_FS->GUSBCFG &= ~(0xF << USB_OTG_GUSBCFG_TRDT_Pos);
-USB2_OTG_FS->GUSBCFG |= (0x9 << USB_OTG_GUSBCFG_TRDT_Pos); 
-USB2_OTG_FS->GINTMSK |= (1 << USB_OTG_GINTMSK_OTGINT_Pos) | (1 << USB_OTG_GINTMSK_MMISM_Pos) | (1 << USB_OTG_GINTMSK_SRQIM_Pos);
-
-// device initialization according to 57.15.3 from reference manual
-//USB2_OTG_FS_DEVICE->DCFG &= ~(3 << USB_OTG_DCFG_DSPD_Pos);
-USB2_OTG_FS_DEVICE->DCFG |= (3 << USB_OTG_DCFG_DSPD_Pos);
-USB2_OTG_FS_DEVICE->DCFG &= ~(1 << USB_OTG_DCFG_NZLSOHSK_Pos);
-USB2_OTG_FS_DEVICE->DCFG &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); // set device address 0 on startup
-
-USB2_OTG_FS_DEVICE->DCTL &= ~(1 << USB_OTG_DCTL_SDIS_Pos);
-USB2_OTG_FS->GINTMSK |= (1 << USB_OTG_GINTMSK_RSTDEM_Pos) 
-                      | (1 << USB_OTG_GINTMSK_ENUMDNEM_Pos) 
-                      | (1 << USB_OTG_GINTMSK_ESUSPM_Pos) 
-                      | (1 << USB_OTG_GINTMSK_USBSUSPM_Pos)
-                      | (1 << USB_OTG_GINTMSK_SOFM_Pos);
-*/
-
+void setPendingAddress(uint8_t address)
+{
+    usbAddressChangePending = 0xFF00 | address;
 }

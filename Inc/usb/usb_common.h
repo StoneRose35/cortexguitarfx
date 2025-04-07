@@ -35,6 +35,9 @@
 #define SETUP_PACKET_DESCR_TYPE_INTERFACE_POWER 8
 #define SETUP_PACKET_DESCR_TYPE_OTG 9
 
+#define REQUEST_TYPE_RECIPIENT_DEVICE 0
+#define REQUEST_TYPE_RECIPIENT_INTERFACE 1
+#define REQUEST_TYPE_RECIPIENT_ENDPOINT 2
 
 #define ENDPOINT_DIR_POS 7
 #define ENDPOINT_DIR_OUT 0 
@@ -64,9 +67,12 @@
 #define INTERFACE_DESCRIPTOR_LENGTH 9
 #define ENDPOINT_DESCRIPTOR_LENGTH 7
 
+#define BM_ATTRIBUTES_SELF_POWERED 0xC0
+#define BM_ATTRIBUTES_BUS_POWERED 0x80
+
 typedef volatile struct __attribute__((__packed__))
 {
-    uint8_t mbRequestType;
+    uint8_t bmRequestType;
     uint8_t bRequest;
     uint16_t wValue;
     uint16_t wIndex;
@@ -147,18 +153,18 @@ typedef UsbEndpointDescriptorType* UsbEndpointDescriptor;
 
 typedef struct  __attribute__((__packed__))
 {
-    uint8_t bLength;
-    uint8_t bDescriptorType;
-    char * bString;
+    const uint8_t bLength;
+    const uint8_t bDescriptorType;
+    const char * bString;
 } UsbStringDescriptorType;
 
 typedef UsbStringDescriptorType* UsbStringDescriptor;
 
 typedef struct __attribute__((__packed__))
 {
-    uint8_t bLength;
-    uint8_t bDescriptorType;
-    uint16_t wLangId;
+    const uint8_t bLength;
+    const uint8_t bDescriptorType;
+    const uint16_t wLangId;
 } UsbString0DescriptorType;
 
 typedef UsbString0DescriptorType* UsbString0Descriptor;
@@ -214,4 +220,6 @@ uint8_t handleSetupRequestIn(UsbSetupPacket pck,UsbEndpointConfigurationType * e
  */
 uint8_t handleSetupRequestOut(UsbSetupPacket pck,UsbEndpointConfigurationType * ep);
 
+
+void ProcessUsbSetupPackage(const UsbSetupPacketType *packet); 
 #endif
