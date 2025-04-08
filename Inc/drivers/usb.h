@@ -8,6 +8,11 @@
 #define PKSTS OUT_TRANSFER_COMPLETED 3
 #define PKSTS_SETUP_TRANSACTION_COMPLETED 4
 #define PKSTS_SETUP_DATA_PACKET_RECEIVED 6
+
+#define EPTYP_CONTROL 0
+#define EPTYP_ISOCHRONOUS 1
+#define EPTYP_BULK 2
+#define EPTYP_INTERRUPT 3
 // initializes the hardware part for usb communication
 void initUSB();
 

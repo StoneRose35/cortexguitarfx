@@ -18,7 +18,7 @@ void(*ep6OUTHandler)(void*data)=0;
 void(*ep7OUTHandler)(void*data)=0;
 void(*ep8OUTHandler)(void*data)=0;
 
-volatile uint32_t * ep0InDataBfr;
+uint32_t * epInDataBfr;
 volatile uint16_t usbAddressChangePending;
 
 void OTG_FS_EP1_OUT_IRQHandler(void)
@@ -72,6 +72,28 @@ void OTG_FS_IRQHandler(void)
 
     }
 
+    if ((coreInterrupts & (1 << USB_OTG_GINTSTS_IEPINT_Pos)) == (1 << USB_OTG_GINTSTS_IEPINT_Pos))
+    {
+        uint32_t deviceInterrupts = USB2_OTG_FS_DEVICE->DAINT & 0xFFFF;
+        for (uint8_t c=0;c<9;c++)
+        {
+            if ((deviceInterrupts & 1) == 1)
+            {
+                USB_OTG_INEndpointTypeDef * inEndpoint = ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + 0x20*c));
+                if (inEndpoint->DIEPCTL & (1 << USB_OTG_DIEPINT_XFRC_Pos))
+                {
+                    #ifdef USB_DBG
+                    sendStringBlocking("USB Xfer Dne\r\n");
+                    #endif
+                }
+                inEndpoint->DIEPINT = 0xFFFF;
+            }
+
+            deviceInterrupts >>= 1;
+        }
+        USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_IEPINT_Pos);   
+    }
+
     // RX FIFO not empty: something has been received
     if (coreInterrupts & (1 << USB_OTG_GINTSTS_RXFLVL_Pos))
     {
@@ -83,31 +105,100 @@ void OTG_FS_IRQHandler(void)
         uint8_t packetStatus = (statusRegisterPopped >> 17) & 0xF;
         uint8_t epNr = (statusRegisterPopped) & 0xF;
         uint8_t dPid = (statusRegisterPopped >> 15) & 0x3;
-        if (bCnt > 0 && epNr == 0)
+
+        if (bCnt > 0)
         {
-            ep0InDataBfr = malloc(bCnt);
+            epInDataBfr = malloc(bCnt);
             for (uint8_t c=0;c< bCnt >> 2;c++)
             {
-                *(ep0InDataBfr + c) = *((uint32_t*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE));
+                *(epInDataBfr + c) = *((uint32_t*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE));
             }
         }
-        else if (epNr==0 && dPid == 2) // status stage received: enpoint 0 and data pid 1, data size 0
+
+        switch (epNr)
         {
-            if((usbAddressChangePending & 0xFF00) != 0)
-            {
-                uint32_t dcfg = USB2_OTG_FS_DEVICE->DCFG;
-                dcfg &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); 
-                dcfg |= usbAddressChangePending & 0xFF;
-                USB2_OTG_FS_DEVICE->DCFG = dcfg;
-                usbAddressChangePending =0;
-            }
-        }
-        if (epNr==0 && packetStatus == PKSTS_SETUP_DATA_PACKET_RECEIVED && bCnt == 8)
-        {
-            //setup data package received: read two words, then decode the setup information
-            UsbSetupPacket setupPacket = (UsbSetupPacket)ep0InDataBfr;
-            ProcessUsbSetupPackage(setupPacket);
-            free((void*)ep0InDataBfr);
+            case 0:
+
+                if (bCnt == 0 && dPid == 2) // status stage received: enpoint 0 and data pid 1, data size 0
+                {
+                    if((usbAddressChangePending & 0xFF00) != 0)
+                    {
+                        uint32_t dcfg = USB2_OTG_FS_DEVICE->DCFG;
+                        dcfg &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); 
+                        dcfg |= usbAddressChangePending & 0xFF;
+                        USB2_OTG_FS_DEVICE->DCFG = dcfg;
+                        usbAddressChangePending =0;
+                    }
+                }
+                if (packetStatus == PKSTS_SETUP_DATA_PACKET_RECEIVED && bCnt == 8)
+                {
+                    //setup data package received: read two words, then decode the setup information
+                    UsbSetupPacket setupPacket = (UsbSetupPacket)epInDataBfr;
+                    ProcessUsbSetupPackage(setupPacket);
+                    free((void*)epInDataBfr);
+                }
+                else if (ep0OUTHandler != 0)
+                {
+                    ep0OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
+            case 1:
+                if (ep1OUTHandler != 0)
+                {
+                    ep1OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
+            case 2:
+                if (ep2OUTHandler != 0)
+                {
+                    ep2OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
+            case 3:
+                if (ep3OUTHandler != 0)
+                {
+                    ep3OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
+            case 4:
+                if (ep4OUTHandler != 0)
+                {
+                    ep4OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
+            case 5:
+                if (ep5OUTHandler != 0)
+                {
+                    ep5OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
+            case 6:
+                if (ep6OUTHandler != 0)
+                {
+                    ep6OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
+            case 7:
+                if (ep7OUTHandler != 0)
+                {
+                    ep7OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
+            case 8:
+                if (ep8OUTHandler != 0)
+                {
+                    ep8OUTHandler(epInDataBfr);
+                }
+                free((void*)epInDataBfr);
+                break;
         }
 
         USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_RXFLVL_Pos);

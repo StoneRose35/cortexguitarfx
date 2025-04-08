@@ -178,6 +178,7 @@ typedef struct
     uint32_t idx;
 } UsbMultipacketTransfer;
 
+
 /**
  * @brief send the next packet of a transfer spanning multiple packets over the given endpoint. 
  * 
@@ -222,4 +223,9 @@ uint8_t handleSetupRequestOut(UsbSetupPacket pck,UsbEndpointConfigurationType * 
 
 
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet); 
+
+// driver-specific implementations
+void setUsbConfiguration(uint8_t configurationNr);
+void handleClassSetupRequest(const UsbSetupPacketType* packet);
+void handleVendorSetupRequest(const UsbSetupPacketType* packet);
 #endif
