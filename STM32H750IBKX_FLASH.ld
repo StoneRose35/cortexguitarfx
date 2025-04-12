@@ -215,6 +215,19 @@ SECTIONS
     . = ALIGN(8);
   } >RAM_D1
 
+  .itcm_code :
+  {
+    . = ALIGN(4);
+    _sitcm_code = .;
+    PROVIDE(__itcm_code_start = _sitcm_code);
+    *(.itcm_code)
+    *(.itcm_code*)
+
+    .  = ALIGN(4);
+    _esitm_code = .;
+    PROVIDE(__itcm_code_end = _eitcm_code);
+  } > ITCMRAM AT>QSPIFLASH
+
   /* Remove information from the standard libraries */
   /DISCARD/ :
   {
