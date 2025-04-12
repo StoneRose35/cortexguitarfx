@@ -29,7 +29,6 @@ uint16_t epOutMaxPacketSizes[9]={64,0,0,0,0,0,0,0,0};
 uint16_t epInMaxPacketSizes[9]={64,0,0,0,0,0,0,0,0};
 uint8_t ep0OutDataBfr[128];
 uint8_t ep0InDataBfr[128]; 
-//volatile uint16_t usbAddressChangePending;
 
 void OTG_FS_EP1_OUT_IRQHandler(void)
 {
@@ -51,11 +50,6 @@ void OTG_FS_IRQHandler(void)
         #ifdef USB_DBG
         sendStringBlocking("USB reset\r\n");
         #endif
-        // set NAK for all OUT endpoints
-        //for (uint8_t c=0;c<8;c++)
-        //{
-        //    *((uint32_t*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + (c+1)*0x20)) |= (1 << USB_OTG_DOEPCTL_SNAK_Pos);
-        //}
         // unmask interrupts: INEP0 control 0 IN endpoint
         // OUTEP0 control 0 OUT endpoint
         // STUPM setup phase done
@@ -143,40 +137,6 @@ void OTG_FS_IRQHandler(void)
                 epOutDataCntrs[epNr] += 4;
             }
         }
-        /*
-        if (epNr==0)
-        {
-            if (bCnt == 0 && dPid == 2) // status stage received: enpoint 0 and data pid 1, data size 0
-            {
-                if((usbAddressChangePending & 0xFF00) != 0)
-                {
-                    uint32_t dcfg = USB2_OTG_FS_DEVICE->DCFG;
-                    dcfg &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); 
-                    dcfg |= usbAddressChangePending & 0xFF;
-                    USB2_OTG_FS_DEVICE->DCFG = dcfg;
-                    usbAddressChangePending =0;
-                }
-            }
-            if (packetStatus == PKSTS_SETUP_DATA_PACKET_RECEIVED && bCnt == 8)
-            {
-                //setup data package received: read two words, then decode the setup information
-                UsbSetupPacket setupPacket = (UsbSetupPacket)epInDataBfr;
-                ProcessUsbSetupPackage(setupPacket);
-                free((void*)epInDataBfr);
-            }
-            else if (outHandlers[0] != 0)
-            {
-                outHandlers[0](epInDataBfr);
-            }   
-        }
-        else 
-        {
-            if (outHandlers[epNr] != 0)
-            {
-                outHandlers[epNr](epInDataBfr);
-            }
-        }
-        */
        USB2_OTG_FS->GINTMSK |= (1 << USB_OTG_GINTMSK_RXFLVLM_Pos); // unmask RX FIFO Interrupt
     }
 
@@ -198,16 +158,8 @@ void OTG_FS_IRQHandler(void)
             sendStringBlocking("\r\n");
         }
         #endif
-        //USB_OTG_INEndpointTypeDef * inEP = ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE));
-        //uint32_t diepctl0 = inEP->DIEPCTL; 
-        //diepctl0 &= ~(0x7FF);
-        //diepctl0 |= 0x40;
-        //inEP->DIEPCTL = diepctl0;
         USB2_OTG_FS_DEVICE->DCTL |= (1 << USB_OTG_DCTL_CGINAK_Pos);
         USB2_OTG_FS->GINTMSK |= (1 << USB_OTG_GINTMSK_RXFLVLM_Pos); // switch on rx interrupt
-        //USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_ENUMDNE_Pos);
-        //USB_OTG_OUTEndpointTypeDef* outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE));
-        //__ASM("nop");
     }
     
 
@@ -281,17 +233,6 @@ void OTG_FS_IRQHandler(void)
             {
                 
                 USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*epNr));
-                
-                /*uint32_t packageInfo = USB2_OTG_FS->GRXSTSP;
-                uint8_t byteCount = (packageInfo >> 3) & 0x3FF;
-                if ((byteCount >> 2) > 0)
-                {
-                    usbOUTData = (uint32_t*)malloc(byteCount);
-                    for (uint8_t c=0;c<(byteCount >> 2);c++)
-                    {
-                        *(usbOUTData + c) = *((uint32_t*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE));
-                    }
-                }*/
                 if (outEndpoint->DOEPINT & (1 << USB_OTG_DOEPINT_STUP_Pos))
                 {
                     // handle setup phase
@@ -334,23 +275,10 @@ void OTG_FS_IRQHandler(void)
                     
                     if (epNr==0)
                     {
-
-                        //uint16_t upperLimit=0;
-                        // still more to send than a packet size
-                        //if ((epInDataCntrs[epNr] - epInWordsTransferred[epNr]) > epInMaxPacketSizes[epNr])
-                        //{
-                        //    upperLimit = epInMaxPacketSizes[epNr] >> 2;
-                        //}
                         if (epInDataCntrs[epNr] == epInBytesTransferred[epNr] && (epInBytesTransferred[epNr] % epInMaxPacketSizes[epNr])==0)
                         { // send a zerol length package when total length is a multiple of the maximum package size
                             sendUSBData(0,0,0);
                         }
-                        //else
-                        //{
-                        //    upperLimit = epInDataCntrs[epNr] - epInWordsTransferred[epNr];
-                        //}
-                        // start reception if on endpoint 0
-                        // to get status packet
                         USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*epNr));
                         outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_XFRSIZ & epOutMaxPacketSizes[epNr]);
                         outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_PKTCNT & (1U << 19));
@@ -468,11 +396,6 @@ while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_CSRST) == USB_OTG_GRSTCTL_CSRST);
 USB2_OTG_FS->GCCFG |= (1 << USB_OTG_GCCFG_PWRDWN_Pos); // enable usb transceiver
 USB2_OTG_FS->GUSBCFG |= (1 << USB_OTG_GUSBCFG_FDMOD_Pos); // for device mode to be able to access device registers
 
-//for (uint8_t c=0;c<15;c++)
-//{
-//    USB2_OTG_FS->DIEPTXF[c]=0U;
-//}
-
 // disable VBUS sensing
 USB2_OTG_FS_DEVICE->DCTL |= (1 << USB_OTG_DCTL_SDIS_Pos);
 USB2_OTG_FS->GCCFG &= ~(1 << USB_OTG_GCCFG_VBDEN_Pos);
@@ -483,18 +406,6 @@ USB2_OTG_FS->GOTGCTL |= (1 << USB_OTG_GOTGCTL_BVALOEN_Pos) | (1 << USB_OTG_GOTGC
 
 USB2_OTG_FS_DEVICE->DCFG |= (3 << USB_OTG_DCFG_DSPD_Pos); // speed is internal phy, full speed
 
-// flush all TX FIFO's
-// wait until AHB is idle
-//while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U); // maybe timeout here
-//USB2_OTG_FS->GRSTCTL = ((1 << USB_OTG_GRSTCTL_TXFFLSH_Pos) | (0x10 << 6));
-// wait until flushed
-//while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_TXFFLSH) == USB_OTG_GRSTCTL_TXFFLSH); // maybe timeout as well
-
-// flush the rx FIFO
-// wait until no traffic over AHB
-//while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U); // maybe timeout here
-//USB2_OTG_FS->GRSTCTL = USB_OTG_GRSTCTL_RXFFLSH; // flush the rx FIFO
-//while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_RXFFLSH) == USB_OTG_GRSTCTL_RXFFLSH);// maybe timeout here
 
 // mask all device interrupts
 USB2_OTG_FS_DEVICE->DIEPMSK = 0;
@@ -514,8 +425,6 @@ for (uint8_t c=0; c < 9 ; c++)
     ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*c))->DOEPTSIZ = 0;
     ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*c))->DOEPINT  = 0x2B7F; // according to dataset //0xFB7F;
 }
-
-//USB2_OTG_FS_DEVICE->DIEPMSK &= ~(1 << USB_OTG_DIEPEACHMSK1_TXFURM_Pos); // mask TX underrun interrupt, pretty useless since all interrupts have meen masked before
 
 USB2_OTG_FS->GINTMSK = 0; // mask all usb interrupts
 USB2_OTG_FS->GINTSTS = 0xBFFFFFFF; // clear pending interrupts
@@ -540,8 +449,6 @@ USB2_OTG_FS_DEVICE->DCTL &= ~(1 << USB_OTG_DCTL_SDIS_Pos); // finally: connect!
 
 //NVIC: Enable USB interrupts
 NVIC_EnableIRQ(OTG_FS_IRQn);
-
-
 
 outHandlers[0]=ep0OUTHandler;
 outHandlers[1]=ep1OUTHandler;
@@ -611,7 +518,6 @@ void sendUSBData(uint8_t epNr,uint8_t*data,uint16_t dlen)
 
 void setAddress(uint8_t address)
 {
-    //usbAddressChangePending = 0xFF00 | address;
     uint32_t dcfg = USB2_OTG_FS_DEVICE->DCFG;
     dcfg &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); 
     dcfg |= (address & 0xFF) << USB_OTG_DCFG_DAD_Pos;
