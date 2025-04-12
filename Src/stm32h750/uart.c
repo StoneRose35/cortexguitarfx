@@ -26,6 +26,17 @@ void sendBlocking(const uint8_t * data,uint32_t dlength)
     while((USART1->ISR & USART_ISR_TXE_TXFNF)==0);
 }
 
+void sendStringBlocking(const char * data)
+{
+    uint32_t c=0;
+    while( *(data+c)!=0)
+    {
+        while((USART1->ISR & USART_ISR_TXE_TXFNF)==0);
+        USART1->TDR = data[c++];   
+    }
+    while((USART1->ISR & USART_ISR_TXE_TXFNF)==0);
+}
+
 void receiveBlocking(uint8_t * data,uint32_t dlength)
 {
     uint32_t c=0;

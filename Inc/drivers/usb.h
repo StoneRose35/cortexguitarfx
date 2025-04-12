@@ -13,10 +13,12 @@
 #define EPTYP_ISOCHRONOUS 1
 #define EPTYP_BULK 2
 #define EPTYP_INTERRUPT 3
+
+
 // initializes the hardware part for usb communication
 void initUSB();
-
-void sendUSBData(uint8_t epNr,const void*data,uint16_t dlen,uint8_t setDATA0);
-void setPendingAddress(uint8_t address);
+uint8_t * getEp0InDataBfr();
+void sendUSBData(uint8_t epNr,uint8_t*data,uint16_t dlen);
+void setAddress(uint8_t address);
 
 #endif

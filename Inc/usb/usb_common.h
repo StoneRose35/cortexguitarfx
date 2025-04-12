@@ -180,48 +180,13 @@ typedef struct
 
 
 /**
- * @brief send the next packet of a transfer spanning multiple packets over the given endpoint. 
- * 
- * @param ep the endpoint to send the data over
- * @param th the object containing the data for the multipacket transfer
- */
-void send_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th,uint8_t zeroTerminate);
-
-
-void receive_next_packet(UsbEndpointConfigurationType* ep,UsbMultipacketTransfer* th,uint8_t zeroTerminate);
-
-/**
  * @brief initializes the usb device. Specifically configures endpoint0 to be ready to handle the default setup requests
  * 
  */
 void initUSB();
 
-/**
- * @brief to be implemented in the specific device driverm, should setup the endpoints according to the 
- * specific device type , e.g. and HID device contains typically a single in endpoints besides ep0In and ep0Out
- * 
- */
-void initUsbDeviceDriver(UsbEndpointConfigurationType **,UsbEndpointConfigurationType **,void(**)(void));
 
-/**
- * @brief handles setup packets from device to host which are driver-specific
- * 
- * @param pck 
- * @param ep 
- * @return uint8_t 1 if handled 0 otherwise
- */
-uint8_t handleSetupRequestIn(UsbSetupPacket pck,UsbEndpointConfigurationType * ep);
-
-/**
- * @brief handles setup packets from the host to the device
- * 
- * @param pck 
- * @param ep 
- * @return uint8_t 
- */
-uint8_t handleSetupRequestOut(UsbSetupPacket pck,UsbEndpointConfigurationType * ep);
-
-
+uint16_t serializeStringDescriptor(uint8_t * dataPtr, UsbStringDescriptor descr);
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet); 
 
 // driver-specific implementations

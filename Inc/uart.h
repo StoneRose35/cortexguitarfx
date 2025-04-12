@@ -69,6 +69,7 @@ uint8_t sendCharAsyncUsb();
 uint8_t sendCharAsyncBt();
 
 void sendBlocking(const uint8_t * data,uint32_t dlength);
+void sendStringBlocking(const char * data);
 void receiveBlocking(uint8_t * data,uint32_t dlength);
 
 #endif /* UART_H_ */
