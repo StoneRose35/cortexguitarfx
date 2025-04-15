@@ -14,11 +14,21 @@
 #define EPTYP_BULK 2
 #define EPTYP_INTERRUPT 3
 
+#define EP_DIRECTION_OUT 0
+#define EP_DIRECTION_IN 1
 
+typedef  void(*endPointHandler)(void*,uint16_t) ;
 // initializes the hardware part for usb communication
 void initUSB();
-uint8_t * getEp0InDataBfr();
-void sendUSBData(uint8_t epNr,uint8_t*data,uint16_t dlen);
-void setAddress(uint8_t address);
 
+
+uint8_t * getEp0InDataBfr();
+void prepareUSBTransfer(uint8_t epNr,uint8_t*data,uint16_t dlen);
+void prepareUSBReception(uint8_t epNr,uint16_t dataSize);
+void setAddress(uint8_t address);
+void setEndpointOutHandler(endPointHandler handler,uint8_t epNr);
+void setTransferDoneHandler(void(*handler)(void),uint8_t epNr);
+
+// sets the software buffers, doens't affect the hardware
+void setupEndpoint(uint8_t epNr,uint8_t direction,uint16_t maxPacketSize);
 #endif

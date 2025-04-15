@@ -190,7 +190,7 @@ uint16_t serializeStringDescriptor(uint8_t * dataPtr, UsbStringDescriptor descr)
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet); 
 
 // driver-specific implementations
-void setUsbConfiguration(uint8_t configurationNr);
+ uint8_t setUsbConfiguration(uint8_t configurationNr);
 void handleClassSetupRequest(const UsbSetupPacketType* packet);
 void handleVendorSetupRequest(const UsbSetupPacketType* packet);
 #endif

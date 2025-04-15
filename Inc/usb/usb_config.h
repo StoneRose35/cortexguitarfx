@@ -3,5 +3,5 @@
 
 //#define USB_CDC_DRIVER 
 //#define USB_MSC_DRIVER
-#define USB_DBG
+#undef USB_DBG
 #endif

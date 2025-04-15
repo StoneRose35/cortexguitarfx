@@ -91,7 +91,7 @@ const uint8_t usbDeviceDescriptorFull[] = {
     SETUP_PACKET_DESCR_TYPE_ENDPOINT, //bDescriptorType: Endpoint 
     (ENDPOINT_DIR_IN << ENDPOINT_DIR_POS) | 0x02, // endpoint nr and direction
     ENDPOINT_ATTR_TRANSFERTYPE_INTERRUPT,
-    0x08, // packet size, lsb
+    USB_CDC_CONTROL_EP_PACKETSIZE, // packet size, lsb
     0x00, // packet size, msb
     0x10, // bInterval: interval for polling the endpoint in ms
     //-------------------------------------
@@ -115,7 +115,7 @@ const uint8_t usbDeviceDescriptorFull[] = {
     SETUP_PACKET_DESCR_TYPE_ENDPOINT, 
     (ENDPOINT_DIR_OUT << ENDPOINT_DIR_POS) | 0x01, // endpoint address: 1 OUT,
     0x02, // bmAttributes: Bulk
-    0x40, // packet size, lsb
+    USB_CDC_DATA_OUT_PACKETSIZE, // packet size, lsb
     0x00, // packet size, msb
     0x00, // bInterval
     //-------------------------------------
@@ -126,7 +126,7 @@ const uint8_t usbDeviceDescriptorFull[] = {
     SETUP_PACKET_DESCR_TYPE_ENDPOINT, 
     (ENDPOINT_DIR_IN << ENDPOINT_DIR_POS) | 0x01, // endpoint address: 1 IN,
     0x02, // bmAttributes: Bulk
-    0x40, // packet size, lsb
+    USB_CDC_DATA_IN_PACKETSIZE, // packet size, lsb
     0x00, // packet size, msb
     0x00, // bInterval
     };
@@ -164,14 +164,14 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                         #ifdef USB_DBG
                         sendStringBlocking("GET_STATUS, device\r\n");
                         #endif
-                        sendUSBData(0,(uint8_t*)&data,2);
+                        prepareUSBTransfer(0,(uint8_t*)&data,2);
                         break;
                     case REQUEST_TYPE_RECIPIENT_INTERFACE:
                         data = 0;
                         #ifdef USB_DBG
                         sendStringBlocking("GET_STATUS, interface\r\n");
                         #endif
-                        sendUSBData(0,(uint8_t*)&data,2);
+                        prepareUSBTransfer(0,(uint8_t*)&data,2);
                         break;
                     case REQUEST_TYPE_RECIPIENT_ENDPOINT:
                         uint16_t endpointNr = packet->wIndex;
@@ -183,7 +183,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                             data = ((((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE 
                                 + USB_OTG_OUT_ENDPOINT_BASE
                                 + 0x20*(endpointNr & 0x7F)))->DOEPCTL >> USB_OTG_DOEPCTL_USBAEP_Pos) & 0x1) ^ 0x1;
-                                sendUSBData(0,(uint8_t*)&data,2);
+                                prepareUSBTransfer(0,(uint8_t*)&data,2);
                         }
                         else
                         {
@@ -193,7 +193,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                             data = ((((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE 
                                 + USB_OTG_IN_ENDPOINT_BASE
                                 + 0x20*(endpointNr & 0x7F)))->DIEPCTL >> USB_OTG_DIEPCTL_USBAEP_Pos) & 0x1) ^ 0x1;
-                            sendUSBData(0,(uint8_t*)&data,2);
+                            prepareUSBTransfer(0,(uint8_t*)&data,2);
                         }
                         break;
 
@@ -203,13 +203,13 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                 #ifdef USB_DBG
                 sendStringBlocking("CLEAR_FEATURE\r\n");
                 #endif
-                sendUSBData(0,0,0); // status package
+                prepareUSBTransfer(0,0,0); // status package
                 break;
             case 0x03: // SET_FEATURE
                 #ifdef USB_DBG
                 sendStringBlocking("SET_FEATURE\r\n");
                 #endif
-                sendUSBData(0,0,0); // status package
+                prepareUSBTransfer(0,0,0); // status package
                 break;
             case 0x05: // SET_ADDRESS
                 #ifdef USB_DBG
@@ -221,8 +221,10 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                 #ifdef USB_DBG
                 sendStringBlocking("SET_CONFIGURATION\r\n");        
                 #endif
-                setUsbConfiguration(packet->wValue);
-                sendUSBData(0,0,0); // status package
+                if (setUsbConfiguration(packet->wValue) == 0)
+                {
+                    prepareUSBTransfer(0,0,0); // status package
+                }
                 break;
             case 0x06: // GET_DESCRIPTOR
                 uint16_t descrLength=0;
@@ -268,7 +270,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                 {
                     effLength = descrLength;
                 }
-                sendUSBData(0,dataPtr,effLength); // sends out data if effLength > 0, an empty/status package otherwise
+                prepareUSBTransfer(0,dataPtr,effLength); // sends out data if effLength > 0, an empty/status package otherwise
 
                 break;
             default:
@@ -310,3 +312,4 @@ uint16_t serializeStringDescriptor(uint8_t * dataPtr, UsbStringDescriptor descr)
     *(dataPtr+1)=SETUP_PACKET_DESCR_TYPE_STRING;
     return c+2;
 }
+
