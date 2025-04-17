@@ -5,7 +5,6 @@
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
 #include "images/pipicofx_param_1_scaled.h"
-#include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"

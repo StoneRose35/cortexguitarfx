@@ -1,6 +1,5 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
-#include "romfunc.h"
 
 #define FXPROGRAM_HIGHCUT_VAL1 0.61035f
 #define FXPROGRAM_HIGHCUT_VAL2 0.9613037f

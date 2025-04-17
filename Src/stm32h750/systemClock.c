@@ -15,7 +15,7 @@ void setupClock()
 
     // switch to external oscillator
     cfgr = RCC->CFGR;
-    cfgr &= ~(3 << RCC_CFGR_SW_Pos);
+    cfgr &= ~(7 << RCC_CFGR_SW_Pos);
     cfgr |= (2 << RCC_CFGR_SW_Pos);
     RCC->CFGR = cfgr;
     while ((RCC->CFGR & (RCC_CFGR_SWS_HSE)) == 0);

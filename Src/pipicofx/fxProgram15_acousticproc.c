@@ -1,6 +1,5 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
-#include "romfunc.h"
 #include "audio/compressor.h"
 
 __attribute__ ((section (".qspi_code")))

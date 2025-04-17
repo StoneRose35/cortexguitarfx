@@ -10,11 +10,11 @@
 #include "images/fwUpgradeOverlay.h"
 #include "images/aboutoverlay.h"
 #include "images/fwupdateScreen.h"
-#include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
 #include "gen/version.h"
+#include "bootloaderActivation.h"
 
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
@@ -116,7 +116,7 @@ static void enterCallback(PiPicoFxUiType*data)
         {
             drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
             DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
-            //reset_usb_boot(1 << 17,2);
+            jumpToBootloader();
         }
     }
 
