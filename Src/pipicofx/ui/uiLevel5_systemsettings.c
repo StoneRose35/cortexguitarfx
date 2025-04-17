@@ -5,11 +5,11 @@
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
-#include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
-
+#include "globalConfig.h"
 #include "drivers/cs4270_audio_codec.h"
+#include "drivers/wm8731.h"
 #include "images/toggleswitch_on.h"
 #include "images/toggleswitch_off.h"
 
@@ -29,7 +29,12 @@ static void create(PiPicoFxUiType*data)
     appendToString(strbfr,"Settings");
     drawText(2,14,strbfr,img,font);
 
+    #ifdef CS4270_CODEC
     regbfr = cs4270GetInputState();
+    #endif
+    #ifdef WM8731_CODEC
+    regbfr = wm8731GetInputState();
+    #endif
     if (regbfr & 0x2)
     {
         drawImage(16,20,&toggleswitch_on_streamimg,img);
@@ -60,7 +65,12 @@ static void create(PiPicoFxUiType*data)
     appendToString(strbfr,"Vol");
     drawText(87,55,strbfr,img,(void*)0);
 
+    #ifdef CS4270_CODEC
     currentVolume = cs4270GetOutputVolume();
+    #endif
+    #ifdef WM8731_CODEC
+    currentVolume = wm8731GetOutputVolume();
+    #endif
     drawOval(10.f,10.f,100.f,32.f,img);
     clearOval(8.f,8.f,100.f,32.f,img);
 
@@ -239,33 +249,68 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         switch (paramSelected)
         {
             case 0:
+                #ifdef CS4270_CODEC
                 regbfr = cs4270GetInputState();
+                #endif
+                #ifdef WM8731_CODEC
+                regbfr = wm8731GetInputState();
+                #endif
                 if ((regbfr & 0x2) != 0 && encoderDelta < 0) // switch off, was on
                 {
+                    #ifdef CS4270_CODEC
                     cs4270SetInputState(CS4270_CHANNEL_B,0);
+                    #endif
+                    #ifdef WM8731_CODEC
+                    wm8731SetInputState(WM8731_CHANNEL_B,0);
+                    #endif
                     drawImage(16,20,&toggleswitch_off_streamimg,img);
                 }
                 else if ((regbfr & 0x2) == 0 && encoderDelta > 0) // switch on, was off
                 {
+                    #ifdef CS4270_CODEC
                     cs4270SetInputState(CS4270_CHANNEL_B,1);
+                    #endif
+                    #ifdef WM8731_CODEC
+                    wm8731SetInputState(WM8731_CHANNEL_B,1);
+                    #endif
                     drawImage(16,20,&toggleswitch_on_streamimg,img);
                 }
                 break;
             case 1:
+                #ifdef CS4270_CODEC
                 regbfr = cs4270GetInputState();
+                #endif
+                #ifdef WM8731_CODEC
+                regbfr = wm8731GetInputState();
+                #endif
                 if ((regbfr & 0x1) != 0 && encoderDelta < 0) // switch off, was on
                 {
+                    #ifdef CS4270_CODEC
                     cs4270SetInputState(CS4270_CHANNEL_A,0);
+                    #endif
+                    #ifdef WM8731_CODEC
+                    wm8731SetInputState(WM8731_CHANNEL_A,0);
+                    #endif
                     drawImage(47,20,&toggleswitch_off_streamimg,img);
                 }
                 else if ((regbfr & 0x1) == 0 && encoderDelta > 0) // switch on, was off
                 {
+                    #ifdef CS4270_CODEC
                     cs4270SetInputState(CS4270_CHANNEL_A,1);
+                    #endif
+                    #ifdef WM8731_CODEC
+                    wm8731SetInputState(WM8731_CHANNEL_A,1);
+                    #endif
                     drawImage(47,20,&toggleswitch_on_streamimg,img);
                 }
                 break;
             case 2:
+                #ifdef CS4270_CODEC
                 currentVolume = cs4270GetOutputVolume();
+                #endif
+                #ifdef WM8731_CODEC
+                currentVolume = wm8731GetOutputVolume();
+                #endif
                 currentVolume &= 0xFF;
                 currentVolume += (encoderDelta << 2);
                 if (encoderDelta > 0)
@@ -294,7 +339,12 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 cx = 100.0f;
                 cy = 32.0f;
                 drawLine(cx,cy,px,py,img);
+                #ifdef CS4270_CODEC
                 cs4270SetOutputVolume(CS4270_CHANNEL_BOTH,(uint8_t)currentVolume);
+                #endif
+                #ifdef WM8731_CODEC
+                wm8731SetOutputVolume(CS4270_CHANNEL_BOTH,(uint8_t)currentVolume);
+                #endif
                 break;
         }
     }

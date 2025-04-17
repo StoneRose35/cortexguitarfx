@@ -37,18 +37,15 @@
 
 
 // i2c interface
-#ifdef INTERNAL_CODEC
-#define I2C_SDA (1*16+11) // PB11
-#define I2C_SCL (7*16+4) // PH4
-#define I2C_BLOCK I2C2
-#define I2C_ENR RCC_APB1LENR_I2C2EN_Pos
-#endif
-#ifdef EXTERNAL_CODEC
-#define I2C_SDA (1*16+7) // PB7
-#define I2C_SCL (1*16+6) // PB6
-#define I2C_BLOCK I2C1
-#define I2C_ENR RCC_APB1LENR_I2C1EN_Pos
-#endif
+
+#define I2C_SDA_INTERNAL (1*16+11) // PB11
+#define I2C_SCL_INTERNAL (7*16+4) // PH4
+#define I2C_SDA_EXTERNAL (1*16+7) // PB7
+#define I2C_SCL_EXTERNAL (1*16+6) // PB6
+#define I2C_BLOCK_INTERNAL I2C2
+#define I2C_BLOCK_EXTERNAL I2C1
+#define I2C_ENR_INTERNAL RCC_APB1LENR_I2C2EN_Pos
+#define I2C_ENR_EXTERNAL RCC_APB1LENR_I2C1EN_Pos
 
 #define PCM3060_DEEMPHASIS (1*16 + 11) // PB11
 

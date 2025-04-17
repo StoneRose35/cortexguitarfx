@@ -2,7 +2,7 @@
 #define _WM8731_H_
 #include "stdint.h"
 
-#define WM8731_ADDRESS (50)
+#define WM8731_ADDRESS (26)
 
 // register map
 #define WM8731_R0 (0x0<<9)
@@ -77,12 +77,14 @@
 #define SAMPLERATE_32KHZ 1
 #define SAMPLERATE_48KHZ 2
 
+#define WM8731_CHANNEL_A (0) 
+#define WM8731_CHANNEL_B (1)
 /**
  * @brief low-level register write function
  * 
  * @param data b15 - b9: register, b8 - b0: data
  */
-uint8_t wm8731_write(uint16_t data);
+void wm8731_write(uint16_t data);
 
 /**
  * @brief sets the interface to the desired sample depth and sample rate
@@ -94,7 +96,10 @@ uint8_t wm8731_write(uint16_t data);
  */
 void setupWm8731(uint8_t sampledepth,uint8_t samplerate);
 
+uint16_t wm8731GetOutputVolume(void);
 
-
+void wm8731SetOutputVolume(uint8_t channels,uint8_t volume);
+uint8_t wm8731GetInputState(void);
+void wm8731SetInputState(uint8_t channel,uint8_t val);
 
 #endif
