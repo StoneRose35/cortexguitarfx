@@ -29,6 +29,12 @@ static volatile uint8_t qspiStatus=1;
 extern uint32_t*  _siqspicode;
 extern uint32_t* _sqspi_code;
 extern uint32_t* _eqspi_code;
+extern uint32_t*  _siitcmcode;
+extern uint32_t* _sitcm_code;
+extern uint32_t* _eitcm_code;
+extern uint32_t*  _sidtcmdata;
+extern uint32_t* _sdtcm_data;
+extern uint32_t* _edtcm_data;
 
 #define QUADSPI_DR_BYTE ((volatile uint8_t*)(&QUADSPI->DR))
 
@@ -181,10 +187,24 @@ void initQspi()
     }
     setMemoryMappedMode();
     cnt=0;
-    // copy qsp code section from qspi to ram
+    // copy qspi code section from qspi to ram
     while (((uint32_t)&_sqspi_code)+ (cnt << 2) < (uint32_t)&_eqspi_code)
     {
         *((uint32_t*)&_sqspi_code + cnt) = *((uint32_t*)&_siqspicode + cnt);
+        cnt++; 
+    }
+    cnt=0;
+    // copy itcm section
+    while (((uint32_t)&_sitcm_code)+ (cnt << 2) < (uint32_t)&_eitcm_code)
+    {
+        *((uint32_t*)&_sitcm_code + cnt) = *((uint32_t*)&_siitcmcode + cnt);
+        cnt++; 
+    }
+    cnt=0;
+    // copy dtcm section
+    while (((uint32_t)&_sdtcm_data)+ (cnt << 2) < (uint32_t)&_edtcm_data)
+    {
+        *((uint32_t*)&_sdtcm_data + cnt) = *((uint32_t*)&_sidtcmdata + cnt);
         cnt++; 
     }
 }
