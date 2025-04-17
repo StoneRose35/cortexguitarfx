@@ -1,7 +1,8 @@
 #include <stdint.h>
+#include "memoryRegions.h"
 #define TOL 0.000001f
 // taken from https://gist.github.com/LingDong-/7e4c4cae5cbbc44400a05fba65f06f23
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float toLn(float x) {
   float xStacked = x;
   float * xPtr = &xStacked;
@@ -16,7 +17,7 @@ float toLn(float x) {
 }
 
 // claculates 20*log10(x), using a 2nd order polynomial approach obtained using the remez algo
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float toDb(float x) {
   float xStacked = x;
   float * xPtr = &xStacked;
@@ -29,7 +30,7 @@ float toDb(float x) {
   return -10.08376785f + 12.18970261f**xPtr + -2.07619445f**xPtr**xPtr +6.020599913279f*(float)t;
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 // computes a linear value given a db value using the bisection algorithm
 float toLin(float y)
 {

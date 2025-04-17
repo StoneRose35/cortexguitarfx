@@ -1,18 +1,19 @@
 
 #include "audio/sineChorus.h"
 #include "audio/delay.h"
+#include "memoryRegions.h"
 
 static const int16_t firstSineQuadrant[33] = {0,12,25,38,51,63,76,88,100,112,123,134,145,156,166,175,184,193,201,209,216,222,228,234,239,243,246,249,252,253,254,255,255};
 
 /** set frequency in Hz/100 */
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void sineChorusSetFrequency(uint16_t freq,SineChorusType*data)
 {
     data->lfoPhaseinc= freq*894; //*4294967296/4800000;
     data->frequency = freq;
 }
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 int16_t getSineValue(uint32_t phase)
 {
     uint8_t index;
@@ -41,7 +42,7 @@ int16_t getSineValue(uint32_t phase)
 }
 
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void initSineChorus(SineChorusType*data,float * delayMemoryPointer)
 {
     data->delayBuffer = delayMemoryPointer;
@@ -55,7 +56,7 @@ void initSineChorus(SineChorusType*data,float * delayMemoryPointer)
     data->lfoPhaseinc=data->frequency*4*256*SINE_CHORUS_LFO_DIVIDER/4800000;
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float sineChorusProcessSample(float sampleIn,SineChorusType*data)
 {
     uint16_t delayPtr;
@@ -79,7 +80,7 @@ float sineChorusProcessSample(float sampleIn,SineChorusType*data)
         return sampleOut;
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float sineChorusInterpolatedProcessSample(float sampleIn,SineChorusType*data)
 {
     uint16_t delayPtr,delayPtrNext;

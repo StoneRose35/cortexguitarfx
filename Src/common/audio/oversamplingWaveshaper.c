@@ -2,12 +2,14 @@
 #include "audio/secondOrderIirFilter.h"
 #include <stdint.h>
 #include "sai.h"
+#include "memoryRegions.h"
+
 
 // oversampling factor as power of two
 #define OVERSAMPLING_FACTOR 2 
 
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void initOversamplingWaveshaper(OversamplingWaveshaperDataType*data)
 {
     data->oldValue = 0;
@@ -16,7 +18,7 @@ void initOversamplingWaveshaper(OversamplingWaveshaperDataType*data)
 
 //uint16_t oversampledBuffer[AUDIO_BUFFER_SIZE*2*(1 << OVERSAMPLING_FACTOR)];
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 void  applyOversamplingDistortion(float*data,OversamplingWaveshaperDataType* waveshaper)
 {
     float oversample;
@@ -38,7 +40,7 @@ void  applyOversamplingDistortion(float*data,OversamplingWaveshaperDataType* wav
     }
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float  OversamplingDistortionProcessSample(float sample,OversamplingWaveshaperDataType* waveshaper)
 {
     float osVal1, osVal2, osVal3, osVal4;
@@ -59,7 +61,7 @@ float  OversamplingDistortionProcessSample(float sample,OversamplingWaveshaperDa
     return outVal;
 }
 
-__attribute__ ((section (".qspi_code")))
+__QSPI_CODE
 void oversamplingWaveshaperReset(OversamplingWaveshaperDataType*data)
 {
     data->oldValue=0.0f;

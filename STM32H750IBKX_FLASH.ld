@@ -35,7 +35,8 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-_estack = ORIGIN(RAM_D1) + LENGTH(RAM_D1);    /* end of RAM */
+//_estack = ORIGIN(RAM_D1) + LENGTH(RAM_D1);    /* end of RAM */
+_estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM); /* end of ITCM RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x200 ;      /* required amount of heap  */
 _Min_Stack_Size = 0x400 ; /* required amount of stack */
@@ -168,10 +169,29 @@ SECTIONS
 	} > SDRAM
 
   . = ALIGN(4);
+.dtcm_bss (NOLOAD) : 
+{
+		. = ALIGN(4);
+    _sdtcm_bss = .;
+    *(.dtcm_bss)
+    *(.dtcm_bss*)
+    . = ALIGN(4);
+    _edtcm_bss = .;
+} > DTCMRAM
 
+  . = ALIGN(4);
+  _sidtcmdata = LOADADDR(.dtcm_data);
+.dtcm_data : 
+{
+		. = ALIGN(4);
+    _sdtcm_data = .;
+    *(.dtcm_data)
+    *(.dtcm_data*)
+    . = ALIGN(4);
+    _edtcm_data = .;
+} > DTCMRAM AT> QSPIFLASH
 
-
-  .qspi_data (NOLOAD):
+  .qspi_data : 
   {
     . = ALIGN(4);
 		_sqspi_data = .;
@@ -203,9 +223,25 @@ SECTIONS
 
 		PROVIDE(__qspi_code_end = _eqspi_code);
   } > RAM_D1 AT> QSPIFLASH
+
+  _siitcmcode = LOADADDR(.qspi_itcm_code);
+
+  .qspi_itcm_code :
+  {
+    . = ALIGN(4);
+    _sitcm_code = .;
+    PROVIDE(__itcm_code_start = _sitcm_code);
+    *(.qspi_itcm_code)
+    *(.qspi_itcm_code*)
+
+    .  = ALIGN(4);
+    _eitcm_code = .;
+    PROVIDE(__itcm_code_end = _eitcm_code);
+  } > ITCMRAM AT>QSPIFLASH
+
     . = ALIGN(4);
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack :
+  /*._user_heap_stack :
   {
     . = ALIGN(8);
     PROVIDE ( end = . );
@@ -214,19 +250,17 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM_D1
-
-  .itcm_code :
+  */
+._user_heap_stack :
   {
-    . = ALIGN(4);
-    _sitcm_code = .;
-    PROVIDE(__itcm_code_start = _sitcm_code);
-    *(.itcm_code)
-    *(.itcm_code*)
+    . = ALIGN(8);
+    PROVIDE ( end = . );
+    PROVIDE ( _end = . );
+    . = . + _Min_Heap_Size;
+    . = . + _Min_Stack_Size;
+    . = ALIGN(8);
+  } >DTCMRAM
 
-    .  = ALIGN(4);
-    _esitm_code = .;
-    PROVIDE(__itcm_code_end = _eitcm_code);
-  } > ITCMRAM AT>QSPIFLASH
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

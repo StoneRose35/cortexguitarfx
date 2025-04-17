@@ -203,6 +203,21 @@ SECTIONS
 		PROVIDE(__qspi_code_end = _eqspi_code);
   } > RAM_D1 AT> QSPIFLASH
 
+  _siitcmcode = LOADADDR(.qspi_itcm_code);
+  
+    .qspi_itcm_code :
+  {
+    . = ALIGN(4);
+    _sitcm_code = .;
+    PROVIDE(__itcm_code_start = _sitcm_code);
+    *(.qspi_itcm_code)
+    *(.qspi_itcm_code*)
+
+    .  = ALIGN(4);
+    _eitcm_code = .;
+    PROVIDE(__itcm_code_end = _eitcm_code);
+  } > ITCMRAM AT>QSPIFLASH
+
   . = ALIGN(4);
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :

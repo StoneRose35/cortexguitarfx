@@ -1,13 +1,13 @@
 #include "audio/bitcrusher.h"
+#include "memoryRegions.h"
 
-
-__attribute__ ((section (".qspi_code")))
+__QSPI_CODE
 void initBitcrusher(BitCrusherDataType*data)
 {
     data->bitmask= ~(0x7FFFFF);
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 void setBitMask(uint8_t resolution,BitCrusherDataType*data)
 {
     data->bitmask=0;
@@ -19,7 +19,7 @@ void setBitMask(uint8_t resolution,BitCrusherDataType*data)
     data->bitmask = ~(data->bitmask);
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float bitCrusherProcessSample(float sampleIn,BitCrusherDataType*data)
 {
     int32_t isample;

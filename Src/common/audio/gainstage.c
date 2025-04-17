@@ -1,15 +1,15 @@
 #include "audio/gainstage.h"
 #include "audio/audiotools.h"
+#include "memoryRegions.h"
 
-
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void initGainstage(GainStageDataType*data)
 {
     data->gain=1.0f;
     data->offset=0.0f;
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float gainStageProcessSample(float sampleIn,GainStageDataType*data)
 {
     float sampleOut;

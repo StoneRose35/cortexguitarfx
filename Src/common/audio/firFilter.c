@@ -1,8 +1,8 @@
 #include "audio/firFilter.h"
 #include "stm32h750/helpers.h"
+#include "memoryRegions.h"
 
-
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 void addSample(float sampleIn,FirFilterType*data)
 {
     data->delayPointer--;
@@ -22,7 +22,7 @@ float processSecondHalf(FirFilterType*data)
     return 0.0f;
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float firFilterProcessSample(float sampleIn,FirFilterType*data)
 {
     addSample(sampleIn,data);
@@ -31,7 +31,7 @@ float firFilterProcessSample(float sampleIn,FirFilterType*data)
     return res;
 }
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void initfirFilter(FirFilterType*data)
 {
     data->filterLength=64;
@@ -42,7 +42,7 @@ void initfirFilter(FirFilterType*data)
     }
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 void firFilterReset(FirFilterType*data)
 {
     data->filterLength=64;

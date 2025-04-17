@@ -1,12 +1,14 @@
 #include "audio/delay.h"
 #include "audio/audiotools.h"
+#include "memoryRegions.h"
 
-__attribute__ ((section (".sdram_bss")))
+__SDRAM_BSS
 float delayLineSdram[DELAY_LINE_SDRAM_LENGTH];
+
 
 float delayLineRam[DELAY_LINE_RAM_LENGTH];
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
 {
     data->delayLine = (float*)memoryPointer;
@@ -23,7 +25,7 @@ void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
     data->feebackData=0;
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float delayLineProcessSample(float sampleIn,DelayDataType*data)
 {
     uint32_t delayIdx;
@@ -45,7 +47,7 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
     return sampleOut;
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float getDelayedSample(DelayDataType*data)
 {
     uint32_t delayIdx;
@@ -57,7 +59,7 @@ float getDelayedSample(DelayDataType*data)
     return sampleOut;
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float * getDelayMemoryPointer(uint8_t delayLineType)
 {
     if (delayLineType == DELAY_LINE_TYPE_SDRAM)
@@ -71,7 +73,7 @@ float * getDelayMemoryPointer(uint8_t delayLineType)
 }
 
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 void addSampleToDelayline(float sampleIn,DelayDataType*data)
 {
     *(data->delayLine + data->delayLinePtr) = sampleIn;
@@ -79,7 +81,7 @@ void addSampleToDelayline(float sampleIn,DelayDataType*data)
     data->delayLinePtr &= (data->delayBufferLength -1);
 }
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void clearDelayLine()
 {
     for (uint32_t c=0;c<DELAY_LINE_SDRAM_LENGTH;c++)

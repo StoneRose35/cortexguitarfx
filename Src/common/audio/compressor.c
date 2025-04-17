@@ -3,9 +3,9 @@
 #include "stdio.h"
 #include "fastExpLog.h"
 #include "ln.h"
+#include "memoryRegions.h"
 
-
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float applyGain(float sample,float avgVolume,CompressorDataType*comp)
 {
     float logAvg;
@@ -38,7 +38,7 @@ float applyGain(float sample,float avgVolume,CompressorDataType*comp)
     return sampleInterm;
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float getMaxGain(CompressorDataType*comp)
 {
     if (comp->gainFunction.gainReduction > 16.0f)
@@ -51,7 +51,7 @@ float getMaxGain(CompressorDataType*comp)
     }
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float compressorProcessSample(float sampleIn,CompressorDataType*data)
 {
     float absSample;
@@ -70,6 +70,7 @@ float compressorProcessSample(float sampleIn,CompressorDataType*data)
     return sampleOut;
 }
 
+__QSPI_CODE
 void compressorReset(CompressorDataType*data)
 {
     firstOrderIirDualCoeffLPReset(&data->avgLowpass);

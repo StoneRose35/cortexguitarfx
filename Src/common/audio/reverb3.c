@@ -1,9 +1,10 @@
 #include "audio/reverb3.h"
 #include "audio/reverbUtils.h"
 #include "audio/audiotools.h"
+#include "memoryRegions.h"
 
 #define DIFFUSOR_SIZE 2048
-__attribute__ ((section (".qspi_data")))
+__DTCM_DATA
 const int16_t diffuserTimes[4][4]={
     {53, 701, 1361, 1993},
     {97, 487, 1327, 1973},
@@ -11,7 +12,7 @@ const int16_t diffuserTimes[4][4]={
     {73, 293, 1597, 2011}
 };
 
-__attribute__ ((section (".qspi_code")))
+__QSPI_CODE
 void initReverb3(Reverb3Type*data,float*delayMemoryPtr)
 {
     uint32_t cnt=0;
@@ -44,7 +45,7 @@ void initReverb3(Reverb3Type*data,float*delayMemoryPtr)
     }
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float reverb3processSample(float sampleIn,Reverb3Type*data)
 {
     float sampleOut=0,diffusorTaps[3];

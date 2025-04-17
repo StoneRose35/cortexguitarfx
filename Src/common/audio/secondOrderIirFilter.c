@@ -1,5 +1,7 @@
 #include "audio/secondOrderIirFilter.h"
+#include "memoryRegions.h"
 
+__QSPI_CODE
 void initSecondOrderIirFilter(SecondOrderIirFilterType* data)
 {
     data->x1=0.0f;
@@ -9,7 +11,7 @@ void initSecondOrderIirFilter(SecondOrderIirFilterType* data)
     data->acc=0.0f;
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float secondOrderIirFilterProcessSample(float sampleIn,SecondOrderIirFilterType*data)
 {
     data->acc = data->coeffB[0]*sampleIn;
@@ -24,7 +26,7 @@ float secondOrderIirFilterProcessSample(float sampleIn,SecondOrderIirFilterType*
     return data->acc;
 }
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void secondOrderIirFilterReset(SecondOrderIirFilterType*data)
 {
     data->acc=0.0f;

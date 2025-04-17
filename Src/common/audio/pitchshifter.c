@@ -2,8 +2,9 @@
 #include "audio/pitchshifter.h"
 #include "audio/delay.h"
 #include "audio/audiotools.h"
+#include "memoryRegions.h"
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float pitchShifterProcessSample(float sampleIn,PitchshifterDataType*data)
 {
     float sampleOut=0;
@@ -56,7 +57,7 @@ float pitchShifterProcessSample(float sampleIn,PitchshifterDataType*data)
     return sampleOut;
 }
 
-__attribute__ ((section (".qspi_code")))
+__QSPI_CODE
 void initPitchshifter(PitchshifterDataType*data,float * delayMemoryPointer)
 {
     data->delayBufferPtr = delayMemoryPointer;

@@ -3,9 +3,9 @@
 #include "stdio.h"
 #include "fastExpLog.h"
 #include "ln.h"
+#include "memoryRegions.h"
 
-
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float applyGain2(float sample,float avgVolume,CompressorDataType*comp)
 {
     float logAvg, expAvg;
@@ -40,6 +40,7 @@ float applyGain2(float sample,float avgVolume,CompressorDataType*comp)
     return sampleInterm;
 }
 
+__ITCM_CODE
 float compressor2ProcessSample(float sampleIn,CompressorDataType*data)
 {
     float absSample;

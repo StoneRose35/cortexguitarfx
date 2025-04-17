@@ -1,7 +1,9 @@
 #include "audio/simpleChorus.h"
 #include "audio/delay.h"
+#include "memoryRegions.h"
 
 /** set frequency in Hz/100 */
+__QSPI_CODE
 void simpleChorusSetFrequency(uint16_t freq,SimpleChorusType*data)
 {
     data->lfoPhaseinc=freq*4*256*SIMPLE_CHORUS_LFO_DIVIDER/4800000;
@@ -9,7 +11,7 @@ void simpleChorusSetFrequency(uint16_t freq,SimpleChorusType*data)
 }
 
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void initSimpleChorus(SimpleChorusType*data,float*delayMemoryPointer)
 {
     data->delayBuffer = delayMemoryPointer;
@@ -23,7 +25,7 @@ void initSimpleChorus(SimpleChorusType*data,float*delayMemoryPointer)
     data->lfoPhaseinc=data->frequency*4*256*SIMPLE_CHORUS_LFO_DIVIDER/4800000;
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float simpleChorusProcessSample(float sampleIn,SimpleChorusType*data)
 {
     uint16_t delayPtr;

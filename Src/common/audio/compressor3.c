@@ -2,7 +2,9 @@
 #include "audio/compressor.h"
 #include "stdio.h"
 #include "fastExpLog.h"
+#include "memoryRegions.h"
 
+__ITCM_CODE
 float compressor3ProcessSample(float sampleIn,CompressorDataType*data)
 {
     float absSample;

@@ -2,6 +2,7 @@
 #include "audio/reverb.h"
 #include "audio/delay.h"
 #include "audio/audiotools.h"
+#include "memoryRegions.h"
 
 /**
  * @brief feedback interpolation values for
@@ -18,7 +19,7 @@ typedef struct
     const uint16_t allpassDelays[4];
 } reverbParameterType;
 
-__attribute__((section (".qspi_data")))
+__DTCM_DATA
 static const reverbParameterType reverbParameterSet[4]= {
     {
         .name="solid",
@@ -87,16 +88,16 @@ static const reverbParameterType reverbParameterSet[4]= {
     }
 };
 
-__attribute__((section (".qspi_data")))
+__DTCM_DATA
 const float phaseshifts[4]= {0.7f,0.7f,0.7f,0.7f};
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 const char * getReverbParameterSetName(ReverbType*reverbData)
 {
     return reverbParameterSet[reverbData->paramNr].name;
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float getFeedback(uint8_t delayLineIndex,float tau,uint8_t paramNr)
 {
     float feedbackVal=0.0f;
@@ -112,7 +113,7 @@ float getFeedback(uint8_t delayLineIndex,float tau,uint8_t paramNr)
     return feedbackVal;
 }
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void setReverbTime(float reverbTime,ReverbType*reverbData)
 {
     for(uint8_t c=0;c<4;c++)
@@ -122,7 +123,7 @@ void setReverbTime(float reverbTime,ReverbType*reverbData)
 }
 
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void initReverb(ReverbType*reverbData,float reverbTime,float*delayMemoryPointer)
 {
     for(uint8_t c=0;c<4;c++)
@@ -144,7 +145,7 @@ void initReverb(ReverbType*reverbData,float reverbTime,float*delayMemoryPointer)
 }
 
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float reverbProcessSample(float sampleIn,ReverbType*reverbData)
 {
     float sampleOut;

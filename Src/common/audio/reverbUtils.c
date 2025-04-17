@@ -1,8 +1,9 @@
 #include "stdint.h"
 #include "audio/reverbUtils.h"
 #include "audio/audiotools.h"
+#include "memoryRegions.h"
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t*audioStatePtr)
 {
     float sampleInterm;
@@ -17,7 +18,7 @@ float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t
 
 }
 
-__attribute__((section (".qspi_code")))
+__ITCM_CODE
 void hadamardDiffuserProcessArray(float * channels,HadamardDiffuserType*data,volatile uint32_t * audioStatePtr)
 {
     float sum_first, sum_second;

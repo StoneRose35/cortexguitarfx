@@ -3,18 +3,19 @@
 #include "audio/delay.h"
 #include "audio/firstOrderIirFilter.h"
 #include "audio/audiotools.h"
+#include "memoryRegions.h"
 
-__attribute__ ((section (".qspi_data")))
+__DTCM_DATA
 const uint16_t ap_delays[]={431,433,439,443,449,457,461,463};
 //const uint32_t delay_lengths[]={537,683,827,971};
 
 //const uint16_t ap_delays[]={107,127,149,283,71,241,311,199};
 //const uint32_t delay_lengths[]={1523,1847,2131,2447};
 
-__attribute__ ((section (".qspi_data")))
+__DTCM_DATA
 const uint32_t delay_lengths[]={1523,1847,683,971};
 
-__attribute__ ((section (".qspi_code")))
+__QSPI_CODE
 void initReverb2(Reverb2Type*reverbData,float * delayMemoryPointer )
 {
     for (uint8_t c=0;c<8;c++)
@@ -39,14 +40,14 @@ void initReverb2(Reverb2Type*reverbData,float * delayMemoryPointer )
     reverbData->mix=0.0f;   
 }
 
-__attribute__ ((section (".qspi_code")))
+__QSPI_CODE
 void reverb2Reset(Reverb2Type*reverbData)
 {
     reverbData->lowpass.oldVal = 0.0f;
     reverbData->lowpass.oldXVal = 0.0f;
 }
 
-__attribute__ ((section (".qspi_code")))
+__ITCM_CODE
 float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
 {
     float sampleOut;

@@ -18,14 +18,14 @@ OPT=-Og
 DEFINES=-DDEBUG -DSTM32 -DSTM32F7 -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc -I./Inc/gen
 LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
-LARGS_QSPI=-g -nostdlib -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_QSPI.ld -Xlinker -Map="./out/$(PROJECT)_qspi.map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+LARGS_QSPI=-g -nostdlib -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT)_qspi.map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
-CPYARGS=-Obinary --remove-section=.qspi*
-CPYARGS_QSPIBIN=-Obinary --only-section=.qspi* 
+CPYARGS=-Obinary --remove-section=.qspi* --remove-section=.dtcm*
+CPYARGS_QSPIBIN=-Obinary --only-section=.qspi* --only-section=.dtcm*
 DEBUGGER_UART=/dev/ttyACM0
 
 all: out/$(PROJECT).bin out/$(PROJECT)_qspi.bin
-
+	@rm out/*.o
 
 STM32H750_OBJS := $(patsubst Src/stm32h750/%.c,out/%.o,$(wildcard Src/stm32h750/*.c))
 COMMON_OBJS := $(patsubst Src/common/%.c,out/%.o,$(wildcard Src/common/*.c))
@@ -143,19 +143,24 @@ out/$(PROJECT)_qspi.elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  al
 
 out/$(PROJECT).bin: out/$(PROJECT).elf
 	@$(OBJCPY) $(CPYARGS) ./out/$(PROJECT).elf ./out/$(PROJECT).bin
+	
 
 out/$(PROJECT)_qspi.bin: out/$(PROJECT)_qspi.elf
 	@$(OBJCPY) $(CPYARGS_QSPIBIN) -- ./out/$(PROJECT)_qspi.elf ./out/$(PROJECT)_qspi.bin
 
+
 program_qspi: out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
+	rm out/*.o
 
 program_flash: out/$(PROJECT).bin
 	st-flash --connect-under-reset write out/$(PROJECT).bin 0x8000000
+	rm out/*.o
 
 program_all: out/$(PROJECT).bin out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
 	st-flash --connect-under-reset write out/$(PROJECT).bin 0x8000000
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
+	rm out/*.o
 
 # *************************************************************
 #
