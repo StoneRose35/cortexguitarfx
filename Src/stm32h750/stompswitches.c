@@ -40,11 +40,11 @@ void clearStompSwitchStickyReleased(uint8_t switchNr)
 
 void sendColors()
 {
-    if (getTargetAddress()!=STOMPSWITCHES_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=STOMPSWITCHES_I2C_ADDRESS)
     {
-        setTargetAddress(STOMPSWITCHES_I2C_ADDRESS);
+        setTargetAddressExternal(STOMPSWITCHES_I2C_ADDRESS);
     }
-    masterTransmit(switchesColors.rawColors,1);
+    masterTransmitExternal(switchesColors.rawColors,1);
 }
 
 void setStompswitchColor(uint8_t switchNr,uint8_t clr)
@@ -73,11 +73,11 @@ void setStompswitchColorRaw(uint8_t data)
 void requestSwitchesUpdate()
 {
     uint8_t i2cData;
-    if (getTargetAddress()!=STOMPSWITCHES_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=STOMPSWITCHES_I2C_ADDRESS)
     {
-        setTargetAddress(STOMPSWITCHES_I2C_ADDRESS);
+        setTargetAddressExternal(STOMPSWITCHES_I2C_ADDRESS);
     }
-    i2cData = masterReceive(1);
+    i2cData = masterReceiveExternal(1);
     if (i2cData != 0xff)
     {
         for (uint8_t c=0;c<NR_STOMPSWITCHES;c++)
@@ -100,7 +100,7 @@ void requestSwitchesUpdate()
 void initStompSwitchesInterface()
 {
     // assume that the i2c interface is initialized
-    setTargetAddress(STOMPSWITCHES_I2C_ADDRESS);
+    setTargetAddressExternal(STOMPSWITCHES_I2C_ADDRESS);
     
 }
 

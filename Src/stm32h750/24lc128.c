@@ -1,19 +1,20 @@
 #include "drivers/24lc128.h"
 #include "drivers/systick.h"
+#include "drivers/i2c.h"
 
 void eeprom24s128WritePage(uint32_t address,uint16_t len, uint8_t* data)
 {
     eeprom24lc128WaitUntilAvailable();
 
 
-    masterTransmit((address >> 8) &0xFF,0);
-    masterTransmit((address) &0xFF,0);
+    masterTransmitExternal((address >> 8) &0xFF,0);
+    masterTransmitExternal((address) &0xFF,0);
 
     for(uint16_t c=0;c<len-1;c++)
     {
-        masterTransmit(*(data+c),0);
+        masterTransmitExternal(*(data+c),0);
     }
-    masterTransmit(*(data+len-1),1);
+    masterTransmitExternal(*(data+len-1),1);
 }
 
 
@@ -23,9 +24,9 @@ void eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data)
     uint16_t dataCnt=0;
     uint16_t remaining=len;
     uint16_t lenToWrite;
-    if (getTargetAddress()!=EEPROM_24LC128_ADDRESS)
+    if (getTargetAddressExternal()!=EEPROM_24LC128_ADDRESS)
     {
-        setTargetAddress(EEPROM_24LC128_ADDRESS);
+        setTargetAddressExternal(EEPROM_24LC128_ADDRESS);
     }
     while (remaining > 0)
     {
@@ -53,27 +54,23 @@ void eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data)
 void eeprom24lc128ReadArray(uint32_t startAdress,uint16_t len,uint8_t* data)
 {
 
-    if (getTargetAddress()!=EEPROM_24LC128_ADDRESS)
+    if (getTargetAddressExternal()!=EEPROM_24LC128_ADDRESS)
     {
-        setTargetAddress(EEPROM_24LC128_ADDRESS);
+        setTargetAddressExternal(EEPROM_24LC128_ADDRESS);
     }
     eeprom24lc128WaitUntilAvailable();
-    masterTransmit((startAdress >> 8) &0xFF,0);
-    masterTransmit(startAdress & 0xFF,1); 
-    for(uint16_t c=0;c<len-1;c++)
-    {
-        *(data + c) = masterReceive(0);
-    }
-    *(data + len -1) = masterReceive(1);
+    masterTransmitExternal((startAdress >> 8) &0xFF,0);
+    masterTransmitExternal(startAdress & 0xFF,1); 
+    I2CReceiveMultipleExternal(data,len);
 }
 
 void eeprom24lc128WaitUntilAvailable()
 {
-    if (getTargetAddress()!=EEPROM_24LC128_ADDRESS)
+    if (getTargetAddressExternal()!=EEPROM_24LC128_ADDRESS)
     {
-        setTargetAddress(EEPROM_24LC128_ADDRESS);
+        setTargetAddressExternal(EEPROM_24LC128_ADDRESS);
     }
-    while(masterTransmit(0,1)!=0)
+    while(masterTransmitExternal(0,1)!=0)
     {
 
     }

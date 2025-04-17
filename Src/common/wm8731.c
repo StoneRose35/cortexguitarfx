@@ -1,11 +1,20 @@
-#include "wm8731.h"
-#include "i2c.h"
+#include "stdint.h"
+#include "drivers/wm8731.h"
+#include "drivers/i2c.h"
+
+volatile uint16_t wm8731Volumes = (23 << (3 + 8)) | (23 << 3);
+volatile uint8_t wm8731States = 3; // bit 0: left, bit 1: right, 0 is off, 1 is on
 
 void wm8731_write(uint16_t data)
 {
-    masterTransmit((uint8_t)((data >> 8)&0xFF),0);
-    masterTransmit((uint8_t)(data&0xFF),1);
+    if (getTargetAddressExternal()!=WM8731_ADDRESS)
+    {
+        setTargetAddressExternal(WM8731_ADDRESS);
+    }
+    masterTransmitInternal((uint8_t)((data >> 8)&0xFF),0);
+    masterTransmitInternal((uint8_t)(data&0xFF),1);
 }
+
 
 void setupWm8731(uint8_t sampledepth,uint8_t samplerate)
 {
@@ -56,6 +65,41 @@ void setupWm8731(uint8_t sampledepth,uint8_t samplerate)
     //R9: activate interface
     const uint16_t registerData9 = WM8731_R9 | (1 << ACTIVE_LSB);
     wm8731_write(registerData9);
-    
-    
+}
+
+uint16_t wm8731GetOutputVolume(void)
+{
+    return wm8731Volumes;
+}
+
+void wm8731SetOutputVolume(uint8_t channels,uint8_t volume)
+{
+    wm8731Volumes =  (volume << 8) | (volume & 0xFF) ;
+    uint16_t rData = (WM8731_R0 | (((~wm8731States) & 0x1) << LIN_MUTE_LSB ) | ((wm8731Volumes >> 3) & 0x1F)); 
+    wm8731_write(rData);
+    rData = (WM8731_R1 | (((~(wm8731States>> 1)) & 0x1) << RIN_MUTE_LSB ) | ((wm8731Volumes >> 3) & 0x1F)); 
+    wm8731_write(rData);
+}
+
+
+uint8_t wm8731GetInputState(void)
+{
+    return wm8731States;
+}
+
+void wm8731SetInputState(uint8_t channel,uint8_t val)
+{
+    if (val == 0)
+    {
+        wm8731States &= ~(1 << channel);
+    }
+    else
+    {
+        wm8731States |= (1 << channel);
+    }
+    uint16_t rData = (WM8731_R0 | (((~wm8731States) & 0x1) << LIN_MUTE_LSB ) | ((wm8731Volumes >> 3) & 0x1F)); 
+    wm8731_write(rData);
+    rData = (WM8731_R1 | (((~(wm8731States>> 1)) & 0x1) << RIN_MUTE_LSB ) | ((wm8731Volumes >> 3) & 0x1F)); 
+    wm8731_write(rData);
+
 }

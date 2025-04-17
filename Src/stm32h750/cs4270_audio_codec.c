@@ -2,7 +2,7 @@
 #include "stm32h750/stm32h750_cfg_pins.h"
 #include "stm32h750/helpers.h"
 #include "systick.h"
-#include "i2c.h"
+#include "drivers/i2c.h"
 #include "cs4270_audio_codec.h"
 
 
@@ -11,31 +11,31 @@
 static uint8_t cs4270Write(uint16_t data)
 {
     uint8_t res=0;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
-        setTargetAddress(CS4270_I2C_ADDRESS);
+        setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
-    res += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
-    res += masterTransmit((uint8_t)(data&0xFF),1);
+    res += masterTransmitExternal((uint8_t)((data >> 8)&0xFF),0);
+    res += masterTransmitExternal((uint8_t)(data&0xFF),1);
     return res;
 }
 
 static uint8_t cs4270Read(uint8_t reg)
 {
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
-        setTargetAddress(CS4270_I2C_ADDRESS);
+        setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
-    masterTransmit(reg,1);
-    return masterReceive(1);
+    masterTransmitExternal(reg,1);
+    return masterReceiveExternal(1);
 }
 
 void cs4270PowerDown()
 {
     uint16_t regdata;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
-        setTargetAddress(CS4270_I2C_ADDRESS);
+        setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
     regdata = (CS4270_R2 << 8) | (1 << CS4270_R2_PDN_Pos); // power down
     cs4270Write(regdata);
@@ -98,9 +98,9 @@ void cs4270SetInputState(uint8_t channel,uint8_t val)
 {
     uint16_t regdata;
     uint8_t regContent;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
-        setTargetAddress(CS4270_I2C_ADDRESS);
+        setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
     regdata = (CS4270_R6 << 8);
     regContent = cs4270Read(CS4270_R6);
@@ -137,9 +137,9 @@ void cs4270SetInputState(uint8_t channel,uint8_t val)
 uint8_t cs4270GetInputState()
 {
     uint8_t regContent;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
-        setTargetAddress(CS4270_I2C_ADDRESS);
+        setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
     regContent = cs4270Read(CS4270_R6);
     regContent >>= 3;
@@ -151,9 +151,9 @@ uint8_t cs4270GetInputState()
 void cs4270SetOutputVolume(uint8_t channel,uint8_t volume)
 {
     uint16_t regdata;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
-        setTargetAddress(CS4270_I2C_ADDRESS);
+        setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
     if (channel == CS4270_CHANNEL_A) 
     {
@@ -174,9 +174,9 @@ void cs4270SetOutputVolume(uint8_t channel,uint8_t volume)
     }
     else
     {
-        masterTransmit((0x80 | CS4270_R7),0);
-        masterTransmit((0xFF - volume),0);
-        masterTransmit((0xFF - volume),1);
+        masterTransmitExternal((0x80 | CS4270_R7),0);
+        masterTransmitExternal((0xFF - volume),0);
+        masterTransmitExternal((0xFF - volume),1);
     }
 }
 
@@ -188,14 +188,14 @@ uint16_t cs4270GetOutputVolume()
 {
     uint16_t outval=0;
     uint8_t channelVal;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
+    if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
-        setTargetAddress(CS4270_I2C_ADDRESS);
+        setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
-    masterTransmit((0x80 | CS4270_R7),1);
-    channelVal = 0xFF - masterReceive(0);
+    masterTransmitExternal((0x80 | CS4270_R7),1);
+    channelVal = 0xFF - masterReceiveExternal(0);
     outval |= (channelVal << 8);
-    channelVal = 0xFF - masterReceive(0);
+    channelVal = 0xFF - masterReceiveExternal(0);
     outval |= channelVal;
     return outval;
 }
