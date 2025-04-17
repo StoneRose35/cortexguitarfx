@@ -6,7 +6,6 @@
 #ifndef SIMPLE_NEOPIXEL
 
 
-//#include <neopixelDriver.h>
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
 #include "globalConfig.h"
@@ -36,8 +35,8 @@
 #include "drivers/stompswitches.h"
 #include "cliApiTask.h"
 #include "sai.h"
-#include "i2c.h"
-#include "wm8731.h"
+#include "drivers/i2c.h"
+#include "drivers/wm8731.h"
 #include "pcm3060.h"
 #include "memchecker.h"
 #include "speedtest_logexp.h"
@@ -50,6 +49,8 @@
 #include "audio/audiotools.h"
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
+#include "drivers/usb.h"
+#include "usb/usb_cdc.h"
 
 #define LD1 0
 #define LD2 7
@@ -133,12 +134,12 @@ int main(void)
 	initDMA();
     initFmcSdram();
     initQspi();
-
+    //initUSB();
 
 	initAdc();
     initTimer();
 	#ifndef PCM3060_CODEC
-    initI2c(26); // 26 for wm8731, 72 for cs4270, none for pcm3060
+    initI2c(WM8731_ADDRESS,STOMPSWITCHES_I2C_ADDRESS); // 26 for wm8731, 72 for cs4270, none for pcm3060 (first argument)
     #endif
 
 	//Initialise Component-specific drivers
@@ -146,9 +147,9 @@ int main(void)
 
     initRotaryEncoder(switchesPins,2);
 
-        // wait for flashing when button 0 (Enter switch) is pressed during startup 
+    // wait for flashing when button 0 (Enter switch) is pressed during startup 
     // allows flashing the QSPI from a corrupted state
-    volatile uint8_t currentSwitchVal = getMomentarySwitchValue(0);
+    uint8_t currentSwitchVal = getMomentarySwitchValue(0);
     if ((currentSwitchVal & 0x01)==1)
     {
         while ((task & (1 << TASK_FLASH_QSPI)) == 0);    
@@ -185,13 +186,14 @@ int main(void)
     initRoundRobinReading(); // internal adc for reading parameters
 
     setAsOutput(CLIPPING_LED_INPUT);
+    setPin(CLIPPING_LED_INPUT,1);
     setAsOutput(CLIPPING_LED_OUTPUT);
+    setPin(CLIPPING_LED_OUTPUT,1);
 
     #ifdef EXTENSION_BOARD
     setStompswitchColorRaw(0);
     #endif
 	context |= (1 << CONTEXT_USB);
-	//printf("Microsys v1.1 running on DaisySeed 1.1\r\n");
 	
     piPicoFxUiSetup(&piPicoUiController);
 	ClearDisplay();
