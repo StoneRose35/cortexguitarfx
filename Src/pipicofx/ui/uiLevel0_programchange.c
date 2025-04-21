@@ -10,7 +10,13 @@
 #include "drivers/stompswitches.h"
 
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
-BwImageType lock;
+BwImageTypeConst lock=
+{
+    .sx=5,
+    .sy=8,
+    .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
+    .data = locksymbol
+};
 extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
 extern const uint8_t stompswitch_progs[];
@@ -23,9 +29,6 @@ static void create(PiPicoFxUiType*data)
     char lineBuffer[24];
     BwImageType* imgBuffer = getImageBuffer();
     lock.data =locksymbol;
-    lock.sx=5;
-    lock.sy=8;
-    lock.type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     clearImage(imgBuffer);
     drawText(0,1*8,data->currentProgram->name,imgBuffer,0);
     if (data->locked != 0)
@@ -61,13 +64,14 @@ static void create(PiPicoFxUiType*data)
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
-    BwImageType bargraph;
+    BwImageTypeConst bargraph={
+        .sx = 128,
+        .sy = 8,
+        .type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES
+    };
     BwImageType* imgBuffer = getImageBuffer();
     uint8_t bargraphBuffer[128];
     bargraph.data = bargraphBuffer;
-    bargraph.sx=128;
-    bargraph.sy = 8;
-    bargraph.type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     // show basic display
     for (uint8_t c=0;c<128;c++)
     {

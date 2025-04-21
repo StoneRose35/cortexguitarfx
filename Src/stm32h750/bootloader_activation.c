@@ -1,5 +1,7 @@
 #include "stdint.h"
 #include "stm32h750/stm32h750xx.h"
+#include "bootloader_activation.h"
+
 void jumpToBootloader(void)
 {
     uint32_t cfgr;
@@ -40,7 +42,7 @@ void jumpToBootloader(void)
     RCC->CR &= ~((1 << RCC_CR_PLL1ON_Pos) | (1 << RCC_CR_PLL2ON_Pos) | (1 << RCC_CR_PLL3ON_Pos));
 
     // jump to system memory
-    __ASM("LDR R0, =0x1FF00000 \n\t"
-           "BLX R0");
+    __set_MSP(BOOTLOADER_START_ADDRESS);
 
+    ((void (*)(void))(*((uint32_t *) (BOOTLOADER_START_ADDRESS + 4))))();
 }

@@ -1,5 +1,5 @@
 #ifndef _BOOTLOADER_ACTIVATION_H_
 #define _BOOTLOADER_ACTIVATION_H_
-
 void jumpToBootloader(void);
+#define BOOTLOADER_START_ADDRESS 0x1FF09800
 #endif

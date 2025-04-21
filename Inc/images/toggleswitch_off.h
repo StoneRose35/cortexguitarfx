@@ -2,12 +2,15 @@
 #ifndef _TOGGLESWITCH_OFF_H_
 #define _TOGGLESWITCH_OFF_H_
 #include "graphics/bwgraphics.h"
+#include "memoryRegions.h"
 
-static uint8_t toggleswitch_off_bwdata[]= {
+__QSPI_DATA
+static const uint8_t toggleswitch_off_bwdata[]= {
 0xf8, 0x4, 0x2, 0x1, 0x1, 0x1, 0x1, 0x2, 0x4, 0xf8, 0xff, 0x0, 0x0, 0x0, 0x80, 0x80, 0x0, 0x0, 0x0, 0xff, 0x1f, 0x2c, 0x52, 0xa1, 0xc0, 0xc0, 0xa1, 0x52, 0x2c, 0x1f, 
 };
 
-static const struct BwImageStruct toggleswitch_off_streamimg = {
+__QSPI_DATA
+static const struct BwImageStructConst toggleswitch_off_streamimg = {
     .data = toggleswitch_off_bwdata,
     .sx = 10,
     .sy = 24,

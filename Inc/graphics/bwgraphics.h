@@ -25,6 +25,15 @@ typedef struct BwImageStruct
 	              // BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES
 } BwImageType;
 
+typedef struct BwImageStructConst
+{
+	const uint8_t * data; // data is arrange x axis first, starting from top left
+	const uint8_t sx; // size in pixels
+	const uint8_t sy; // size in pixels
+	const uint8_t type; // either WIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES if bytes run along the vertical axis, or 
+	              // BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES
+} BwImageTypeConst;
+
 typedef struct BwImageBufferStruct
 {
 	uint8_t data[1024]; // data is arrange x axis first, starting from top left
@@ -34,7 +43,7 @@ typedef struct BwImageBufferStruct
 } BwImageBufferType;
 
 
-uint8_t getPixel(int32_t px,int32_t py,const BwImageType*img);
+uint8_t getPixel(int32_t px,int32_t py,const BwImageTypeConst*img);
 void drawLine(float spx,float spy,float epx, float epy,BwImageType* img);
 void clearLine(float spx,float spy,float epx, float epy,BwImageType* img);
 void setPixel(int32_t px,int32_t py,BwImageType*img);
@@ -54,6 +63,6 @@ uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageType* img,const void* fon
 uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GFXfont* font);
 uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageType* img);
 void drawText(uint8_t px, uint8_t py,const char * txt,BwImageType* img,const void* font);
-void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgBuffer);
+void drawImage(uint8_t px, uint8_t py,const BwImageTypeConst * img, BwImageType* imgBuffer);
 void clearImage(BwImageType*img);
 #endif
