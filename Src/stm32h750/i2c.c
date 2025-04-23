@@ -5,16 +5,52 @@
 static volatile uint8_t slave_address_internal, slave_address_external;
 static volatile uint8_t firstCommand;
 
-static volatile uint8_t sendBfr[I2C_BUFFER_LENGTH];
-static volatile uint8_t nSend=0;
-static volatile uint8_t nackOccurred=0;
+static uint8_t sendBfr[I2C_BUFFER_LENGTH];
+static uint8_t receiveBuffer[I2C_BUFFER_LENGTH];
+static volatile uint16_t nReceived=0;
+static volatile uint16_t nSend=0;
+static volatile uint8_t bmI2CStatus=0; // bit 0: NACK occurred, bit 1: await slve transaction
+static volatile void(*i2cReceivedDataCallback)(uint8_t*,uint16_t)=0;
 void I2C1_EV_IRQHandler(void)
 {
     if ((I2C1->ISR & (1 << I2C_ISR_NACKF_Pos))!= 0)
     {
+        bmI2CStatus |= (1 << I2C_ERROR_MASTER_NACK);
         I2C1->ICR = (1 << I2C_ICR_NACKCF_Pos);
-        nackOccurred = 1;
     }
+
+    if ((I2C1->ISR & (1 << I2C_ISR_ARLO_Pos))!= 0)
+    {
+        bmI2CStatus |= 1 << I2C_AWAIT_SLAVE_TRANSACTION;
+        I2C1->OAR1 = I2C_BOARD_ADDRESS << I2C_OAR1_OA1_Pos;
+        I2C1->OAR1 |= 1 << I2C_OAR1_OA1EN_Pos;
+        I2C1->CR1 |= (1 << I2C_CR1_ADDRIE_Pos);
+        I2C1->ICR = (1 << I2C_ICR_ARLOCF_Pos);
+    }
+
+    if ((I2C1->ISR & (1 << I2C_ISR_ADDR_Pos))!= 0)
+    {
+        // currently only slave receiver is implemented, thus, enable rxne interrupt
+        I2C1->ISR |= (1 << I2C_CR1_RXIE_Pos);
+        I2C1->ICR = (1 << I2C_ICR_ADDRCF_Pos);
+        nReceived = 0;
+    }
+
+    if ((I2C1->ISR & (1 << I2C_ISR_RXNE_Pos))!= 0)
+    {
+        receiveBuffer[nReceived++] = (uint8_t)I2C1->RXDR;
+    }
+
+    if ((I2C1->ISR & (1 << I2C_ISR_STOPF_Pos)))
+    {
+        bmI2CStatus &= ~(1 << I2C_AWAIT_SLAVE_TRANSACTION);
+        I2C1->ICR = (1 << I2C_ICR_STOPCF_Pos);
+        if (i2cReceivedDataCallback != 0)
+        {
+            i2cReceivedDataCallback(receiveBuffer,nReceived);
+        }
+    }
+
 }
 
 // I2C2
@@ -69,67 +105,70 @@ void initI2c(uint8_t slaveAddressInt,uint8_t slaveAddressExt)
     config_i2c_pin(I2C_SDA_EXTERNAL);
 
     I2C_BLOCK_INTERNAL->CR1 |= (1 << I2C_CR1_PE_Pos);
+    I2C_BLOCK_EXTERNAL->CR1 |= (1 << I2C_CR1_NACKIE_Pos) | (1 << I2C_CR1_ERRIE_Pos) | (1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos);
     I2C_BLOCK_EXTERNAL->CR1 |= (1 << I2C_CR1_PE_Pos);
-    I2C_BLOCK_EXTERNAL->CR1 |= (1 << I2C_CR1_NACKIE_Pos);
+    I2C_BLOCK_EXTERNAL->OAR1 = I2C_BOARD_ADDRESS;
+    I2C_BLOCK_EXTERNAL->OAR1 |= (1 << I2C_OAR1_OA1EN_Pos);
     NVIC_EnableIRQ(I2C1_EV_IRQn);
     slave_address_internal = slaveAddressInt;
     slave_address_external = slaveAddressExt;
     firstCommand = 1;
 }
 
-uint8_t masterTransmitInternal(uint8_t data,uint8_t lastCmd)
+uint16_t masterTransmitInternal(uint8_t data,uint8_t lastCmd)
 {
     return masterTransmit(I2C_BLOCK_INTERNAL,data,lastCmd,slave_address_internal);
 }
 
-uint8_t masterTransmitExternal(uint8_t data,uint8_t lastCmd)
+uint16_t masterTransmitExternal(uint8_t data,uint8_t lastCmd)
 {
     return masterTransmit(I2C_BLOCK_EXTERNAL,data,lastCmd,slave_address_external);
 }
 
-uint8_t masterTransmit(I2C_TypeDef * i2cBlk, uint8_t data,uint8_t lastCmd,uint8_t slaveAddress)
+uint16_t masterTransmit(I2C_TypeDef * i2cBlk, uint8_t data,uint8_t lastCmd,uint8_t slaveAddress)
 {
     sendBfr[nSend++] = data;
     if (lastCmd==1)
     {
-        I2CsendMultiple(i2cBlk,slaveAddress);
+        return I2CsendMultiple(i2cBlk,sendBfr,nSend,slaveAddress);
     }
     return 0;
 }
 
-uint8_t I2CsendMultipleInternal()
+uint16_t I2CsendMultipleInternal(uint8_t * data, uint16_t nSend)
 {
-    return I2CsendMultiple(I2C_BLOCK_INTERNAL,slave_address_internal);
+    return I2CsendMultiple(I2C_BLOCK_INTERNAL,data,nSend,slave_address_internal);
 }
 
-uint8_t I2CsendMultipleExternal()
+uint16_t I2CsendMultipleExternal(uint8_t * data, uint16_t nSend)
 {
-    return I2CsendMultiple(I2C_BLOCK_EXTERNAL,slave_address_external);
+    return I2CsendMultiple(I2C_BLOCK_EXTERNAL,data,nSend,slave_address_external);
 }
 
-uint8_t I2CsendMultiple(I2C_TypeDef * i2cBlk,uint8_t slave_address)
+uint16_t I2CsendMultiple(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uint8_t slave_address)
 {
     uint32_t regbfr;
     uint16_t sCnt=0;
     while ((i2cBlk->ISR & (1 << I2C_ISR_TXE_Pos))==0);
-    
+    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)); 
+    i2cBlk->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
     regbfr = i2cBlk->CR2;
     regbfr &= ~((I2C_CR2_SADD_Msk) | (1 << I2C_CR2_RD_WRN_Pos) | (0xFF << I2C_CR2_NBYTES_Pos));
     regbfr |= (slave_address << (I2C_CR2_SADD_Pos+1)) | (1 << I2C_CR2_START_Pos) | (nSend << I2C_CR2_NBYTES_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
     i2cBlk->CR2 = regbfr;
 
-    while (sCnt < nSend)
+    while (sCnt < nSend && bmI2CStatus == 0)
     {
-        i2cBlk->TXDR = sendBfr[sCnt];
+        i2cBlk->TXDR = data[sCnt];
         sCnt++;
-        while ((i2cBlk->ISR & I2C_ISR_TXE)==0);
+        while ((i2cBlk->ISR & I2C_ISR_TXE)==0 && bmI2CStatus == 0);
     }
     nSend=0;
-
-    return 0;
+    while ((bmI2CStatus & (1 << I2C_AWAIT_SLAVE_TRANSACTION))!= 0); // block if a slave transaction is awaited
+    return sCnt;
 }
 
-uint8_t masterReceiveInternal(uint8_t lastCmd)
+/*uint8_t masterReceiveInternal(uint8_t lastCmd)
 {
     return masterReceive(I2C_BLOCK_INTERNAL,lastCmd,slave_address_internal);
 }
@@ -137,11 +176,12 @@ uint8_t masterReceiveInternal(uint8_t lastCmd)
 uint8_t masterReceiveExternal(uint8_t lastCmd)
 {
     return masterReceive(I2C_BLOCK_EXTERNAL,lastCmd,slave_address_external);
-}
+}*/
 
 /**
  * receives a single bytes using one i2c transfer
  */
+/*
 uint8_t masterReceive(I2C_TypeDef * i2cBlk,uint8_t lastCmd,uint8_t slaveAddress)
 {
     uint8_t res;
@@ -155,33 +195,39 @@ uint8_t masterReceive(I2C_TypeDef * i2cBlk,uint8_t lastCmd,uint8_t slaveAddress)
                 | (1 << I2C_CR2_RD_WRN_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
     i2cBlk->CR2 = regbfr;
 
-    while ((i2cBlk->ISR & (1UL << I2C_ISR_RXNE_Pos)) == 0 && nackOccurred == 0);
-    if (nackOccurred == 0)
+    while ((i2cBlk->ISR & (1UL << I2C_ISR_RXNE_Pos)) == 0 && bmI2CStatus == 0);
+    if ((bmI2CStatus & (1 << I2C_ERROR_MASTER_NACK)) == 0)
     {
         res = (uint8_t)i2cBlk->RXDR;
         return res;
     }
     else
     {
-        nackOccurred = 0;
+        bmI2CStatus &= ~(1 << I2C_ERROR_MASTER_NACK);
         return 0xFF;
     }
 }
+*/
 
-
-uint8_t I2CReceiveMultiple(I2C_TypeDef * i2cBlk,uint8_t* dataBfr,uint16_t nBytes,uint8_t slaveAddress)
+/*
+ receives nBytes as master from slaveAddress, in case of errors less than nBytes are received
+*/
+uint16_t I2CReceiveMultiple(I2C_TypeDef * i2cBlk,uint8_t* dataBfr,uint16_t nBytes,uint8_t slaveAddress)
 {
     uint32_t regbfr;
     uint16_t dataCnt=0;
     uint16_t bytesReceived=0;
-    uint8_t packetByteCnt=0;
+    uint16_t packetByteCnt=0;
     uint8_t bytesToReceive;
+    
+    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)); 
+    i2cBlk->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
     // flush read fifo
     while((i2cBlk->ISR & (1UL << I2C_ISR_RXNE_Pos))!= 0)
     {
         (void)i2cBlk->RXDR;
     }
-    while (bytesReceived < nBytes)
+    while (bytesReceived < nBytes && bmI2CStatus==0)
     {
         if (nBytes - bytesReceived > 0xff)
         {
@@ -197,23 +243,27 @@ uint8_t I2CReceiveMultiple(I2C_TypeDef * i2cBlk,uint8_t* dataBfr,uint16_t nBytes
               | (1 << I2C_CR2_RD_WRN_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
         i2cBlk->CR2 = regbfr;
         packetByteCnt = 0;
-        while ((i2cBlk->ISR & (1UL << I2C_ISR_BUSY_Pos))!=0 && packetByteCnt < bytesToReceive)
+        while ((i2cBlk->ISR & (1UL << I2C_ISR_BUSY_Pos))!=0 && packetByteCnt < bytesToReceive && bmI2CStatus==0)
         {
-            while ((i2cBlk->ISR & (1UL << I2C_ISR_RXNE_Pos)) == 0 && packetByteCnt < bytesToReceive);
-            *(dataBfr + dataCnt++) = (uint8_t)i2cBlk->RXDR;
-            packetByteCnt++;
+            while ((i2cBlk->ISR & (1UL << I2C_ISR_RXNE_Pos)) == 0 && packetByteCnt < bytesToReceive && bmI2CStatus == 0);
+            if (bmI2CStatus == 0)
+            {
+                *(dataBfr + dataCnt++) = (uint8_t)i2cBlk->RXDR;
+                packetByteCnt++;
+            }
         }
         bytesReceived += dataCnt;
     }
+    while ((bmI2CStatus & (1 << I2C_AWAIT_SLAVE_TRANSACTION))!= 0); // block if a slave transaction is awaited
 
-    return 0;
+    return bytesReceived;
 }
 
-uint8_t I2CReceiveMultipleInternal(uint8_t* dataBfr,uint16_t nBytes)
+uint16_t I2CReceiveMultipleInternal(uint8_t* dataBfr,uint16_t nBytes)
 {
     return I2CReceiveMultiple(I2C_BLOCK_INTERNAL,dataBfr,nBytes,slave_address_internal);
 }
-uint8_t I2CReceiveMultipleExternal(uint8_t* dataBfr,uint16_t nBytes)
+uint16_t I2CReceiveMultipleExternal(uint8_t* dataBfr,uint16_t nBytes)
 {
     return I2CReceiveMultiple(I2C_BLOCK_EXTERNAL,dataBfr,nBytes,slave_address_external);
 }
@@ -236,4 +286,9 @@ uint8_t getTargetAddressInternal()
 uint8_t getTargetAddressExternal()
 {
     return slave_address_external;
+}
+
+void setI2CReceiveCallback(void(*cb)(uint8_t*,uint16_t))
+{
+    i2cReceivedDataCallback = cb;
 }

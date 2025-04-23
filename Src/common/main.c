@@ -198,6 +198,7 @@ int main(void)
     piPicoFxUiSetup(&piPicoUiController);
 	ClearDisplay();
     clearDelayLine();
+    setI2CReceiveCallback(&handleSwitchesUpdate);
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
 	{
 		if ((uint32_t)fxPrograms[c]->setup != 0)
@@ -410,7 +411,6 @@ int main(void)
 
           programChangeState = 4;
       }
-      requestSwitchesUpdate();
       #endif
 	}
 }

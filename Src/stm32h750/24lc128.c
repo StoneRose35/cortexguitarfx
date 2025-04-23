@@ -70,7 +70,7 @@ void eeprom24lc128WaitUntilAvailable()
     {
         setTargetAddressExternal(EEPROM_24LC128_ADDRESS);
     }
-    while(masterTransmitExternal(0,1)!=0)
+    while(masterTransmitExternal(0,1)==0) // wait until at least one byte could be sent
     {
 
     }

@@ -22,12 +22,14 @@ static uint8_t cs4270Write(uint16_t data)
 
 static uint8_t cs4270Read(uint8_t reg)
 {
+    uint8_t receiveBuffer[1];
     if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
         setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
     masterTransmitExternal(reg,1);
-    return masterReceiveExternal(1);
+    I2CReceiveMultipleExternal(receiveBuffer,1);
+    return receiveBuffer[0];
 }
 
 void cs4270PowerDown()
@@ -188,14 +190,16 @@ uint16_t cs4270GetOutputVolume()
 {
     uint16_t outval=0;
     uint8_t channelVal;
+    uint8_t receiveBuffer[2];
     if (getTargetAddressExternal()!=CS4270_I2C_ADDRESS)
     {
         setTargetAddressExternal(CS4270_I2C_ADDRESS);
     }
     masterTransmitExternal((0x80 | CS4270_R7),1);
-    channelVal = 0xFF - masterReceiveExternal(0);
+    I2CReceiveMultipleExternal(receiveBuffer,2);
+    channelVal = 0xFF - receiveBuffer[0];
     outval |= (channelVal << 8);
-    channelVal = 0xFF - masterReceiveExternal(0);
+    channelVal = 0xFF - receiveBuffer[1];
     outval |= channelVal;
     return outval;
 }

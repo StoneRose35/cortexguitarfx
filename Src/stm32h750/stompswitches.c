@@ -70,29 +70,23 @@ void setStompswitchColorRaw(uint8_t data)
     sendColors();
 }
 
-void requestSwitchesUpdate()
-{
-    uint8_t i2cData;
-    if (getTargetAddressExternal()!=STOMPSWITCHES_I2C_ADDRESS)
-    {
-        setTargetAddressExternal(STOMPSWITCHES_I2C_ADDRESS);
-    }
-    i2cData = masterReceiveExternal(1);
-    if (i2cData != 0xff)
+void handleSwitchesUpdate(uint8_t*data,uint16_t len)
+{    
+    if (data[0] != 0xff)
     {
         for (uint8_t c=0;c<NR_STOMPSWITCHES;c++)
         {
-            if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) == 0) && (i2cData & (1 << c)) == 0)
+            if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) == 0) && (data[0] & (1 << c)) == 0)
             {
                 switchesState[c] |= (1 << 1); // set sticky pressed
             }
-            else if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) != 0) && (i2cData & (1 << c)) != 0)
+            else if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) != 0) && (data[0] & (1 << c)) != 0)
             {
                 switchesState[c] |= (1 << 2); // set sticky released
             }
             // set momentary value
             switchesState[c] &= ~(1);
-            switchesState[c] |= 0x1 ^ ((i2cData & (1 << c)) >> c);
+            switchesState[c] |= 0x1 ^ ((data[0] & (1 << c)) >> c);
         }
     }
 }
