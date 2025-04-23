@@ -8,6 +8,7 @@
 #include "gpio.h"
 #include "audio/audiotools.h"
 #include "stm32h750/daisy_seed_pins.h"
+#include "memoryRegions.h"
 
 #ifdef EXTERNAL_CODEC
 
@@ -27,14 +28,16 @@ extern uint32_t cpuLoad;
 extern PiPicoFxUiType piPicoUiController;
 uint16_t bufferCnt;
 volatile uint32_t audioState=0;
+volatile int16_t fadeCounter;
+extern volatile uint8_t programChangeState;
 
 int32_t *  audioBufferPtr;
 int32_t *  audioBufferInputPtr;
-int32_t inputSampleInt,inputSampleInt2;
-float inputSample, avgIn, avgOut;
+int32_t inputSampleInt,outputSampleInt;
+float inputSample, avgIn, avgOut, outputSample;
 uint32_t ticStart, ticEnd;
-__attribute__((section (".qspi_code")))
 
+__QSPI_CODE
 void DMA1_Stream0_IRQHandler(void) // adc
 {
     if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
@@ -85,7 +88,7 @@ void DMA1_Stream0_IRQHandler(void) // adc
             // convert raw input to float   
             #ifdef EXTENSION_BOARD
             inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8) + 
-                          ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8);
+                          ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
             #else
             inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
             #endif
@@ -114,9 +117,38 @@ void DMA1_Stream0_IRQHandler(void) // adc
             }
             avgInOld = AVERAGING_LOWPASS_CUTOFF*avgIn + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgInOld);
 
-            if (audioState & (1 << AUDIO_STATE_ON))
+            if (programChangeState != 3) // processing
             {
-                inputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
+                outputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
+            }
+            else
+            {
+                outputSample = 0.0f;
+            }
+    
+            if (programChangeState == 2)// fadeout
+            {
+                outputSample = (((float)(32767 - fadeCounter)*inputSample) + (((float)fadeCounter*outputSample)))/32767.0f;
+                fadeCounter -= 256;
+                if (fadeCounter < 0)
+                {
+                    fadeCounter = 0;
+                    programChangeState=3;
+                }
+            }
+            else if (programChangeState==4) // fadein
+            {
+                outputSample = (((float)(32767 - fadeCounter)*inputSample) + (((float)fadeCounter*outputSample)))/32767.0f;
+                fadeCounter += 256;
+                if (fadeCounter < 0) // overrun
+                {
+                    programChangeState = 0;
+                }
+            }
+            if (programChangeState == 1)
+            {
+                fadeCounter = 32767;
+                programChangeState = 2;
             }
 
 
@@ -129,11 +161,11 @@ void DMA1_Stream0_IRQHandler(void) // adc
                 avgOut = inputSample;
             }
             avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
-            inputSample=clip(inputSample,getAudioStatePtr());
-            inputSampleInt=((int32_t)(inputSample*8388607.0f));
+            outputSample=clip(outputSample,getAudioStatePtr());
+            outputSampleInt=((int32_t)(outputSample*8388607.0f));
             //inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);
-            *(audioBufferPtr+c) = inputSampleInt;  
-            *(audioBufferPtr+c+1) = inputSampleInt;
+            *(audioBufferPtr+c) = outputSampleInt;  
+            *(audioBufferPtr+c+1) = outputSampleInt;
         }
         task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
         bufferCnt++;
