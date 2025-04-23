@@ -11,7 +11,6 @@
 "C23,C24,C26,C29","0.1uF","Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder","4"
 "C25,C28","22uF","Capacitor_SMD:CP_Elec_4x4.5","2"
 "D1","SM6T12A","Diode_SMD:D_SMB","1"
-"D2,D3,D4","LED_Dual_AAK","LED_THT:LED_D5.0mm-3","3"
 "J7","Conn_02x20_Odd_Even","Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical_SMD","1"
 "L1","4.7uH","Inductor_SMD:L_Bourns_SRP7028A_7.3x6.6mm","1"
 "R1,R3,R4,R21,R22,R24,R25,R29","22k","Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder","8"
