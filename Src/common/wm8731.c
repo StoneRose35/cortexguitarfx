@@ -14,7 +14,7 @@ void wm8731_write(uint16_t data)
     }
     sendBfr[0] = (uint8_t)((data >> 8)&0xFF);
     sendBfr[1] = (uint8_t)(data&0xFF);
-    I2CsendMultipleExternal(sendBfr,2);
+    I2CsendMultipleInternal(sendBfr,2);
     //masterTransmitInternal((uint8_t)((data >> 8)&0xFF),0);
     //masterTransmitInternal((uint8_t)(data&0xFF),1);
 }
