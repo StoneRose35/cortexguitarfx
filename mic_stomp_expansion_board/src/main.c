@@ -3,11 +3,20 @@
 #include <avr/iom88.h>
 
 #define I2C_ADDRESS 23
+#define I2C_MAINBOARD_ADDRESS 27
 
-volatile int footswitchstate=0, footswitchstateOld=0;
+#define I2C_OWN_ADDRESS_WRITE 0x60
+#define I2C_DATA_RECEIVED 0x80
+#define I2C_OWN_ADDRESS_READ 0xA8
+#define I2C_LAST_DATA_BYTE_TRANSMITTED 0xC0
+#define I2C_START_TRANSMITTED 0x08
+#define I2C_ADDRESS_TRANSMITTED_ACK 0x18
+#define I2C_ADDRESS_TRANSMITTED_NACK 0x20
+#define I2C_DATA_TRANSMITTED_ACK 0x28
+#define I2C_DATA_TRANSMITTED_NACK 0x30
+#define I2C_ARBITRATION_LOST 0x38
+volatile int footswitchstate=0, footswitchstateOld=0,sendOperationPending=0;
 volatile int ledState=0, ledStateOld=0;
-
-//int transmissionOngoing = 0;
 
 void sendStompSwitchesState(void);
 void startDebounceTimer(void);
@@ -31,6 +40,8 @@ int main(void)
 	// initialize i2c to listen to address 23
 	TWAR = (I2C_ADDRESS << 1);
 	TWCR |= (1 << TWIE) | (1 << TWEA) | (1 << TWEN);
+	footswitchstate = PINB & 0x7;	
+	footswitchstateOld = footswitchstate;
 	sei();
 	while(1)
 	{
@@ -40,6 +51,8 @@ int main(void)
 			if (TCCR0B == 0) // counter didn't run, change is valid
 			{
 				footswitchstateOld = footswitchstate;
+				sendOperationPending = 1;
+				TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWSTA); // start sending the switch state
 				startDebounceTimer();
 			}
 		}
@@ -62,28 +75,52 @@ void sendStompSwitchesState(void)
 ISR ( TWI_vect )
 {
 	//PORTD &= ~0x2;
-	if ((TWSR & 0xF8) == 0x60)
+	if ((TWSR & 0xF8) == I2C_OWN_ADDRESS_WRITE)
 	{
 		// got own address and request to write
 		// wait for command
 		TWCR |= (1 << TWEA) | (1 << TWINT)| (1 << TWEN);
 	}
-	else if ((TWSR & 0xF8) == 0x80)
+	else if ((TWSR & 0xF8) == I2C_DATA_RECEIVED)
 	{
 		// led status data has been received
 		ledState = TWDR;
 		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
 
 	}
-	else if ((TWSR & 0xF8) == 0xA8)
+	else if ((TWSR & 0xF8) == I2C_OWN_ADDRESS_READ)
 	{
 		// read request has been received, send out stomp switches state
 		sendStompSwitchesState();
 	}
-	else if ((TWSR & 0xF0) == 0xC0)
+	else if ((TWSR & 0xF0) == I2C_LAST_DATA_BYTE_TRANSMITTED)
 	{
 		// last data byte has been transmitted successfully, not ack or ack (both c0 or c8 match) have been received
 		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
+	}
+	else if ((TWSR & 0xF8) == I2C_START_TRANSMITTED)
+	{
+		// start has been sent, continue with main board address
+		TWDR = (I2C_MAINBOARD_ADDRESS << 1);
+		TWCR |= (1 << TWINT) | (1 << TWEN);
+	}
+	else if ((TWSR & 0xF8) == I2C_ADDRESS_TRANSMITTED_ACK)
+	{
+		TWDR = footswitchstate;
+		TWCR |= (1 << TWINT) | (1 << TWEN);
+	}
+	else if ((TWSR & 0xF8) == I2C_DATA_TRANSMITTED_ACK)
+	{
+		sendOperationPending = 0;
+		TWCR |= (1 << TWINT) | (1 << TWSTO) | (1 << TWEA);
+	}
+	else if (((TWSR & 0xF8) == I2C_DATA_TRANSMITTED_NACK) || ((TWSR & 0xF8) == I2C_ADDRESS_TRANSMITTED_NACK))
+	{
+		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWSTA); // immediately retry
+	}
+	else if (((TWSR & 0xF8) == I2C_ARBITRATION_LOST) && sendOperationPending != 0)
+	{
+		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWSTA); // immediately retry
 	}
 	else
 	{
