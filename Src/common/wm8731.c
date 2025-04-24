@@ -7,12 +7,16 @@ volatile uint8_t wm8731States = 3; // bit 0: left, bit 1: right, 0 is off, 1 is 
 
 void wm8731_write(uint16_t data)
 {
+    uint8_t sendBfr[2];
     if (getTargetAddressExternal()!=WM8731_ADDRESS)
     {
         setTargetAddressExternal(WM8731_ADDRESS);
     }
-    masterTransmitInternal((uint8_t)((data >> 8)&0xFF),0);
-    masterTransmitInternal((uint8_t)(data&0xFF),1);
+    sendBfr[0] = (uint8_t)((data >> 8)&0xFF);
+    sendBfr[1] = (uint8_t)(data&0xFF);
+    I2CsendMultipleExternal(sendBfr,2);
+    //masterTransmitInternal((uint8_t)((data >> 8)&0xFF),0);
+    //masterTransmitInternal((uint8_t)(data&0xFF),1);
 }
 
 

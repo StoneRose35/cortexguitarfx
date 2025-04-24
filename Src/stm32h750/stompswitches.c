@@ -44,7 +44,8 @@ void sendColors()
     {
         setTargetAddressExternal(STOMPSWITCHES_I2C_ADDRESS);
     }
-    masterTransmitExternal(switchesColors.rawColors,1);
+
+    I2CsendMultipleExternal((uint8_t*)&switchesColors,1);
 }
 
 void setStompswitchColor(uint8_t switchNr,uint8_t clr)

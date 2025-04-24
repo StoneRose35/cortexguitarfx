@@ -5,7 +5,6 @@
 static volatile uint8_t slave_address_internal, slave_address_external;
 static volatile uint8_t firstCommand;
 
-static uint8_t sendBfr[I2C_BUFFER_LENGTH];
 static uint8_t receiveBuffer[I2C_BUFFER_LENGTH];
 static volatile uint16_t nReceived=0;
 static volatile uint16_t nSend=0;
@@ -113,26 +112,6 @@ void initI2c(uint8_t slaveAddressInt,uint8_t slaveAddressExt)
     slave_address_internal = slaveAddressInt;
     slave_address_external = slaveAddressExt;
     firstCommand = 1;
-}
-
-uint16_t masterTransmitInternal(uint8_t data,uint8_t lastCmd)
-{
-    return masterTransmit(I2C_BLOCK_INTERNAL,data,lastCmd,slave_address_internal);
-}
-
-uint16_t masterTransmitExternal(uint8_t data,uint8_t lastCmd)
-{
-    return masterTransmit(I2C_BLOCK_EXTERNAL,data,lastCmd,slave_address_external);
-}
-
-uint16_t masterTransmit(I2C_TypeDef * i2cBlk, uint8_t data,uint8_t lastCmd,uint8_t slaveAddress)
-{
-    sendBfr[nSend++] = data;
-    if (lastCmd==1)
-    {
-        return I2CsendMultiple(i2cBlk,sendBfr,nSend,slaveAddress);
-    }
-    return 0;
 }
 
 uint16_t I2CsendMultipleInternal(uint8_t * data, uint16_t nSend)

@@ -3,6 +3,7 @@
 #include "pipicofx/picofxCore.h"
 #include "drivers/24lc128.h"
 #include "stringFunctions.h"
+#include "systick.h"
 
 FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     
@@ -25,6 +26,7 @@ FxProgramType* fxPrograms[N_FX_PROGRAMS]={
 void savePreset(FxPresetType* preset,uint16_t presetPos)
 {
     uint16_t cs=0;
+    uint8_t retval;
     uint32_t address;
     uint8_t * presetArrayPtr;
     presetArrayPtr = (uint8_t*)preset;
@@ -35,7 +37,12 @@ void savePreset(FxPresetType* preset,uint16_t presetPos)
     preset->magicNr = cs;
     address = presetPos*sizeof(FxPresetType);
     #ifdef STM32
-    eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArrayPtr);
+    retval = eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArrayPtr);
+    while(retval!=0)
+    {
+        waitSysticks(50);
+        retval = eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArrayPtr);
+    }
     #endif
 }
 
@@ -45,9 +52,15 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     uint32_t address;
     uint8_t * presetArrayPtr;
     presetArrayPtr = (uint8_t*)preset;
+    uint8_t retval;
     address = presetPos*sizeof(FxPresetType);
     #ifdef STM32
-    eeprom24lc128ReadArray(address,sizeof(FxPresetType),presetArrayPtr);
+    retval = eeprom24lc128ReadArray(address,sizeof(FxPresetType),presetArrayPtr);
+    while(retval != 0)
+    {
+        waitSysticks(50);
+        retval = eeprom24lc128ReadArray(address,sizeof(FxPresetType),presetArrayPtr);   
+    }
     #endif
     for (uint8_t c=0;c<sizeof(FxPresetType)-2;c++)
     {

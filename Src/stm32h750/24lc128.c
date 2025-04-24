@@ -1,24 +1,39 @@
 #include "drivers/24lc128.h"
 #include "drivers/systick.h"
 #include "drivers/i2c.h"
-
-void eeprom24s128WritePage(uint32_t address,uint16_t len, uint8_t* data)
+#include "stdlib.h"
+uint8_t eeprom24s128WritePage(uint32_t address,uint16_t len, uint8_t* data)
 {
-    eeprom24lc128WaitUntilAvailable();
+    uint8_t * sendBfr;
+    uint16_t nSent;
+    sendBfr = (uint8_t*)malloc(len+2);
 
-
-    masterTransmitExternal((address >> 8) &0xFF,0);
-    masterTransmitExternal((address) &0xFF,0);
-
+    sendBfr[0] = (address >> 8) &0xFF;
+    sendBfr[1] = (address) &0xFF;
     for(uint16_t c=0;c<len-1;c++)
     {
-        masterTransmitExternal(*(data+c),0);
+        sendBfr[c+2] = *(data+c);
+        //masterTransmitExternal(*(data+c),0);
     }
-    masterTransmitExternal(*(data+len-1),1);
+    eeprom24lc128WaitUntilAvailable();
+    nSent = I2CsendMultipleExternal(sendBfr,len+2);
+
+    //masterTransmitExternal((address >> 8) &0xFF,0);
+    //masterTransmitExternal((address) &0xFF,0);
+
+
+    //masterTransmitExternal(*(data+len-1),1);
+
+    free(sendBfr);
+
+    if (nSent < len)
+    {
+        return 1;
+    }
+    return 0;
 }
 
-
-void eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data)
+uint8_t eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data)
 {
     uint16_t addrCnt=startAdress;
     uint16_t dataCnt=0;
@@ -43,34 +58,46 @@ void eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data)
         {
             lenToWrite = ((addrCnt + lenToWrite) & 0xFFC0) - addrCnt;
         }
-        eeprom24s128WritePage(addrCnt,lenToWrite,data + dataCnt);
+        if (eeprom24s128WritePage(addrCnt,lenToWrite,data + dataCnt)!=0)
+        {
+            return 1;
+        }
         waitSysticks(1);
         remaining -= lenToWrite;
         addrCnt += lenToWrite;
         dataCnt += lenToWrite;
     }
+    return 0;
 }
 
-void eeprom24lc128ReadArray(uint32_t startAdress,uint16_t len,uint8_t* data)
+uint8_t eeprom24lc128ReadArray(uint32_t startAdress,uint16_t len,uint8_t* data)
 {
-
+    uint8_t sendBfr[2];
     if (getTargetAddressExternal()!=EEPROM_24LC128_ADDRESS)
     {
         setTargetAddressExternal(EEPROM_24LC128_ADDRESS);
     }
     eeprom24lc128WaitUntilAvailable();
-    masterTransmitExternal((startAdress >> 8) &0xFF,0);
-    masterTransmitExternal(startAdress & 0xFF,1); 
-    I2CReceiveMultipleExternal(data,len);
+    sendBfr[0]=(startAdress >> 8) &0xFF;
+    sendBfr[1]=startAdress & 0xFF;
+    //masterTransmitExternal((startAdress >> 8) &0xFF,0);
+    //masterTransmitExternal(startAdress & 0xFF,1); 
+    I2CsendMultipleExternal(sendBfr,2);
+    if (I2CReceiveMultipleExternal(data,len) != len)
+    {
+        return 1;
+    }
+    return 0;
 }
 
 void eeprom24lc128WaitUntilAvailable()
 {
+    uint8_t sendBfr[1]={0};
     if (getTargetAddressExternal()!=EEPROM_24LC128_ADDRESS)
     {
         setTargetAddressExternal(EEPROM_24LC128_ADDRESS);
     }
-    while(masterTransmitExternal(0,1)==0) // wait until at least one byte could be sent
+    while(I2CsendMultipleExternal(sendBfr,1)==0) // wait until at least one byte could be sent
     {
 
     }
