@@ -15,6 +15,9 @@ uint32_t getTickValue()
     return ticks;
 }
 
+/**
+ * generates a Systick every 10 ms
+ */
 void initSystickTimer()
 {
 
