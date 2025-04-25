@@ -196,47 +196,6 @@ uint16_t I2CsendMultiple(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uin
     return sCnt;
 }
 
-/*uint8_t masterReceiveInternal(uint8_t lastCmd)
-{
-    return masterReceive(I2C_BLOCK_INTERNAL,lastCmd,slave_address_internal);
-}
-
-uint8_t masterReceiveExternal(uint8_t lastCmd)
-{
-    return masterReceive(I2C_BLOCK_EXTERNAL,lastCmd,slave_address_external);
-}*/
-
-/**
- * receives a single bytes using one i2c transfer
- */
-/*
-uint8_t masterReceive(I2C_TypeDef * i2cBlk,uint8_t lastCmd,uint8_t slaveAddress)
-{
-    uint8_t res;
-    uint32_t regbfr;
-    (void)lastCmd;
-    while ((i2cBlk->ISR & (1 << I2C_ISR_BUSY_Pos)) != 0);
-
-    //regbfr = i2cBlk->CR2;
-    //regbfr &= ~((I2C_CR2_SADD_Msk) | (1 << I2C_CR2_RD_WRN_Pos));
-    regbfr = (slaveAddress << (I2C_CR2_SADD_Pos+1)) | (1 << I2C_CR2_START_Pos) | (0x1 << I2C_CR2_NBYTES_Pos) 
-                | (1 << I2C_CR2_RD_WRN_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
-    i2cBlk->CR2 = regbfr;
-
-    while ((i2cBlk->ISR & (1UL << I2C_ISR_RXNE_Pos)) == 0 && bmI2CStatus == 0);
-    if ((bmI2CStatus & (1 << I2C_ERROR_MASTER_NACK)) == 0)
-    {
-        res = (uint8_t)i2cBlk->RXDR;
-        return res;
-    }
-    else
-    {
-        bmI2CStatus &= ~(1 << I2C_ERROR_MASTER_NACK);
-        return 0xFF;
-    }
-}
-*/
-
 /*
  receives nBytes as master from slaveAddress, in case of errors less than nBytes are received
 */
