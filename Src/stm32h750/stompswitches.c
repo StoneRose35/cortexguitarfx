@@ -71,23 +71,25 @@ void setStompswitchColorRaw(uint8_t data)
     sendColors();
 }
 
-void handleSwitchesUpdate(uint8_t*data,uint16_t len)
-{    
-    if (data[0] != 0xff)
+void handleSwitchesUpdate(volatile I2CReceivedDataType * receivedData)
+{   
+    uint8_t val; 
+    if (receivedData->dataSize != 0 && receivedData->data[0] != 0xff)
     {
+        val = receivedData->data[0];
         for (uint8_t c=0;c<NR_STOMPSWITCHES;c++)
         {
-            if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) == 0) && (data[0] & (1 << c)) == 0)
+            if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) == 0) && (val & (1 << c)) == 0)
             {
                 switchesState[c] |= (1 << 1); // set sticky pressed
             }
-            else if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) != 0) && (data[0] & (1 << c)) != 0)
+            else if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) != 0) && (val & (1 << c)) != 0)
             {
                 switchesState[c] |= (1 << 2); // set sticky released
             }
             // set momentary value
             switchesState[c] &= ~(1);
-            switchesState[c] |= 0x1 ^ ((data[0] & (1 << c)) >> c);
+            switchesState[c] |= 0x1 ^ ((val & (1 << c)) >> c);
         }
     }
 }

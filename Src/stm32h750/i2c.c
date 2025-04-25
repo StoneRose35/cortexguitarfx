@@ -1,53 +1,98 @@
 #include "drivers/i2c.h"
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
+#include "system.h"
+#include "uart.h"
+#include "stdio.h"
 
 static volatile uint8_t slave_address_internal, slave_address_external;
 static volatile uint8_t firstCommand;
-
+extern volatile uint32_t task;
 static uint8_t receiveBuffer[I2C_BUFFER_LENGTH];
 static volatile uint16_t nReceived=0;
 static volatile uint16_t nSend=0;
 static volatile uint8_t bmI2CStatus=0; // bit 0: NACK occurred, bit 1: await slve transaction
-static volatile void(*i2cReceivedDataCallback)(uint8_t*,uint16_t)=0;
+volatile I2CReceivedDataType i2cReceivedData = 
+{
+   .data = receiveBuffer,
+   .dataSize = 0,
+   .senderAddress = 0  
+};
+
+void I2C1_ER_IRQHandler(void)
+{
+    if ((I2C1->ISR & (1 << I2C_ISR_ARLO_Pos))!= 0)
+    {
+        bmI2CStatus |= 1 << I2C_AWAIT_SLAVE_TRANSACTION;
+        I2C1->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
+        I2C1->OAR1 = (I2C_BOARD_ADDRESS << 1);
+        I2C1->OAR1 |= 1 << I2C_OAR1_OA1EN_Pos;
+        I2C1->CR1 |= (1 << I2C_CR1_ADDRIE_Pos);
+        I2C1->ICR = (1 << I2C_ICR_ARLOCF_Pos);
+        #ifdef I2C_DBG
+        sendStringBlocking("I2C ERR ARLO\r\n");
+        #endif
+    }
+    else
+    {
+        #ifdef I2C_DBG
+        sendStringBlocking("I2C ERR \r\n");
+        #endif
+    }
+}
 void I2C1_EV_IRQHandler(void)
 {
     if ((I2C1->ISR & (1 << I2C_ISR_NACKF_Pos))!= 0)
     {
         bmI2CStatus |= (1 << I2C_ERROR_MASTER_NACK);
         I2C1->ICR = (1 << I2C_ICR_NACKCF_Pos);
-    }
-
-    if ((I2C1->ISR & (1 << I2C_ISR_ARLO_Pos))!= 0)
-    {
-        bmI2CStatus |= 1 << I2C_AWAIT_SLAVE_TRANSACTION;
-        I2C1->OAR1 = I2C_BOARD_ADDRESS << I2C_OAR1_OA1_Pos;
-        I2C1->OAR1 |= 1 << I2C_OAR1_OA1EN_Pos;
-        I2C1->CR1 |= (1 << I2C_CR1_ADDRIE_Pos);
-        I2C1->ICR = (1 << I2C_ICR_ARLOCF_Pos);
+        #ifdef I2C_DBG
+        sendStringBlocking("I2C ERR NACK\r\n");
+        #endif
     }
 
     if ((I2C1->ISR & (1 << I2C_ISR_ADDR_Pos))!= 0)
     {
         // currently only slave receiver is implemented, thus, enable rxne interrupt
         I2C1->ISR |= (1 << I2C_CR1_RXIE_Pos);
+        if ((task & (1 << TASK_I2C_DATA_RECEIVED))==0)
+        {
+            i2cReceivedData.senderAddress = (I2C1->ISR & I2C_ISR_ADDCODE_Msk) >> I2C_ISR_ADDCODE_Pos;
+            nReceived = 0;
+        }
         I2C1->ICR = (1 << I2C_ICR_ADDRCF_Pos);
-        nReceived = 0;
+
+        #ifdef I2C_DBG
+        sendStringBlocking("I2C ADDR\r\n");
+        #endif
     }
 
     if ((I2C1->ISR & (1 << I2C_ISR_RXNE_Pos))!= 0)
     {
-        receiveBuffer[nReceived++] = (uint8_t)I2C1->RXDR;
+        uint8_t data = (uint8_t)I2C1->RXDR;
+        if ((task & (1 << TASK_I2C_DATA_RECEIVED))==0)
+        {
+            receiveBuffer[nReceived++] = (uint8_t)I2C1->RXDR;
+        }
+        #ifdef I2C_DBG
+        sendStringBlocking("I2C RXNE\r\n");
+        #endif
     }
 
     if ((I2C1->ISR & (1 << I2C_ISR_STOPF_Pos)))
     {
         bmI2CStatus &= ~(1 << I2C_AWAIT_SLAVE_TRANSACTION);
         I2C1->ICR = (1 << I2C_ICR_STOPCF_Pos);
-        if (i2cReceivedDataCallback != 0)
+        if ((task & (1 << TASK_I2C_DATA_RECEIVED))==0)
         {
-            i2cReceivedDataCallback(receiveBuffer,nReceived);
+            i2cReceivedData.dataSize = nReceived;
+            task |= (1 << TASK_I2C_DATA_RECEIVED);
         }
+        #ifdef I2C_DBG
+        char charBfr[32];
+        sprintf(charBfr,"I2C STOPF, data size %d\r\n",nReceived);
+        sendStringBlocking(charBfr);
+        #endif
     }
 
 }
@@ -104,11 +149,12 @@ void initI2c(uint8_t slaveAddressInt,uint8_t slaveAddressExt)
     config_i2c_pin(I2C_SDA_EXTERNAL);
 
     I2C_BLOCK_INTERNAL->CR1 |= (1 << I2C_CR1_PE_Pos);
-    I2C_BLOCK_EXTERNAL->CR1 |= (1 << I2C_CR1_NACKIE_Pos) | (1 << I2C_CR1_ERRIE_Pos) | (1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos);
+    I2C_BLOCK_EXTERNAL->CR1 |= (1 << I2C_CR1_NACKIE_Pos) | (1 << I2C_CR1_ERRIE_Pos) | (1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos);
     I2C_BLOCK_EXTERNAL->CR1 |= (1 << I2C_CR1_PE_Pos);
-    I2C_BLOCK_EXTERNAL->OAR1 = I2C_BOARD_ADDRESS;
+    I2C_BLOCK_EXTERNAL->OAR1 = (I2C_BOARD_ADDRESS << 1);
     I2C_BLOCK_EXTERNAL->OAR1 |= (1 << I2C_OAR1_OA1EN_Pos);
     NVIC_EnableIRQ(I2C1_EV_IRQn);
+    NVIC_EnableIRQ(I2C1_ER_IRQn);
     slave_address_internal = slaveAddressInt;
     slave_address_external = slaveAddressExt;
     firstCommand = 1;
@@ -129,7 +175,7 @@ uint16_t I2CsendMultiple(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uin
     uint32_t regbfr;
     uint16_t sCnt=0;
     while ((i2cBlk->ISR & (1 << I2C_ISR_TXE_Pos))==0);
-    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)); 
+    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos)); 
     i2cBlk->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
     regbfr = i2cBlk->CR2;
     regbfr &= ~((I2C_CR2_SADD_Msk) | (1 << I2C_CR2_RD_WRN_Pos) | (0xFF << I2C_CR2_NBYTES_Pos));
@@ -144,6 +190,9 @@ uint16_t I2CsendMultiple(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uin
     }
     nSend=0;
     while ((bmI2CStatus & (1 << I2C_AWAIT_SLAVE_TRANSACTION))!= 0); // block if a slave transaction is awaited
+    i2cBlk->ICR = (1 << I2C_ICR_STOPCF_Pos);
+    i2cBlk->CR1 |= ((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)| (1 << I2C_CR1_ADDRIE_Pos)); 
+    i2cBlk->OAR1 |= (1 << I2C_OAR1_OA1EN_Pos);
     return sCnt;
 }
 
@@ -199,7 +248,8 @@ uint16_t I2CReceiveMultiple(I2C_TypeDef * i2cBlk,uint8_t* dataBfr,uint16_t nByte
     uint16_t packetByteCnt=0;
     uint8_t bytesToReceive;
     
-    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)); 
+    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos)); 
+    i2cBlk->CR1 |= (1 << I2C_CR1_ERRIE_Pos);
     i2cBlk->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
     // flush read fifo
     while((i2cBlk->ISR & (1UL << I2C_ISR_RXNE_Pos))!= 0)
@@ -234,7 +284,9 @@ uint16_t I2CReceiveMultiple(I2C_TypeDef * i2cBlk,uint8_t* dataBfr,uint16_t nByte
         bytesReceived += dataCnt;
     }
     while ((bmI2CStatus & (1 << I2C_AWAIT_SLAVE_TRANSACTION))!= 0); // block if a slave transaction is awaited
-
+    i2cBlk->ICR = (1 << I2C_ICR_STOPCF_Pos);
+    i2cBlk->CR1 |= ((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)| (1 << I2C_CR1_ADDRIE_Pos)); 
+    i2cBlk->OAR1 |= (1 << I2C_OAR1_OA1EN_Pos);
     return bytesReceived;
 }
 
@@ -267,7 +319,7 @@ uint8_t getTargetAddressExternal()
     return slave_address_external;
 }
 
-void setI2CReceiveCallback(void(*cb)(uint8_t*,uint16_t))
+volatile I2CReceivedDataType* I2CGetReceivedData(void)
 {
-    i2cReceivedDataCallback = cb;
+    return &i2cReceivedData;
 }

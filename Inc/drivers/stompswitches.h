@@ -1,6 +1,6 @@
 #ifndef _STOMPSWITCHES_H_
 #define _STOMPSWITCHES_H_
-
+#include "drivers/i2c.h"
 #define NR_STOMPSWITCHES 3
 #define STOMPSWITCHES_I2C_ADDRESS 23
 #define SWITCH_STATE_MOMENTARY_MSK 1
@@ -12,6 +12,6 @@ void clearStompSwitchStickyReleased(uint8_t switchNr);
 void initStompSwitchesInterface();
 void setStompswitchColor(uint8_t switchNr,uint8_t clr);
 void setStompswitchColorRaw(uint8_t data);
-void handleSwitchesUpdate(uint8_t*data,uint16_t len);
+void handleSwitchesUpdate(volatile I2CReceivedDataType*);
 
  #endif

@@ -35,6 +35,7 @@
 //cs4270 reset line 
 #define CS4270_RESET (2*16+11) //PC11
 
+#define DEBUG_OUTPUT_PIN (1*16+12) // PB12
 
 // i2c interface
 

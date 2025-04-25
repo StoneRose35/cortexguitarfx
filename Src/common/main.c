@@ -166,6 +166,7 @@ int main(void)
             testSpeed();
         }
     }
+
 	#ifdef PCM3060_CODEC
     setupPCM3060();
     #endif
@@ -198,7 +199,6 @@ int main(void)
     piPicoFxUiSetup(&piPicoUiController);
 	ClearDisplay();
     clearDelayLine();
-    setI2CReceiveCallback(&handleSwitchesUpdate);
 	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
 	{
 		if ((uint32_t)fxPrograms[c]->setup != 0)
@@ -259,8 +259,6 @@ int main(void)
             }
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
 
-
-                    
             if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
             {
                 // call the update function of the chosen program
@@ -276,7 +274,7 @@ int main(void)
                     onKnob0(adcChannel0,&piPicoUiController);
                     adcChannelOld0=adcChannel0;
                 }
-
+    
                 adcChannel = getChannel1Value();
                 adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
                 if ((adcChannel1 > adcChannelOld1) && (adcChannel1-adcChannelOld1) > UI_DMIN )
@@ -289,7 +287,7 @@ int main(void)
                     onKnob1(adcChannel1,&piPicoUiController);
                     adcChannelOld1=adcChannel1;
                 }
-
+    
                 adcChannel = getChannel2Value();
                 adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
                 if ((adcChannel2 > adcChannelOld2) && (adcChannel2-adcChannelOld2) > UI_DMIN )
@@ -305,6 +303,8 @@ int main(void)
                 task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
                 restartAdc();
             }
+                    
+
         }
 
         if ((task & (1 << TASK_DISPLAY_NEXT_LINE)) != 0)
@@ -312,7 +312,7 @@ int main(void)
             // wait until transmission through spi is done 
             while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
             DisplayWriteNextLine();
-            task &= ~(2 << TASK_DISPLAY_NEXT_LINE);
+            task &= ~(1 << TASK_DISPLAY_NEXT_LINE);
         }
 		
         switchVals[0] = getSwitchValue(0);
@@ -410,6 +410,12 @@ int main(void)
           }
 
           programChangeState = 4;
+      }
+      if ((task & (1 << TASK_I2C_DATA_RECEIVED))!=0)
+      {
+
+        handleSwitchesUpdate(I2CGetReceivedData());
+        task &= ~(1 << TASK_I2C_DATA_RECEIVED);
       }
       #endif
 	}

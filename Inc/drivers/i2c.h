@@ -24,6 +24,11 @@ void setTargetAddressInternal(uint8_t address);
 void setTargetAddressExternal(uint8_t address);
 uint8_t getTargetAddressInternal();
 uint8_t getTargetAddressExternal();
+typedef struct {
+    uint8_t * data;
+    uint8_t senderAddress;
+    uint16_t dataSize;
+} I2CReceivedDataType;
+volatile I2CReceivedDataType* I2CGetReceivedData(void);
 
-void setI2CReceiveCallback(void(*cb)(uint8_t*,uint16_t));
 #endif

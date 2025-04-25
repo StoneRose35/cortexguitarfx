@@ -14,7 +14,9 @@
 // #define PCM3060_CODEC
 
 
-
+// debug swiches (return information over UART@115200 8-n-1 when enabled)
+#undef USB_DBG
+#undef  I2C_DBG
 
 
 
