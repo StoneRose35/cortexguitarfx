@@ -72,7 +72,7 @@ void I2C1_EV_IRQHandler(void)
         uint8_t data = (uint8_t)I2C1->RXDR;
         if ((task & (1 << TASK_I2C_DATA_RECEIVED))==0)
         {
-            receiveBuffer[nReceived++] = (uint8_t)I2C1->RXDR;
+            receiveBuffer[nReceived++] = data;
         }
         #ifdef I2C_DBG
         sendStringBlocking("I2C RXNE\r\n");
