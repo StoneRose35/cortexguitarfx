@@ -5,6 +5,7 @@
 #include "usb/usb_common.h"
 #include "usb/usb_config.h"
 #include "uart.h"
+#include "usb/usb_cdc.h"
 #include "memoryRegions.h"
 
 
@@ -41,6 +42,7 @@ void OTG_FS_EP1_IN_IRQHandler(void)
 
 }
 
+__ITCM_CODE_FLASH
 void OTG_FS_IRQHandler(void)
 {
     uint32_t coreInterrupts = USB2_OTG_FS->GINTSTS;
@@ -451,14 +453,7 @@ USB2_OTG_FS->GRXFSIZ = 0x80; // receiver fifo
 USB2_OTG_FS->DIEPTXF0_HNPTXFSIZ = (0x40 << 16) | 0x80; // transmit fifo 0 
 //USB2_OTG_FS->DIEPTXF[0] = ((uint32_t)0x80 << 16) | (0x80 + 0x40); // transmit fifo 1
 
-// start phy clock and stop HCLK gating
-*(volatile uint32_t*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_PCGCCTL_BASE) &= ~((1 << USB_OTG_PCGCCTL_GATECLK_Pos) | (1 << USB_OTG_PCGCCTL_STOPCLK_Pos));
-USB2_OTG_FS_DEVICE->DCTL |= (1 << USB_OTG_DCTL_SDIS_Pos); // soft diconnect
-USB2_OTG_FS->GAHBCFG |= (1 << USB_OTG_GAHBCFG_GINT_Pos); // unmask global interrupt
-USB2_OTG_FS_DEVICE->DCTL &= ~(1 << USB_OTG_DCTL_SDIS_Pos); // finally: connect!
 
-//NVIC: Enable USB interrupts
-NVIC_EnableIRQ(OTG_FS_IRQn);
 
 outHandlers[0]=ep0OUTHandler;
 outHandlers[1]=ep1OUTHandler;
@@ -487,6 +482,19 @@ epOutBuffers[0]=ep0OutDataBfr;
 epInBuffers[0]=ep0InDataBfr;
 epOutDataCntrs[0]=0;
 epInDataCntrs[0]=0;
+
+// Init specific driver
+USBCDCInit();
+
+// start phy clock and stop HCLK gating
+*(volatile uint32_t*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_PCGCCTL_BASE) &= ~((1 << USB_OTG_PCGCCTL_GATECLK_Pos) | (1 << USB_OTG_PCGCCTL_STOPCLK_Pos));
+USB2_OTG_FS_DEVICE->DCTL |= (1 << USB_OTG_DCTL_SDIS_Pos); // soft diconnect
+USB2_OTG_FS->GAHBCFG |= (1 << USB_OTG_GAHBCFG_GINT_Pos); // unmask global interrupt
+USB2_OTG_FS_DEVICE->DCTL &= ~(1 << USB_OTG_DCTL_SDIS_Pos); // finally: connect!
+
+//NVIC: Enable USB interrupts
+NVIC_EnableIRQ(OTG_FS_IRQn);
+
 }
 
 uint8_t * getEp0InDataBfr()

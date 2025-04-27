@@ -138,6 +138,21 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >RAM_D1 AT> FLASH
 
+    . = ALIGN(4);
+  _siflash_itcm_code = LOADADDR(.flash_itcm_code);
+
+  .flash_itcm_code :
+  {
+    . = ALIGN(4);
+    _sitcm_flash_code = .;
+    PROVIDE(__itcm_flash_code_start = _sitcm_flash_code);
+    *(.flash_itcm_code)
+    *(.flash_itcm_code*)
+    .  = ALIGN(4);
+    _eitcm_flash_code = .;
+    PROVIDE(__itcm_flash_code_end = _eitcm_flash_code);
+  } > ITCMRAM AT>FLASH
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
@@ -238,6 +253,8 @@ SECTIONS
     _eitcm_code = .;
     PROVIDE(__itcm_code_end = _eitcm_code);
   } > ITCMRAM AT>QSPIFLASH
+
+
 
     . = ALIGN(4);
   /* User_heap_stack section, used to check that there is enough RAM left */

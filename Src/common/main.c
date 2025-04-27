@@ -51,6 +51,7 @@
 #include "pipicofx/pipicofxui.h"
 #include "drivers/usb.h"
 #include "usb/usb_cdc.h"
+#include "usb/usb_dfu.h"
 
 #define LD1 0
 #define LD2 7
@@ -416,6 +417,11 @@ int main(void)
 
         handleSwitchesUpdate(I2CGetReceivedData());
         task &= ~(1 << TASK_I2C_DATA_RECEIVED);
+      }
+      if ((task & (1 << TASK_PREPARE_FOR_DFU))!=0)
+      {
+        prepareSystemFroDFU();
+        task &= ~(1 << TASK_PREPARE_FOR_DFU);
       }
       #endif
 	}

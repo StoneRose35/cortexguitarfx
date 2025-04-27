@@ -193,4 +193,9 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet);
  uint8_t setUsbConfiguration(uint8_t configurationNr);
 void handleClassSetupRequest(const UsbSetupPacketType* packet);
 void handleVendorSetupRequest(const UsbSetupPacketType* packet);
+
+void setUsbConfigurationDescriptor(const uint8_t * confDescr,const uint16_t size);
+void setUsbDeviceDescriptor(const uint8_t * deviceDescr,const uint16_t size);
+void setUsbStringDescriptors(UsbStringDescriptor stringDescrs);
+void setConfigurationHandler(uint8_t(*confHandler)(uint8_t));
 #endif

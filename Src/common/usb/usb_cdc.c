@@ -5,6 +5,165 @@
 #include "stm32h750/stm32h750xx.h"
 #include "systick.h"
 
+static const uint8_t usbDeviceDescriptorFull[] = {
+    0x12, // bLength
+    0x01, // device descriptor type
+    0x00,
+    0x02, //bcdUSB
+    0x02, // device class
+    0x02, // device subclass
+    0x00, // device protocol
+    0x40, // max endpoint0 size
+    0xfe, // vendor id, lsb
+    0xca, // vendor id, msb
+    0x42, // product id, lsb
+    0x41, // product id, msb
+    0x00,
+    0x02, //bcdDevice
+    0x01, // manufacturer string id
+    0x02, // product string id
+    0x03, // serial string id
+    0x01, // max number of configurations
+    };
+static const uint16_t usbDeviceDescriptorFullSize = sizeof(usbDeviceDescriptorFull);
+    
+static const uint8_t usbConfigurationDescriptorFull[] = {
+    // ------------------------------------
+    // configuration header
+    // ------------------------------------
+    0x09, // bLength
+    SETUP_PACKET_DESCR_TYPE_CONFIGURATION, // descriptor type configuration
+    67, // configation descriptor size, lsb
+    0x00, // configurator descriptor size, msb
+    0x02, // bNumInterfaces
+    0x01, // bConfigurationValue
+    0x00, // configuration string id
+    0xC0, // bmAttributes, 0xC0 self powered, 0x80 bus powered
+    0xFA, // bus power
+    //-------------------------------------
+    //-------------------------------------
+    // Interface Descriptor: Control interface
+    //-------------------------------------
+    0x09, // bLength
+    SETUP_PACKET_DESCR_TYPE_INTERFACE, // bDescriptorType: descriptor type interface
+    0x00, // bInterfaceNumber: interface nr
+    0x00, // bAlternateSetting: alternate setting
+    0x01, // bNumEndpoints: just one
+    0x02, // bInterfaceClass: Communication Interface Class
+    0x02, // bInterfaceSubClass: Abstract Control Model
+    0x01, // bInterfaceProtocol: standard AT commands
+    0x04, // interface description string id
+      // Header Functional Descriptor 
+    0x05, // bLength: Endpoint Descriptor size 
+    0x24, // bDescriptorType: CS_INTERFACE 
+    0x00, // bDescriptorSubtype: Header Func Desc 
+    0x10, // bcdCDC: spec release number 
+    0x01,
+    
+      // Call Management Functional Descriptor 
+    0x05, // bFunctionLength 
+    0x24, // bDescriptorType: CS_INTERFACE 
+    0x01, // bDescriptorSubtype: Call Management Func Desc 
+    0x00, // bmCapabilities: D0+D1 
+    0x01, // bDataInterface 
+    
+      // ACM Functional Descriptor 
+    0x04, // bFunctionLength 
+    0x24, // bDescriptorType: CS_INTERFACE 
+    0x02, // bDescriptorSubtype: Abstract Control Management desc 
+    0x02, // bmCapabilities 
+    
+      // Union Functional Descriptor 
+    0x05, // bFunctionLength 
+    0x24, // bDescriptorType: CS_INTERFACE 
+    0x06, // bDescriptorSubtype: Union func desc 
+    0x00, // bMasterInterface: Communication class interface 
+    0x01, // bSlaveInterface0: Data Class Interface 
+    //-------------------------------------
+    //-------------------------------------
+    // Endpoint 2 descriptor
+    //-------------------------------------
+    0x07, //bLength
+    SETUP_PACKET_DESCR_TYPE_ENDPOINT, //bDescriptorType: Endpoint 
+    (ENDPOINT_DIR_IN << ENDPOINT_DIR_POS) | 0x02, // endpoint nr and direction
+    ENDPOINT_ATTR_TRANSFERTYPE_INTERRUPT,
+    USB_CDC_CONTROL_EP_PACKETSIZE, // packet size, lsb
+    0x00, // packet size, msb
+    0x10, // bInterval: interval for polling the endpoint in ms
+    //-------------------------------------
+    //-------------------------------------
+    // Interface Descriptor: Data Interface
+    //-------------------------------------
+    0x09, //bLength
+    SETUP_PACKET_DESCR_TYPE_INTERFACE,
+    0x01, // bInterfaceNumber: interface nr
+    0x00, // bAlternateSetting: alternate setting
+    0x02, // bNumEndpoints: two (out and in)
+    0x0A, // Interface class: CDC
+    0x00, // interface subclass
+    0x00, // interface protocol
+    0x05, // interface description string id
+    //-------------------------------------
+    //-------------------------------------
+    // Endpoint OUT descriptor
+    //-------------------------------------
+    0x07, // bLength
+    SETUP_PACKET_DESCR_TYPE_ENDPOINT, 
+    (ENDPOINT_DIR_OUT << ENDPOINT_DIR_POS) | 0x01, // endpoint address: 1 OUT,
+    0x02, // bmAttributes: Bulk
+    USB_CDC_DATA_OUT_PACKETSIZE, // packet size, lsb
+    0x00, // packet size, msb
+    0x00, // bInterval
+    //-------------------------------------
+    //-------------------------------------
+    // Endpoint IN descriptor
+    //-------------------------------------
+    0x07, // bLength
+    SETUP_PACKET_DESCR_TYPE_ENDPOINT, 
+    (ENDPOINT_DIR_IN << ENDPOINT_DIR_POS) | 0x01, // endpoint address: 1 IN,
+    0x02, // bmAttributes: Bulk
+    USB_CDC_DATA_IN_PACKETSIZE, // packet size, lsb
+    0x00, // packet size, msb
+    0x00, // bInterval
+    //------------------------------------
+    //------------------------------------
+    // Interface Descriptor: USB DFU
+    // -----------------------------------
+    0x09, //bLength
+    SETUP_PACKET_DESCR_TYPE_INTERFACE, 
+    0x01, //bInterfaceNumber
+    0x00, //bAlternateSetting
+    0x00, //bNumEndpoints
+    0xFE, //bInterfaceClass
+    0x01, //bInterfaceSubClass
+    0x01, //bInterfaceProtocol
+    0x06, //iInterface
+    //------------------------------------
+    // Interfacce functional descriptor
+    //------------------------------------
+    //------------------------------------
+    0x09, //bLength
+    0x21, //bDescriptorType
+    (0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0), //bmAttributes: can download and upload only
+    0xF0, //wDetachTimeOut, lsb
+    0x00, //wDetachTimeOut, msb
+    0x00, //wTransferSize, lsb
+    0x02, //wTransferSize, msb
+    0x10, // bcdDFUVersion
+    0x01  // bcdDFUVersion
+    };
+    
+static const uint16_t usbConfigurationDescriptorFullSize = sizeof(usbConfigurationDescriptorFull);
+
+static UsbStringDescriptorType stringDescriptors[] = {
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (11*2)+2, .bString = "StoneRose35"},
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (8*2)+2, .bString = "PiPicoFX"},
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (10*2)+2, .bString = "3457456234"},
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (17*2)+2, .bString = "Control Interface"},
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (14*2)+2, .bString = "Data Interface"},
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (25*2)+2, .bString = "DFU Programming Interface"},
+
+};
 
 const struct __attribute__((packed))
 {
@@ -20,6 +179,14 @@ const struct __attribute__((packed))
     .bParityType=0,
     .bDataBits=8
 };
+
+void USBCDCInit()
+{
+    setUsbConfigurationDescriptor(usbConfigurationDescriptorFull,usbConfigurationDescriptorFullSize);
+    setUsbDeviceDescriptor(usbDeviceDescriptorFull,usbDeviceDescriptorFullSize);
+    setUsbStringDescriptors(stringDescriptors);
+    setConfigurationHandler(&setUsbConfiguration);
+}
 
 volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress
 volatile uint8_t  receivedDataBfr[128];

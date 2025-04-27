@@ -37,7 +37,8 @@
 #define TASK_UPDATE_AUDIO_UI 7 // update the screen content: rewrite framebuffer and issue a display driver update
 #define TASK_FLASH_QSPI 8 // flash the qspi content
 #define TASK_DISPLAY_NEXT_LINE 9 //issued by the display driver: next line content should be transferred from dma
-#define TASK_I2C_DATA_RECEIVED 10
+#define TASK_I2C_DATA_RECEIVED 10 // I2C data has been received and is ready to be processed
+#define TASK_PREPARE_FOR_DFU 11 // prepare the system for dfu, i.e. shut down interrupt and any possibilities to access flash or qspi code
 
 
 #define CONTEXT_USB 0 //!<bit position: if set output of prints is routed to the USB console

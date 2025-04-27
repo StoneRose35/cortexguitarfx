@@ -30,5 +30,6 @@ void UsbCdcTransferDone(void);
 
 uint16_t getUsbCdcReceivedDataLevel();
 uint16_t readUsbCdcData(uint8_t *);
+void USBCDCInit();
 
 #endif
