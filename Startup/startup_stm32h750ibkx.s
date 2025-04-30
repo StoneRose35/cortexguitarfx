@@ -84,7 +84,7 @@ LoopCopyDataInit:
 ldr r0, =_sitcm_flash_code 
 ldr r1, =_eitcm_flash_code
 ldr r2, =_siflash_itcm_code
-movs R3, #0
+movs r3, #0
 b LoopCopyDataItcmInit
 
 LoopCopyDataItcm:
