@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "stdlib.h"
 #include "stm32h750/stm32h750xx.h"
 #include "usb/usb_common.h"
 #include "drivers/usb.h"
@@ -9,6 +10,10 @@
 
 extern volatile uint32_t task;
 extern volatile uint8_t programChangeState;
+volatile uint8_t usbDfuState=USB_DFU_APP_IDLE;
+volatile uint8_t * firmwareBuffer;
+volatile uint16_t firmwareSize;
+volatile uint16_t currentFirmwareBlockNr;
 const uint8_t usbDeviceDescriptorDfu[] = {
     0x12, // bLength
     SETUP_PACKET_DESCR_TYPE_DEVICE, // device descriptor type
@@ -76,6 +81,7 @@ const uint8_t usbConfigurationDescriptorDfu[] = {
 
 const uint16_t usbConfigurationDescriptorDfuSize = sizeof(usbConfigurationDescriptorDfu);
 
+volatile UsbDfuStatusType usbDfuStatus;
 
 UsbStringDescriptorType stringDescriptorsDfu[] = {
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((12-1)*2)+2, .bString = "StoneRose35"},
@@ -85,42 +91,109 @@ UsbStringDescriptorType stringDescriptorsDfu[] = {
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((18-1)*2)+2, .bString = "@Flash 0x08000000"},
 };
 
-uint8_t setUsbConfigurationDfu(uint8_t confNr)
+__RAMFUNC
+uint8_t setUsbConfigurationDfu(uint16_t confNr)
 {
     setupEndpoint(0,EP_DIRECTION_OUT,0x40);
-    setEndpointOutHandler(0,0);
+    setEndpointOutHandler(&endPoint0DfuHandler,0);
     return 0;
 }
 
 
-#ifdef USB_DFU
 __RAMFUNC
-void handleClassSetupRequest(const UsbSetupPacketType* packet)
+void usbDfuResetHandler(void)
+{
+    if (usbDfuState == USB_DFU_APP_IDLE)
+    {
+        usbDfuState = USB_DFU_APP_DETACH;
+    }
+    else if (usbDfuState == USB_DFU_MANIFEST)
+    {
+        NVIC_SystemReset();
+    }
+    else
+    {
+        usbDfuState = USB_DFU_APP_IDLE;
+    }
+}
+
+__RAMFUNC
+uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet)
 {
     switch (packet->bRequest)
     {
     case SETUP_REQUEST_DFU_DETACH:
+        prepareUSBTransfer(0,0,0); 
         setUsbDeviceDescriptor(usbConfigurationDescriptorDfu,usbDeviceDescriptorDfuSize);
         setUsbConfigurationDescriptor(usbConfigurationDescriptorDfu,usbConfigurationDescriptorDfuSize);
         setUsbStringDescriptors(stringDescriptorsDfu);
         setConfigurationHandler(&setUsbConfigurationDfu);
+        setResetHandler(&usbDfuResetHandler);
         task |= (1 << TASK_PREPARE_FOR_DFU);
-
+        setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,700); // allow 700ms for detaching, tune/reduce later
+        currentFirmwareBlockNr = 0;
         break;
     case SETUP_REQUEST_DFU_UPLOAD:
+        //usbDfuState = USB_DFU_ERROR;
+        //setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_ERR_UNKNOWN,200);
+        firmwareSize = packet->wLength;
+        usbDfuState = USB_DFU_UPLOAD_IDLE;
+        setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,255);
+        prepareUSBTransfer(0,(uint8_t*)(0x08000000),firmwareSize); 
         break;
     case SETUP_REQUEST_DFU_DNLOAD: // from host to device
-        uint16_t firmwareSize = packet->wLength;
-        prepareUSBReception(0,firmwareSize);
+        firmwareSize = packet->wLength;
+        if (packet->wValue != currentFirmwareBlockNr + 1)
+        {
+            usbDfuState = USB_DFU_ERROR;
+            setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_ERR_FILE,255);
+        }
+        else
+        {
+            if (packet->wLength > 0)
+            {
+                usbDfuState = USB_DFU_DNLOAD_SYNC;
+                setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,255);
+                currentFirmwareBlockNr = packet->wValue;
+                prepareUSBReception(0,firmwareSize);
+            }
+            else if (packet->wLength==0 && usbDfuState == USB_DFU_DNLOAD_IDLE)
+            {
+                usbDfuState = USB_DFU_MANIFEST_SYNC;
+                setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,333);
+            }
+        }
+        break;
+    case SETUP_REQUEST_DFU_GETSTATUS:
+        if (usbDfuState == USB_DFU_DNLOAD_SYNC)
+        {
+            usbDfuState = USB_DFU_DNBUSY;
+        }
+        else if (usbDfuState == USB_DFU_MANIFEST_SYNC)
+        {
+            usbDfuState = USB_DFU_MANIFEST;
+        }
+        setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,255);
+        prepareUSBTransfer(0,(uint8_t*)(&usbDfuStatus),sizeof(usbDfuStatus));
+        break; 
+    case SETUP_REQUEST_DFU_GETSTATE:
+        prepareUSBTransfer(0,(uint8_t*)(&usbDfuState),1);
+        break;
+    case SETUP_REQUEST_DFU_CLRSTATUS:
+        usbDfuState = USB_DFU_IDLE;
+        prepareUSBTransfer(0,0,0); 
+        break;
+    case SETUP_REQUEST_DFU_ABORT:
+        prepareUSBTransfer(0,0,0); 
         break;
     default:
         break;
     }
+    return 0;
 }
-#endif
 
 __RAMFUNC
-void prepareSystemFroDFU()
+void prepareSystemForDFU()
 {
             // disable interrupts
         // audio engine
@@ -154,19 +227,32 @@ void prepareSystemFroDFU()
         task &= ~((1 << TASK_UPDATE_AUDIO_UI) | (1 << TASK_DISPLAY_NEXT_LINE) | (1 << TASK_I2C_DATA_RECEIVED));
         programChangeState = 0;
 
+        setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest);
+        usbDfuState = USB_DFU_APP_DETACH;
+        firmwareBuffer=malloc(0x200);
         while(1)
         {
 
         }
 }
+__RAMFUNC
+void setUsbDfuStatus(volatile UsbDfuStatusType*statusStruct,uint8_t status,uint32_t timeout)
+{
+    statusStruct->bState = usbDfuState;
+    statusStruct->bwPollTimeout[0] = (uint8_t)(timeout & 0xFF);
+    statusStruct->bwPollTimeout[1] = (uint8_t)((timeout >> 8) & 0xFF);
+    statusStruct->bwPollTimeout[2] = (uint8_t)((timeout >> 16 ) & 0xFF);
+    statusStruct->iString=0;
+    statusStruct->bStatus = status;
+}
 
 __RAMFUNC
 void endPoint0DfuHandler(void*data,uint16_t dataSize)
 {
- //Force NACK
- // process the data
- //
 
- // handle special case if data size is 0
+// process data, don't immediately prepare for more reception since a dnload setup request comes first
 
+    // set idle indicating another download is possible
+    usbDfuState = USB_DFU_DNLOAD_IDLE;
+    setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,128);
 }

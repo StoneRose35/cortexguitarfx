@@ -28,6 +28,7 @@ void prepareUSBReception(uint8_t epNr,uint16_t dataSize);
 void setAddress(uint8_t address);
 void setEndpointOutHandler(endPointHandler handler,uint8_t epNr);
 void setTransferDoneHandler(void(*handler)(void),uint8_t epNr);
+void setResetHandler(void(*)(void));
 
 // sets the software buffers, doens't affect the hardware
 void setupEndpoint(uint8_t epNr,uint8_t direction,uint16_t maxPacketSize);

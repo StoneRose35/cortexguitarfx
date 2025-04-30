@@ -7,6 +7,7 @@
 #include "uart.h"
 #include "usb/usb_cdc.h"
 #include "memoryRegions.h"
+#include "globalConfig.h"
 
 
 // handlers
@@ -20,6 +21,9 @@ void(*ep6OUTHandler)(void*,uint16_t)=0;
 void(*ep7OUTHandler)(void*,uint16_t)=0;
 void(*ep8OUTHandler)(void*,uint16_t)=0;
 
+//driver-specific handlers
+void(*usbDriverResetHandler)(void)=0; // if anything special needs to be done on usb reset
+
 endPointHandler outHandlers[9]={0,0,0,0,0,0,0,0,0};
 void(*transferDoneHandlers[9])(void)={0,0,0,0,0,0,0,0,0};
 uint8_t * epOutBuffers[9]={0,0,0,0,0,0,0,0,0};
@@ -29,7 +33,7 @@ uint16_t epInDataCntrs[9]={0,0,0,0,0,0,0,0,0};
 uint16_t epInBytesTransferred[9]={0,0,0,0,0,0,0,0,0};
 uint16_t epOutMaxPacketSizes[9]={64,0,0,0,0,0,0,0,0};
 uint16_t epInMaxPacketSizes[9]={64,0,0,0,0,0,0,0,0};
-uint8_t ep0OutDataBfr[128];
+uint8_t ep0OutDataBfr[512];
 uint8_t ep0InDataBfr[128]; 
 
 void OTG_FS_EP1_OUT_IRQHandler(void)
@@ -42,7 +46,7 @@ void OTG_FS_EP1_IN_IRQHandler(void)
 
 }
 
-__ITCM_CODE_FLASH
+//__ITCM_CODE_FLASH
 void OTG_FS_IRQHandler(void)
 {
     uint32_t coreInterrupts = USB2_OTG_FS->GINTSTS;
@@ -119,14 +123,17 @@ void OTG_FS_IRQHandler(void)
             epOutDataCntrs[c]=0;
         }
         epOutDataCntrs[0]=0;
-        
+        if (usbDriverResetHandler != 0)
+        {
+            usbDriverResetHandler();
+        }
     }
 
     // RX FIFO not empty: something has been received
     if (coreInterrupts & (1 << USB_OTG_GINTSTS_RXFLVL_Pos))
     {
         USB2_OTG_FS->GINTMSK &= ~(1 << USB_OTG_GINTMSK_RXFLVLM_Pos); // mask RX FIFO Interrupt
-        //USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_RXFLVL_Pos);
+
         #ifdef USB_DBG
             sendStringBlocking("USB RX\r\n");
         #endif
@@ -187,7 +194,7 @@ void OTG_FS_IRQHandler(void)
     {
         #ifdef USB_DBG
         sendStringBlocking("USB early susp\r\n");
-    #endif
+        #endif
         USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_ESUSP_Pos);
     }
 
@@ -197,7 +204,6 @@ void OTG_FS_IRQHandler(void)
         #ifdef USB_DBG
             //sendStringBlocking("USB SOF\r\n");
         #endif
-        // maybe useful to measure the liveliness of the usb host...
         USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_SOF_Pos);
     }
 
@@ -283,7 +289,9 @@ void OTG_FS_IRQHandler(void)
                     
                     if (epNr==0)
                     {
-                        if (epInDataCntrs[epNr] == epInBytesTransferred[epNr] && (epInBytesTransferred[epNr] % epInMaxPacketSizes[epNr])==0)
+                        if (epInDataCntrs[epNr] == epInBytesTransferred[epNr] 
+                            && (epInBytesTransferred[epNr] % epInMaxPacketSizes[epNr])==0 
+                            && epInBytesTransferred[epNr] > 0)
                         { // send a zerol length package when total length is a multiple of the maximum package size
                             prepareUSBTransfer(0,0,0);
                         }
@@ -584,4 +592,9 @@ void setAddress(uint8_t address)
     dcfg |= (address & 0xFF) << USB_OTG_DCFG_DAD_Pos;
     USB2_OTG_FS_DEVICE->DCFG = dcfg;
     prepareUSBTransfer(0,0,0);
+}
+
+void setResetHandler(void(*handler)(void))
+{
+    usbDriverResetHandler = handler;
 }

@@ -33,11 +33,11 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     // ------------------------------------
     0x09, // bLength
     SETUP_PACKET_DESCR_TYPE_CONFIGURATION, // descriptor type configuration
-    67, // configation descriptor size, lsb
+    85, // configation descriptor size, lsb
     0x00, // configurator descriptor size, msb
-    0x02, // bNumInterfaces
+    0x03, // bNumInterfaces
     0x01, // bConfigurationValue
-    0x00, // configuration string id
+    0x07, // configuration string id
     0xC0, // bmAttributes, 0xC0 self powered, 0x80 bus powered
     0xFA, // bus power
     //-------------------------------------
@@ -131,7 +131,7 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     // -----------------------------------
     0x09, //bLength
     SETUP_PACKET_DESCR_TYPE_INTERFACE, 
-    0x01, //bInterfaceNumber
+    0x02, //bInterfaceNumber
     0x00, //bAlternateSetting
     0x00, //bNumEndpoints
     0xFE, //bInterfaceClass
@@ -144,7 +144,7 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     //------------------------------------
     0x09, //bLength
     0x21, //bDescriptorType
-    (0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0), //bmAttributes: can download and upload only
+    (uint8_t)((0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0)), //bmAttributes: can download and upload only
     0xF0, //wDetachTimeOut, lsb
     0x00, //wDetachTimeOut, msb
     0x00, //wTransferSize, lsb
@@ -162,7 +162,7 @@ static UsbStringDescriptorType stringDescriptors[] = {
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (17*2)+2, .bString = "Control Interface"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (14*2)+2, .bString = "Data Interface"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (25*2)+2, .bString = "DFU Programming Interface"},
-
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (12*2)+2, .bString = "Default Conf"}
 };
 
 const struct __attribute__((packed))
@@ -185,13 +185,14 @@ void USBCDCInit()
     setUsbConfigurationDescriptor(usbConfigurationDescriptorFull,usbConfigurationDescriptorFullSize);
     setUsbDeviceDescriptor(usbDeviceDescriptorFull,usbDeviceDescriptorFullSize);
     setUsbStringDescriptors(stringDescriptors);
-    setConfigurationHandler(&setUsbConfiguration);
+    setConfigurationHandler(&usbCdcSetConfiguration);
+    setClassSpecificSetupHandler(&usbCdcHandleClassSetupRequest);
 }
 
 volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress
 volatile uint8_t  receivedDataBfr[128];
 volatile uint16_t receivedDataLevel=0;
-uint8_t setUsbConfiguration(uint8_t confNr)
+uint8_t usbCdcSetConfiguration(uint16_t confNr)
 {
     
     USB_OTG_INEndpointTypeDef * inEndpoint;
@@ -280,7 +281,7 @@ uint8_t setUsbConfiguration(uint8_t confNr)
     // wire up endpoint reception handler
     setEndpointOutHandler(&UsbCdcDataReceived,1);
 
-    setEndpointOutHandler(&UsbCdcEp0OutHandler,0);
+
 
     // wire up transfer done handler (used for blocking transfer)
     setTransferDoneHandler(&UsbCdcTransferDone,1);
@@ -291,7 +292,7 @@ uint8_t setUsbConfiguration(uint8_t confNr)
     return 0;
 }
 
-void handleClassSetupRequest(const UsbSetupPacketType* packet)
+uint8_t usbCdcHandleClassSetupRequest(const UsbSetupPacketType* packet)
 {
     switch (packet->bRequest)
     {
@@ -307,7 +308,9 @@ void handleClassSetupRequest(const UsbSetupPacketType* packet)
     default:
         break;
     }
+    return 0;
 }
+
 
 void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking)
 {

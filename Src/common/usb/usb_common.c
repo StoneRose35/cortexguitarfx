@@ -8,7 +8,7 @@
 #include "usb/usb_cdc.h"
 #include "usb/usb_config.h"
 #include "uart.h"
-
+#include "globalConfig.h"
 
 
     
@@ -18,7 +18,7 @@ UsbString0DescriptorType string0Descriptor = {
     .wLangId = 0x0409
 };
 
-UsbStringDescriptorType stringDescriptors[] = {
+/*UsbStringDescriptorType stringDescriptors[] = {
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (11*2)+2, .bString = "StoneRose35"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (8*2)+2, .bString = "PiPicoFX"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (10*2)+2, .bString = "3457456234"},
@@ -26,16 +26,18 @@ UsbStringDescriptorType stringDescriptors[] = {
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (14*2)+2, .bString = "Data Interface"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (25*2)+2, .bString = "DFU Programming Interface"},
 
-};
+};*/
 
 static const uint8_t * currentConfigurationDescriptor;
-static volatile uint16_t * currentConfigurationDescriptorSize;
+static volatile uint16_t currentConfigurationDescriptorSize;
 
 static const volatile uint8_t * currentDeviceDescriptor;
-static volatile uint16_t * currentDeviceDescriptorSize;
+static volatile uint16_t currentDeviceDescriptorSize;
 
 static volatile UsbStringDescriptor currentStringDescriptors;
-static uint8_t(*currentConfigurationHandler)(uint8_t);
+static uint8_t(*currentConfigurationHandler)(uint16_t);
+
+static uint8_t(*currentUsbClassSpecificSetupHandler)(const volatile UsbSetupPacketType*)=0;
 
 // Function to decode a USB setup packet
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
@@ -111,7 +113,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                 #ifdef USB_DBG
                 sendStringBlocking("SET_CONFIGURATION\r\n");        
                 #endif
-                if (setUsbConfiguration(packet->wValue) == 0)
+                if (currentConfigurationHandler(packet->wValue) == 0)
                 {
                     prepareUSBTransfer(0,0,0); // status package
                 }
@@ -125,14 +127,14 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                         sendStringBlocking("GET_DESCRIPTOR, device\r\n");
                         #endif     
                         dataPtr = (uint8_t*)currentDeviceDescriptor;  
-                        descrLength = *currentDeviceDescriptorSize;
+                        descrLength = currentDeviceDescriptorSize;
                         break;
                     case 0x02: // CONFIGURATION
                         #ifdef USB_DBG
                         sendStringBlocking("GET_DESCRIPTOR, configuration\r\n");
                         #endif  
                         dataPtr = (uint8_t*)currentConfigurationDescriptor;
-                        descrLength = *currentConfigurationDescriptorSize;
+                        descrLength = currentConfigurationDescriptorSize;
                         break;
                     case 0x03: // STRING
                         #ifdef USB_DBG
@@ -140,7 +142,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                         #endif
                         if ((packet->wValue & 0xFF)!= 0) {
                             dataPtr = getEp0InDataBfr();
-                            descrLength = serializeStringDescriptor(dataPtr,stringDescriptors + ((packet->wValue  & 0xFF) - 1));
+                            descrLength = serializeStringDescriptor(dataPtr,currentStringDescriptors + ((packet->wValue  & 0xFF) - 1));
                             // Request for string descriptor 1
                         } else {
                             // Request for string descriptor 0
@@ -172,7 +174,10 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
         #ifdef USB_DBG
         sendStringBlocking("Setup Packet, class-type request\r\n");
         #endif
-        handleClassSetupRequest(packet);
+        if (currentUsbClassSpecificSetupHandler != 0)
+        {
+            currentUsbClassSpecificSetupHandler(packet);
+        }
     }
     else if (requestType == SETUP_PACKET_REQTYPE_VENDOR)
     {
@@ -206,14 +211,14 @@ uint16_t serializeStringDescriptor(uint8_t * dataPtr, UsbStringDescriptor descr)
 void setUsbDeviceDescriptor(const uint8_t * deviceDescr,const uint16_t size)
 {
     currentDeviceDescriptor = deviceDescr;
-    *currentDeviceDescriptorSize = size;
+    currentDeviceDescriptorSize = size;
 }
 
 
 void setUsbConfigurationDescriptor(const uint8_t * confDescr,const uint16_t size)
 {
     currentConfigurationDescriptor = confDescr;
-    *currentConfigurationDescriptorSize = size;
+    currentConfigurationDescriptorSize = size;
 }
 
 void setUsbStringDescriptors(UsbStringDescriptor stringDescrs)
@@ -221,7 +226,12 @@ void setUsbStringDescriptors(UsbStringDescriptor stringDescrs)
     currentStringDescriptors = stringDescrs;
 }
 
-void setConfigurationHandler(uint8_t(*confHandler)(uint8_t))
+void setConfigurationHandler(uint8_t(*confHandler)(uint16_t))
 {
     currentConfigurationHandler = confHandler;
+}
+
+void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*))
+{
+    currentUsbClassSpecificSetupHandler = handler;
 }
