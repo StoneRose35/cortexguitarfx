@@ -17,8 +17,8 @@ ELF2UF2=./tools/elf2uf2
 OPT=-Og
 DEFINES=-DDEBUG -DSTM32 -DSTM32F7 -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc -I./Inc/gen
-LARGS=-g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
-LARGS_QSPI=-g -nostdlib -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT)_qspi.map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+LARGS=     -g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+#LARGS_QSPI=-g -nostdlib -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT)_qspi.map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary --remove-section=.qspi* --remove-section=.dtcm*
 CPYARGS_QSPIBIN=-Obinary --only-section=.qspi* --only-section=.dtcm*
@@ -138,15 +138,15 @@ Inc/gen/version.h: Inc/gen
 out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps all_audio all_graphics all_math all_ui all_usb $(ASSET_IMAGES)
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
-out/$(PROJECT)_qspi.elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps all_audio all_graphics all_math all_ui  all_usb $(ASSET_IMAGES)
-	$(CC) $(LARGS_QSPI) -o ./out/$(PROJECT)_qspi.elf ./out/*.o 
+#out/$(PROJECT)_qspi.elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps all_audio all_graphics all_math all_ui  all_usb $(ASSET_IMAGES)
+#	$(CC) $(LARGS_QSPI) -o ./out/$(PROJECT)_qspi.elf ./out/*.o 
 
 out/$(PROJECT).bin: out/$(PROJECT).elf
 	@$(OBJCPY) $(CPYARGS) ./out/$(PROJECT).elf ./out/$(PROJECT).bin
 	
 
-out/$(PROJECT)_qspi.bin: out/$(PROJECT)_qspi.elf
-	@$(OBJCPY) $(CPYARGS_QSPIBIN) -- ./out/$(PROJECT)_qspi.elf ./out/$(PROJECT)_qspi.bin
+out/$(PROJECT)_qspi.bin: out/$(PROJECT).elf
+	@$(OBJCPY) $(CPYARGS_QSPIBIN) ./out/$(PROJECT).elf ./out/$(PROJECT)_qspi.bin
 
 
 program_qspi: out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
