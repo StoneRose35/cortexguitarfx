@@ -1,6 +1,7 @@
 #ifndef _USB_H_
 #define _USB_H_
 #include "stdint.h"
+#include "usb/usb_common.h"
 #define USB2_OTG_FS_DEVICE ((USB_OTG_DeviceTypeDef*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_DEVICE_BASE))
 
 #define PKSTS_GLOBAL_OUT_NAK 1
@@ -22,14 +23,16 @@ typedef  void(*endPointHandler)(void*,uint16_t) ;
 void initUSB();
 
 
-uint8_t * getEp0InDataBfr();
-void prepareUSBTransfer(uint8_t epNr,uint8_t*data,uint16_t dlen);
+uint8_t const* getEp0InDataBfr();
+void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen);
 void prepareUSBReception(uint8_t epNr,uint16_t dataSize);
+void prepareEP0Rception(void);
 void setAddress(uint8_t address);
 void setEndpointOutHandler(endPointHandler handler,uint8_t epNr);
 void setTransferDoneHandler(void(*handler)(void),uint8_t epNr);
 void setResetHandler(void(*)(void));
-
+void getSetupPacket(UsbSetupPacketType*setupPacket, uint8_t*buffer);
+void stallInEndpoint(uint8_t epNr);
 // sets the software buffers, doens't affect the hardware
 void setupEndpoint(uint8_t epNr,uint8_t direction,uint16_t maxPacketSize);
 #endif

@@ -28,13 +28,18 @@ endPointHandler outHandlers[9]={0,0,0,0,0,0,0,0,0};
 void(*transferDoneHandlers[9])(void)={0,0,0,0,0,0,0,0,0};
 uint8_t * epOutBuffers[9]={0,0,0,0,0,0,0,0,0};
 uint8_t * epInBuffers[9]={0,0,0,0,0,0,0,0,0};
-uint16_t epOutDataCntrs[9]={0,0,0,0,0,0,0,0,0};
-uint16_t epInDataCntrs[9]={0,0,0,0,0,0,0,0,0};
-uint16_t epInBytesTransferred[9]={0,0,0,0,0,0,0,0,0};
-uint16_t epOutMaxPacketSizes[9]={64,0,0,0,0,0,0,0,0};
-uint16_t epInMaxPacketSizes[9]={64,0,0,0,0,0,0,0,0};
+volatile uint16_t epOutDataCntrs[9]={0,0,0,0,0,0,0,0,0};
+volatile uint16_t epInDataCntrs[9]={0,0,0,0,0,0,0,0,0};
+volatile uint16_t epInBytesTransferred[9]={0,0,0,0,0,0,0,0,0};
+volatile uint16_t epOutMaxPacketSizes[9]={64,0,0,0,0,0,0,0,0};
+volatile uint16_t epInMaxPacketSizes[9]={64,0,0,0,0,0,0,0,0};
 uint8_t ep0OutDataBfr[512];
 uint8_t ep0InDataBfr[128]; 
+uint8_t const* ep0InDataBfrPtr=ep0InDataBfr;
+
+volatile uint8_t configuredAddress=0;
+volatile uint8_t triggerAddressChange=0;
+volatile UsbSetupPacketType setupPacket;
 
 void OTG_FS_EP1_OUT_IRQHandler(void)
 {
@@ -145,13 +150,11 @@ void OTG_FS_IRQHandler(void)
         if (bCnt > 0)
         {
             uint16_t receivedWordCnt = (bCnt + 3) / 4;
-            uint16_t wordCounter = 0;
             for (uint8_t c=0;c< receivedWordCnt;c++)
             {
-                (void)((((struct T_UINT32_WRITE *)(void *)(epOutBuffers[epNr]+wordCounter))->v)= (*((volatile uint32_t*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE))));
-                wordCounter += 4;
+                (void)((((struct T_UINT32_WRITE *)(void *)(epOutBuffers[epNr]+epOutDataCntrs[epNr]))->v)= (*((volatile uint32_t*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE))));
+                epOutDataCntrs[epNr] += 4;
             }
-            epOutDataCntrs[epNr]=bCnt;
         }
        USB2_OTG_FS->GINTMSK |= (1 << USB_OTG_GINTMSK_RXFLVLM_Pos); // unmask RX FIFO Interrupt
     }
@@ -242,29 +245,38 @@ void OTG_FS_IRQHandler(void)
         #endif
         deviceInterrupts = (USB2_OTG_FS_DEVICE->DAINT >> 16) & 0xFFFF;
         epNr = 0;
-        while (deviceInterrupts != 0) //for (uint8_t epNr=0;epNr<9;epNr++)
+        while (deviceInterrupts != 0) 
         {
             if ((deviceInterrupts & 1) != 0)
             {
                 
                 outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*epNr));
+                uint16_t dataFetched = epOutDataCntrs[epNr];  
+                epOutDataCntrs[epNr]=0;
                 if (outEndpoint->DOEPINT & (1 << USB_OTG_DOEPINT_STUP_Pos))
                 {
+                    // flush tx endpoint 0 IN to get rid of partial data streams
+                    while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U); 
+                    USB2_OTG_FS->GRSTCTL = ((1 << USB_OTG_GRSTCTL_TXFFLSH_Pos) | (0x0 << 6));
+                    // wait until flushed
+                    while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_TXFFLSH) == USB_OTG_GRSTCTL_TXFFLSH); 
+
                     // handle setup phase
-                    UsbSetupPacketType * setupPacket;
-                    for (uint8_t c=0; c<(epOutDataCntrs[epNr] >> 3); c++)
+                    for (uint8_t c=0; c<(dataFetched >> 3); c++)
                     {
-                        setupPacket = (UsbSetupPacketType*)(epOutBuffers[epNr] + (c << 3));
-                        ProcessUsbSetupPackage(setupPacket);
+                        getSetupPacket(&setupPacket,epOutBuffers[epNr] + (0 << 3));
+                        ProcessUsbSetupPackage(&setupPacket);
                     }  
-                    epOutDataCntrs[epNr]=0;                  
+                    outEndpoint->DOEPINT = (1 << USB_OTG_DOEPINT_STUP_Pos);            
                 }
-                else if ((outEndpoint->DOEPINT & (1 << USB_OTG_DOEPINT_XFRC_Pos)) && outHandlers[epNr] != 0 && epOutBuffers[epNr] != 0)
+                if ((outEndpoint->DOEPINT & (1 << USB_OTG_DOEPINT_XFRC_Pos)))
                 {
-                    outHandlers[epNr](epOutBuffers[epNr],epOutDataCntrs[epNr]);
-                    epOutDataCntrs[epNr]=0;
+                    if (outHandlers[epNr] != 0 && epOutBuffers[epNr] != 0)
+                    {
+                        outHandlers[epNr](epOutBuffers[epNr],dataFetched);
+                    }
+                    outEndpoint->DOEPINT = (1 << USB_OTG_DOEPINT_XFRC_Pos);          
                 }
-                outEndpoint->DOEPINT = 0xFFFF; // clear all interrupts
             }
             deviceInterrupts >>=1;
             epNr++;
@@ -285,7 +297,7 @@ void OTG_FS_IRQHandler(void)
                     #ifdef USB_DBG
                     sendStringBlocking("USB Xfer Dne\r\n");
                     #endif
-                    USB2_OTG_FS_DEVICE->DIEPEMPMSK &= ~(1 << epNr);
+                    //USB2_OTG_FS_DEVICE->DIEPEMPMSK &= ~(1 << epNr);
                     
                     if (epNr==0)
                     {
@@ -295,17 +307,18 @@ void OTG_FS_IRQHandler(void)
                         { // send a zerol length package when total length is a multiple of the maximum package size
                             prepareUSBTransfer(0,0,0);
                         }
-                        outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*epNr));
-                        outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_XFRSIZ & epOutMaxPacketSizes[epNr]);
-                        outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_PKTCNT & (1U << 19));
-                        outEndpoint->DOEPCTL |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
+                        else
+                        {
+                            prepareEP0Rception();
+                        }
                     }
                     if (transferDoneHandlers[epNr] != 0)
                     {
                         transferDoneHandlers[epNr]();
                     }
+                    inEndpoint->DIEPINT = (1 << USB_OTG_DIEPINT_XFRC_Pos);
                 }
-                if (inEndpoint->DIEPINT & (1 << USB_OTG_DIEPINT_TXFE_Pos)) // transmit fifo empty
+                if ((inEndpoint->DIEPINT & (1 << USB_OTG_DIEPINT_TXFE_Pos)) && (USB2_OTG_FS_DEVICE->DIEPEMPMSK & (1 << epNr))==1) // transmit fifo empty
                 {
                     #ifdef USB_DBG
                     sendStringBlocking("USB TX Fifo empty\r\n");
@@ -320,18 +333,19 @@ void OTG_FS_IRQHandler(void)
                         upperLimit = epInDataCntrs[epNr] - epInBytesTransferred[epNr];
                     }
                     uint16_t wordCount = (upperLimit + 3)/4;
-                    for (uint16_t c=0;c<wordCount;c++)
+                    uint16_t c=0;
+                    while (c< wordCount && ((inEndpoint->DTXFSTS& 0xFFFF)!=0))
                     {
-                        *((volatile uint32_t *)(USB_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE + epNr * USB_OTG_FIFO_SIZE)) = (((const struct T_UINT32_READ *)(const void *)(epInBuffers[epNr]))->v);
-                        epInBuffers[epNr]+=4;
+                        *((volatile uint32_t *)(USB_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE + epNr * USB_OTG_FIFO_SIZE)) = (((const struct T_UINT32_READ *)(const void *)(epInBuffers[epNr] + epInBytesTransferred[epNr]))->v);
+                        epInBytesTransferred[epNr]+=4;
+                        c++;
                     }   
-                    epInBytesTransferred[epNr] += upperLimit;
                     if (epInBytesTransferred[epNr] >= epInDataCntrs[epNr])
                     {
                         USB2_OTG_FS_DEVICE->DIEPEMPMSK &= ~(1 << epNr);
                     }
+                    inEndpoint->DIEPINT = (1 << USB_OTG_DIEPINT_TXFE_Pos);
                 }
-                inEndpoint->DIEPINT = 0xFFFF;
             }
 
             deviceInterrupts >>= 1;
@@ -473,9 +487,12 @@ outHandlers[6]=ep6OUTHandler;
 outHandlers[7]=ep7OUTHandler;
 outHandlers[8]=ep8OUTHandler;
 
-for(uint8_t c=0;c<128;c++)
+for(uint16_t c=0;c<512;c++)
 {
     ep0OutDataBfr[c]=0;
+}
+for (uint8_t c=0;c<128;c++)
+{
     ep0InDataBfr[c]=0;
 }
 for (uint8_t c=1;c<9;c++)
@@ -505,9 +522,9 @@ NVIC_EnableIRQ(OTG_FS_IRQn);
 
 }
 
-uint8_t * getEp0InDataBfr()
+uint8_t const* getEp0InDataBfr()
 {
-    return ep0InDataBfr;
+    return ep0InDataBfrPtr;
 }
 
 /**
@@ -516,34 +533,35 @@ uint8_t * getEp0InDataBfr()
  * data: pointer to the data to be sent
  * dlen: length of the data
  */
-void prepareUSBTransfer(uint8_t epNr,uint8_t*data,uint16_t dlen)
+void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen)
 {
     USB_OTG_INEndpointTypeDef * inEndpoint = ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + epNr*0x20));
     uint32_t epCtrl = inEndpoint->DIEPCTL;
     uint16_t npackets;
-    // so far wait when tx fifo ist full
-    while ((inEndpoint->DTXFSTS & 0xFFFF) == 0);
 
     if(dlen==0)
     {
         npackets = 1;
+        USB2_OTG_FS_DEVICE->DIEPEMPMSK &= ~(1UL << epNr);
     }
     else
     {
         npackets = ((dlen + epInMaxPacketSizes[epNr] - 1) / epInMaxPacketSizes[epNr]);
+        USB2_OTG_FS_DEVICE->DIEPEMPMSK |= (1UL << epNr);
     }
     
-    
-    epInBuffers[epNr] = data;
+    //for (uint16_t c=0;c<dlen;c++)
+    //{
+    //    epInBuffers[epNr][c] = *(data+c);
+    //}
+    epInBuffers[epNr] = (uint8_t*)data;
     epInBytesTransferred[epNr]=0;
     epInDataCntrs[epNr] = dlen;
     
     inEndpoint->DIEPTSIZ =  (npackets << USB_OTG_DIEPTSIZ_PKTCNT_Pos) | dlen;
+    epCtrl &= ~(1 << USB_OTG_DIEPCTL_STALL_Pos);
     epCtrl |= (1 << USB_OTG_DIEPCTL_EPENA_Pos) | (1 << USB_OTG_DIEPCTL_CNAK_Pos);
     inEndpoint->DIEPCTL = epCtrl;
-
-    USB2_OTG_FS_DEVICE->DIEPEMPMSK |= 1UL << epNr;
-
 
 }
 
@@ -553,6 +571,16 @@ void prepareUSBReception(uint8_t epNr,uint16_t dataSize)
     USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*epNr));
     outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_XFRSIZ & dataSize);
     outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_PKTCNT & (nPackets << 19));
+    outEndpoint->DOEPCTL &= ~(1 << USB_OTG_DOEPCTL_STALL_Pos);
+    outEndpoint->DOEPCTL |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
+}
+
+void prepareEP0Rception(void)
+{
+    USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*0));
+    outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_XFRSIZ & epOutMaxPacketSizes[0]);
+    outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_PKTCNT & (1U << 19));
+    outEndpoint->DOEPCTL &= ~(1 << USB_OTG_DOEPCTL_STALL_Pos);
     outEndpoint->DOEPCTL |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
 }
 
@@ -585,13 +613,33 @@ void setupEndpoint(uint8_t epNr,uint8_t direction,uint16_t maxPacketSize)
 
 }
 
+void stallInEndpoint(uint8_t epNr)
+{
+    USB_OTG_INEndpointTypeDef * inEndpoint = ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + epNr*0x20));
+    inEndpoint->DIEPCTL |= (1 << USB_OTG_DIEPCTL_STALL_Pos);
+
+    // flush the fifo
+    while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U); // maybe timeout here
+    USB2_OTG_FS->GRSTCTL = ((1 << USB_OTG_GRSTCTL_TXFFLSH_Pos) | (epNr << 6));
+    // wait until flushed
+    while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_TXFFLSH) == USB_OTG_GRSTCTL_TXFFLSH); // maybe timeout as well
+}
+
+void getSetupPacket(UsbSetupPacketType*setupPacket, uint8_t*buffer)
+{
+    setupPacket->bmRequestType = *(buffer+0);
+    setupPacket->bRequest = *(buffer+1);
+    setupPacket->wValue = (uint16_t)(*(buffer+2) | (*(buffer+3) << 8));
+    setupPacket->wIndex = (uint16_t)(*(buffer+4) | (*(buffer+5) << 8));
+    setupPacket->wLength = (uint16_t)(*(buffer+6) | (*(buffer+7) << 8));
+} 
+
 void setAddress(uint8_t address)
 {
     uint32_t dcfg = USB2_OTG_FS_DEVICE->DCFG;
     dcfg &= ~(0x7F << USB_OTG_DCFG_DAD_Pos); 
     dcfg |= (address & 0xFF) << USB_OTG_DCFG_DAD_Pos;
     USB2_OTG_FS_DEVICE->DCFG = dcfg;
-    prepareUSBTransfer(0,0,0);
 }
 
 void setResetHandler(void(*handler)(void))

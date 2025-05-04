@@ -17,18 +17,18 @@ volatile uint16_t currentFirmwareBlockNr;
 const uint8_t usbDeviceDescriptorDfu[] = {
     0x12, // bLength
     SETUP_PACKET_DESCR_TYPE_DEVICE, // device descriptor type
-    0x00, //bcdUSB, lsb
+    0x10, //bcdUSB, lsb
     0x01, //bcdUSB, msb
     0x00, // device class
     0x00, // device subclass
     0x00, // device protocol
     0x40, // max endpoint0 size
-    0xfe, // vendor id, lsb
-    0xca, // vendor id, msb
-    0x42, // product id, lsb
-    0x41, // product id, msb
-    0x00,
-    0x02, //bcdDevice
+    __LOBYTE(USB_VENDOR_ID), // vendor id, lsb
+    __HIBYTE(USB_VENDOR_ID), // vendor id, msb
+    __LOBYTE(USB_PRODUCT_ID), // product id, lsb
+    __HIBYTE(USB_PRODUCT_ID), // product id, msb
+    0x04,
+    0x00, //bcdDevice
     0x01, // manufacturer string id
     0x02, // product string id
     0x03, // serial string id
@@ -70,12 +70,12 @@ const uint8_t usbConfigurationDescriptorDfu[] = {
     //------------------------------------
     0x09, //bLength
     0x21, //bDescriptorType
-    (0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0), //bmAttributes: can download and upload only
+    (1 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0), //bmAttributes:will detach can download and upload only
     0xF0, //wDetachTimeOut, lsb
     0x00, //wDetachTimeOut, msb
     0x00, //wTransferSize, lsb
     0x02, //wTransferSize, msb
-    0x10, // bcdDFUVersion
+    0x1a, // bcdDFUVersion
     0x01  // bcdDFUVersion
 };
 

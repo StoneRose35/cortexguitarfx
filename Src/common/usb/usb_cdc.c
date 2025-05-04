@@ -2,24 +2,27 @@
 #include "drivers/usb.h"
 #include "usb/usb_common.h"
 #include "usb/usb_cdc.h"
+#include "usb/usb_dfu.h"
 #include "stm32h750/stm32h750xx.h"
 #include "systick.h"
+#include "globalConfig.h"
+#include "memoryRegions.h"
 
 static const uint8_t usbDeviceDescriptorFull[] = {
     0x12, // bLength
     0x01, // device descriptor type
-    0x00,
-    0x02, //bcdUSB
+    0x10,
+    0x01, //bcdUSB
     0x02, // device class
     0x02, // device subclass
     0x00, // device protocol
     0x40, // max endpoint0 size
-    0xfe, // vendor id, lsb
-    0xca, // vendor id, msb
-    0x42, // product id, lsb
-    0x41, // product id, msb
-    0x00,
-    0x02, //bcdDevice
+    __LOBYTE(USB_VENDOR_ID), // vendor id, lsb
+    __HIBYTE(USB_VENDOR_ID), // vendor id, msb
+    __LOBYTE(USB_PRODUCT_ID), // product id, lsb
+    __HIBYTE(USB_PRODUCT_ID), // product id, msb
+    0x04,
+    0x00, //bcdDevice
     0x01, // manufacturer string id
     0x02, // product string id
     0x03, // serial string id
@@ -144,12 +147,12 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     //------------------------------------
     0x09, //bLength
     0x21, //bDescriptorType
-    (uint8_t)((0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0)), //bmAttributes: can download and upload only
+    (uint8_t)((1 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0)), //bmAttributes:will detach, can download and upload 
     0xF0, //wDetachTimeOut, lsb
     0x00, //wDetachTimeOut, msb
     0x00, //wTransferSize, lsb
     0x02, //wTransferSize, msb
-    0x10, // bcdDFUVersion
+    0x1a, // bcdDFUVersion
     0x01  // bcdDFUVersion
     };
     
@@ -164,20 +167,16 @@ static UsbStringDescriptorType stringDescriptors[] = {
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (25*2)+2, .bString = "DFU Programming Interface"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (12*2)+2, .bString = "Default Conf"}
 };
-
-const struct __attribute__((packed))
+#define USB_CDC_TE_RATE (115200)
+const uint8_t getcoding[]=
 {
-    uint32_t dwDTERate;
-    uint8_t bCharFormat;
-    uint8_t bParityType;
-    uint8_t bDataBits;
-
-} getcoding=
-{
-    .dwDTERate=115200,
-    .bCharFormat=0,
-    .bParityType=0,
-    .bDataBits=8
+USB_CDC_TE_RATE & 0xFF,
+(USB_CDC_TE_RATE >> 8) & 0xFF,
+(USB_CDC_TE_RATE >> 16) & 0xFF,
+(USB_CDC_TE_RATE >> 24) & 0xFF,
+0x0, // bCharFormat: 1 Stop bit
+0x0, // bParityType: None
+0x8 // bDataBits: 8
 };
 
 void USBCDCInit()
@@ -194,6 +193,7 @@ volatile uint8_t  receivedDataBfr[128];
 volatile uint16_t receivedDataLevel=0;
 uint8_t usbCdcSetConfiguration(uint16_t confNr)
 {
+    
     
     USB_OTG_INEndpointTypeDef * inEndpoint;
     USB_OTG_OUTEndpointTypeDef * outEndpoint;
@@ -305,7 +305,11 @@ uint8_t usbCdcHandleClassSetupRequest(const UsbSetupPacketType* packet)
     case SETUP_PACKET_REQ_CDC_SET_LINE_CODING:
         prepareUSBTransfer(0,0,0);
         break;
+    case SETUP_REQUEST_DFU_DETACH:
+        usbDfuHandleClassSetupRequest(packet);
+        break;
     default:
+        
         break;
     }
     return 0;
