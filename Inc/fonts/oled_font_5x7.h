@@ -2,6 +2,9 @@
 #ifndef _OLED_FONT_5_X_7_H_
 #define _OLED_FONT_5_X_7_H_
 #include <stdint.h>
+#include "memoryRegions.h"
+
+__QSPI_DATA
 const uint8_t oled_font_5x7[98][5] = {
     {0x00, 0x00, 0x00, 0x00, 0x00}, // (space)
     {0x00, 0x00, 0x5F, 0x00, 0x00}, // !

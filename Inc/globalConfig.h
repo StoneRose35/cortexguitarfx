@@ -14,6 +14,8 @@
 // #define PCM3060_CODEC
 
 
+#define USB_VENDOR_ID 0x4A37
+#define USB_PRODUCT_ID 0x35D2
 // debug swiches (return information over UART@115200 8-n-1 when enabled)
 #undef USB_DBG
 #undef  I2C_DBG
