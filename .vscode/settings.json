@@ -55,7 +55,10 @@
         "secondorderiirfilter.h": "c",
         "fxprograms.h": "c",
         "math.h": "c",
-        "usb_common.h": "c"
+        "usb_common.h": "c",
+        "sai.h": "c",
+        "usb_dfu.h": "c",
+        "usb_cdc.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

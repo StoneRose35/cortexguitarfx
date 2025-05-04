@@ -138,10 +138,37 @@
         },
         {
             "type": "cppbuild",
-            "label": "C/C++: gcc-9 Aktive Datei kompilieren",
-            "command": "/usr/bin/gcc-9",
+            "label": "bin2dfu erstellen",
+            "command": "g++",
             "args": [
                 "-fdiagnostics-color=always",
+                "-I",
+                "${workspaceFolder}/Inc",
+                "-g",
+                "${workspaceFolder}/tools/bins2dfu/bin2dfu.cpp",
+                "-o",
+                "${workspaceFolder}/tools/bin2dfu"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "Erstellt das Tool bin2dfu."
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc-9 Aktive Datei kompilieren",
+            "command": "g++",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-I",
+                "${workspaceFolder}/Inc",
                 "-g",
                 "${file}",
                 "-o",

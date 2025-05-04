@@ -187,6 +187,32 @@
             ],
             "preLaunchTask": "compile generateUnitPulseWav",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "gcc-9 - debug bin2dfu",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/bin2dfu",
+            "args": ["./out/microsys_audio.bin", "./out/microsys_audio_qspi.bin","-o","./out/microsys_audio.dfu"],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "bin2dfu erstellen",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }
