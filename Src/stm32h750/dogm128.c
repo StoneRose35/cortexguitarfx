@@ -54,28 +54,38 @@ static void config_spi_pin(uint8_t pinnr,uint8_t alternateFunction)
 
 void dogm128SendCommand(uint8_t cmd)
 {
-    gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF)+16)); // cs low
     gpio_cd->BSRR = (1 << ((DISPLAY_CD & 0xF)+16)); // cd low
-    short_nop_delay();
+    nop_wait(DOGM128_CS_DELAY);
     SPI1_TXDR_BYTE=cmd;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    short_nop_delay();
-    gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF))); // cs high
 }
 
 void dogm128SendData(const uint8_t*data,uint8_t l)
 {
     gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF)+16)); // cs low
     gpio_cd->BSRR = (1 << ((DISPLAY_CD & 0xF))); // cd high
-    short_nop_delay();
+    nop_wait(DOGM128_CS_DELAY);
     for(uint8_t c=0;c<l;c++)
     {
         SPI1_TXDR_BYTE=*(data+c);
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
     }
-    short_nop_delay();
+    nop_wait(DOGM128_CS_DELAY);
     gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF))); // cs high
 }
+
+// set cs (chip select) low
+void dogm128Enable()
+{
+    gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF)+16)); // cs low
+}
+
+// set cs (chip select) low
+void dogm128Disable()
+{
+    gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF))); // cs high
+}
+
 
 void initDisplay()
 {
@@ -160,15 +170,15 @@ void initDisplay()
 
     // reset high
     gpio_reset->BSRR = (1 << (DISPLAY_RESET & 0xF));
-    waitSysticks(1);
     //reset low
     gpio_reset->BSRR = (1 << ((DISPLAY_RESET & 0xF)+16));
-    waitSysticks(1);
+    waitSysticks(10);
     // reset high
     gpio_reset->BSRR = (1 << (DISPLAY_RESET & 0xF));
-    waitSysticks(1);
+    waitSysticks(5);
 
-
+    dogm128Enable();
+    waitSysticks(5);
     
     dogm128SendCommand(0x40);// set startline 0
     dogm128SendCommand(0xA1);// ADC reverse, set A0 to flip display
@@ -180,12 +190,14 @@ void initDisplay()
     dogm128SendCommand(0x00);  
     dogm128SendCommand(0x27); // constrast: voltage regulator set
     dogm128SendCommand(0x81); // constrast: electronic volume set 
-    dogm128SendCommand(0x16);
+    dogm128SendCommand(0x16); // was 0x16
     dogm128SendCommand(0xAC); // static indicator: no indicator
     dogm128SendCommand(0x00);
     dogm128SendCommand(0xAF); // finally: display on 
     waitSysticks(11);
 
+
+    dogm128Disable();
 
     NVIC_EnableIRQ(DMA1_Stream3_IRQn);
 }
@@ -198,12 +210,16 @@ void initDisplay()
  */
 void setCursor(uint8_t row, uint8_t col)
 {
+    dogm128Enable();
+    nop_wait(DOGM128_CS_DELAY);
     // set row / page
     dogm128SendCommand(0xB0 | row);
     // set column, high nibble
     dogm128SendCommand(0x10 | ((col+HORIZONTAL_OFFSET) >> 4));
     // set column, low nibble
     dogm128SendCommand((col+HORIZONTAL_OFFSET) & 0x0F);
+    nop_wait(DOGM128_CS_DELAY);
+    dogm128Disable();
 }
 
 
@@ -221,6 +237,33 @@ void ClearDisplay()
     {
         setCursor(r,0);
         dogm128SendData(zeroVals,128);
+    }   
+}
+
+void CheckerBoardDisplay()
+{
+    uint8_t zeroVals[]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                    };
+    for(uint8_t r=0;r<DOGM128_N_PAGES;r++)
+    {
+        if (r & 1)
+        {
+            setCursor(r,0);
+            dogm128SendData(zeroVals+16,128);
+        }
+        else
+        {
+            setCursor(r,0);
+            dogm128SendData(zeroVals,128);
+        }
     }   
 }
 
@@ -346,7 +389,7 @@ void DisplayWriteNextLine(void)
         setCursor(currentDmaRow,0);
         gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF)+16)); // cs low
         gpio_cd->BSRR = (1 << ((DISPLAY_CD & 0xF))); // cd high
-        short_nop_delay();
+        nop_wait(DOGM128_CS_DELAY);
         DisplayWriteLineAsync(currentFrameBuffer + currentDmaRow*DOGM128_DISPLAY_N_COLUMNS);
         currentDmaRow++;
     }

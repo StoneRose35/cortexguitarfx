@@ -23,6 +23,21 @@ bne short_delay_l1
 pop {r0}
 bx lr
 
+// a short nop based delay, number of cycles in in first argument (r0)
+.global nop_wait
+.type nop_wait,%function
+.thumb_func
+nop_wait:
+push {r1}
+mov r1,r0
+nop_wait_l1:
+nop
+sub r1,r1,#1
+cmp r1,#0
+bne nop_wait_l1
+pop {r1}
+bx lr
+
 .section .RamFunc.convolve
 // computes the sum of the products of two float vectors
 // a[0]*b[0] + a[1]*b[1] + a[2]*b[2] .... 
