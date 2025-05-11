@@ -9,7 +9,6 @@
 #include "system.h"
 
 extern volatile uint32_t task;
-extern volatile uint8_t programChangeState;
 volatile uint8_t usbDfuState=USB_DFU_APP_IDLE;
 volatile uint8_t * firmwareBuffer;
 volatile uint16_t firmwareSize;
@@ -225,7 +224,7 @@ void prepareSystemForDFU()
         NVIC_DisableIRQ(I2C1_EV_IRQn);
         NVIC_DisableIRQ(I2C1_ER_IRQn);
         task &= ~((1 << TASK_UPDATE_AUDIO_UI) | (1 << TASK_DISPLAY_NEXT_LINE) | (1 << TASK_I2C_DATA_RECEIVED));
-        programChangeState = 0;
+
 
         setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest);
         usbDfuState = USB_DFU_APP_DETACH;

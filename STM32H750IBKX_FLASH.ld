@@ -41,6 +41,17 @@ _estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM); /* end of ITCM RAM */
 _Min_Heap_Size = 0x200 ;      /* required amount of heap  */
 _Min_Stack_Size = 0x400 ; /* required amount of stack */
 
+
+TARGET(binary)
+INPUT (./track001.raw)
+INPUT (./track002.raw)
+INPUT (./track003.raw)
+INPUT (./track004.raw)
+INPUT (./track005.raw)
+INPUT (./track006.raw)
+
+OUTPUT_FORMAT("elf32-littlearm")
+
 /* Specify the memory areas */
 MEMORY
 {
@@ -121,6 +132,7 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
+
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
@@ -129,11 +141,11 @@ SECTIONS
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
-    *(.data)           /* .data sections */
-    *(.data*)          /* .data* sections */
+    *(EXCLUDE_FILE (*.raw) .data)           /* .data sections */
+    *(EXCLUDE_FILE (*.raw) .data*)          /* .data* sections */
     *(.RamFunc)        /* .RamFunc sections */
     *(.RamFunc*)       /* .RamFunc* sections */
-
+    
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
   } >RAM_D1 AT> FLASH
@@ -206,20 +218,26 @@ SECTIONS
     _edtcm_data = .;
 } > DTCMRAM AT> QSPIFLASH
 
-  .qspi_data : 
-  {
-    . = ALIGN(4);
-		_sqspi_data = .;
-
-		PROVIDE(__qspi_data_start_start = _sqspi_data);
-		*(.qspi_data)
-		*(.qspi_data*)
-		. = ALIGN(4);
-		_eqspi_data = .;
-
-		PROVIDE(__qspi_data_end = _eqspi_data);
-  } > QSPIFLASH
+.qspi_data : 
+{
   . = ALIGN(4);
+  _sqspi_data = .;
+
+  PROVIDE(__qspi_data_start_start = _sqspi_data);
+  *(.qspi_data)
+  *(.qspi_data*)
+  "./track001.raw"
+  "./track002.raw"
+  "./track003.raw"
+  "./track004.raw"
+  "./track005.raw"
+  "./track006.raw"
+  . = ALIGN(4);
+  _eqspi_data = .;
+
+  PROVIDE(__qspi_data_end = _eqspi_data);
+} > QSPIFLASH
+. = ALIGN(4);
 
   _siqspicode = LOADADDR(.qspi_code);
   
