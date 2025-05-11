@@ -135,7 +135,7 @@ int main(void)
 	initDMA();
     initFmcSdram();
     initQspi();
-    //initUSB();
+    initUSB();
 
 	initAdc();
     initTimer();
@@ -219,6 +219,10 @@ int main(void)
     BwImageType * imgBfr = getImageBuffer();
     fb = imgBfr->data;
 
+
+    #ifdef USB_DBG
+    initUart(115200);
+    #endif
     /* Loop forever */
 	for(;;)
 	{
@@ -420,7 +424,7 @@ int main(void)
       }
       if ((task & (1 << TASK_PREPARE_FOR_DFU))!=0)
       {
-        prepareSystemFroDFU();
+        prepareSystemForDFU();
         task &= ~(1 << TASK_PREPARE_FOR_DFU);
       }
       #endif

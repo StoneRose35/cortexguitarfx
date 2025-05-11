@@ -52,6 +52,7 @@ void OTG_FS_EP1_IN_IRQHandler(void)
 }
 
 //__ITCM_CODE_FLASH
+__ITCM_CODE_FLASH
 void OTG_FS_IRQHandler(void)
 {
     uint32_t coreInterrupts = USB2_OTG_FS->GINTSTS;
@@ -533,6 +534,7 @@ uint8_t const* getEp0InDataBfr()
  * data: pointer to the data to be sent
  * dlen: length of the data
  */
+__RAMFUNC
 void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen)
 {
     USB_OTG_INEndpointTypeDef * inEndpoint = ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + epNr*0x20));
@@ -565,6 +567,7 @@ void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen)
 
 }
 
+__RAMFUNC
 void prepareUSBReception(uint8_t epNr,uint16_t dataSize)
 {
     uint16_t nPackets = (dataSize / epOutMaxPacketSizes[epNr]) + 1;
@@ -575,6 +578,7 @@ void prepareUSBReception(uint8_t epNr,uint16_t dataSize)
     outEndpoint->DOEPCTL |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
 }
 
+__RAMFUNC
 void prepareEP0Rception(void)
 {
     USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*0));
@@ -584,16 +588,19 @@ void prepareEP0Rception(void)
     outEndpoint->DOEPCTL |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
 }
 
+__RAMFUNC
 void setEndpointOutHandler(endPointHandler handler,uint8_t epNr)
 {
     outHandlers[epNr] = handler;
 }
 
+__RAMFUNC
 void setTransferDoneHandler(void(*handler)(void),uint8_t epNr)
 {
     transferDoneHandlers[epNr] = handler;
 }
 
+__RAMFUNC
 void setupEndpoint(uint8_t epNr,uint8_t direction,uint16_t maxPacketSize)
 {
     if (direction == EP_DIRECTION_OUT)
@@ -613,6 +620,7 @@ void setupEndpoint(uint8_t epNr,uint8_t direction,uint16_t maxPacketSize)
 
 }
 
+__RAMFUNC
 void stallInEndpoint(uint8_t epNr)
 {
     USB_OTG_INEndpointTypeDef * inEndpoint = ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + epNr*0x20));
@@ -625,6 +633,7 @@ void stallInEndpoint(uint8_t epNr)
     while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_TXFFLSH) == USB_OTG_GRSTCTL_TXFFLSH); // maybe timeout as well
 }
 
+__RAMFUNC
 void getSetupPacket(UsbSetupPacketType*setupPacket, uint8_t*buffer)
 {
     setupPacket->bmRequestType = *(buffer+0);
@@ -634,6 +643,7 @@ void getSetupPacket(UsbSetupPacketType*setupPacket, uint8_t*buffer)
     setupPacket->wLength = (uint16_t)(*(buffer+6) | (*(buffer+7) << 8));
 } 
 
+__RAMFUNC
 void setAddress(uint8_t address)
 {
     uint32_t dcfg = USB2_OTG_FS_DEVICE->DCFG;
@@ -642,6 +652,7 @@ void setAddress(uint8_t address)
     USB2_OTG_FS_DEVICE->DCFG = dcfg;
 }
 
+__RAMFUNC
 void setResetHandler(void(*handler)(void))
 {
     usbDriverResetHandler = handler;

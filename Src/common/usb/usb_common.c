@@ -9,6 +9,7 @@
 #include "usb/usb_config.h"
 #include "uart.h"
 #include "globalConfig.h"
+#include "memoryRegions.h"
 
 
     
@@ -31,6 +32,7 @@ static uint8_t(*currentConfigurationHandler)(uint16_t);
 static uint8_t(*currentUsbClassSpecificSetupHandler)(const volatile UsbSetupPacketType*)=0;
 
 // Function to decode a USB setup packet
+__RAMFUNC
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
 
     uint8_t requestType = (packet->bmRequestType & 0x60) >> 5;
@@ -140,7 +142,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                     sendStringBlocking("\r\n");
                     #endif
                     if ((packet->wValue & 0xFF)!= 0) {
-                        dataPtr = getEp0InDataBfr();
+                        dataPtr = (uint8_t*)getEp0InDataBfr();
                         descrLength = serializeStringDescriptor(dataPtr,currentStringDescriptors + ((packet->wValue  & 0xFF) - 1));
                         // Request for string descriptor 1
                     } else {
@@ -194,6 +196,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
  * generates a valid string descript package and converts an ascii strig to the required unicode
  * format
  */
+__RAMFUNC
 uint16_t serializeStringDescriptor(uint8_t * dataPtr, UsbStringDescriptor descr)
 {
     uint16_t c=0;
@@ -210,29 +213,33 @@ uint16_t serializeStringDescriptor(uint8_t * dataPtr, UsbStringDescriptor descr)
     return c+2;
 }
 
+__RAMFUNC
 void setUsbDeviceDescriptor(const uint8_t * deviceDescr,const uint16_t size)
 {
     currentDeviceDescriptor = deviceDescr;
     currentDeviceDescriptorSize = size;
 }
 
-
+__RAMFUNC
 void setUsbConfigurationDescriptor(const uint8_t * confDescr,const uint16_t size)
 {
     currentConfigurationDescriptor = confDescr;
     currentConfigurationDescriptorSize = size;
 }
 
+__RAMFUNC
 void setUsbStringDescriptors(UsbStringDescriptor stringDescrs)
 {
     currentStringDescriptors = stringDescrs;
 }
 
+__RAMFUNC
 void setConfigurationHandler(uint8_t(*confHandler)(uint16_t))
 {
     currentConfigurationHandler = confHandler;
 }
 
+__RAMFUNC
 void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*))
 {
     currentUsbClassSpecificSetupHandler = handler;

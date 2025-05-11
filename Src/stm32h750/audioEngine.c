@@ -14,7 +14,7 @@
 volatile int16_t fadeCounter;
 volatile uint16_t bufferCnt;
 
-__QSPI_CODE
+__ITCM_CODE
 void processAudioBuffers(void)
 {
     int32_t inputSampleInt,outputSampleInt;

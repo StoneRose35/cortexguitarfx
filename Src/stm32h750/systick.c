@@ -2,9 +2,12 @@
 #include "systick.h"
 #include "system.h"
 #include "stm32h750/stm32h750xx.h"
+#include "memoryRegions.h"
+
 volatile static uint32_t ticks=0;
 #define AHB_CLOCK 480000000
 
+__ITCM_CODE_FLASH
 void SysTick_Handler()
 {
     ticks++;
