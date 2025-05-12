@@ -2,7 +2,7 @@
 #define __GLOBAL_CONFIG_H_
 
 
-#define EXTENSION_BOARD
+#undef EXTENSION_BOARD
 
 // #define WAVESHARE_64X128_DISPLAY
 //#define JOYIT_128X64_DISPLAY
@@ -10,8 +10,8 @@
 
 #define INTERNAL_CODEC 
 //#define EXTERNAL_CODEC
-#define WM8731_CODEC
-// #define PCM3060_CODEC
+#undef WM8731_CODEC
+#define PCM3060_CODEC
 
 
 #define USB_VENDOR_ID 0x4A37

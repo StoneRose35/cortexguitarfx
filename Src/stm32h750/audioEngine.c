@@ -17,8 +17,8 @@ extern volatile int16_t *currentSamplePointer;
 extern volatile uint8_t sampleSelectorVal;
 extern volatile uint32_t currentSamplePosition;
 extern int16_t **samplePointers;
-extern uint32_t *sampleLengths;
-__ITCM_CODE
+extern uint32_t sampleLengths[];
+__ITCM_CODE_FLASH
 void processAudioBuffers(void)
 {
     int32_t outputSampleInt;
@@ -63,7 +63,7 @@ void processAudioBuffers(void)
         if (((uint32_t)currentSamplePointer)!=0xFFFFFFFF)
         {
             outputSample = ((float)*(currentSamplePointer +currentSamplePosition++)) / 32768.0f;
-            if (currentSamplePosition >= *(sampleLengths+sampleSelectorVal))
+            if (currentSamplePosition >= sampleLengths[sampleSelectorVal])
             {
                 currentSamplePointer = (int16_t*)0xFFFFFFFF;
                 currentSamplePosition=0;

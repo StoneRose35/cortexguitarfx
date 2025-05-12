@@ -71,8 +71,6 @@ const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_DMIN 16
 uint32_t encoderVal,encoderCntr,encNew;
 int16_t encoderDelta;
-uint8_t enterSwitchVal=0;
-uint8_t exitSwitchVal;
 volatile uint8_t programsActivated=0;
 
 
@@ -170,12 +168,13 @@ int main(void)
 	
 
     // calculate sample lengths
-    sampleLengths[0]=(uint32_t)&_binary___track001_raw_start - (uint32_t)&_binary___track001_raw_start;
-    sampleLengths[1]=(uint32_t)&_binary___track002_raw_start - (uint32_t)&_binary___track002_raw_start;
-    sampleLengths[2]=(uint32_t)&_binary___track003_raw_start - (uint32_t)&_binary___track003_raw_start;
-    sampleLengths[3]=(uint32_t)&_binary___track004_raw_start - (uint32_t)&_binary___track004_raw_start;
-    sampleLengths[4]=(uint32_t)&_binary___track005_raw_start - (uint32_t)&_binary___track005_raw_start;
-    sampleLengths[5]=(uint32_t)&_binary___track006_raw_start - (uint32_t)&_binary___track006_raw_start;
+    sampleLengths[0]=(uint32_t)(&_binary___track001_raw_end) - (uint32_t)(&_binary___track001_raw_start);
+    sampleLengths[1]=(uint32_t)(&_binary___track002_raw_end) - (uint32_t)(&_binary___track002_raw_start);
+    sampleLengths[2]=(uint32_t)(&_binary___track003_raw_end) - (uint32_t)(&_binary___track003_raw_start);
+    sampleLengths[3]=(uint32_t)(&_binary___track004_raw_end) - (uint32_t)(&_binary___track004_raw_start);
+    sampleLengths[4]=(uint32_t)(&_binary___track005_raw_end) - (uint32_t)(&_binary___track005_raw_start);
+    sampleLengths[5]=(uint32_t)(&_binary___track006_raw_end) - (uint32_t)(&_binary___track006_raw_start);
+    currentSamplePointer = (int16_t*)0xFFFFFFFF;
 
     
     //enable audio engine last (when fx programs have been set up)
@@ -203,15 +202,16 @@ int main(void)
             task &= ~(1 << TASK_FLASH_QSPI);
         }
         
-        currentVal = getSwitchValue(ENTER_SWITCH);
-        if (currentVal == 1 && enterSwitchVal == 0)
+        currentVal = getSwitchValue(0);
+        if ((currentVal & 1) != 0)
         {
+            clearPressedStickyBit(0);
             currentSamplePointer = samplePointers[sampleSelectorVal];
         }
-        enterSwitchVal = currentVal;
-        currentVal = getSwitchValue(EXIT_SWITCH);
-        if (currentVal == 1 && exitSwitchVal == 0)
+        currentVal = getSwitchValue(1);
+        if ((currentVal & 1 ) != 0)
         {
+            clearPressedStickyBit(1);
             if (sampleSelectorVal < 5)
             {
                 sampleSelectorVal++;
@@ -220,7 +220,7 @@ int main(void)
             {
                 sampleSelectorVal = 0;
             }
-            if (currentSamplePosition >= sampleLengths[sampleSelectorVal])
+            if (currentSamplePosition >= sampleLengths[sampleSelectorVal] || ((uint32_t)currentSamplePointer==0xFFFFFFFF))
             {
                 currentSamplePointer = (int16_t*)0xFFFFFFFF;
                 currentSamplePosition = 0;
@@ -230,8 +230,6 @@ int main(void)
                 currentSamplePointer = samplePointers[sampleSelectorVal];
             }
         }
-        exitSwitchVal = currentVal;
-        
 	}
 }
 #endif

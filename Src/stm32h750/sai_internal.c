@@ -27,14 +27,14 @@ volatile uint16_t audioState=0;
 volatile uint16_t audioTransferState=0;
 
 
-__ITCM_CODE
-#ifdef PCM3060_CODEC
-void DMA1_Stream1_IRQHandler(void) // adc
-#else
+__ITCM_CODE_FLASH
+//#ifdef PCM3060_CODEC
+//void DMA1_Stream1_IRQHandler(void) // adc
+//#else
 void DMA1_Stream0_IRQHandler(void) // adc
-#endif
+//#endif
 {
-    #ifdef PCM3060_CODEC
+    //#ifdef PCM3060_CODEC
     if ((DMA1->LISR & DMA_LISR_TCIF1) != 0) // receiver transfer complete
     {
         dbfrInputPtr = AUDIO_BUFFER_SIZE*2;
@@ -81,7 +81,8 @@ void DMA1_Stream0_IRQHandler(void) // adc
         return;
     }
 
-    #else
+    //#else
+    /*
     //NVIC_DisableIRQ(DMA1_Stream0_IRQn);
     if ((DMA1->LISR & DMA_LISR_TCIF0) != 0) // receiver transfer complete
     {
@@ -133,7 +134,7 @@ void DMA1_Stream0_IRQHandler(void) // adc
     {
         return;
     }
-    #endif
+    #endif */
 }
 
 
@@ -310,20 +311,20 @@ void initSAI()
 
 void enableAudioEngine()
 {
-    #ifdef PCM3060_CODEC
-    NVIC_EnableIRQ(DMA1_Stream1_IRQn);
-    #else
+    //#ifdef PCM3060_CODEC
+    //NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+    //#else
     NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-    #endif
+    //#endif
     audioState |= (1 << AUDIO_STATE_ON);
 }
 void disableAudioEngine()
 {   
-    #ifdef PCM3060_CODEC
-    NVIC_DisableIRQ(DMA1_Stream1_IRQn);
-    #else
+    //#ifdef PCM3060_CODEC
+    //NVIC_DisableIRQ(DMA1_Stream1_IRQn);
+    //#else
     NVIC_DisableIRQ(DMA1_Stream0_IRQn);
-    #endif
+    //#endif
     audioState &= ~(1 << AUDIO_STATE_ON);
 }
 void toggleAudioBuffer()
