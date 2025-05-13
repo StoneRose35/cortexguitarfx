@@ -168,12 +168,12 @@ int main(void)
 	
 
     // calculate sample lengths
-    sampleLengths[0]=(uint32_t)(&_binary___track001_raw_end) - (uint32_t)(&_binary___track001_raw_start);
-    sampleLengths[1]=(uint32_t)(&_binary___track002_raw_end) - (uint32_t)(&_binary___track002_raw_start);
-    sampleLengths[2]=(uint32_t)(&_binary___track003_raw_end) - (uint32_t)(&_binary___track003_raw_start);
-    sampleLengths[3]=(uint32_t)(&_binary___track004_raw_end) - (uint32_t)(&_binary___track004_raw_start);
-    sampleLengths[4]=(uint32_t)(&_binary___track005_raw_end) - (uint32_t)(&_binary___track005_raw_start);
-    sampleLengths[5]=(uint32_t)(&_binary___track006_raw_end) - (uint32_t)(&_binary___track006_raw_start);
+    sampleLengths[0]=((uint32_t)(&_binary___track001_raw_end) - (uint32_t)(&_binary___track001_raw_start)) >> 1;
+    sampleLengths[1]=((uint32_t)(&_binary___track002_raw_end) - (uint32_t)(&_binary___track002_raw_start)) >> 1;
+    sampleLengths[2]=((uint32_t)(&_binary___track003_raw_end) - (uint32_t)(&_binary___track003_raw_start)) >> 1;
+    sampleLengths[3]=((uint32_t)(&_binary___track004_raw_end) - (uint32_t)(&_binary___track004_raw_start)) >> 1;
+    sampleLengths[4]=((uint32_t)(&_binary___track005_raw_end) - (uint32_t)(&_binary___track005_raw_start)) >> 1;
+    sampleLengths[5]=((uint32_t)(&_binary___track006_raw_end) - (uint32_t)(&_binary___track006_raw_start)) >> 1;
     currentSamplePointer = (int16_t*)0xFFFFFFFF;
 
     
@@ -207,6 +207,7 @@ int main(void)
         {
             clearPressedStickyBit(0);
             currentSamplePointer = samplePointers[sampleSelectorVal];
+            currentSamplePosition=0;
         }
         currentVal = getSwitchValue(1);
         if ((currentVal & 1 ) != 0)
