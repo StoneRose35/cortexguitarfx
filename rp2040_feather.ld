@@ -1,4 +1,13 @@
 
+TARGET(binary)
+INPUT (./track001.raw)
+INPUT (./track002.raw)
+INPUT (./track003.raw)
+INPUT (./track004.raw)
+INPUT (./track005.raw)
+INPUT (./track006.raw)
+
+OUTPUT_FORMAT("elf32-littlearm")
 
 MEMORY
 {
@@ -48,6 +57,7 @@ SECTIONS
     .rodata : {
         *(EXCLUDE_FILE(*libgcc.a: *libc.a:*lib_a-mem*.o *libm.a:) .rodata*)
         . = ALIGN(4);
+        *.raw(.data*)
         *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.flashdata*)))
         . = ALIGN(4);
     } > FLASH
@@ -92,7 +102,7 @@ SECTIONS
         *(.ramfunc*)
         . = ALIGN(4); 
 
-        *(.data*)
+        *(EXCLUDE_FILE(*.raw) .data*)
 
         . = ALIGN(4);
         *(.after_data.*)

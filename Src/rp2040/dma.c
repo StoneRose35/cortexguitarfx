@@ -39,6 +39,12 @@ static volatile uint32_t * audioStatePtr;
 int16_t fadeCounter;
 volatile uint32_t spurious_irq_cntr=0;
 
+extern volatile int16_t *currentSamplePointer;
+extern volatile uint8_t sampleSelectorVal;
+extern volatile uint32_t currentSamplePosition;
+extern int16_t **samplePointers;
+extern uint32_t sampleLengths[];
+
 void initDMA()
 {
 	// enable the dma block
@@ -59,18 +65,7 @@ void initDMA()
  */
 void isr_c0_dma_irq0_irq11()
 {
-	/*
-	if ((*DMA_INTS0 & (1<<0))==(1 << 0)) // if from channel 0: neopixel  frame timer
-	{
-		// clear interrupt
-		*DMA_INTS0 = (1<<0);
-
-		// disable dma channel 0
-		*DMA_CH0_CTRL_TRIG &= ~(1 << 0);
-
-		sendState = SEND_STATE_SENT;
-	}
-	else */if ((*DMA_INTS0 & (1<<1))==(1 << 1) ) // from channel 1: usb uart transmission done, handled by core0
+    if ((*DMA_INTS0 & (1<<1))==(1 << 1) ) // from channel 1: usb uart transmission done, handled by core0
 	{
 		*DMA_INTS0 = (1<<1);
 		*DMA_CH1_CTRL_TRIG &= ~(1 << DMA_CH1_CTRL_TRIG_EN_LSB); // disable dma channel 1
@@ -107,55 +102,21 @@ void isr_c0_dma_irq0_irq11()
 
 		for (uint8_t c=0;c<AUDIO_BUFFER_SIZE;c++) // count in frame of 4 bytes or two  16bit samples
 		{
-			// convert raw input to signed 16 bit
-			#ifndef I2S_INPUT
-			inputSample = (*(audioBufferInputPtr + c) << 4) - 0x7FFF;
-			#else
-			inputSample= clip_input(*(audioBufferInputPtr + c*2 + 1) + *(audioBufferInputPtr + c*2),audioStatePtr); 
-			#endif
 
-			if (inputSample < 0)
+			if (((uint32_t)currentSamplePointer)!=0xFFFFFFFF)
 			{
-				avgIn = -inputSample;
-			}
-			else
-			{
-				avgIn = inputSample;
-			}
-			avgInOld = ((AVERAGING_LOWPASS_CUTOFF*avgIn) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgInOld) >> 15);
-
-			if (programChangeState != 3) // processing
-			{
-				outputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
+				outputSample = *(currentSamplePointer +currentSamplePosition++);
+				if (currentSamplePosition >= sampleLengths[sampleSelectorVal])
+				{
+					currentSamplePointer = (int16_t*)0xFFFFFFFF;
+					currentSamplePosition=0;
+				}
 			}
 			else
 			{
 				outputSample = 0;
 			}
-			if (programChangeState == 2)// fadeout
-			{
-				outputSample = ((32767 - fadeCounter)*inputSample >> 15) + ((fadeCounter*outputSample) >> 15);
-				fadeCounter -= 256;
-				if (fadeCounter < 0)
-				{
-					fadeCounter = 0;
-					programChangeState=3;
-				}
-			}
-			else if (programChangeState==4) // fadein
-			{
-				outputSample = ((32767 - fadeCounter)*inputSample >> 15) + ((fadeCounter*outputSample) >> 15);
-				fadeCounter += 256;
-				if (fadeCounter < 0) // overrun
-				{
-					programChangeState = 0;
-				}
-			}
-			if (programChangeState == 1)
-			{
-				fadeCounter = 32767;
-				programChangeState = 2;
-			}
+
 
 			if (outputSample < 0)
 			{

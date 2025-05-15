@@ -4,7 +4,7 @@
 #define AUDIO_SAMPLING_RATE 48000
 
 // uncomment if compiling for useage with the stomp extension board
-#define EXTENSION_BOARD
+#undef EXTENSION_BOARD
 
 // #define WAVESHARE_64X128_DISPLAY
 #define JOYIT_128X64_DISPLAY
@@ -13,7 +13,8 @@
 //#define CS4270_AUDIO_CODEC
 
 // use PCM3060 audio codec
-#define PCM3060_AUDIO_CODEC
+#undef PCM3060_AUDIO_CODEC
+#define WM8731
 
 // uncomment to bypass the audio codec triggering the UI update
 // the audio codec clocks are held at reset in this case
@@ -43,7 +44,7 @@
 #error Multiple Audio Codecs defined, select only one.
 #endif
 
-#if !defined(CS4270_AUDIO_CODEC) && !defined(PCM3060_AUDIO_CODEC)
+#if !defined(CS4270_AUDIO_CODEC) && !defined(PCM3060_AUDIO_CODEC) && !defined(WM8731)
 #error Choose an audio codec.
 #endif
 

@@ -82,6 +82,34 @@ volatile uint8_t currentPreset=0;
 // 3: in bypass / change in progress
 // 4: fade in
 volatile uint8_t programChangeState;
+
+volatile int16_t *currentSamplePointer;
+volatile uint32_t currentSamplePosition;
+volatile uint8_t sampleSelectorVal=0;
+
+extern uint32_t  _binary___track001_raw_start;
+extern uint32_t  _binary___track001_raw_end;
+extern uint32_t  _binary___track002_raw_start;
+extern uint32_t  _binary___track002_raw_end;
+extern uint32_t  _binary___track003_raw_start;
+extern uint32_t  _binary___track003_raw_end;
+extern uint32_t  _binary___track004_raw_start;
+extern uint32_t  _binary___track004_raw_end;
+extern uint32_t  _binary___track005_raw_start;
+extern uint32_t  _binary___track005_raw_end;
+extern uint32_t  _binary___track006_raw_start;
+extern uint32_t  _binary___track006_raw_end;
+
+
+int16_t * samplePointers[6]={
+    (int16_t*)&_binary___track001_raw_start,
+    (int16_t*)&_binary___track002_raw_start,
+    (int16_t*)&_binary___track003_raw_start,
+    (int16_t*)&_binary___track004_raw_start,
+    (int16_t*)&_binary___track005_raw_start,
+    (int16_t*)&_binary___track006_raw_start};
+uint32_t sampleLengths[6];
+
 #define UI_UPDATE_IN_SAMPLE_BUFFERS 300
 #define AVERAGING_LOWPASS_CUTOFF 10
 
@@ -112,8 +140,8 @@ int main(void)
 	initGpio();
 	initPio();
 	initTimer();
-	initAdc();
-	initDatetimeClock();
+	//initAdc();
+	//initDatetimeClock();
 	initI2SSlave();
 	#ifdef WM8731
 	initI2c(26);
@@ -148,6 +176,15 @@ int main(void)
 	#ifdef USB_UART
 	initUSB();
 	#endif
+
+
+    sampleLengths[0]=((uint32_t)(&_binary___track001_raw_end) - (uint32_t)(&_binary___track001_raw_start)) >> 1;
+    sampleLengths[1]=((uint32_t)(&_binary___track002_raw_end) - (uint32_t)(&_binary___track002_raw_start)) >> 1;
+    sampleLengths[2]=((uint32_t)(&_binary___track003_raw_end) - (uint32_t)(&_binary___track003_raw_start)) >> 1;
+    sampleLengths[3]=((uint32_t)(&_binary___track004_raw_end) - (uint32_t)(&_binary___track004_raw_start)) >> 1;
+    sampleLengths[4]=((uint32_t)(&_binary___track005_raw_end) - (uint32_t)(&_binary___track005_raw_start)) >> 1;
+    sampleLengths[5]=((uint32_t)(&_binary___track006_raw_end) - (uint32_t)(&_binary___track006_raw_start)) >> 1;
+    currentSamplePointer = (int16_t*)0xFFFFFFFF;
 	//initUart(57600,&usbCommBuffer);
 
 	/*
@@ -157,7 +194,7 @@ int main(void)
 	 * */
 
 
-	initOledDisplay();
+	//initOledDisplay();
 
 	/*
      *
@@ -166,23 +203,23 @@ int main(void)
 	 */
 
 	
-	piPicoFxUiSetup(&piPicoUiController);
-	OledClearDisplay();
-	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	{
-		if ((uint32_t)fxPrograms[c]->setup != 0)
-		{
-			fxPrograms[c]->setup(fxPrograms[c]->data);
-		}
-	}
-	#ifndef FORCE_TEST_MODE
-		enterLevel0(&piPicoUiController);
-	#else
+	//piPicoFxUiSetup(&piPicoUiController);
+	//OledClearDisplay();
+	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
+	//{
+	//	if ((uint32_t)fxPrograms[c]->setup != 0)
+	//	{
+	//		fxPrograms[c]->setup(fxPrograms[c]->data);
+	//	}
+	//}
+	//#ifndef FORCE_TEST_MODE
+	//	enterLevel0(&piPicoUiController);
+	//#else
 	    // switch on program "off"
-		piPicoUiController.currentProgramIdx = N_FX_PROGRAMS-1;
-		piPicoUiController.currentProgram=fxPrograms[piPicoUiController.currentProgramIdx];
-	    enterLevel7(&piPicoUiController);
-	#endif
+	//	piPicoUiController.currentProgramIdx = N_FX_PROGRAMS-1;
+	//	piPicoUiController.currentProgram=fxPrograms[piPicoUiController.currentProgramIdx];
+	//    enterLevel7(&piPicoUiController);
+	//#endif
 	#ifdef USB_UART
 	initCliApi(&bufferedInput,NULL,&usbApi,&usbCommBuffer,sendOverUsb);
 	#endif
@@ -200,20 +237,37 @@ int main(void)
     /* Loop forever */
 	for(;;)
 	{
-		/* uncomment to to ui updates independent from audio codec*/
-		#ifdef TRIGGER_UI_BY_CORE_0
-		waitSysticks(10);
-		bufferCnt = UI_UPDATE_IN_SAMPLE_BUFFERS;
-		#endif
-        
-		if (bufferCnt >= UI_UPDATE_IN_SAMPLE_BUFFERS)
-		{
-			bufferCnt = 0;
-			task |= (1 << TASK_UPDATE_AUDIO_UI);
-		}
-		#ifdef USB_UART
-		cliApiTask(&bufferedInput);
-		#endif	
+		uint8_t currentVal;
+
+        currentVal = getSwitchValue(0);
+        if ((currentVal & 1) != 0)
+        {
+            clearPressedStickyBit(0);
+            currentSamplePointer = samplePointers[sampleSelectorVal];
+            currentSamplePosition=0;
+        }
+        currentVal = getSwitchValue(1);
+        if ((currentVal & 1 ) != 0)
+        {
+            clearPressedStickyBit(1);
+            if (sampleSelectorVal < 5)
+            {
+                sampleSelectorVal++;
+            }
+            else
+            {
+                sampleSelectorVal = 0;
+            }
+            if (currentSamplePosition >= sampleLengths[sampleSelectorVal] || ((uint32_t)currentSamplePointer==0xFFFFFFFF))
+            {
+                currentSamplePointer = (int16_t*)0xFFFFFFFF;
+                currentSamplePosition = 0;
+            }
+            else
+            {
+                currentSamplePointer = samplePointers[sampleSelectorVal];
+            }
+        }
 	}
 }
 #endif

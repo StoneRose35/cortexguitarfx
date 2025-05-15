@@ -30,25 +30,20 @@ extern volatile int16_t avgOutOld;
 extern volatile int16_t avgInOld;
 extern volatile uint8_t fxProgramIdx;
 extern volatile uint32_t cpuLoad;
-extern volatile uint8_t programsActivated;
-extern volatile uint8_t programChangeState;
-extern volatile uint8_t programsToInitialize[3];
 extern const uint8_t stompswitch_progs[];
-extern PiPicoFxUiType piPicoUiController;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
 uint8_t cpuLoadBfr;
 int16_t encoderDelta;
 uint8_t switchVals[2]={0,0};
-//PiPicoFxUiType uiControllerData;
-uint16_t adcChannelOld0=0,adcChannel0=0;
-uint16_t adcChannelOld1=0,adcChannel1=0;
-uint16_t adcChannelOld2=0,adcChannel2=0;
-uint16_t adcChannel=0;
 uint8_t stompSwitchState;
 FxPresetType preset1, preset2;
 
-
+extern volatile int16_t *currentSamplePointer;
+extern volatile uint32_t currentSamplePosition;
+extern volatile uint8_t sampleSelectorVal;
+extern int16_t **samplePointers;
+extern uint32_t sampleLengths[];
 
 static volatile uint32_t * audioStatePtr;
 #define UI_DMIN 1
@@ -95,6 +90,8 @@ void core1Main()
 
     for(;;)
     {
+
+        /*
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
@@ -167,12 +164,14 @@ void core1Main()
             
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
         }
+            */
 
         /*
          *
          * UI Switches Callback
          * 
         */
+       /*
         switchVals[0] = getSwitchValue(0);
         if ((switchVals[0] & 1) > 0)
         {
@@ -211,7 +210,7 @@ void core1Main()
            onRotaryChange(encoderDelta,&piPicoUiController);
            clearStickyIncrementDelta();
        }
-
+        */
        /*
         *
         * Stomp Switches Callback

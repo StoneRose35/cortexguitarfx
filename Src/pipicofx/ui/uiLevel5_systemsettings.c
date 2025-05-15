@@ -20,7 +20,7 @@ static volatile uint8_t subLevel;
 static void create(PiPicoFxUiType*data)
 {
     char strbfr[16];
-    uint8_t regbfr;
+    uint8_t regbfr=0;
     float fValue, fMaxValue, fMinValue, px, py, cx, cy;
     uint16_t currentVolume;
     const GFXfont * font = getGFXFont(FREESANSBOLD9PT7B);
@@ -181,8 +181,8 @@ static void exitCallback(PiPicoFxUiType*data)
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
-    uint8_t regbfr;
-    uint16_t currentVolume;
+    uint8_t regbfr=0;
+    uint16_t currentVolume=0;
     float fValue, fMaxValue, fMinValue, px, py, cx, cy;
     BwImageType* img = getImageBuffer();
     if (subLevel==0) // choose parameter to edit
