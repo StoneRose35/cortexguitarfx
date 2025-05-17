@@ -240,9 +240,9 @@ int main(void)
 		uint8_t currentVal;
 
         currentVal = getSwitchValue(0);
-        if ((currentVal & 1) != 0)
+        if ((currentVal & 2) != 0)
         {
-            clearPressedStickyBit(0);
+            clearReleasedStickyBit(0);
             currentSamplePointer = samplePointers[sampleSelectorVal];
             currentSamplePosition=0;
         }
