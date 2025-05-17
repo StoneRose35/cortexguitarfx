@@ -20,9 +20,6 @@ uint32_t tryToUInt32(char * str,uint8_t* has_errors_ptr);
 
 uint8_t checkLampRange(uint8_t,uint8_t* has_errors_ptr);
 
-void handleRgb(uint8_t,uint8_t,uint8_t,uint8_t,RGBStream*);
-
-void handleRgbStruct(RGB*,uint8_t,RGBStream*);
 
 /*
  * expands a string list of lamp number into a array of unique lamp numbers

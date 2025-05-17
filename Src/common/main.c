@@ -3,9 +3,6 @@
 
 #ifdef HARDWARE
 
-
-
-#include <drivers/neopixelDriver.h>
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
 #include "hardware/rp2040_registers.h"

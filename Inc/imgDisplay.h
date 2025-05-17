@@ -22,6 +22,18 @@ typedef struct
 
 } ST7735Font16x16;
 
+/**
+ * @brief a simple rgb structure, is not aligned to be streamed directly to the neopixels
+ *
+ */
+typedef struct
+{
+	uint8_t r; //!< Red
+	uint8_t g; //!< Green
+	uint8_t b; //!< Blue
+} RGB;
+
+
 inline uint16_t encodeColor(const RGB * clr)
 {
     return (((clr->r & 0xF8) | ((clr->g >> 5) & 0x7)) << 0) | 

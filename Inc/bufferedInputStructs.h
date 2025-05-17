@@ -14,9 +14,9 @@
 #ifndef BUFFEREDINPUTSTRUCTS_H_
 #define BUFFEREDINPUTSTRUCTS_H_
 
-#ifndef HARDWARE
+
 #include <stdint.h>
-#endif
+
 
 #define COMMAND_BUFFER_SIZE 48 //!< the size of the input command buffer thus the maximum command length. The byte size of the input buffer is COMMAND_BUFFER_SIZE*COMMAND_HISTORY_SIZE
 #define COMMAND_HISTORY_SIZE 4 //!< the maximum number of commands remembered

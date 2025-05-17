@@ -83,30 +83,6 @@ uint32_t tryToUInt32(char * str,uint8_t* has_errors_ptr)
 	}
 }
 
-/**
- * @brief checks if the neopixel number is within 0 to N_LAMPS
- * 
- * @param lampnr the number to check
- * @param has_errors_ptr point to an error flag
- * @return 1 if successful, 0 if not
- */
-uint8_t checkLampRange(uint8_t lampnr,uint8_t* has_errors_ptr)
-{
-	char nrbfr[4];
-	if (lampnr < N_LAMPS || lampnr == 0xFF)
-	{
-		return 1;
-	}
-	else
-	{
-		printf("ERROR: Lamp Nr ");
-		UInt8ToChar(lampnr,nrbfr);
-		printf(nrbfr);
-		printf(" is out of range\r\n");
-		*has_errors_ptr = 1;
-		return 0;
-	}
-}
 
 /**
  * @brief converts a neopixel description containing ranges and individual indexes into a set of distinct and value neopixel indexes
@@ -157,33 +133,5 @@ uint8_t expandLampDescription(char * description,uint8_t * res)
 	return nlamps;
 }
 
-/**
- * @brief sets the color of a given neopixel within a RGBStream based on an RGB color structure.
- * 
- * @param clr the color to set
- * @param nr the neopixel index, must be betwenn 0 and N_LAMPS
- * @param lamps the structured color data to manipulate
- */
-void handleRgbStruct(RGB* clr,uint8_t nr,RGBStream * lamps)
-{
-	(lamps+nr)->rgb.r=clr->r;
-	(lamps+nr)->rgb.b=clr->b;
-	(lamps+nr)->rgb.g=clr->g;
-}
 
-/**
- * @brief sets the color of a given neopixel within a RGBStream based on individual color values.
- * 
- * @param r red
- * @param g  green
- * @param b blue
- * @param nr the neopixel index, must be betwenn 0 and N_LAMPS
- * @param lamps the structured color data to manipulate
- */
-void handleRgb(uint8_t r,uint8_t g, uint8_t b,uint8_t nr,RGBStream * lamps)
-{
-	(lamps+nr)->rgb.r=r;
-	(lamps+nr)->rgb.b=b;
-	(lamps+nr)->rgb.g=g;
-}
 

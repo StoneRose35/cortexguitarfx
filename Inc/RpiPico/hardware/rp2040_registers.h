@@ -1,6 +1,8 @@
 #ifndef _RP2040_REGISTERS_
 #define _RP2040_REGISTERS_
 
+#include "stdint.h"
+
 /**
  * @brief device-specific settings such as pin numbers and timings
  * 

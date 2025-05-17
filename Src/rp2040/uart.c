@@ -7,7 +7,6 @@
 
 #ifdef RP2040_FEATHER
 
-#include <drivers/neopixelDriver.h>
 #include "drivers/uart.h"
 #include "system.h"
 #include "consoleHandler.h"
@@ -161,8 +160,8 @@ void initUart(uint16_t baudrate,CommBuffer bfr)
 	// resulting in 143.2291666, becoming 143 and floor(0.2291666*64)=14
 
 	// set the baud rate
-	*UART_UARTIBRD = (uint32_t)(F_SYS/(16*BAUD_RATE)); // 130 with F_SYS at 120 MHz
-	*UART_UARTFBRD = (uint32_t)(64*(F_SYS/(16.0*BAUD_RATE) - (uint32_t)(F_SYS/(16.0*BAUD_RATE))) + 0.5); // 13 with F_SYS at 120 MHz
+	*UART_UARTIBRD = (uint32_t)(F_SYS/(16*baudrate)); // 130 with F_SYS at 120 MHz
+	*UART_UARTFBRD = (uint32_t)(64*(F_SYS/(16.0*baudrate) - (uint32_t)(F_SYS/(16.0*baudrate))) + 0.5); // 13 with F_SYS at 120 MHz
 
 	// set word length to 8 bits
 	*UART_UARTLCR_H |= (3 << UART_UARTLCR_H_WLEN_LSB);
@@ -213,8 +212,8 @@ void initBTUart(uint16_t baudrate,CommBuffer bfr)
 	*UARTBT_UARTIMSC |= (1 << UART_UARTIMSC_RXIM_LSB);
 
 	// set the baud rate
-	*UARTBT_UARTIBRD = (uint32_t)(F_SYS/(16*BAUD_RATE)); // 130 with F_SYS at 120 MHz
-	*UARTBT_UARTFBRD = (uint32_t)(64*(F_SYS/(16.0*BAUD_RATE) - (uint32_t)(F_SYS/(16.0*BAUD_RATE))) + 0.5); // 13 with F_SYS at 120 MHz
+	*UARTBT_UARTIBRD = (uint32_t)(F_SYS/(16*baudrate)); // 130 with F_SYS at 120 MHz
+	*UARTBT_UARTFBRD = (uint32_t)(64*(F_SYS/(16.0*baudrate) - (uint32_t)(F_SYS/(16.0*baudrate))) + 0.5); // 13 with F_SYS at 120 MHz
 
 	// set word length to 8 bits
 	*UARTBT_UARTLCR_H |= (3 << UART_UARTLCR_H_WLEN_LSB);

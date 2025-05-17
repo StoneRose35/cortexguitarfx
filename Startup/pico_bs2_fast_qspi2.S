@@ -5,6 +5,7 @@
 #include "hardware/regs/sio.h"
 #include "hardware/regs/ssi.h"
 #include "hardware/regs/pads_qspi.h"
+#include "system.h"
 
 #define CMD_READ_QUAD 0xeb
 #define CMD_WRITE_ENABLE 0x06
@@ -13,8 +14,6 @@
 #define CMD_READ_STATUS_3 0x15
 #define CMD_WRITE_STATUS 0x01
 
-
-#define PICO_FLASH_SPI_CLKDIV 2
 
 // register offsets
 #define SSI_TMOD 8

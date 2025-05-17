@@ -8,7 +8,6 @@
 #include "drivers/bluetoothATConfig.h"
 #include "drivers/systick.h"
 #include "stringFunctions.h"
-#include "drivers/neopixelDriver.h"
 #include "drivers/uart.h"
 #include "drivers/datetimeClock.h"
 #include "consoleBase.h"

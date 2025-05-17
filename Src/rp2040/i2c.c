@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "system.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/resets.h"
 #include "hardware/regs/io_bank0.h"
@@ -60,8 +61,8 @@ void initI2c(uint8_t slaveAdress)
         1300 ns for 400 kbps,
         500 ns for 1000 kbps,
     */
-    *I2C_IC_SS_SCL_HCNT=480;
-    *I2C_IC_SS_SCL_LCNT=564;
+    *I2C_IC_SS_SCL_HCNT=I2C_SS_HCNT;
+    *I2C_IC_SS_SCL_LCNT=I2C_SS_LCNT;
 
     // enable dma signals
     *I2C_IC_DMA_CR |= (1 << I2C_IC_DMA_CR_RDMAE_LSB) | (1 << I2C_IC_DMA_CR_TDMAE_LSB);

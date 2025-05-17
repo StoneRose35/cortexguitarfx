@@ -178,11 +178,10 @@ def fontImageToArray(fname="sm_ascii_16x16.png", sizex=16, sizey=16, offsetx=0, 
 
 
 
-def oscillator_freq_calc():
+def oscillator_freq_calc(target_freq=133000000,spi_freq=5000000,i2c_freq=100000):
         # computed the possible division factors for the pll
     f_xosc = 12000000.
 
-    f_ws2818 = 800000.
 
     mult_pio = 10
     pio0_fact = 1
@@ -194,38 +193,69 @@ def oscillator_freq_calc():
     f_sys = f_xosc
     params_array = []
     bestparams = None
-    while f_sys < 133000000:
-        f_sys = f_ws2818 * mult_pio * pio0_fact
+    while f_sys < target_freq:
+        f_sys = target_freq #f_ws2818 * mult_pio * pio0_fact
         if f_sys > f_xosc:
             postdiv1 = 1
             postdiv2 = 1
             while postdiv1 < 8:
                 postdiv2 = 1
                 while postdiv2 < 8:
-                    if f_sys*postdiv1*postdiv2 > 400000000 and f_sys*postdiv1*postdiv2 < 1600000000:
+                    if f_sys*postdiv1*postdiv2 > 400000000 and f_sys*postdiv1*postdiv2 < 1600000000 and postdiv1 >= postdiv2:
                         f_vco = f_sys*postdiv1*postdiv2
                         feedbk_f = f_vco / f_xosc
                         feedbk = math.floor(feedbk_f)
                         f_vco_appr = feedbk * f_xosc
                         f_sys_approx = f_vco_appr/postdiv1/postdiv2
-                        f_ws2812_approx = f_sys_approx/mult_pio/pio0_fact
-                        f_ws2812_err = math.fabs(f_sys - f_ws2812_approx)
+
+                        #calculate f_spi
+                        cpsdvsr = 2
+                        while f_sys/(cpsdvsr*spi_freq) - 1 > 255:
+                            cpsdvsr += 1
+                        scr = int(f_sys/(cpsdvsr*spi_freq)-1)
+                        spi_freq_effective = f_sys/(cpsdvsr*(1+scr))
+
+                        #calculate f_i2c
+                        # MIN_SCL_HIGHtime = Minimum High Period
+                        # MIN_SCL_HIGHtime =
+                        # 4000 ns for 100 kbps,
+                        # 600 ns for 400 kbps,
+                        # 260 ns for 1000 kbps,
+                        # MIN_SCL_LOWtime = Minimum Low Period
+                        # MIN_SCL_LOWtime =
+                        # 4700 ns for 100 kbps,
+                        # 1300 ns for 400 kbps,
+                        # 500 ns for 1000 kbps,
+                        ss_scl_hcnt = int(f_sys_approx * 4000e-9)
+                        ss_scl_lcnt = int(f_sys_approx * 4700e-9)
+                        f_i2c_approx = f_sys_approx/(ss_scl_hcnt + ss_scl_lcnt)
+
+                        f_sys_err = math.fabs(f_sys - f_sys_approx)
                         params = {"feedbk": feedbk, "pio_clock": pio0_fact, "postdiv1": postdiv1,
-                                  "postdiv2": postdiv2, "f_vco": f_vco_appr,"f_sys": f_vco_appr/postdiv1/postdiv2,
-                                  "f_ws2812": f_ws2812_approx,
-                                  "f_ws_2812_err": f_ws2812_err}
+                                  "postdiv2": postdiv2, "f_vco": f_vco_appr,"f_sys": f_vco_appr/postdiv1/postdiv2, "f_sys_err": f_sys_err,"f_spi_eff": spi_freq_effective,
+                                  "cpsdvsr": cpsdvsr, "scr": scr,
+                                  "f_i2c_approx": f_i2c_approx,
+                                  "ss_scl_hcnt": ss_scl_hcnt,
+                                  "ss_scl_lcnt": ss_scl_lcnt
+                                  }
+                        
                         print("Feedback Multiplier: {}".format(params["feedbk"]))
                         print("PIO0 Clock Divider: {}".format(params["pio_clock"]))
                         print("Post Divider 1: {}".format(params["postdiv1"]))
                         print("Post Divider 2: {}".format(params["postdiv2"]))
                         print("VCO Frequency: {}".format(params["f_vco"]))
+                        print("SPI Frequency: {}, CPSDVSR: {}, SCR: {}".format(params["f_spi_eff"],params["cpsdvsr"],params["scr"]))
+                        print("I2C Frequency: {}, SS_SCL_HCNT: {}, SS_SCL_LCNT: {}".format(params["f_i2c_approx"],params["ss_scl_hcnt"],params["ss_scl_lcnt"]))
                         print("System Frequency: {}".format(params["f_sys"]))
-                        print("ws2812 Frequency: {}".format(params["f_ws2812"]))
+                        print("System Frequency Error: {}".format(params["f_sys_err"]))
                         print("")
                         if bestparams is None:
                             bestparams = params
-                        elif bestparams["f_ws_2812_err"] > params["f_ws_2812_err"]:
+                        elif bestparams["f_sys_err"] > params["f_sys_err"]:
                             bestparams = params
+                        elif bestparams["f_sys_err"] == params["f_sys_err"]:
+                            if bestparams["f_vco"] < params["f_vco"]:
+                                bestparams = params
                         params_array.append(params)
                     postdiv2 += 1
                 postdiv1 += 1
@@ -236,11 +266,10 @@ def oscillator_freq_calc():
     print("Post Divider 1: {}".format(bestparams["postdiv1"]))
     print("Post Divider 2: {}".format(bestparams["postdiv2"]))
     print("VCO Frequency: {}".format(bestparams["f_vco"]))
+    print("SPI Frequency: {}, CPSDVSR: {}, SCR: {}".format(bestparams["f_spi_eff"],bestparams["cpsdvsr"],bestparams["scr"]))
+    print("I2C Frequency: {}, SS_SCL_HCNT: {}, SS_SCL_LCNT: {}".format(bestparams["f_i2c_approx"],bestparams["ss_scl_hcnt"],bestparams["ss_scl_lcnt"]))
     print("System Frequency: {}".format(bestparams["f_sys"]))
-    print("ws2812 Frequency: {}".format(bestparams["f_ws2812"]))
-
-
-
+    print("System Frequency Error: {}".format(bestparams["f_sys_err"]))
 
 if __name__ == "__main__":
     asset_path = "../Assets"
@@ -253,9 +282,10 @@ if __name__ == "__main__":
     parser.add_argument("-convertImg",help="convert specific image to c header as 16bit color image (for ST7735)")
     parser.add_argument("-convertBwImg",help="convert specific image to c header as black/white image (for SSD1306)")
     parser.add_argument("-convertBwXYPixel",help="convert specific image to c header as black/white image useable with the bwgraphics lib")
+    parser.add_argument("-calculateFrequencies",help="script for calculating the PLL diviion factors given a target frequency [Hz]")
 
     args = parser.parse_args()
-    if args.calcSysFreqs is False and args.generateAssets is False and args.convertImg is None and args.convertBwImg is None:
+    if args.calcSysFreqs is False and args.generateAssets is False and args.convertImg is None and args.convertBwImg is None and args.calculateFrequencies is None:
         parser.print_help()
     else:
         if args.calcSysFreqs is True:
@@ -281,7 +311,9 @@ if __name__ == "__main__":
             full_path = args.convertBwXYPixel # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
                 imageToBWXYPixelCStream(full_path, "./Inc/images")
-
+        elif args.calculateFrequencies is not None:
+            target_freq = float(args.calculateFrequencies)
+            oscillator_freq_calc(target_freq)
 
     """
     imageToCStream("../Assets/OK_32x32.png", "../Inc/images")
@@ -292,7 +324,7 @@ if __name__ == "__main__":
     imageToCStream("../Assets/kaltblut2.png", "../Inc/images")
     imageToCStream("../Assets/kaltblut1.png", "../Inc/images")
     imageToCStream("../Assets/clock_32x32.png", "../Inc/images")
-    imageToCStream("../Assets/drafthorse_32x32.png", "../Inc/images")
+    imageToCStream("../Assets/drafthorse_32x32.png", 200000000"../Inc/images")
     imageToCStream("../Assets/bulb_off_24x24.png", "../Inc/images")
     imageToCStream("../Assets/bulb_on_24x24.png", "../Inc/images")
     """

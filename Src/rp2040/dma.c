@@ -1,6 +1,5 @@
 
 #include "drivers/dma.h"
-#include "drivers/neopixelDriver.h"
 #include "drivers/i2s.h"
 #include "drivers/adc.h"
 #include "drivers/gpio.h"
@@ -14,6 +13,7 @@
 #include "pipicofx/pipicofxui.h"
 #include "audio/audiotools.h"
 #include "drivers/oled_display.h"
+#include "system.h"
 
 int16_t* audioBufferPtr;
 #ifndef I2S_INPUT

@@ -16,6 +16,7 @@
 #include "hardware/regs/resets.h"
 #include "hardware/rp2040_registers.h"
 #include "hardware/regs/dma.h"
+#include "system.h"
 
 static volatile uint8_t currentDmaRow=SSD1306_DISPLAY_N_PAGES;
 static volatile uint8_t * currentFrameBuffer=0;
@@ -39,9 +40,9 @@ void initOledDisplay()
     *SSD1306_DISPLAY_RESET_PIN_CNTR = 5;
 
     // configure control register 0: 8-bit data, 5 MHz Clock
-    *SSPCR0 = (0x7 << SPI_SSPCR0_DSS_LSB) | (SSD1306_SCK_DISPLAY_SLOW << SPI_SSPCR0_SCR_LSB);
+    *SSPCR0 = (0x7 << SPI_SSPCR0_DSS_LSB) | (SPI_SCR << SPI_SSPCR0_SCR_LSB);
     // configure clock divider
-    *SSPCPSR = 2;
+    *SSPCPSR = SPI_SSPCPSR;
     // configure control register 1: enable by setting synchronous operation
     *SSPCR1 = 1 << SPI_SSPCR1_SSE_LSB;
     //enable dma for the transmitter

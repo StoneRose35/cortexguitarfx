@@ -10,7 +10,7 @@
  */
 #include "intFunctions.h"
 #include "system.h"
-
+#include "stdint.h"
 /**
  * @brief compares to bytes interpreted as unsigned integers
  * 
