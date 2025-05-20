@@ -277,19 +277,19 @@ if __name__ == "__main__":
     image_inc_path = "../Inc/images"
     font_inc_path = "../Inc/fonts"
     parser = argparse.ArgumentParser()
-    parser.add_argument("-calcSysFreqs",help="calculate oscillator frequencies",action="store_true")
+    parser.add_argument("-calcSysFreqs",help="calculate oscillator frequencies")
     parser.add_argument("-generateAssets",help="generate images and font asset headers",action="store_true")
     parser.add_argument("-convertImg",help="convert specific image to c header as 16bit color image (for ST7735)")
     parser.add_argument("-convertBwImg",help="convert specific image to c header as black/white image (for SSD1306)")
     parser.add_argument("-convertBwXYPixel",help="convert specific image to c header as black/white image useable with the bwgraphics lib")
-    parser.add_argument("-calculateFrequencies",help="script for calculating the PLL diviion factors given a target frequency [Hz]")
 
     args = parser.parse_args()
     if args.calcSysFreqs is False and args.generateAssets is False and args.convertImg is None and args.convertBwImg is None and args.calculateFrequencies is None:
         parser.print_help()
     else:
-        if args.calcSysFreqs is True:
-            oscillator_freq_calc()
+        if args.calcSysFreqs is not None:
+            target_freq = float(args.calcSysFreqs)
+            oscillator_freq_calc(target_freq)
         if args.generateAssets is True:
             dircontent = os.listdir(asset_path)
             for el in dircontent:
@@ -311,9 +311,7 @@ if __name__ == "__main__":
             full_path = args.convertBwXYPixel # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
                 imageToBWXYPixelCStream(full_path, "./Inc/images")
-        elif args.calculateFrequencies is not None:
-            target_freq = float(args.calculateFrequencies)
-            oscillator_freq_calc(target_freq)
+
 
     """
     imageToCStream("../Assets/OK_32x32.png", "../Inc/images")
