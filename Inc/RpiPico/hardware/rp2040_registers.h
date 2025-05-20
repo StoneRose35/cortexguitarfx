@@ -131,6 +131,7 @@
 
 #define PADS_ADC0 ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO26_OFFSET))
 
+
 #define GPIO_OE ((volatile uint32_t*)(SIO_BASE + SIO_GPIO_OE_OFFSET))
 #define GPIO_OUT ((volatile uint32_t*)(SIO_BASE + SIO_GPIO_OUT_OFFSET))
 #define GPIO_IN ((volatile uint32_t*)(SIO_BASE + SIO_GPIO_IN_OFFSET))
@@ -170,7 +171,7 @@
 #define SIO_FIFO_ST ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_ST_OFFSET))
 #define SIO_FIFO_RD ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_RD_OFFSET))
 #define SIO_FIFO_WR ((volatile uint32_t*)(SIO_BASE + SIO_FIFO_WR_OFFSET))
-#define SIO_CPUID ((volatile uint32_t*)(SIO_BASE + SIO_CPUID_OFFSET))
+#define SIO_CPUID ((volatile uint32_t*)(SIO_BASE))
 
 #define M0PLUS_VTOR ((volatile uint32_t*)(PPB_BASE + M0PLUS_VTOR_OFFSET))
 #define NVIC_ISER ((volatile uint32_t*)(PPB_BASE + M0PLUS_NVIC_ISER_OFFSET))
@@ -269,11 +270,14 @@
 #define I2C_ENABLE_IC ((volatile uint32_t*)(I2C0_BASE +I2C_IC_ENABLE_OFFSET))
 #define I2C_IC_CON ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CON_OFFSET))
 #define I2C_IC_TAR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TAR_OFFSET))
+#define I2C_IC_SAR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_SAR_OFFSET))
 #define I2C_IC_DATA_CMD ((volatile uint32_t*)(I2C0_BASE +I2C_IC_DATA_CMD_OFFSET))
 #define I2C_IC_DATA_CMD_BYTE ((volatile uint8_t*)(I2C0_BASE +I2C_IC_DATA_CMD_OFFSET))
+#define I2C_IC_INTR_STAT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_INTR_STAT_OFFSET))
 #define I2C_IC_INTR_MASK ((volatile uint32_t*)(I2C0_BASE +I2C_IC_INTR_MASK_OFFSET))
 #define I2C_IC_CLR_RX_DONE ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_RX_DONE_OFFSET))
 #define I2C_IC_CLR_INTR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_INTR_OFFSET))
+#define I2C_IC_CLR_START_DET ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_START_DET_OFFSET))
 #define I2C_IC_CLR_STOP_DET ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_STOP_DET_OFFSET))
 #define I2C_IC_CLR_TX_ABRT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_TX_ABRT_OFFSET))
 #define I2C_IC_TXFLR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TXFLR_OFFSET))
@@ -303,6 +307,8 @@
 #define CLK_SYS_CTRL ((volatile uint32_t*)(CLOCKS_BASE+CLOCKS_CLK_SYS_CTRL_OFFSET))
 #define CLK_REF_CTRL ((volatile uint32_t*)(CLOCKS_BASE+CLOCKS_CLK_REF_CTRL_OFFSET))
 #define CLK_PERI_CTRL ((volatile uint32_t*)(CLOCKS_BASE+CLOCKS_CLK_PERI_CTRL_OFFSET))
+
+#define VREG ((volatile uint32_t*)(VREG_AND_CHIP_RESET_BASE))
 
 typedef struct {
 	volatile uint32_t cs;

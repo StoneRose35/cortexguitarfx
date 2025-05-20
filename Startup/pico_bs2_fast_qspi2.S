@@ -76,6 +76,10 @@ str r6,[r3, #SSI_SSIENR_OFFSET]
 movs r4,#PICO_FLASH_SPI_CLKDIV
 str r4,[r3, #SSI_BAUDR_OFFSET]
 
+// set sample delay
+movs r2,#SSI_RX_SAMPLE_DLY_OFFSET
+str r7,[r3,r2]
+
 /************** 
  * PART 1 
  **************/

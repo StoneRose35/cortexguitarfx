@@ -15,6 +15,7 @@
 void setupClock();
 void initUsbPll();
 
+void _sr35_delay(uint32_t);
 #endif /* SYSTEMCLOCK_H_ */
 
 #endif

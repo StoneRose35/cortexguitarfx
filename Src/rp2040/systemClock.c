@@ -14,7 +14,8 @@
 #include "drivers/systemClock.h"
 #include "system.h"
 
-
+#define SYS_CLK_VREG_VOLTAGE_AUTO_ADJUST_DELAY_US 1000
+#define VREG_VOLTAGE_1_15 0b01100
 
 void setupClock()
 {
@@ -52,6 +53,17 @@ void setupClock()
 	// enable post divider
 	PLL_SYS->pwr &= ~(1 << PLL_PWR_POSTDIVPD_LSB);
 
+	// adjust voltage regulator for voltages up to 1.15v if not already set
+	uint32_t vregVal = *VREG;
+	if (((vregVal & 0xF0) >> 4) < VREG_VOLTAGE_1_15) {
+		vregVal &= ~0xF0;
+		vregVal |= VREG_VOLTAGE_1_15 << 4;
+		*VREG = vregVal;
+		// wait for voltage to settle; must use CPU cycles as TIMER is not yet clocked correctly
+		//busy_wait_at_least_cycles((uint32_t)((SYS_CLK_VREG_VOLTAGE_AUTO_ADJUST_DELAY_US * (uint64_t)F_XOSC) / 1000000));
+		_sr35_delay((uint32_t)((SYS_CLK_VREG_VOLTAGE_AUTO_ADJUST_DELAY_US * (uint64_t)F_XOSC) / 1000000));
+	}
+
 	// switch system clock to pll (src to aux which is sys pll by default)
 	*CLK_SYS_CTRL |= (0x01 << 0);
 
@@ -67,7 +79,7 @@ void initUsbPll()
 	while ((*RESETS_DONE & (1 << RESETS_RESET_PLL_USB_LSB)) == 0);
 	PLL_USB->cs |= (1 << 0) ;
 	//vco runs at 12MHz*FEEDBK
-	PLL_USB->fbdiv = FEEDBK;
+	PLL_USB->fbdiv = FEEDBK_USB;
 
 	// wwitch on pll itself and vco
 	PLL_USB->pwr &= ~((1 << PLL_PWR_PD_LSB) | (1 << PLL_PWR_VCOPD_LSB));
