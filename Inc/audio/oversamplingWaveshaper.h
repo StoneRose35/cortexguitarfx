@@ -14,6 +14,6 @@ typedef struct {
 
 void initOversamplingWaveshaper(OversamplingWaveshaperDataType*data);
 void  applyOversamplingDistortion(uint16_t*data,OversamplingWaveshaperDataType*waveshaper);
-int16_t  OversamplingDistortionProcessSample(int16_t sample,OversamplingWaveshaperDataType* waveshaper);
+__attribute__ ((section (".ramfunc"))) int16_t  OversamplingDistortionProcessSample(int16_t sample,OversamplingWaveshaperDataType* waveshaper);
 void oversamplingWaveshaperReset(OversamplingWaveshaperDataType*data);
 #endif

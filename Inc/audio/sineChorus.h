@@ -22,8 +22,8 @@ typedef struct
     uint16_t lfoUpdateCnt;
 } SineChorusType;
 
-int16_t sineChorusProcessSample(int16_t sampleIn,SineChorusType*data);
-int16_t sineChorusInterpolatedProcessSample(int16_t sampleIn,SineChorusType*data);
+__attribute__ ((section (".ramfunc"))) int16_t sineChorusProcessSample(int16_t sampleIn,SineChorusType*data);
+__attribute__ ((section (".ramfunc"))) int16_t sineChorusInterpolatedProcessSample(int16_t sampleIn,SineChorusType*data);
 void initSineChorus(SineChorusType*data,int8_t instanceNr);
 void sineChorusSetFrequency(uint16_t freq,SineChorusType*data);
 

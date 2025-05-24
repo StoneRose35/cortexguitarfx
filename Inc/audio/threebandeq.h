@@ -14,6 +14,6 @@ typedef struct
 } ThreeBandEQType;
 
 void initThreeBandEq(ThreeBandEQType*data);
-int16_t threeBandEqProcessSample(int16_t sampleIn,ThreeBandEQType*data);
+__attribute__ ((section (".ramfunc"))) int16_t threeBandEqProcessSample(int16_t sampleIn,ThreeBandEQType*data);
 void threeBandEqReset(ThreeBandEQType*data);
 #endif

@@ -16,7 +16,7 @@ typedef struct
 } Reverb2Type;
 
 
-int16_t reverb2ProcessSample(int16_t sampleIn,Reverb2Type*reverbData);
+__attribute__ ((section (".ramfunc"))) int16_t reverb2ProcessSample(int16_t sampleIn,Reverb2Type*reverbData);
 void initReverb2(Reverb2Type*reverbData);
 
 #endif

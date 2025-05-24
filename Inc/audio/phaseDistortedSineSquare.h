@@ -17,7 +17,7 @@ typedef struct
 
 
 
-int16_t phaseDistortedSineSquareNextSample(PhaseDistortedSineSquareType*data);
+__attribute__ ((section (".ramfunc"))) int16_t phaseDistortedSineSquareNextSample(PhaseDistortedSineSquareType*data);
 void phaseDistortedSineSquarePulseWidth(int16_t value,PhaseDistortedSineSquareType*data);
 void phaseDistortedSineSquareSetFrequency(float f,PhaseDistortedSineSquareType*data);
 float phaseDistortedSineSquareGetFrequency(PhaseDistortedSineSquareType*data);

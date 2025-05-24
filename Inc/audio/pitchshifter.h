@@ -25,8 +25,8 @@ typedef struct
 
 #define PITSHIFTER_BUFFER_SIZE_TWOS_POWER 11
 #define PITCHSHIFTER_BUFFER_SIZE (1<<PITSHIFTER_BUFFER_SIZE_TWOS_POWER)
-int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data,volatile uint32_t*audioStatePtr);
+__attribute__ ((section (".ramfunc"))) int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data,volatile uint32_t*audioStatePtr);
 void initPitchshifter(PitchshifterDataType*data);
-int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType*data,volatile uint32_t*audioStatePtr);
+__attribute__ ((section (".ramfunc"))) int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType*data,volatile uint32_t*audioStatePtr);
 void initPitchshifter2(Pitchshifter2DataType*data);
 #endif

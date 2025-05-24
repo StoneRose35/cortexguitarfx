@@ -11,6 +11,6 @@ typedef struct
 
 void initGainstage(GainStageDataType*data);
 
-int16_t gainStageProcessSample(int16_t sampleIn,GainStageDataType*data);
+__attribute__ ((section (".ramfunc"))) int16_t gainStageProcessSample(int16_t sampleIn,GainStageDataType*data);
 
 #endif

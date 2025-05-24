@@ -14,6 +14,7 @@
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/spi.h"
 #include "hardware/regs/resets.h"
+#include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
 #include "hardware/regs/dma.h"
 #include "system.h"
@@ -98,8 +99,6 @@ void initOledDisplay()
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     waitSysticks(11);
 
-    // enable interrupt on channel4
-    *DMA_INTE0 |= (1 << 4);
 }
 
 /**
@@ -304,8 +303,6 @@ void OledWriteLineAsync(volatile uint8_t * data)
 						| (1 << DMA_CH4_CTRL_TRIG_INCR_READ_LSB) 
 						| (0 << DMA_CH4_CTRL_TRIG_DATA_SIZE_LSB) // byte wise transfer
 						| (1 << DMA_CH4_CTRL_TRIG_EN_LSB);
-
-    *DMA_INTE0 |= (1 << 4);
 }
 
 void OledWriteNextLine(void)

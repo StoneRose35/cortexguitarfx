@@ -10,10 +10,10 @@
 #define JOYIT_128X64_DISPLAY
 
 // use CS4270 audio codec
-//#define CS4270_AUDIO_CODEC
+#define CS4270_AUDIO_CODEC
 
 // use PCM3060 audio codec
-#define PCM3060_AUDIO_CODEC
+//#define PCM3060_AUDIO_CODEC
 
 // uncomment to bypass the audio codec triggering the UI update
 // the audio codec clocks are held at reset in this case
@@ -21,6 +21,10 @@
 
 // uncomment to enable UART over USB
 //#define USB_UART
+
+// set 0 if the clipping LED's are connected between pin and Ground (RP2040 as source)
+// set 1 if the clipping LED's are connected between pin and 3.3V (RP2040 as sink)
+#define CLIPPING_LED_POLARITY 0
 
 // comment in to flash a test program useful for hardware integrity check
 //#define FORCE_TEST_MODE

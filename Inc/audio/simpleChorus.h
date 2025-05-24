@@ -23,5 +23,5 @@ void simpleChorusSetFrequency(uint16_t freq,SimpleChorusType*data);
 
 void initSimpleChorus(SimpleChorusType*data);
 
-int16_t simpleChorusProcessSample(int16_t sampleIn,SimpleChorusType*data);
+__attribute__ ((section (".ramfunc"))) int16_t simpleChorusProcessSample(int16_t sampleIn,SimpleChorusType*data);
 #endif

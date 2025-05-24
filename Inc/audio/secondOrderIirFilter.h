@@ -11,6 +11,6 @@ typedef struct
 
 void initSecondOrderIirFilter(SecondOrderIirFilterType* data);
 
-int16_t secondOrderIirFilterProcessSample(int16_t sampleIn,SecondOrderIirFilterType*data);
+__attribute__ ((section (".ramfunc"))) int16_t secondOrderIirFilterProcessSample(int16_t sampleIn,SecondOrderIirFilterType*data);
 void secondOrderIirFilterReset(SecondOrderIirFilterType*data);
 #endif

@@ -23,9 +23,9 @@
 #define F_ADC_USB (48000000)
 // system and usb clocks
 // divider factors, calculated using helper_scripts.py
-#define POSTDIV1 3
+#define POSTDIV1 6
 #define POSTDIV1_USB 6
-#define POSTDIV2 2
+#define POSTDIV2 1
 #define POSTDIV2_USB 5
 #define NP_CLKDIV 15
 #define FEEDBK 100
@@ -33,8 +33,7 @@
 #define F_SYS (F_XOSC*FEEDBK/POSTDIV1/POSTDIV2)
 #define F_USB (F_XOSC*FEEDBK_USB/POSTDIV1_USB/POSTDIV2_USB)
 // flash access clock
-#define PICO_FLASH_SPI_CLKDIV 2 // SSI Clock speed is F_SYS/PICO_FLASH_SPI_CLKDIV, less than 133MHz according to V25Q16JVU datasheet
-                                // must be an even value
+#define PICO_FLASH_SPI_CLKDIV 4 
 // spi clock_division
 #define SPI_SCR 19
 #define SPI_SSPCPSR 2
@@ -64,6 +63,7 @@
 #define TASK_PROCESS_AUDIO_INPUT 5 //<! audio input buffer has been filled, process it
 #define TASK_UPDATE_POTENTIOMETER_VALUES 6  //<! potentiometer values have been read --> update
 #define TASK_UPDATE_AUDIO_UI 7
+#define TASK_I2C_DATA_RECEIVED 10 // I2C data has been received and is ready to be processed
 #define CONTEXT_USB 0 //!<bit position: if set output of prints is routed to the USB console
 #define CONTEXT_BT 1 //!<bit position: if set output of prints is routed to the bluetooth console
 

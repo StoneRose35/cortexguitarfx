@@ -12,6 +12,7 @@
 
 #include "stdint.h"
 #ifdef RP2040_FEATHER
+__attribute__ ((section (".ramfunc"))) 
 inline int32_t clip(int32_t sample,volatile uint32_t*audioStatePtr)
 {
     if (sample > 32767)
@@ -29,7 +30,7 @@ inline int32_t clip(int32_t sample,volatile uint32_t*audioStatePtr)
         return sample;
     }
 }
-
+__attribute__ ((section (".ramfunc"))) 
 inline int32_t clip_input(int32_t sample,volatile uint32_t*audioStatePtr)
 {
     if (sample > 32767)

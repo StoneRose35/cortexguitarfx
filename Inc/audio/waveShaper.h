@@ -37,7 +37,7 @@ extern const WaveShaperDataTypeRO waveShaperAsymm;
 extern const MultiWaveShaperDataTypeRO multiWaveshaper1;
 
 
-int16_t multiWaveShaperProcessSample(int16_t sampleIn,MultiWaveShaperDataType*data);
+__attribute__ ((section (".ramfunc"))) int16_t multiWaveShaperProcessSample(int16_t sampleIn,MultiWaveShaperDataType*data);
 int16_t waveShaperProcessSample(int16_t sampleIn,WaveShaperDataType*data);
 #else
 

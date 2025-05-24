@@ -13,6 +13,6 @@
 
  } TremoloType;
 
-int16_t tremoloProcessSample(int16_t sample,TremoloType*data);
+__attribute__ ((section (".ramfunc"))) int16_t tremoloProcessSample(int16_t sample,TremoloType*data);
 void initTremolo(TremoloType*data);
 #endif

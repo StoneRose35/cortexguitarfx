@@ -57,6 +57,7 @@ void initDMA()
  * on channel 0 an interrupt is asserted when the neopixel data has been fully clocked out
  * on channel 1 an interrupt is asserted when data has been sent over the usb uart
  */
+__attribute__ ((section (".ramfunc"))) 
 void isr_c0_dma_irq0_irq11()
 {
 	/*
@@ -186,7 +187,6 @@ void isr_c0_dma_irq0_irq11()
 	}
 	return;
 }
-
 
 
 void isr_c1_dma_irq0_irq11()
