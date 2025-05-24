@@ -111,7 +111,6 @@ int main(void)
 	initTimer();
 	initAdc();
 	initDatetimeClock();
-	initI2SSlave();
 	#ifdef WM8731
 	initI2c(26);
 	#endif
@@ -140,8 +139,7 @@ int main(void)
 		DebugLedOn();
 		core1Handshake = *SIO_FIFO_RD;
 	}
-
-
+	
 	#ifdef USB_UART
 	initUSB();
 	#endif
@@ -153,38 +151,11 @@ int main(void)
 	 * 
 	 * */
 
-
-	initOledDisplay();
-
-	/*
-     *
-     * Initialize Background Services
-     *
-	 */
-
-	
-	piPicoFxUiSetup(&piPicoUiController);
-	OledClearDisplay();
-	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	{
-		if ((uint32_t)fxPrograms[c]->setup != 0)
-		{
-			fxPrograms[c]->setup(fxPrograms[c]->data);
-		}
-	}
-	#ifndef FORCE_TEST_MODE
-		enterLevel0(&piPicoUiController);
-	#else
-	    // switch on program "off"
-		piPicoUiController.currentProgramIdx = N_FX_PROGRAMS-1;
-		piPicoUiController.currentProgram=fxPrograms[piPicoUiController.currentProgramIdx];
-	    enterLevel7(&piPicoUiController);
-	#endif
 	#ifdef USB_UART
 	initCliApi(&bufferedInput,NULL,&usbApi,&usbCommBuffer,sendOverUsb);
 	#endif
 
-
+	initI2SSlave();
 
 
 	ticEnd=0;

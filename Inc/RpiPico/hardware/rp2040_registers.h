@@ -280,6 +280,7 @@
 #define I2C_IC_CLR_START_DET ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_START_DET_OFFSET))
 #define I2C_IC_CLR_STOP_DET ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_STOP_DET_OFFSET))
 #define I2C_IC_CLR_TX_ABRT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_TX_ABRT_OFFSET))
+#define I2C_IC_CLR_ACTIVITY ((volatile uint32_t*)(I2C0_BASE + I2C_IC_CLR_ACTIVITY_OFFSET))
 #define I2C_IC_TXFLR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TXFLR_OFFSET))
 #define I2C_IC_TX_TL ((volatile uint32_t*)(I2C0_BASE +I2C_IC_TX_TL_OFFSET))
 #define I2C_IC_RXFLR ((volatile uint32_t*)(I2C0_BASE +I2C_IC_RXFLR_OFFSET))
@@ -288,6 +289,7 @@
 #define I2C_IC_SS_SCL_HCNT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_SS_SCL_HCNT_OFFSET))
 #define I2C_IC_SS_SCL_LCNT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_SS_SCL_LCNT_OFFSET))
 #define I2C_IC_STATUS ((volatile uint32_t*)(I2C0_BASE +I2C_IC_STATUS_OFFSET))
+#define I2C_IC_ENABLE_STATUS ((volatile uint32_t*)(I2C0_BASE +I2C_IC_ENABLE_STATUS_OFFSET))
 
 #define I2C_IC_CLR_TX_ABRT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_CLR_TX_ABRT_OFFSET))
 #define I2C_IC_RAW_INTR_STAT ((volatile uint32_t*)(I2C0_BASE +I2C_IC_RAW_INTR_STAT_OFFSET))

@@ -13,23 +13,21 @@
 static uint8_t cs4270Write(uint16_t data)
 {
     uint8_t res=0;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
-    {
-        setTargetAddress(CS4270_I2C_ADDRESS);
-    }
-    res += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
-    res += masterTransmit((uint8_t)(data&0xFF),1);
+    uint8_t sendBfr[2];
+    sendBfr[0] = (uint8_t)((data >> 8)&0xFF);
+    sendBfr[1] = (uint8_t)(data&0xFF);
+    I2CsendMultiple(sendBfr,2,CS4270_I2C_ADDRESS);
     return res;
 }
 
 static uint8_t cs4270Read(uint8_t reg)
 {
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
-    {
-        setTargetAddress(CS4270_I2C_ADDRESS);
-    }
-    masterTransmit(reg,1);
-    return masterReceive(1);
+    uint8_t buffer[1];
+
+    buffer[0]=reg;
+    I2CsendMultiple(buffer,1,CS4270_I2C_ADDRESS);
+    I2CReceiveMultiple(buffer,1,CS4270_I2C_ADDRESS);
+    return buffer[0];
 }
 
 void cs4270PowerDown()
@@ -150,10 +148,7 @@ uint8_t cs4270GetInputState()
 void cs4270SetOutputVolume(uint8_t channel,uint8_t volume)
 {
     uint16_t regdata;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
-    {
-        setTargetAddress(CS4270_I2C_ADDRESS);
-    }
+    uint8_t sendBfr[3];
     if (channel == CS4270_CHANNEL_A) 
     {
         regdata = (CS4270_R7 << 8);
@@ -173,9 +168,10 @@ void cs4270SetOutputVolume(uint8_t channel,uint8_t volume)
     }
     else
     {
-        masterTransmit((0x80 | CS4270_R7),0);
-        masterTransmit((0xFF - volume),0);
-        masterTransmit((0xFF - volume),1);
+        sendBfr[0] = (0x80 | CS4270_R7);
+        sendBfr[1] = (0xFF - volume);
+        sendBfr[2] = (0xFF - volume);
+        I2CsendMultiple(sendBfr,3,CS4270_I2C_ADDRESS);
     }
 }
 
@@ -187,14 +183,13 @@ uint16_t cs4270GetOutputVolume()
 {
     uint16_t outval=0;
     uint8_t channelVal;
-    if (getTargetAddress()!=CS4270_I2C_ADDRESS)
-    {
-        setTargetAddress(CS4270_I2C_ADDRESS);
-    }
-    masterTransmit((0x80 | CS4270_R7),1);
-    channelVal = 0xFF - masterReceive(0);
+    uint8_t buffer[2];
+    buffer[0] = (0x80 | CS4270_R7);
+    I2CsendMultiple(buffer,1,CS4270_I2C_ADDRESS);
+    I2CReceiveMultiple(buffer,2,CS4270_I2C_ADDRESS);
+    channelVal = 0xFF - buffer[0];
     outval |= (channelVal << 8);
-    channelVal = 0xFF - masterReceive(0);
+    channelVal = 0xFF - buffer[1];
     outval |= channelVal;
     return outval;
 }

@@ -4,10 +4,11 @@
 
 uint8_t wm8731_write(uint16_t data)
 {
-    uint8_t retcodes=0;
-    retcodes += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
-    retcodes += masterTransmit((uint8_t)(data&0xFF),1);
-    return retcodes;
+    uint8_t buffer[2];
+    buffer[0] = (uint8_t)((data >> 8)&0xFF);
+    buffer[1] = (uint8_t)(data&0xFF);
+    I2CsendMultiple(buffer,2,WM8731_ADDRESS);
+    return 0;
 }
 
 void setupWm8731(uint8_t sampledepth,uint8_t samplerate)

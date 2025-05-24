@@ -123,7 +123,7 @@ std_isr isr_c0_irq31
 
 .global __vectors_core1 
 __vectors_core1:
-.word __StackTop
+.word __StackTopOne
 .word _start_c_runtime
 .word isr_c1_nmi
 .word isr_c1_hardfault
@@ -275,20 +275,6 @@ ldr r1,=main
 blx r1
 
 
-// utility delay function
-
-.global _sr35_delay
-.type _sr35_delay,%function
-_sr35_delay:
-    movs r1,#0
-    b _delay_test
-    _delay_loop:
-    adds r1,#1
-    _delay_test:
-    cmp r1,r0
-    bne _delay_loop
-    bx lr
-        
 // data table addresses used to copy data from flash to ram     
 
 .align 4
@@ -296,3 +282,24 @@ data_section_addresses:
 .word __etext
 .word __data_start__
 .word __data_end__
+
+
+// utility delay function
+// total delay without interruptions is 
+// 1+2 + <delay>*4 - 1 cpu cycles
+// thus roughly cpu cycles times four
+
+.section .ramfunc,"ax"
+.align 2
+.global _sr35_delay
+.type _sr35_delay,%function
+.thumb_func
+_sr35_delay:
+    movs r1,#0  // 1
+    b _delay_test // 2
+    _delay_loop:
+    adds r1,#1 // 1
+    _delay_test:
+    cmp r1,r0 // 1
+    bne _delay_loop // 2, 1 for the last
+    bx lr // 2

@@ -19,6 +19,7 @@
 #include "drivers/systick.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
+#include "hardware/regs/dma.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
 
@@ -74,6 +75,35 @@ void core1Main()
 {
     audioStatePtr = getAudioStatePtr();
 
+
+    	initOledDisplay();
+
+	/*
+     *
+     * Initialize Background Services
+     *
+	 */
+
+	
+	piPicoFxUiSetup(&piPicoUiController);
+	OledClearDisplay();
+    *DMA_INTE0 |= (1 << 4);
+	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
+	{
+		if ((uint32_t)fxPrograms[c]->setup != 0)
+		{
+			fxPrograms[c]->setup(fxPrograms[c]->data);
+		}
+	}
+	#ifndef FORCE_TEST_MODE
+		enterLevel0(&piPicoUiController);
+	#else
+	    // switch on program "off"
+		piPicoUiController.currentProgramIdx = N_FX_PROGRAMS-1;
+		piPicoUiController.currentProgram=fxPrograms[piPicoUiController.currentProgramIdx];
+	    enterLevel7(&piPicoUiController);
+	#endif
+
     // initalized the rotary encoder and the switches so that core 1 handler the interrupts of the ui elements
     initRotaryEncoder(switchesPins,2);
     #ifdef EXTENSION_BOARD
@@ -88,10 +118,10 @@ void core1Main()
     setStompswitchColorRaw(0);
     #endif
 
+    *NVIC_ISER = (1 << 16) | (1 << 23) | (1 << 11); // enable interrupt for dma,sio and i2c of proc1 
+    setInterruptPriority(11,1);
     *SIO_FIFO_ST = (1 << 2);
     *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
-    *NVIC_ISER = (1 << 16) | (1 << 11); // enable interrupt for dma and sio of proc1 
-    setInterruptPriority(11,1);
 
     for(;;)
     {
@@ -147,25 +177,32 @@ void core1Main()
             #ifndef FORCE_TEST_MODE
             if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
             {
-                setPin(CLIPPING_LED_INPUT,0);
+                setPin(CLIPPING_LED_INPUT,CLIPPING_LED_POLARITY ^ 1);
                 *audioStatePtr &= ~(1 << AUDIO_STATE_INPUT_CLIPPED);
             }
             else
             {
-                setPin(CLIPPING_LED_INPUT,1);
+                setPin(CLIPPING_LED_INPUT,CLIPPING_LED_POLARITY);
             }
             if ((*audioStatePtr & (1 << AUDIO_STATE_OUTPUT_CLIPPED)) == (1 << AUDIO_STATE_OUTPUT_CLIPPED))
             {
-                setPin(CLIPPING_LED_OUTPUT,0);
+                setPin(CLIPPING_LED_OUTPUT,CLIPPING_LED_POLARITY ^ 1);
                 *audioStatePtr &= ~(1 << AUDIO_STATE_OUTPUT_CLIPPED);
             }
             else
             {
-                setPin(CLIPPING_LED_OUTPUT,1);
+                setPin(CLIPPING_LED_OUTPUT,CLIPPING_LED_POLARITY);
             }
             #endif
             
             task &= ~(1 << TASK_UPDATE_AUDIO_UI);
+        }
+
+        if ((task & (1 << TASK_I2C_DATA_RECEIVED))!=0)
+        {
+
+            handleSwitchesUpdate(I2CGetReceivedData());
+            task &= ~(1 << TASK_I2C_DATA_RECEIVED);
         }
 
         /*
@@ -270,7 +307,6 @@ void core1Main()
 
             programChangeState = 4;
         }
-        requestSwitchesUpdate();
         #endif
     }
 }

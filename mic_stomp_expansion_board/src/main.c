@@ -25,7 +25,7 @@ void startDebounceTimer(void);
 void startDebounceTimer(void)
 {
 	TCNT0 = 0;
-	TCCR0B = 4; // divide by 256
+	TCCR0B = 5; // divide by 1024
 	OCR0A = 117; // compare match after roughly 30ms
 	TIMSK0 = 2; // output compare a enabled
 }
@@ -36,7 +36,12 @@ int main(void)
 	PORTB = 0x7;
 	DDRD = 0x3;
 	DDRC = 0xF;
+
+	CLKPR = 0x80; // enable
+	CLKPR = 0x01; // set prescaler of 8MHz/2 results in 4MHz system clock
 	
+	TWBR = ((40-16)>>1); // adjust the bit rate register for a bit rate of 100 kHz
+
 	// initialize i2c to listen to address 23
 	TWAR = (I2C_ADDRESS << 1);
 	TWCR |= (1 << TWIE) | (1 << TWEA) | (1 << TWEN);
@@ -46,7 +51,7 @@ int main(void)
 	while(1)
 	{
 		footswitchstate = PINB & 0x7;	
-		if (footswitchstateOld != footswitchstate)
+		if (footswitchstateOld != footswitchstate && sendOperationPending == 0)
 		{
 			if (TCCR0B == 0) // counter didn't run, change is valid
 			{
@@ -74,19 +79,17 @@ void sendStompSwitchesState(void)
 
 ISR ( TWI_vect )
 {
-	//PORTD &= ~0x2;
 	if ((TWSR & 0xF8) == I2C_OWN_ADDRESS_WRITE)
 	{
 		// got own address and request to write
 		// wait for command
-		TWCR |= (1 << TWEA) | (1 << TWINT)| (1 << TWEN);
+		TWCR |= (1 << TWEA) | (1 << TWINT)| (1 << TWEN) | (1 << TWIE);
 	}
 	else if ((TWSR & 0xF8) == I2C_DATA_RECEIVED)
 	{
 		// led status data has been received
 		ledState = TWDR;
-		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
-
+		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWEA) | (1 << TWIE);
 	}
 	else if ((TWSR & 0xF8) == I2C_OWN_ADDRESS_READ)
 	{
@@ -102,29 +105,31 @@ ISR ( TWI_vect )
 	{
 		// start has been sent, continue with main board address
 		TWDR = (I2C_MAINBOARD_ADDRESS << 1);
-		TWCR |= (1 << TWINT) | (1 << TWEN);
+		TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWIE);
+		
 	}
 	else if ((TWSR & 0xF8) == I2C_ADDRESS_TRANSMITTED_ACK)
 	{
-		TWDR = footswitchstate;
-		TWCR |= (1 << TWINT) | (1 << TWEN);
+		TWDR = footswitchstateOld & 0xFF;
+		TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWIE);
+		
 	}
 	else if ((TWSR & 0xF8) == I2C_DATA_TRANSMITTED_ACK)
 	{
 		sendOperationPending = 0;
-		TWCR |= (1 << TWINT) | (1 << TWSTO) | (1 << TWEA);
+		TWCR = (1 << TWINT) | (1 << TWSTO) | (1 << TWEA) | (1 << TWEN) | (1 << TWIE);
 	}
 	else if (((TWSR & 0xF8) == I2C_DATA_TRANSMITTED_NACK) || ((TWSR & 0xF8) == I2C_ADDRESS_TRANSMITTED_NACK))
 	{
-		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWSTA); // immediately retry
+		TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTA) | (1 << TWIE); // immediately retry
 	}
 	else if (((TWSR & 0xF8) == I2C_ARBITRATION_LOST) && sendOperationPending != 0)
 	{
-		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWSTA); // immediately retry
+		TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTA) | (1 << TWIE); // immediately retry
 	}
 	else
 	{
-		TWCR |= (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
+		TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA) | (1 << TWIE);
 	}
 }
 

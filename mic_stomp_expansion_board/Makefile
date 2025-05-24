@@ -1,6 +1,6 @@
 PROJECTNAME=mic_stomp
 CC=avr-gcc
-CARGS=-Wall -Og -DF_CPU=1000000UL -mmcu=atmega88
+CARGS=-Wall -Og -DF_CPU=4000000UL -mmcu=atmega88
 OBJCOPY=avr-objcopy
 OCARGS=-j .text -j .data -O ihex 
 

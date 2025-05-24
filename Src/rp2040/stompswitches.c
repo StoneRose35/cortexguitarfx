@@ -40,11 +40,7 @@ void clearStompSwitchStickyReleased(uint8_t switchNr)
 
 void sendColors()
 {
-    if (getTargetAddress()!=STOMPSWITCHES_I2C_ADDRESS)
-    {
-        setTargetAddress(STOMPSWITCHES_I2C_ADDRESS);
-    }
-    masterTransmit(switchesColors.rawColors,1);
+    I2CsendMultiple((uint8_t*)&switchesColors,1,STOMPSWITCHES_I2C_ADDRESS);
 }
 
 void setStompswitchColor(uint8_t switchNr,uint8_t clr)
@@ -70,29 +66,25 @@ void setStompswitchColorRaw(uint8_t data)
     sendColors();
 }
 
-void requestSwitchesUpdate()
-{
-    uint8_t i2cData;
-    if (getTargetAddress()!=STOMPSWITCHES_I2C_ADDRESS)
+void handleSwitchesUpdate(volatile I2CReceivedDataType * receivedData)
+{   
+    uint8_t val; 
+    if (receivedData->dataSize != 0 && receivedData->data[0] != 0xff)
     {
-        setTargetAddress(STOMPSWITCHES_I2C_ADDRESS);
-    }
-    i2cData = masterReceive(1);
-    if (i2cData != 0xff)
-    {
+        val = receivedData->data[0];
         for (uint8_t c=0;c<NR_STOMPSWITCHES;c++)
         {
-            if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) == 0) && (i2cData & (1 << c)) == 0)
+            if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) == 0) && (val & (1 << c)) == 0)
             {
                 switchesState[c] |= (1 << 1); // set sticky pressed
             }
-            else if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) != 0) && (i2cData & (1 << c)) != 0)
+            else if (((switchesState[c] & SWITCH_STATE_MOMENTARY_MSK) != 0) && (val & (1 << c)) != 0)
             {
                 switchesState[c] |= (1 << 2); // set sticky released
             }
             // set momentary value
             switchesState[c] &= ~(1);
-            switchesState[c] |= 0x1 ^ ((i2cData & (1 << c)) >> c);
+            switchesState[c] |= 0x1 ^ ((val & (1 << c)) >> c);
         }
     }
 }

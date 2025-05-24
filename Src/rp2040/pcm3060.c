@@ -14,23 +14,21 @@
 static uint8_t pcm3060Write(uint16_t data)
 {
     uint8_t res=0;
-    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
-    {
-        setTargetAddress(PCM3060_I2C_ADDRESS);
-    }
-    res += masterTransmit((uint8_t)((data >> 8)&0xFF),0);
-    res += masterTransmit((uint8_t)(data&0xFF),1);
+    uint8_t sendBfr[2];
+    sendBfr[0] = (uint8_t)((data >> 8)&0xFF);
+    sendBfr[1] = (uint8_t)(data&0xFF);
+    res = I2CsendMultiple(sendBfr,2,PCM3060_I2C_ADDRESS);
     return res;
 }
 
 static uint8_t pcm3060Read(uint8_t reg)
 {
-    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
-    {
-        setTargetAddress(PCM3060_I2C_ADDRESS);
-    }
-    masterTransmit(reg,1);
-    return masterReceive(1);
+    uint8_t buffer[1];
+
+    buffer[0]=reg;
+    I2CsendMultiple(buffer,1,PCM3060_I2C_ADDRESS);
+    I2CReceiveMultiple(buffer,1,PCM3060_I2C_ADDRESS);
+    return buffer[0];
 }
 
 void pcm3060PowerDown()
@@ -136,10 +134,7 @@ uint8_t pcm3060GetInputState()
 void pcm3060SetOutputVolume(uint8_t channel,uint8_t volume)
 {
     uint16_t regData;
-    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
-    {
-        setTargetAddress(PCM3060_I2C_ADDRESS);
-    }
+    uint8_t sendBfr[3];
 
     if (channel ==PCM3060_CHANNEL_LEFT || channel == PCM3060_CHANNEL_BOTH)
     {
@@ -156,9 +151,10 @@ void pcm3060SetOutputVolume(uint8_t channel,uint8_t volume)
     }
     else
     {
-        masterTransmit(PCM3060_R65,0);
-        masterTransmit(volume,0);
-        masterTransmit(volume,1);
+        sendBfr[0]=PCM3060_R65;
+        sendBfr[1]=volume;
+        sendBfr[2]=volume;
+        I2CsendMultiple(sendBfr,3,PCM3060_I2C_ADDRESS);
     }
 }
 
@@ -169,16 +165,9 @@ LEFT is in the MSB, RIGHT in the LSB
 */
 uint16_t pcm3060GetOutputVolume()
 {
-    uint16_t outval=0;
-    uint8_t channelVal;
-    if (getTargetAddress()!=PCM3060_I2C_ADDRESS)
-    {
-        setTargetAddress(PCM3060_I2C_ADDRESS);
-    }
-    masterTransmit(PCM3060_R65,1);
-    channelVal = masterReceive(0);
-    outval |= (channelVal << 8);
-    channelVal = masterReceive(0);
-    outval |= channelVal;
-    return outval;
+    uint8_t buffer[2];
+    buffer[0] = PCM3060_R65;
+    I2CsendMultiple(buffer,1,PCM3060_I2C_ADDRESS);
+    I2CReceiveMultiple(buffer,2,PCM3060_I2C_ADDRESS);
+    return *((uint16_t*)buffer);
 }
