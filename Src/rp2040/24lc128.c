@@ -9,7 +9,7 @@ uint8_t eeprom24s128WritePage(uint32_t address,uint16_t len, uint8_t* data)
 
     sendBfr[0] = (address >> 8) &0xFF;
     sendBfr[1] = (address) &0xFF;
-    for(uint16_t c=0;c<len-1;c++)
+    for(uint16_t c=0;c<len;c++)
     {
         sendBfr[c+2] = *(data+c);
     }
