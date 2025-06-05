@@ -32,6 +32,6 @@ uint16_t getUsbCdcReceivedDataLevel();
 uint16_t readUsbCdcData(uint8_t *);
 void USBCDCInit();
 uint8_t usbCdcHandleClassSetupRequest(const UsbSetupPacketType* packet);
-
+uint8_t usbCdcSetInterfaceHandler(uint16_t,uint16_t);
 uint8_t usbCdcSetConfiguration(uint16_t confNr);
 #endif

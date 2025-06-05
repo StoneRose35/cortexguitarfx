@@ -39,7 +39,7 @@
 #define TASK_DISPLAY_NEXT_LINE 9 //issued by the display driver: next line content should be transferred from dma
 #define TASK_I2C_DATA_RECEIVED 10 // I2C data has been received and is ready to be processed
 #define TASK_PREPARE_FOR_DFU 11 // prepare the system for dfu, i.e. shut down interrupt and any possibilities to access flash or qspi code
-
+#define TASK_MANIFEST_DFU 12 // DFU manifestation phase
 
 #define CONTEXT_USB 0 //!<bit position: if set output of prints is routed to the USB console
 #define CONTEXT_BT 1 //!<bit position: if set output of prints is routed to the bluetooth console

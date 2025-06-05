@@ -270,7 +270,7 @@ void OTG_FS_IRQHandler(void)
                     }  
                     outEndpoint->DOEPINT = (1 << USB_OTG_DOEPINT_STUP_Pos);            
                 }
-                if ((outEndpoint->DOEPINT & (1 << USB_OTG_DOEPINT_XFRC_Pos)))
+                else if ((outEndpoint->DOEPINT & (1 << USB_OTG_DOEPINT_XFRC_Pos)))
                 {
                     if (outHandlers[epNr] != 0 && epOutBuffers[epNr] != 0)
                     {
@@ -552,10 +552,6 @@ void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen)
         USB2_OTG_FS_DEVICE->DIEPEMPMSK |= (1UL << epNr);
     }
     
-    //for (uint16_t c=0;c<dlen;c++)
-    //{
-    //    epInBuffers[epNr][c] = *(data+c);
-    //}
     epInBuffers[epNr] = (uint8_t*)data;
     epInBytesTransferred[epNr]=0;
     epInDataCntrs[epNr] = dlen;
@@ -570,22 +566,30 @@ void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen)
 __RAMFUNC
 void prepareUSBReception(uint8_t epNr,uint16_t dataSize)
 {
+    uint32_t regval=0;
     uint16_t nPackets = (dataSize / epOutMaxPacketSizes[epNr]) + 1;
     USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*epNr));
-    outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_XFRSIZ & dataSize);
-    outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_PKTCNT & (nPackets << 19));
-    outEndpoint->DOEPCTL &= ~(1 << USB_OTG_DOEPCTL_STALL_Pos);
-    outEndpoint->DOEPCTL |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
+    regval = outEndpoint->DOEPTSIZ & USB_OTG_DOEPTSIZ_STUPCNT;
+    regval |= (USB_OTG_DOEPTSIZ_XFRSIZ & dataSize);
+    regval |= (USB_OTG_DOEPTSIZ_PKTCNT & (nPackets << 19));
+    outEndpoint->DOEPTSIZ = regval;
+    regval=0;
+    regval |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
+    outEndpoint->DOEPCTL = regval;
 }
 
 __RAMFUNC
 void prepareEP0Rception(void)
 {
+    uint32_t regval;
     USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*0));
-    outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_XFRSIZ & epOutMaxPacketSizes[0]);
-    outEndpoint->DOEPTSIZ |= (USB_OTG_DOEPTSIZ_PKTCNT & (1U << 19));
-    outEndpoint->DOEPCTL &= ~(1 << USB_OTG_DOEPCTL_STALL_Pos);
-    outEndpoint->DOEPCTL |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
+    regval = outEndpoint->DOEPTSIZ & USB_OTG_DOEPTSIZ_STUPCNT;
+    regval |= (USB_OTG_DOEPTSIZ_XFRSIZ & epOutMaxPacketSizes[0]);
+    regval |= (USB_OTG_DOEPTSIZ_PKTCNT & (1U << 19));
+    outEndpoint->DOEPTSIZ = regval;
+    regval=0;
+    regval |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
+    outEndpoint->DOEPCTL = regval;
 }
 
 __RAMFUNC

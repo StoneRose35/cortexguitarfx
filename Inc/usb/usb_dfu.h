@@ -54,10 +54,12 @@ void prepareSystemForDFU();
 
 uint8_t setUsbConfigurationDfu(uint16_t confNr);
 
-void setUsbDfuStatus(volatile UsbDfuStatusType*statusStruct,uint8_t status,uint32_t timeout);
+void setUsbDfuStatus(volatile UsbDfuStatusType*statusStruct,uint8_t status,uint8_t nextState,uint32_t timeout);
 
 void endPoint0DfuHandler(void*data,uint16_t dataSize);
 
 void usbDfuResetHandler(void);
 
 uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet);
+
+void usbDfuEndManifestation();

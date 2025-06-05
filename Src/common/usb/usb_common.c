@@ -10,6 +10,7 @@
 #include "uart.h"
 #include "globalConfig.h"
 #include "memoryRegions.h"
+#include "usb/usb_dfu.h"
 
 
     
@@ -30,6 +31,8 @@ static volatile UsbStringDescriptor currentStringDescriptors;
 static uint8_t(*currentConfigurationHandler)(uint16_t);
 
 static uint8_t(*currentUsbClassSpecificSetupHandler)(const volatile UsbSetupPacketType*)=0;
+
+static uint8_t(*currentUsbSetInterfaceHandler)(uint16_t alternateSetting,uint16_t interfaceIndex)=0;
 
 // Function to decode a USB setup packet
 __RAMFUNC
@@ -169,6 +172,13 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                     prepareUSBTransfer(0,dataPtr,effLength); // sends out data if effLength > 0, an empty/status package otherwise
                 }
                 break;
+            case 0x0B: // SET_INTERFACE
+                if (packet->wValue == 0 && packet->wIndex == 2) // acknowledge when switching to interface 2 (usb dfu)
+                {
+                    setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest);
+                }
+                prepareUSBTransfer(0,0,0);
+                break;
             default:
                 break;
         }
@@ -243,4 +253,10 @@ __RAMFUNC
 void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*))
 {
     currentUsbClassSpecificSetupHandler = handler;
+}
+
+__RAMFUNC
+void setSetInterfaceHandler(uint8_t(*handler)(uint16_t,uint16_t))
+{
+    currentUsbSetInterfaceHandler = handler;    
 }

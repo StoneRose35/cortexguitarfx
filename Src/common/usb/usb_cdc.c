@@ -147,12 +147,12 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     //------------------------------------
     0x09, //bLength
     0x21, //bDescriptorType
-    (uint8_t)((1 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0)), //bmAttributes:will detach, can download and upload 
+    (uint8_t)((0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0)), //bmAttributes:will not automatically detach and reattach, not manifestation tolerant, can download and upload 
     0xF0, //wDetachTimeOut, lsb
     0x00, //wDetachTimeOut, msb
-    0x00, //wTransferSize, lsb
-    0x02, //wTransferSize, msb
-    0x1a, // bcdDFUVersion
+    0x40, //wTransferSize, lsb
+    0x00, //wTransferSize, msb
+    0x00, // bcdDFUVersion
     0x01  // bcdDFUVersion
     };
     
@@ -186,6 +186,7 @@ void USBCDCInit()
     setUsbStringDescriptors(stringDescriptors);
     setConfigurationHandler(&usbCdcSetConfiguration);
     setClassSpecificSetupHandler(&usbCdcHandleClassSetupRequest);
+    setSetInterfaceHandler(&usbCdcSetInterfaceHandler);
 }
 
 volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress
@@ -311,6 +312,16 @@ uint8_t usbCdcHandleClassSetupRequest(const UsbSetupPacketType* packet)
     default:
         
         break;
+    }
+    return 0;
+}
+
+uint8_t usbCdcSetInterfaceHandler(uint16_t alternateSetting,uint16_t interfaceIndex)
+{
+    if (alternateSetting==0 && interfaceIndex == 2) // match dfu interface with alternate setting 0
+    {
+        setClassSpecificSetupHandler(usbDfuHandleClassSetupRequest); // switch over to dfu mode (required for dfu-util)
+        prepareUSBTransfer(0,0,0);
     }
     return 0;
 }

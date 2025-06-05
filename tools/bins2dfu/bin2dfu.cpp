@@ -459,7 +459,7 @@ int main(int argc,char ** argv)
     bytesBfr[6] = 'F';
     bytesBfr[7] = 'U'; //ucDfuSignature
     bytesBfr[8] = 0x1;
-    bytesBfr[9] = 0x1a; //bcdDfu
+    bytesBfr[9] = 0x00; //bcdDfu
     bytesBfr[10] = __HIBYTE(USB_VENDOR_ID);
     bytesBfr[11] = __LOBYTE(USB_VENDOR_ID);
     bytesBfr[12] = __HIBYTE(USB_PRODUCT_ID);

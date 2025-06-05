@@ -197,4 +197,5 @@ void setUsbDeviceDescriptor(const uint8_t * deviceDescr,const uint16_t size);
 void setUsbStringDescriptors(UsbStringDescriptor stringDescrs);
 void setConfigurationHandler(uint8_t(*confHandler)(uint16_t));
 void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*));
+void setSetInterfaceHandler(uint8_t(*handler)(uint16_t,uint16_t));
 #endif
