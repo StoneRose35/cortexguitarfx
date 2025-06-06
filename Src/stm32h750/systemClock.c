@@ -65,7 +65,7 @@ void setupClock()
     RCC->CFGR |= (16 << RCC_CFGR_RTCPRE_Pos);
 
     // adapt flash latency
-    FLASH->ACR |= 4;
+    FLASH->ACR = (4 << FLASH_ACR_LATENCY_Pos) | (2 << FLASH_ACR_WRHIGHFREQ_Pos);
 
     // switch to pll
     cfgr = RCC->CFGR;
