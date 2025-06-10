@@ -1,8 +1,10 @@
 #include "flash.h"
 #include "stm32h750/stm32h750xx.h"
+#include "memoryRegions.h"
 
 
 
+__RAMFUNC
 uint8_t unlockFlash()
 {
  
@@ -18,6 +20,7 @@ uint8_t unlockFlash()
     return 0;
 }
 
+__RAMFUNC
 uint8_t eraseSector()
 {
      uint8_t res;
@@ -43,10 +46,11 @@ uint8_t eraseSector()
     data: array of input data, always 32 bytes long
     address: relative to start of Bank 1, Sector 0
 */
+__RAMFUNC
 uint8_t writeFlashWord(uint8_t*data,uint32_t address)
 {
     uint8_t res;
-    if ((address & 0x1F) != 0) // address is note 32 byte aligned
+    if ((address & 0x1F) != 0) // address is not 32 byte aligned
     {
         return 2;
     }
