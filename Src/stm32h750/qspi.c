@@ -1,5 +1,6 @@
 #include "qspi.h"
 #include "stm32h750/stm32h750xx.h"
+#include "memoryRegions.h"
 
 /*
 &config_.pin_config.io0,
@@ -113,7 +114,6 @@ void setQspiGpio(const QspiPinType * pinType)
 }
 
 
-
 void initQspi()
 {
     volatile uint8_t reg;
@@ -209,7 +209,7 @@ void initQspi()
     }
 }
 
-
+__RAMFUNC
 void waitForStatus(uint32_t maskr,uint32_t matchr)
 {
     while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
@@ -226,6 +226,7 @@ void waitForStatus(uint32_t maskr,uint32_t matchr)
     QUADSPI->FCR = (1 << QUADSPI_FCR_CSMF_Pos);
 }
 
+__RAMFUNC
 void waitForStatusQpi(uint32_t maskr,uint32_t matchr)
 {
     while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
@@ -249,6 +250,7 @@ uint8_t getQspiStatus()
     return qspiStatus;
 }
 
+__RAMFUNC
 void setQspiStatus(uint8_t status)
 {
     if (status < 3)
@@ -257,6 +259,7 @@ void setQspiStatus(uint8_t status)
     }
 }
 
+__RAMFUNC
 void writeEnable()
 {
     while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
@@ -265,6 +268,7 @@ void writeEnable()
     QUADSPI->FCR = (1 << QUADSPI_FCR_CTCF_Pos);
 }
 
+__RAMFUNC
 void writeEnableQpi()
 {
     while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
@@ -332,6 +336,7 @@ uint8_t readStatusRegisterQpi()
 }
 
 // program a page of 256 bytes
+__RAMFUNC
 void QspiProgramPageQpi(uint32_t address,uint8_t*data)
 {
     uint16_t c;
@@ -351,7 +356,7 @@ void QspiProgramPageQpi(uint32_t address,uint8_t*data)
     }
     waitForStatusQpi(IS25LP064A_SR_WIP,0);
 }
-
+__RAMFUNC
 void QspiProgramPage(uint32_t address,uint8_t*data)
 {
     uint16_t c;
@@ -444,6 +449,7 @@ void QspiEraseBlock64Qpi(uint32_t address)
 }
 
 // erases a block of 64 kbytes
+__RAMFUNC
 void QspiEraseBlock64(uint32_t address)
 {
     writeEnable();
@@ -515,6 +521,7 @@ void setMemoryMappedMode()
     qspiStatus = 0;
 }
 
+__RAMFUNC
 void endMemoryMappedMode()
 {
     QUADSPI->CR |= (1 << QUADSPI_CR_ABORT_Pos);
