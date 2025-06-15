@@ -51,7 +51,6 @@ void OTG_FS_EP1_IN_IRQHandler(void)
 
 }
 
-//__ITCM_CODE_FLASH
 __ITCM_CODE_FLASH
 void OTG_FS_IRQHandler(void)
 {

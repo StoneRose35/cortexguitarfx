@@ -10,11 +10,13 @@
 #include "system.h"
 #include "uart.h"
 #include "flash.h"
+#include "stringFunctions.h"
+#include "globalConfig.h"
 
 extern volatile uint32_t task;
 extern volatile uint8_t programChangeState;
 volatile uint8_t usbDfuState=USB_DFU_APP_IDLE;
-volatile uint8_t * firmwareBuffer;
+
 volatile uint16_t firmwareSize;
 volatile uint16_t currentFirmwareBlockNr;
 
@@ -25,6 +27,7 @@ uint32_t flashSize = 0;
 uint32_t qspiTargetAddress = 0xFFFFFFFF;
 uint32_t qspiSize = 0;
 uint8_t flashWritten = 0;
+uint8_t qspiWritten = 0;
 uint8_t flashWordCntr = 0;
 uint16_t flashWordsWritten=0;
 uint32_t bytesWritten = 0;
@@ -203,6 +206,9 @@ uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet)
 __RAMFUNC
 void prepareSystemForDFU()
 {
+        #ifdef DFU_SIM
+        initUart(115200);
+        #endif
             // disable interrupts
         // audio engine
         #ifdef EXTERNAL_CODEC
@@ -236,7 +242,7 @@ void prepareSystemForDFU()
         programChangeState = 0;
 
         setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest);
-        firmwareBuffer=malloc(0x200);
+
         usbDfuState = USB_DFU_IDLE;
         while(1)
         {
@@ -272,11 +278,16 @@ void setUsbDfuStatus(volatile UsbDfuStatusType*statusStruct,uint8_t status,uint8
 __RAMFUNC
 void endPoint0DfuHandler(void*data,uint16_t dataSize)
 {
+    #ifdef DFU_SIM
+    char chrbfr[32]; 
+
+    #else
     uint8_t flashWordBfr[] = {  0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
                                 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
                                 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
                                 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
                                 };
+    #endif
     if (firmwareSize > 0)
     {
         firmwareSize -= dataSize;
@@ -289,7 +300,11 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
             if (*((uint32_t*)data) == 0x4168b18f)
             {
                 dfuFileValid = 1;
+                #ifdef DFU_SIM
+                sendStringBlocking("USB DFU got Magic Nr\r\n");
+                #else
                 eraseSector();
+                #endif
             }
             else
             {
@@ -302,23 +317,59 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
         {
             flashTargetAddress = *(((uint32_t*)data) + 1);
             flashSize = *(((uint32_t*)data) + 2);
+            #ifdef DFU_SIM
+            sendStringBlocking("Flash Target Address: ");
+            UInt32ToHex(flashTargetAddress,chrbfr);
+            sendStringBlocking(chrbfr);
+            sendStringBlocking(", Flash Size: ");
+            UInt32ToChar(flashSize,chrbfr);
+            sendStringBlocking(chrbfr);
+            sendStringBlocking("\r\n");
+            #endif
             uint16_t c=12;
             while (c < dataSize && bytesWritten < flashSize)
             {
+                #ifndef DFU_SIM
                 flashWordBfr[flashWordCntr++]=*(((uint8_t*)data) + c);
+                #else
+                flashWordCntr++;
+                #endif
+                c++;
                 bytesWritten++;
-                if (flashWordCntr == 32 || bytesWritten == flashSize)
+                if ((flashWordCntr == 32 || bytesWritten == flashSize) && flashWritten == 0)
                 {
+                    #ifdef DFU_SIM
+                    sendStringBlocking("Writing Flash, Word ");
+                    UInt16ToChar(flashWordsWritten,chrbfr);
+                    sendStringBlocking(chrbfr);
+                    sendStringBlocking("\r\n");
+                    #else
                     writeFlashWord(flashWordBfr,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                    #endif
                     flashWordsWritten++;
                     flashWordCntr=0;
+                    if (bytesWritten == flashSize)
+                    {
+                        flashWritten = 1;
+                    }
                 }
             }
-            if (flashWordCntr == 32 || bytesWritten == flashSize)
+            if ((flashWordCntr == 32 || bytesWritten == flashSize) && flashWritten == 0)
             {
+                #ifdef DFU_SIM
+                sendStringBlocking("Writing Flash, Word ");
+                UInt16ToChar(flashWordsWritten,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking("\r\n");
+                #else
                 writeFlashWord(flashWordBfr,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                #endif
                 flashWordsWritten++;
                 flashWordCntr=0;
+                if (bytesWritten == flashSize)
+                {
+                    flashWritten = 1;
+                }
             }
             if (bytesWritten == flashSize)
             {
@@ -327,9 +378,21 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 qspiSize = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
                 c+=4;
                 flashWritten = 1;
+                #ifdef DFU_SIM
+                sendStringBlocking("Qspi Target Address: ");
+                UInt32ToHex(qspiTargetAddress,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking(", Qspi Size: ");
+                UInt32ToChar(qspiSize,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking("\r\n");
+                #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
+                #endif
 
+
+                #ifndef DFU_SIM
                 uint32_t blockaddress=0;
                 uint32_t nblocks = qspiSize / 0x10000;
                 nblocks++;
@@ -338,23 +401,47 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     QspiEraseBlock64(blockaddress);
                     blockaddress += 0x10000;
                 }
+                #endif
                 while ( c < dataSize)
                 {
                     // write qspi data
                     qspiBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
                     qspiBytesWritten++;
-                    if (qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize)
+                    c++;
+                    if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
                     {
+                        #ifdef DFU_SIM
+                        sendStringBlocking("Writing Qspi Page ");
+                        UInt16ToChar(qspiPageCnt,chrbfr);
+                        sendStringBlocking(chrbfr);
+                        sendStringBlocking("\r\n");
+                        #else
                         QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                        #endif
                         qspiPageCnt++;
                         qspiBufferBytesFetched = 0;
+                        if (qspiBytesWritten == qspiSize)
+                        {
+                            qspiWritten = 1;
+                        }
                     }
                 }
-                if (qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize)
+                if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
                 {
+                    #ifdef DFU_SIM
+                    sendStringBlocking("Writing Qspi Page ");
+                    UInt16ToChar(qspiPageCnt,chrbfr);
+                    sendStringBlocking(chrbfr);
+                    sendStringBlocking("\r\n");
+                    #else
                     QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                    #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
+                    if (qspiBytesWritten == qspiSize)
+                    {
+                        qspiWritten = 1;
+                    }
                 }
             }
         }
@@ -363,30 +450,69 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
             uint16_t c=0;
             while (c<dataSize && bytesWritten < flashSize)
             {
+                #ifndef DFU_SIM
                 flashWordBfr[flashWordCntr++]=*(((uint8_t*)data) + c);
+                #else
+                flashWordCntr++;
+                #endif
+                c++;
                 bytesWritten++;
-                if (flashWordCntr == 32 || bytesWritten == flashSize)
+                if ((flashWordCntr == 32 || bytesWritten == flashSize) && flashWritten == 0)
                 {
+                    #ifdef DFU_SIM
+                    sendStringBlocking("Writing Flash, Word ");
+                    UInt16ToChar(flashWordsWritten,chrbfr);
+                    sendStringBlocking(chrbfr);
+                    sendStringBlocking("\r\n");
+                    #else
                     writeFlashWord(flashWordBfr,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                    #endif
                     flashWordsWritten++;
                     flashWordCntr=0;
+                    if (bytesWritten == flashSize)
+                    {
+                        flashWritten = 1;
+                    }
                 }
             }
-            if (flashWordCntr == 32 || bytesWritten == flashSize)
+            if ((flashWordCntr == 32 || bytesWritten == flashSize) && flashWritten == 0)
             {
+                #ifdef DFU_SIM
+                sendStringBlocking("Writing Flash, Word ");
+                UInt16ToChar(flashWordsWritten,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking("\r\n");
+                #else
                 writeFlashWord(flashWordBfr,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                #endif
                 flashWordsWritten++;
                 flashWordCntr=0;
+                if (bytesWritten == flashSize)
+                {
+                    flashWritten = 1;
+                }
             }
             if (bytesWritten == flashSize)
             {
                 qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
                 c+=4;
                 qspiSize = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
+                c+=4;
                 flashWritten = 1;
+                #ifdef DFU_SIM
+                sendStringBlocking("Qspi Target Address: ");
+                UInt32ToHex(qspiTargetAddress,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking(", Qspi Size: ");
+                UInt32ToChar(qspiSize,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking("\r\n");
+                #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
+                #endif
 
+                #ifndef DFU_SIM
                 uint32_t blockaddress=0;
                 uint32_t nblocks = qspiSize / 0x10000;
                 nblocks++;
@@ -395,23 +521,47 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     QspiEraseBlock64(blockaddress);
                     blockaddress += 0x10000;
                 }
+                #endif
                 while ( c < dataSize)
                 {
                     // write qspi data
                     qspiBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
                     qspiBytesWritten++;
-                    if (qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize)
+                    c++;
+                    if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
                     {
+                        #ifdef DFU_SIM
+                        sendStringBlocking("Writing Qspi Page ");
+                        UInt16ToChar(qspiPageCnt,chrbfr);
+                        sendStringBlocking(chrbfr);
+                        sendStringBlocking("\r\n");
+                        #else
                         QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                        #endif
                         qspiPageCnt++;
                         qspiBufferBytesFetched = 0;
+                        if (qspiBytesWritten == qspiSize)
+                        {
+                            qspiWritten = 1;
+                        }
                     }
                 }
-                if (qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize)
+                if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
                 {
+                    #ifdef DFU_SIM
+                    sendStringBlocking("Writing Qspi Page ");
+                    UInt16ToChar(qspiPageCnt,chrbfr);
+                    sendStringBlocking(chrbfr);
+                    sendStringBlocking("\r\n");
+                    #else
                     QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                    #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
+                    if (qspiBytesWritten == qspiSize)
+                    {
+                        qspiWritten = 1;
+                    }
                 }
             }
         }
@@ -424,9 +574,20 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 c+=4;
                 qspiSize = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
                 c+=4;
+                #ifdef DFU_SIM
+                sendStringBlocking("Qspi Target Address: ");
+                UInt32ToHex(qspiTargetAddress,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking(", Qspi Size: ");
+                UInt32ToChar(qspiSize,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking("\r\n");
+                #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
+                #endif
 
+                #ifndef DFU_SIM
                 uint32_t blockaddress=0;
                 uint32_t nblocks = qspiSize / 0x10000;
                 nblocks++;
@@ -435,6 +596,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     QspiEraseBlock64(blockaddress);
                     blockaddress += 0x10000;
                 }
+                #endif
             }
 
             while ( c < dataSize)
@@ -442,18 +604,41 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 // write qspi data
                 qspiBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
                 qspiBytesWritten++;
-                if (qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize)
+                c++;
+                if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
                 {
+                    #ifdef DFU_SIM
+                    sendStringBlocking("Writing Qspi Page ");
+                    UInt16ToChar(qspiPageCnt,chrbfr);
+                    sendStringBlocking(chrbfr);
+                    sendStringBlocking("\r\n");
+                    #else
                     QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                    #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
+                    if (qspiBytesWritten == qspiSize)
+                    {
+                        qspiWritten = 1;
+                    }
                 }
             }
-            if (qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize)
+            if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
             {
+                #ifdef DFU_SIM
+                sendStringBlocking("Writing Qspi Page ");
+                UInt16ToChar(qspiPageCnt,chrbfr);
+                sendStringBlocking(chrbfr);
+                sendStringBlocking("\r\n");
+                #else
                 QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                #endif
                 qspiPageCnt++;
                 qspiBufferBytesFetched = 0;
+                if (qspiBytesWritten == qspiSize)
+                {
+                    qspiWritten = 1;
+                }
             }
         }
 

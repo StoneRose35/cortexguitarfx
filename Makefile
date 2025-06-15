@@ -24,7 +24,7 @@ CPYARGS=-Obinary --remove-section=.qspi* --remove-section=.dtcm*
 CPYARGS_QSPIBIN=-Obinary --only-section=.qspi* --only-section=.dtcm*
 DEBUGGER_UART=/dev/ttyACM0
 
-all: out/$(PROJECT).bin out/$(PROJECT)_qspi.bin
+all: out/$(PROJECT).dfu
 	@rm out/*.o
 
 STM32H750_OBJS := $(patsubst Src/stm32h750/%.c,out/%.o,$(wildcard Src/stm32h750/*.c))
@@ -123,6 +123,9 @@ Inc/images/%.h: Assets/%.png out
 tools/qspi_uart_uploader:
 	gcc -Og tools/qspi_uart_uploader.c -o tools/qspi_uart_uploader
 
+tools/bins2dfu:
+	gcc -O1 -I Inc -g tools/bins2dfu_src/bin2dfu.cpp -o tools/bins2dfu
+
 Inc/gen/version.h: Inc/gen
 #REV=`expr %REV% / 60`
 	@echo "#ifndef _PI_PICO_VERSION_H_\r\n#define _PI_PICO_VERSION_H_\r\n" > Inc/gen/version.h 
@@ -133,21 +136,19 @@ Inc/gen/version.h: Inc/gen
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # main linking and generating flashable content
-#$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750 all_common all_apps all_audio all_graphics  $(ASSET_IMAGES)
-#	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps all_audio all_graphics all_math all_ui all_usb $(ASSET_IMAGES)
 	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
-#out/$(PROJECT)_qspi.elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps all_audio all_graphics all_math all_ui  all_usb $(ASSET_IMAGES)
-#	$(CC) $(LARGS_QSPI) -o ./out/$(PROJECT)_qspi.elf ./out/*.o 
 
 out/$(PROJECT).bin: out/$(PROJECT).elf
 	@$(OBJCPY) $(CPYARGS) ./out/$(PROJECT).elf ./out/$(PROJECT).bin
 	
 
-out/$(PROJECT)_qspi.bin: out/$(PROJECT).elf
+out/$(PROJECT)_qspi.bin: out/$(PROJECT).elf 
 	@$(OBJCPY) $(CPYARGS_QSPIBIN) ./out/$(PROJECT).elf ./out/$(PROJECT)_qspi.bin
 
+out/$(PROJECT).dfu: tools/bins2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin
+	tools/bins2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin -o out/$(PROJECT).dfu
 
 program_qspi: out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)

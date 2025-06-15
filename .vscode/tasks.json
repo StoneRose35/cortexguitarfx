@@ -145,7 +145,7 @@
                 "-I",
                 "${workspaceFolder}/Inc",
                 "-g",
-                "${workspaceFolder}/tools/bins2dfu/bin2dfu.cpp",
+                "${workspaceFolder}/tools/bins2dfu_src/bin2dfu.cpp",
                 "-o",
                 "${workspaceFolder}/tools/bin2dfu"
             ],

@@ -141,7 +141,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                     #ifdef USB_DBG
                     uint8_t stringchar[2]={((uint8_t)packet->wValue)+0x30,0};
                     sendStringBlocking("GET_DESCRIPTOR, string ");
-                    sendStringBlocking(stringchar);
+                    sendStringBlocking((char*)stringchar);
                     sendStringBlocking("\r\n");
                     #endif
                     if ((packet->wValue & 0xFF)!= 0) {

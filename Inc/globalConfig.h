@@ -20,6 +20,8 @@
 #undef USB_DBG
 #undef  I2C_DBG
 
+#define DFU_SIM
+
 
 
 
