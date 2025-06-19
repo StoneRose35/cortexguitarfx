@@ -147,7 +147,7 @@
                 "-g",
                 "${workspaceFolder}/tools/bins2dfu_src/bin2dfu.cpp",
                 "-o",
-                "${workspaceFolder}/tools/bin2dfu"
+                "${workspaceFolder}/tools/bins2dfu"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

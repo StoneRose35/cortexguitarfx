@@ -12,6 +12,7 @@
 #include "stringFunctions.h"
 #include <string.h>
 #include <stdlib.h>
+#include "memoryRegions.h"
 
 /**
  * @brief converts a number from 0 1 into a string showing percent from 0 to 100. The precision is fixed to three digits.
@@ -19,7 +20,7 @@
  * @param percentVal the value to convert
  * @param out the character array holding the converted string, must be initialized and of length 8 minimum
  */
-__attribute__((section (".qspi_code")))
+
 void toPercentChar(float percentVal,char * out)
 {
 	uint32_t ival = (uint32_t)(percentVal*100000.0);
@@ -43,7 +44,7 @@ void toPercentChar(float percentVal,char * out)
 	out[str_len+1] = 0;
 }
 
-__attribute__((section (".qspi_code")))
+
 void fixedPointInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals)
 {
 	uint32_t fracBase=1;
@@ -100,7 +101,7 @@ void fixedPointInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals)
 }
 
 
-__attribute__((section (".qspi_code")))
+
 void fixedPointUInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals)
 {
 	uint32_t fracBase=1;
@@ -152,7 +153,7 @@ void fixedPointUInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals)
  * @param nr the number to convert
  * @param out the character array,must be initialized and of length 4 minimum
  */
-__attribute__((section (".qspi_code")))
+
 void UInt8ToChar(uint8_t nr, char * out)
 {
 	uint8_t pos=100;
@@ -189,7 +190,7 @@ void UInt8ToChar(uint8_t nr, char * out)
  * @param nr the number to convert
  * @param out the character array,must be initialized and of length 6 minimum
  */
-__attribute__((section (".qspi_code")))
+
 void UInt16ToChar(uint16_t nr, char * out)
 {
 	uint16_t pos=10000;
@@ -220,7 +221,7 @@ void UInt16ToChar(uint16_t nr, char * out)
 	out[charpos]=0;
 }
 
-__attribute__((section (".qspi_code")))
+
 uint16_t decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 {
 	uint16_t pos=10000;
@@ -390,7 +391,7 @@ void Int16ToChar(int16_t nr, char * out)
  * @param nr the number to convert
  * @param out the character array,must be initialized and of length 11 minimum
  */
-__attribute__((section (".qspi_code")))
+
 void UInt32ToChar(uint32_t nr, char * out)
 {
 	uint32_t pos=1000000000;
@@ -427,7 +428,7 @@ void UInt32ToChar(uint32_t nr, char * out)
  * @param val the unsigned int value to convert
  * @param nrbfr the buffer to hold the string representation, must be at least 11 chars in size
  */
-__attribute__((section (".qspi_code")))
+
 void UInt32ToHex(uint32_t val,char* nrbfr)
 {
 	uint32_t cval = val;
@@ -471,7 +472,7 @@ void UInt32ToHex(uint32_t val,char* nrbfr)
  * @param minlength the minimum length the string should have
  * @param nr the array containing the string representation of the integer number, note the extra space must be allocated
  */
-__attribute__((section (".qspi_code")))
+
 void fillWithLeadingZeros(uint8_t minlength,char * nr)
 {
 	uint8_t nrlen=0;
@@ -500,7 +501,7 @@ void fillWithLeadingZeros(uint8_t minlength,char * nr)
  * @param target the string for which should be checked if it start with ptrn
  * @return 1 if target start with ptrn, 0 otherwise
  */
-__attribute__((section (".qspi_code")))
+
 uint8_t startsWith(char* ptrn,const char* target)
 {
 	uint8_t cnt=0,isEqual=1;
@@ -520,7 +521,7 @@ uint8_t startsWith(char* ptrn,const char* target)
  * 
  * @param str 
  */
-__attribute__((section (".qspi_code")))
+
 void toUpper(char * str,char endchar)
 {
 	uint16_t c=0;
@@ -545,7 +546,7 @@ void toUpper(char * str,char endchar)
  * @param chr the string convert
  * @return the string as a uint8_t
  */
-__attribute__((section (".qspi_code")))
+
 uint8_t toUInt8(char * chr)
 {
 	uint8_t res=0;
@@ -565,7 +566,7 @@ uint8_t toUInt8(char * chr)
  * @param chr the string convert
  * @return the string as a uint32_t
  */
-__attribute__((section (".qspi_code")))
+
 uint32_t toUInt32(char * chr)
 {
 	uint32_t res=0;
@@ -585,7 +586,7 @@ uint32_t toUInt32(char * chr)
  * @param chr the string convert
  * @return the string as a int16_t
  */
-__attribute__((section (".qspi_code")))
+
 int16_t toInt16(char * chr)
 {
 	int16_t res=0;
@@ -609,7 +610,7 @@ int16_t toInt16(char * chr)
 	return res;
 }
 
-__attribute__((section (".qspi_code")))
+
 int16_t toUInt16(char * chr)
 {
 	uint16_t res=0;
@@ -630,7 +631,7 @@ int16_t toUInt16(char * chr)
  * @param input the string containing exactly one set of brackett: "()"
  * @param out the content within the brackets
  */
-__attribute__((section (".qspi_code")))
+
 void getBracketContent(const char* input,char * out)
 {
 	uint8_t cnt=0,bcnt=0;
@@ -673,7 +674,7 @@ void getBracketContent(const char* input,char * out)
  * 
  * @param input the string for which the whitespace should be removed, note that the operation happens in-place and that the character after the terminating 0 are not zeroed
  */
-__attribute__((section (".qspi_code")))
+
 void stripWhitespaces(char * input)
 {
 
@@ -704,7 +705,7 @@ void stripWhitespaces(char * input)
  * @param result pointer to the uint8_t array, the array itself is initialized dynamically within the function
  * @return the length of the array, 0 if no range has been input
  */
-__attribute__((section (".qspi_code")))
+
 uint8_t expandRange(char * stringinput,uint8_t ** result)
 {
 	char nr[4];
@@ -743,7 +744,7 @@ uint8_t expandRange(char * stringinput,uint8_t ** result)
 	return len;
 }
 
-__attribute__((section (".qspi_code")))
+
 void timeToString(char * bfr,uint8_t h,uint8_t m,uint8_t s)
 {
 
@@ -785,7 +786,7 @@ void timeToString(char * bfr,uint8_t h,uint8_t m,uint8_t s)
     }
     *(bfr + strPos) = 0;
 }
-__attribute__((section (".qspi_code")))
+
 void dateToString(char * bfr, uint16_t y,uint8_t month, uint8_t d)
 {
 	uint8_t strPos=0;
@@ -821,7 +822,7 @@ void dateToString(char * bfr, uint16_t y,uint8_t month, uint8_t d)
     }
     *(bfr + strPos) = 0;
 }
-__attribute__((section (".qspi_code")))
+
 void dateTimeToString(char * out,uint16_t year,uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t seconds)
 {
 	char bfr[12];
@@ -858,7 +859,7 @@ uint16_t copyToString(char * dest,const char * src)
  * @param appender 
  * @return uint16_t 
  */
-__attribute__((section (".qspi_code")))
+
 uint16_t appendToString(char * appendee,const char *  appender)
 {
 	uint16_t c=0,c2=0;
@@ -874,7 +875,7 @@ uint16_t appendToString(char * appendee,const char *  appender)
 	return c;
 }
 
-__attribute__((section (".qspi_code")))
+
 uint16_t appendToStringUntil(char * appendee,const char *  appender,uint8_t maxLen)
 {
 	uint16_t c=0,c2=0;

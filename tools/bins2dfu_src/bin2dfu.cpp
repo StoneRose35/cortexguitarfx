@@ -361,6 +361,7 @@ int main(int argc,char ** argv)
     uint32_t wordBfr;
     uint8_t bytesBfr[CHUNK_SIZE];
     uint32_t crc;
+    uint32_t bytesRead;
     if (argc < 3)
     {
         printf("no enough parameters\r\n");
@@ -423,7 +424,11 @@ int main(int argc,char ** argv)
             bytesToTransfer = bytesRemaining;
             
         }
-        fread(bytesBfr,bytesToTransfer,1,inputFileBinFlash);
+        bytesRead=fread(bytesBfr,bytesToTransfer,1,inputFileBinFlash);
+        if (bytesRead != 1)
+        {
+            return 1;
+        }
         fwrite(bytesBfr,bytesToTransfer,1,outputFile);
     }
     wordBfr=0;
@@ -445,7 +450,11 @@ int main(int argc,char ** argv)
             bytesToTransfer = bytesRemaining;
             
         }
-        fread(bytesBfr,bytesToTransfer,1,inputFileBinQspi);
+        bytesRead = fread(bytesBfr,bytesToTransfer,1,inputFileBinQspi);
+        if (bytesRead != 1)
+        {
+            return 1;
+        }
         fwrite(bytesBfr,bytesToTransfer,1,outputFile);
     }
 
