@@ -27,10 +27,6 @@ static void fxProgramParam1Callback(uint16_t val,void*data) // Shimmer
 {
     FxProgram17DataType* pData= (FxProgram17DataType*)data;
     pData->pitchShifter.delayIncrement = (val >> 9) + 1;
-    if (pData->pitchShifter.delayIncrement>=0)
-    {
-        pData->pitchShifter.delayIncrement+=1;
-    }
     fxProgram17.parameters[0].rawValue = val;
 }
 
