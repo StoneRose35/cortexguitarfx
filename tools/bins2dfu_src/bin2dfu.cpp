@@ -424,10 +424,13 @@ int main(int argc,char ** argv)
             bytesToTransfer = bytesRemaining;
             
         }
-        bytesRead=fread(bytesBfr,bytesToTransfer,1,inputFileBinFlash);
-        if (bytesRead != 1)
+        if (bytesToTransfer > 0)
         {
-            return 1;
+            bytesRead=fread(bytesBfr,bytesToTransfer,1,inputFileBinFlash);
+            if (bytesRead != 1)
+            {
+                return 1;
+            }
         }
         fwrite(bytesBfr,bytesToTransfer,1,outputFile);
     }
@@ -450,10 +453,13 @@ int main(int argc,char ** argv)
             bytesToTransfer = bytesRemaining;
             
         }
-        bytesRead = fread(bytesBfr,bytesToTransfer,1,inputFileBinQspi);
-        if (bytesRead != 1)
+        if (bytesToTransfer > 0)
         {
-            return 1;
+            bytesRead = fread(bytesBfr,bytesToTransfer,1,inputFileBinQspi);
+            if (bytesRead != 1)
+            {
+                return 1;
+            }
         }
         fwrite(bytesBfr,bytesToTransfer,1,outputFile);
     }
