@@ -192,7 +192,7 @@
             "name": "gcc-9 - debug bin2dfu",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/tools/bin2dfu",
+            "program": "${workspaceFolder}/tools/bins2dfu",
             "args": ["./out/microsys_audio.bin", "./out/microsys_audio_qspi.bin","-o","./out/microsys_audio.dfu"],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
