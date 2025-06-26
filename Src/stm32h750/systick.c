@@ -13,6 +13,7 @@ void SysTick_Handler()
     ticks++;
 }
 
+__ITCM_CODE_FLASH
 uint32_t getTickValue()
 {
     return ticks;

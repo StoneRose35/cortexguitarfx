@@ -4,6 +4,7 @@
 #include "usb/usb_cdc.h"
 #include "usb/usb_dfu.h"
 #include "stm32h750/stm32h750xx.h"
+#include "stm32h750/helpers.h"
 #include "systick.h"
 #include "globalConfig.h"
 #include "memoryRegions.h"
@@ -217,7 +218,7 @@ uint8_t usbCdcSetConfiguration(uint16_t confNr)
     cnt=0;
     while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U && cnt < USB_CDC_FLUSH_TIMEOUT)
     {
-        waitSysticks(1);
+        nop_wait(480000);
         cnt++;
     }
     if (cnt == USB_CDC_FLUSH_TIMEOUT)
@@ -229,7 +230,7 @@ uint8_t usbCdcSetConfiguration(uint16_t confNr)
     cnt=0;
     while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_TXFFLSH) == USB_OTG_GRSTCTL_TXFFLSH)
     {
-        waitSysticks(1);
+        nop_wait(480000);
         cnt++;
     }
     if (cnt == USB_CDC_FLUSH_TIMEOUT)
@@ -252,7 +253,7 @@ uint8_t usbCdcSetConfiguration(uint16_t confNr)
     cnt=0;
     while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U && cnt < USB_CDC_FLUSH_TIMEOUT)
     {
-        waitSysticks(1);
+        nop_wait(480000);
         cnt++;
     }
     if (cnt == USB_CDC_FLUSH_TIMEOUT)
@@ -264,7 +265,7 @@ uint8_t usbCdcSetConfiguration(uint16_t confNr)
     cnt=0;
     while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_TXFFLSH) == USB_OTG_GRSTCTL_TXFFLSH)
     {
-        waitSysticks(1);
+        nop_wait(480000);
         cnt++;
     }
     if (cnt == USB_CDC_FLUSH_TIMEOUT)

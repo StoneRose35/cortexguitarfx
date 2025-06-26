@@ -8,7 +8,7 @@
 #include "usb/usb_cdc.h"
 #include "memoryRegions.h"
 #include "globalConfig.h"
-
+#include "stm32h750/helpers.h"
 
 // handlers
 void(*ep0OUTHandler)(void*,uint16_t)=0;
@@ -377,6 +377,8 @@ RCC->D2CCIP2R |= (3 << RCC_D2CCIP2R_USBSEL_Pos);
 // enable usb2 clock
 RCC->AHB1ENR |= (1 << RCC_AHB1ENR_USB2OTGHSEN_Pos);
 
+
+
 // --------------------------
 // - Wire up pin's
 // --------------------------
@@ -420,8 +422,9 @@ portA->OSPEEDR = regval;
 // - USB Core initialization
 // --------------------------
 
-USB2_OTG_FS->GUSBCFG |= (1 << USB_OTG_GUSBCFG_PHYSEL_Pos); // set internal USB PHY
-
+// set internal usb phy
+USB2_OTG_FS->GUSBCFG |= (1 << USB_OTG_GUSBCFG_PHYSEL_Pos); 
+nop_wait(10000);
 // core clock reset
 while (!(USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL));
 USB2_OTG_FS->GRSTCTL |= USB_OTG_GRSTCTL_CSRST;
