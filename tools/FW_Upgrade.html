@@ -1,0 +1,29 @@
+<html>
+<head>
+	<title>FW Upgrade</title>
+	<link rel="stylesheet" href="FW_Upgrade.css"></link>
+	<script type="text/javascript" src="FW_Upgrade.js"></script>
+</head>
+<body onload="init()">
+<div class="fwu-main">
+	<div class="fwu-title">PiPicoFX Firmware Upgrade</div>
+	<div class="fwu-text">Connect Daisy Seed Powered PiPicoFX via USB and click </div>
+	<button class="fwu-button" onclick="requestDevice()">Detect device</button>
+	<div class="fwu-console" style="height: 36px;">
+		<div class="fwu-console-inner" id="fwu-console-1">
+		</div>
+	</div>
+	<div class="fwu-text">Choose Firmware Version</div>
+	<select class="fwu-button">
+		<option>V0.1 First Version</option>
+		<option>V0.2 still trash...</option>
+		<option>V0.3 might give a try</option>
+	</select>
+	<br />
+	<button class="fwu-button" onclick="firmwareUpgradeStep()">Update firmware</button>
+	<div class="fwu-console" style="flex-grow: 4;" >
+		<div class="fwu-console-inner" id="fwu-console-2" ></div>
+	</div>
+</div>
+</body>
+</html>
