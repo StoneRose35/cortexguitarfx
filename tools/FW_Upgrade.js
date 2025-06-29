@@ -4,6 +4,7 @@ let firmwareUpgradeState;
 
 const SET_INTERFACE = 11;
 const DFU_GETSTATUS = 3;
+const SETUP_REQUEST_DFU_DETACH = 0;
 function init() {
     detectDeviceConsole = document.getElementById("fwu-console-1");
     mainConsole = document.getElementById("fwu-console-2");
@@ -24,86 +25,106 @@ function fakeUpdatefirmware()
     },500);   
 }
 
-function firmwareUpgradeStep()
+async function firmwareUpgradeStep()
 {
+    let dfuStatus;
     switch (firmwareUpgradeState.state)
     {
         case "initial":
             requestDevice();
             break;
         case "deviceDetected":
-            firmwareUpgradeState.device.open().then(() => {
-                firmwareUpgradeState.state = "deviceOpened";
-                mainConsole.innerText += "\ndevice opened";
-                firmwareUpgradeStep();
-            }, (err) => {
-                console.log(err);
-            });
-            break;
-        case "deviceOpened":
+            mainConsole.innerText += "\nOpening Device in App Mode";
+            await firmwareUpgradeState.device.open();
+            firmwareUpgradeState.stateNr += 1;
+            mainConsole.innerText += "\nSelect configuration 0";
             if (firmwareUpgradeState.device.configuration == null)
             {
-                firmwareUpgradeState.device.selectConfiguration(0).then(
-                    () => {
-                        firmwareUpgradeState.state = "deviceConfigured";
-                        mainConsole.innerText += "\nDevice configured";
-                        firmwareUpgradeStep();
-                    },
-                    (err) => {
-                        console.log(err);
-                    }
-                )
+                await firmwareUpgradeState.device.selectConfiguration(0);
             }
-            else
-            {
-                firmwareUpgradeState.state = "deviceConfigured";
-                mainConsole.innerText += "\nDevice configured";
-                firmwareUpgradeStep();
-            }
-            break;
-        case "deviceConfigured":
-            firmwareUpgradeState.device.claimInterface(2).then(() => 
-                {
-                    firmwareUpgradeState.state = "interfaceClaimed";
-                    mainConsole.innerText += "\ndfu interface (2) claimed";
-                    firmwareUpgradeState.stateNr = 2;
-                    firmwareUpgradeStep();
-                },(err) =>
-                {
-                    console.log(err);
-                });
-            break;
-        case "interfaceClaimed":
+            firmwareUpgradeState.stateNr += 1;
+            mainConsole.innerText += "\nClaiming Interface 2";
+            await firmwareUpgradeState.device.claimInterface(2);
+            firmwareUpgradeState.stateNr += 1;
+            mainConsole.innerText += "\nSetting Interface 2";
             let outData=new ArrayBuffer(0);
-            firmwareUpgradeState.device.controlTransferOut({requestType: "standard", 
+            await firmwareUpgradeState.device.controlTransferOut({requestType: "standard", 
                 recipient: "device",
                 request: SET_INTERFACE,
                 value: 0,
-                index: 2},outData).then(
-                (resp) => {
-                    if (resp.status == "ok")
+                index: 2},outData);
+            firmwareUpgradeState.stateNr += 1;
+
+            dfuStatus = await getDFUStatus(2);
+            firmwareUpgradeState.stateNr += 1;
+            mainConsole.innerText += "\n" + JSON.stringify(dfuStatus).replace(/,/g,', ');
+            if (dfuStatus.bStatus === 'OK' && dfuStatus.bState === 'APP_IDLE')
+            {
+                mainConsole.innerText += "\nSending detach Request";
+                let resp = await firmwareUpgradeState.device.controlTransferOut({requestType: "class", 
+                recipient: "interface",
+                request: SETUP_REQUEST_DFU_DETACH,
+                value: 100,
+                index: 2},outData);
+                if (resp.status == "ok")
+                {
+                    mainConsole.innerText += "\nResetting Device";
+                    try {
+                        await firmwareUpgradeState.device.reset();
+
+                    } catch (err)
                     {
-                        firmwareUpgradeState.state = "interfaceSet";
-                        mainConsole.innerText += "\nInterface 2 set";
-                        firmwareUpgradeState.stateNr = 3;
-                        firmwareUpgradeStep();
+                        console.log(err);
                     }
-                    else
+                    try {
+                        await firmwareUpgradeState.device.releaseInterface(2);
+
+                    } catch (err)
                     {
-                        mainConsole.innerText += "\ncould not set interface 2 (USB NOK)";
+                        console.log(err);
                     }
-                },
-                (err) => {
-                    console.log(err);
-                    mainConsole.innerText += "\ncould not set interface 2 (promise failed)";
+                    try {
+                        await firmwareUpgradeState.device.close();
+                    } catch (err)
+                    {
+                        console.log(err);
+                    }
+                    firmwareUpgradeState.state = "inDfuMode";
+                    firmwareUpgradeState.stateNr += 1;
+                    setTimeout(firmwareUpgradeStep,300);
+                } 
+                else
+                {
+                    mainConsole.innerText += '\nDetach Failed';
                 }
-            );
+
+            }
             break;
-        case "interfaceSet":
-            getDFUStatus(2).then((res) => {
-                mainConsole.innerText += "\n" + JSON.stringify(res).replace(/,/g,', ');
-            });
+        case "inDfuMode":
+            mainConsole.innerText += "\nget Device again";
+            let dev = await navigator.usb.requestDevice({ filters: [{ vendorId: 0x4A37, productId: 0x35D2 }] });
+            firmwareUpgradeState.device = dev;
+            mainConsole.innerText += "\nreopen device (in DFU mode)";
+            await firmwareUpgradeState.device.open();
+            if (firmwareUpgradeState.device.configuration == null)
+            {
+                await firmwareUpgradeStep.device.selectConfiguration(0);
+            }
+            if (firmwareUpgradeState.device.configuration.interfaces.length!==1)
+            {
+                mainConsole.innerText += "\nDevice not in Dfu Mode, stopping";
+                break;
+            }
+            mainConsole.innerText += "\nclaiming interface 0";
+            await firmwareUpgradeState.device.claimInterface(0);
+            dfuStatus = await getDFUStatus(0);
+            mainConsole.innerText += "\n" + JSON.stringify(dfuStatus).replace(/,/g,', ');
+            if (dfuStatus.bStatus === 'OK' && dfuStatus.bState === 'IDLE')
+            {
+                mainConsole.innerText += "\nStarting Download";
+            }
             break;
+
     }
 }
 
