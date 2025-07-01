@@ -1,14 +1,29 @@
 let detectDeviceConsole;
 let mainConsole;
 let firmwareUpgradeState;
+let fwPromise;
+let firmwareData;
 
 const SET_INTERFACE = 11;
 const DFU_GETSTATUS = 3;
+const DFU_DNLOAD = 2;
 const SETUP_REQUEST_DFU_DETACH = 0;
 function init() {
     detectDeviceConsole = document.getElementById("fwu-console-1");
     mainConsole = document.getElementById("fwu-console-2");
     firmwareUpgradeState={state: "initial",stateNr: 0};
+    const xhttp = new XMLHttpRequest();
+    xhttp.open("GET","pipicofx_firmwares.php?fmt=json",true);
+    xhttp.onload = function (){
+        const jsonresp = JSON.parse(this.responseText);
+        jsonresp.sort((a,b) => a["timestamp"] - b["timestamp"]);
+        jsonresp.forEach((el) => {
+            let fw = document.createElement("option");
+            fw.innerText = el["fname"];
+            document.getElementById("selectFirmware").appendChild(fw);
+        });
+    };
+    xhttp.send();
 }
 
 function fakeDetectDevice()
@@ -34,6 +49,26 @@ async function firmwareUpgradeStep()
             requestDevice();
             break;
         case "deviceDetected":
+            // download appropriate firmware
+            const fwRequest = new XMLHttpRequest();
+            const fwSelect = document.getElementById("selectFirmware");
+            fwPromise =new Promise(function(resolve,reject) {
+                fwRequest.open("GET","pipicofx_firmwares.php?dload=" + fwSelect.options[fwSelect.selectedIndex].text);
+                fwRequest.responseType = "arraybuffer";
+                fwRequest.onload=function() {
+                    
+                    firmwareData = this.response; 
+                    if (firmwareData) {
+                        resolve(firmwareData);
+                    }
+                    else
+                    {
+                        reject();
+                    }
+                };
+                fwRequest.send();
+            });
+
             mainConsole.innerText += "\nOpening Device in App Mode";
             await firmwareUpgradeState.device.open();
             firmwareUpgradeState.stateNr += 1;
@@ -121,7 +156,64 @@ async function firmwareUpgradeStep()
             mainConsole.innerText += "\n" + JSON.stringify(dfuStatus).replace(/,/g,', ');
             if (dfuStatus.bStatus === 'OK' && dfuStatus.bState === 'IDLE')
             {
-                mainConsole.innerText += "\nStarting Download";
+                const fwData =  await fwPromise;
+                const totalBytes = fwData.byteLength;
+                let bytesTransferred=0;
+                let blockNum=0;
+                const TransferSize = 0x40; // so far blindly assuming 64 bytes
+                let progress=0;
+                mainConsole.innerText += "\nStarting Download\n";
+                while (bytesTransferred < totalBytes)
+                {
+                    let bytesToSend;
+                    if (totalBytes - bytesTransferred > 64)
+                    {
+                        bytesToSend = 64;
+                    }
+                    else
+                    {
+                        bytesToSend = totalBytes - bytesTransferred;
+                    }
+
+                    let dchunk = new Uint8Array(firmwareData,blockNum*64,bytesToSend); 
+                    await firmwareUpgradeState.device.controlTransferOut({requestType: "class", 
+                    recipient: "interface",
+                    request: DFU_DNLOAD,
+                    value: blockNum,
+                    index: 0},dchunk);
+                    let dlStatus = await getDFUStatus(0);
+                    if (dlStatus.bStatus !== 'OK')
+                    {
+                        mainConsole.innerText += "\nDownload failed!";
+                        throw new Error("Firmware Download failed");
+                    } 
+                
+                    bytesTransferred += bytesToSend;
+                    blockNum += 1;
+                    if (Math.floor((bytesTransferred/totalBytes)*32.0)> progress)
+                    {
+                        mainConsole.innerText += "=";
+                        progress += 1;
+                    }
+                }
+                await firmwareUpgradeState.device.controlTransferOut({requestType: "class", 
+                    recipient: "interface",
+                    request: DFU_DNLOAD,
+                    value: blockNum,
+                    index: 0},new Uint8Array());
+                let dlStatus = await getDFUStatus(0);  
+                if (dlStatus.bStatus !== 'OK')
+                {
+                    mainConsole.innerText += "\nDownload failed!";
+                    throw new Error("Firmware Download failed");
+                } 
+                mainConsole.innerText += "\nDownload succeeded";
+                dlStatus = await getDFUStatus(0);  
+                while (dlStatus.bState !== 'MANIFEST_WAIT_RESET')
+                {
+                    dlStatus = await getDFUStatus(0); 
+                }
+                mainConsole.innerText += "\nFirmware updated successfully";
             }
             break;
 
