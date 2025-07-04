@@ -21,6 +21,8 @@ static int16_t fxProgramprocessSample(int16_t sampleIn,void*data)
     out =multiWaveShaperProcessSample(out,&pData->waveshaper1);
     out = out >> 1;
 
+    out = gainStageProcessSample(out,&pData->presetVolume);
+    
     switch (pData->cabSimType)
     {
         case 0:
@@ -169,6 +171,30 @@ static void fxProgramParam5Display(void*data,char*res) // cab type
     for(uint8_t c=0;c<24;c++)
     {
         *(res+c)=pData->cabNames[pData->cabSimType][c];
+    }
+}
+
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram9DataType* pData = (FxProgram9DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram9.parameters[5].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram9DataType* pData = (FxProgram9DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
     }
 }
 
@@ -390,11 +416,15 @@ FxProgram9DataType fxProgram9data = {
     .highpass_out=0,
     .highpassCutoff = 31000,
     .nWaveshapers = 1,
-    .reverb.paramNr=0
+    .reverb.paramNr=0,
+    .presetVolume = {
+        .gain=0xff,
+        .offset=0
+    }
 };
 FxProgramType fxProgram9 = {
     .name = "Amp High Gain",
-    .nParameters = 5,
+    .nParameters = 6,
     .parameters = {
         {
             .name="Hi-Cut         ",
@@ -440,6 +470,15 @@ FxProgramType fxProgram9 = {
             .setParameter=&fxProgramParam5Callback,
             .getParameterValue=0,
             .getParameterDisplay=&fxProgramParam5Display
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
     },
     .processSample = &fxProgramprocessSample,

@@ -19,7 +19,7 @@ static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
             sampleIn = compressor3ProcessSample(sampleIn,&pData->compressor);
             break;
     }
-    sampleIn = gainStageProcessSample(sampleIn,&pData->makeupGain);
+    sampleIn = gainStageProcessSample(sampleIn,&pData->presetVolume);
     return sampleIn;
 }
 
@@ -115,17 +115,25 @@ static void fxProgramP4Display(void*data,char*res)
 static void fxProgramP5Callback(uint16_t val,void*data) 
 {
     FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    pData->makeupGain.gain = val + 256;
+    pData->presetVolume.gain = val;
     fxProgram8.parameters[2].rawValue = val;
 }
 
 static void fxProgramP5Display(void*data,char*res)
 {
-    FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    uint32_t dval;
-    dval = pData->makeupGain.gain*100;
-    dval >>= 8;
-    decimalInt16ToChar((int16_t)dval,res,2);
+    FxProgram8DataType* pData = (FxProgram8DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
 }
 
 static void fxProgramP6Callback(uint16_t val,void*data) 
@@ -168,8 +176,8 @@ FxProgram8DataType fxProgram8Data =
     .compressor.currentAvg = 0,
     .compressor.gainFunction.gainReduction = 1,
     .compressor.gainFunction.threshhold = 32767,
-    .makeupGain.gain = 0x100,
-    .makeupGain.offset = 0
+    .presetVolume.gain = 0xff,
+    .presetVolume.offset = 0
 };
 
 static void fxProgramReset(void*data)

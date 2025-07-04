@@ -7,7 +7,7 @@ int16_t fxProgram17processSample(int16_t sampleIn,void*data)
 {
     
     FxProgram17DataType * pData = (FxProgram17DataType*)data;
-    int32_t sampleProc = sampleIn;// + ((pData->feedback*pData->oldVal) >> 15);
+    int32_t sampleProc = gainStageProcessSample(sampleIn,&pData->presetVolume);
     volatile uint32_t * audioStatePtr = getAudioStatePtr();
     int32_t summedDelay=0;
     
@@ -112,6 +112,30 @@ static void fxProgramParam3Display(void*data,char*res)
 
 }
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram17DataType* pData = (FxProgram17DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram17.parameters[3].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram17DataType* pData = (FxProgram17DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
+
 FxProgram17DataType fxProgram17data=
 {
     .pitchShifter.currentDelayPosition=0,
@@ -123,7 +147,11 @@ FxProgram17DataType fxProgram17data=
     .glitterTamer.oldXVal = 0,
     .mix=0,
     .oldVal = 0,
-    .feedback = 0
+    .feedback = 0,
+    .presetVolume = {
+        .gain = 0xff,
+        .offset = 0
+    }
 };
 
 int16_t unicornGlitter(int16_t sampleIn,Pitchshifter2DataType*data,volatile uint32_t * audioState)
@@ -173,7 +201,7 @@ void fxProgram17Setup(void*data)
 
 FxProgramType fxProgram17 = {
     .name = "ShimmerVerb",
-    .nParameters=3,
+    .nParameters=4,
     .parameters = {
         {
             .name="Shimmer",
@@ -201,6 +229,15 @@ FxProgramType fxProgram17 = {
             .getParameterDisplay=&fxProgramParam3Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam3Callback
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
     },
     .processSample = &fxProgram17processSample,

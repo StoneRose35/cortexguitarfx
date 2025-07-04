@@ -5,6 +5,7 @@
 static int16_t fxProgramprocessSample(int16_t sampleIn,void*data)
 {
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
+    sampleIn = gainStageProcessSample(sampleIn,&pData->presetVolume);
     return reverbProcessSample(sampleIn,&pData->reverb);
 }
 
@@ -55,6 +56,30 @@ static void fxProgramParam3Display(void*data,char*res)
 }
 
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram10DataType* pData = (FxProgram10DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram10.parameters[3].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram10DataType* pData = (FxProgram10DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
+
 static void fxProgramSetup(void*data)
 {
     FxProgram10DataType* pData= (FxProgram10DataType*)data;
@@ -64,12 +89,16 @@ static void fxProgramSetup(void*data)
 FxProgram10DataType fxProgram10data=
 {
     .reverbTime=300,
-    .reverb.paramNr=0
+    .reverb.paramNr=0,
+    .presetVolume = {
+        .gain = 0xff,
+        .offset = 0
+    }
 };
 
 FxProgramType fxProgram10 = {
     .name = "Reverb",
-    .nParameters=3,
+    .nParameters=4,
     .parameters = {
         {
             .name = "Time           ",
@@ -97,6 +126,15 @@ FxProgramType fxProgram10 = {
             .getParameterDisplay=&fxProgramParam3Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam3Callback
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
     },
     .processSample = &fxProgramprocessSample,

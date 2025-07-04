@@ -6,6 +6,7 @@ static int16_t fxProgramprocessSample(int16_t sampleIn,void*data)
 {
     int16_t reverberatedSample;
     FxProgram13DataType* pData= (FxProgram13DataType*)data;
+    sampleIn = gainStageProcessSample(sampleIn,&pData->presetVolume);
     reverberatedSample = reverb3processSample(sampleIn,&pData->reverb);
     return (((0x7FFF - pData->mix)*sampleIn) >> 15) + ((pData->mix*reverberatedSample) >> 15);
 }
@@ -56,13 +57,41 @@ static void fxProgramParam2Display(void*data,char*res)
     appendToString(res,"%");
 }
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram13DataType* pData = (FxProgram13DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram13.parameters[2].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram13DataType* pData = (FxProgram13DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
 static void fxProgramSetup(void*data)
 {
     FxProgram13DataType* pData= (FxProgram13DataType*)data;
     initReverb3(&pData->reverb);
 }
 
-FxProgram13DataType fxProgram13data;
+FxProgram13DataType fxProgram13data= {
+    .presetVolume = {
+        .gain =0xff,
+        .offset = 0
+    }
+};
 
 FxProgramType fxProgram13 = {
     .name = "Hadamard Reverb",
@@ -85,6 +114,15 @@ FxProgramType fxProgram13 = {
             .getParameterDisplay=&fxProgramParam2Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam2Callback
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
     },
     .processSample = &fxProgramprocessSample,

@@ -1,6 +1,7 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "romfunc.h"
+#include "audio/gainstage.h"
 
 #define FXPROGRAM1_HIGHCUT_VAL1 20000
 #define FXPROGRAM1_HIGHCUT_VAL2 31500
@@ -20,6 +21,8 @@ static int16_t fxProgram1processSample(int16_t sampleIn,void*data)
     {
         out = waveShaperProcessSample(out,&pData->waveshaper1);
     }
+
+    out = gainStageProcessSample(out,&pData->presetVolume);
 
     out = out >> 1;
 
@@ -95,6 +98,30 @@ static void fxProgram1Param3Display(void*data,char*res)
     }
 }
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram1DataType* pData = (FxProgram1DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram1.parameters[3].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram1DataType* pData = (FxProgram1DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+        for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
+
 static void fxProgram1Setup(void*data)
 {
     FxProgram1DataType* pData = (FxProgram1DataType*)data;
@@ -138,11 +165,13 @@ FxProgram1DataType fxProgram1data = {
     .feedbackFilter.alpha=14000,
     .feedbackFilter.oldXVal=0,
     .feedbackFilter.oldVal=0,
-    .delay.feedbackFunction=&analogDelayFeedbackFunction
+    .delay.feedbackFunction=&analogDelayFeedbackFunction,
+    .presetVolume.gain=0xff,
+    .presetVolume.offset=0
 };
 FxProgramType fxProgram1 = {
     .name = "Amp-Simulator",
-    .nParameters = 3,
+    .nParameters = 4,
     .parameters = {
         {
             .name="Hi-Cut         ",
@@ -171,6 +200,15 @@ FxProgramType fxProgram1 = {
             .getParameterValue=0,
             .getParameterDisplay=&fxProgram1Param3Display
         },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
+        }
     },
     .processSample = &fxProgram1processSample,
     .setup = &fxProgram1Setup,

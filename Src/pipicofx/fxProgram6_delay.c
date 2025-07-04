@@ -4,7 +4,9 @@
 static int16_t fxProgram6processSample(int16_t sampleIn,void*data)
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
-    return delayLineProcessSample(sampleIn, &pData->delay);
+    sampleIn = delayLineProcessSample(sampleIn, &pData->delay);
+    sampleIn = gainStageProcessSample(sampleIn,&pData->presetVolume);
+    return sampleIn;
 }
 
 static void fxProgram6Param1Callback(uint16_t val,void*data) // Delay Time
@@ -85,17 +87,47 @@ static void fxProgram6Param3Display(void*data,char*res)
     }
 }
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram6DataType* pData = (FxProgram6DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram6.parameters[3].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram6DataType* pData = (FxProgram6DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
+
 static void fxProgram6Setup(void*data)
 {
     FxProgram6DataType* pData= (FxProgram6DataType*)data;
     initDelay(&pData->delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
 }
 
-FxProgram6DataType fxProgram6data;
+FxProgram6DataType fxProgram6data=
+{
+    .presetVolume = {
+        .gain=0xff,
+        .offset=0
+    }
+};
 
 FxProgramType fxProgram6 = {
     .name = "Delay",
-    .nParameters=3,
+    .nParameters=4,
     .parameters = {
         {
             .name = "Time           ",
@@ -123,6 +155,15 @@ FxProgramType fxProgram6 = {
             .getParameterDisplay=&fxProgram6Param3Display,
             .getParameterValue=0,
             .setParameter=&fxProgram6Param3Callback
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
     },
     .processSample = &fxProgram6processSample,

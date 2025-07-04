@@ -7,7 +7,7 @@
 int16_t fxProgram18processSample(int16_t sampleIn,void*data)
 {
     FxProgram18DataType* pData= (FxProgram18DataType*)data;
-
+    sampleIn = gainStageProcessSample(sampleIn,&pData->presetVolume);
     return tremoloProcessSample(sampleIn,&pData->tremolo);
 }
 
@@ -72,6 +72,30 @@ static void fxProgramParam4Display(void*data,char*res)
     Int16ToChar(pData->tremolo.modulator.pulseWidth,res);
 }
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram18DataType* pData = (FxProgram18DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram18.parameters[4].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram18DataType* pData = (FxProgram18DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
+
 FxProgram18DataType fxProgram18data=
 {
     .tremolo.currentLfoVal=0,
@@ -80,7 +104,11 @@ FxProgram18DataType fxProgram18data=
     .tremolo.modulator.phaseIncrement=131,
     .tremolo.modulator.phaseIncrementCorrection1=0,
     .tremolo.modulator.pulseWidth=0,
-    .tremolo.modulator.squareRatio=0
+    .tremolo.modulator.squareRatio=0,
+    .presetVolume = {
+        .gain = 0xff,
+        .offset = 0
+    }
 };
 
 void fxProgram18Setup(void*data)
@@ -91,7 +119,7 @@ void fxProgram18Setup(void*data)
 
 FxProgramType fxProgram18 = {
     .name = "Tremolo",
-    .nParameters=4,
+    .nParameters=5,
     .parameters = {
         {
             .name="Rate",
@@ -128,6 +156,15 @@ FxProgramType fxProgram18 = {
             .getParameterDisplay=&fxProgramParam4Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam4Callback
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
     },
     .processSample = &fxProgram18processSample,

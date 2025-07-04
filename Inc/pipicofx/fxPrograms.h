@@ -35,6 +35,7 @@ typedef struct {
     SecondOrderIirFilterType filter1;
     DelayDataType delay;
     FirstOrderIirType feedbackFilter;
+    GainStageDataType presetVolume;
 } FxProgram1DataType;
 #else
 typedef struct {
@@ -83,6 +84,7 @@ typedef struct {
     SecondOrderIirFilterType voxAC15Iir1;
     SecondOrderIirFilterType voxAC15Iir2;
     SecondOrderIirFilterType voxAC15Iir3;
+    GainStageDataType presetVolume;
 } FxProgram9DataType;
 #else
 typedef struct {
@@ -97,7 +99,13 @@ typedef struct {
 
 typedef struct {
     SimpleChorusType chorusData;
+    GainStageDataType presetVolume;
 } FxProgram2DataType;
+
+
+typedef struct {
+    GainStageDataType presetVolume;
+} FxProgram3DataType;
 
 #ifndef FLOAT_AUDIO
 typedef struct {
@@ -162,11 +170,13 @@ typedef struct
 {
     BitCrusherDataType bitcrusher;
     uint8_t resolution;
+    GainStageDataType presetVolume;
 } FxProgram5DataType;
 
 typedef struct 
 {
     DelayDataType delay;
+    GainStageDataType presetVolume;
 } FxProgram6DataType;
 
 
@@ -196,7 +206,7 @@ typedef struct
 {
     uint8_t compressorType;
     CompressorDataType compressor;
-    GainStageDataType makeupGain;
+    GainStageDataType presetVolume;
 }  FxProgram8DataType;
 
 
@@ -204,28 +214,33 @@ typedef struct
 {
     ReverbType reverb;
     int16_t reverbTime;
+    GainStageDataType presetVolume;
 } FxProgram10DataType;
 
 typedef struct 
 {
     SineChorusType sineChorus;
+    GainStageDataType presetVolume;
 } FxProgram11DataType;
 
 
 typedef struct 
 {
     Reverb2Type reverb;
+    GainStageDataType presetVolume;
 } FxProgram12DataType;
 
 typedef struct 
 {
     int16_t mix;
     Reverb3Type reverb;
+    GainStageDataType presetVolume;
 } FxProgram13DataType;
 
 typedef struct
 {
     ThreeBandEQType eq;
+    GainStageDataType presetVolume;
 } FxProgram14DataType;
 
 typedef struct 
@@ -235,6 +250,7 @@ typedef struct
     CompressorDataType comp;
     GainStageDataType postGain;
     ReverbType reverb;
+    GainStageDataType presetVolume;
 } FxProgram15DataType;
 
 
@@ -242,6 +258,7 @@ typedef struct
 {
     Pitchshifter2DataType pitchShifter;
     int16_t mix;
+    GainStageDataType presetVolume;
 } FxProgram16DataType;
 
 
@@ -255,11 +272,13 @@ typedef struct
     int16_t oldVal;
     int16_t feedback;
     int16_t mix;
+    GainStageDataType presetVolume;
 } FxProgram17DataType;
 
 typedef struct 
 {
     TremoloType tremolo;
+    GainStageDataType presetVolume;
 } FxProgram18DataType;
 
 

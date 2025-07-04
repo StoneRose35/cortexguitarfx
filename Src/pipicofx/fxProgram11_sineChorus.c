@@ -7,6 +7,7 @@ static int16_t fxProgramprocessSample(int16_t sampleIn,void*data)
 {
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
     sampleIn >>= 1;
+    sampleIn = gainStageProcessSample(sampleIn,&pData->presetVolume);
     return sineChorusInterpolatedProcessSample(sampleIn,&pData->sineChorus);
 }
 #else
@@ -94,6 +95,30 @@ static void fxProgramParam5Display(void*data,char*res)
     appendToString(res,"%");
 }
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram11DataType* pData = (FxProgram11DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram11.parameters[5].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram11DataType* pData = (FxProgram11DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
+
 static void fxProgramSetup(void*data)
 {
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
@@ -106,13 +131,17 @@ FxProgram11DataType fxProgram11data = {
         .frequency = 500,
         .depth = 10,
         .feedback = 0,
-        .offset = 49
+        .offset = 49,
+    },
+    .presetVolume = {
+        .gain=0xff,
+        .offset=0
     }
 };
 
 FxProgramType fxProgram11 = {
     .name = "Sine Chorus",
-    .nParameters=5,
+    .nParameters=6,
     .processSample = &fxProgramprocessSample,
     .parameters = {
         {
@@ -159,6 +188,15 @@ FxProgramType fxProgram11 = {
             .getParameterDisplay=&fxProgramParam5Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam5Callback
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
 
     },

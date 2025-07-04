@@ -8,6 +8,7 @@ static int16_t fxProgramProcessSample(int16_t sampleIn,void*data)
     FxProgram16DataType* pData= (FxProgram16DataType*)data;
     int16_t processedSample = pitchShifter2ProcessSample(sampleIn,&pData->pitchShifter,getAudioStatePtr());
     int16_t sampleOut= ((sampleIn)*((1 << 15) - pData->mix) >> 15) + ((processedSample)*pData->mix >> 15);
+    sampleOut = gainStageProcessSample(sampleOut,&pData->presetVolume);
     return sampleOut;
 }
 
@@ -91,6 +92,30 @@ static void fxProgramParam3Display(void*data,char*res)
     appendToString(res, "ms");
 }
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram16DataType* pData = (FxProgram16DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram16.parameters[3].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram16DataType* pData = (FxProgram16DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
+
 
 static void fxProgramSetup(void*data)
 {
@@ -109,12 +134,16 @@ FxProgram16DataType fxProgram16data=
 {
     .pitchShifter.currentDelayPosition=0,
     .pitchShifter.delayIncrement=0x4,
-    .pitchShifter.crossFadeWidthPwr2=8
+    .pitchShifter.crossFadeWidthPwr2=8,
+    .presetVolume = {
+        .gain =0xff,
+        .offset = 0
+    }
 };
 
 FxProgramType fxProgram16 = {
     .name = "Pitchshifter",
-    .nParameters=3,
+    .nParameters=4,
     .parameters = {
         {
             .name = "ShiftAmt",
@@ -142,6 +171,15 @@ FxProgramType fxProgram16 = {
             .getParameterDisplay=&fxProgramParam3Display,
             .getParameterValue=0,
             .setParameter=&fxProgramParam3Callback
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
     },
     .processSample = &fxProgramProcessSample,

@@ -1,12 +1,14 @@
 #include <stdint.h>
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
+#include "audio/gainstage.h"
 
 static int16_t fxProgram2processSample(int16_t sampleIn,void*data)
 {
     FxProgram2DataType* pData = (FxProgram2DataType*)data;
     sampleIn >>= 1;
-    return simpleChorusProcessSample(sampleIn,&pData->chorusData);
+    sampleIn = simpleChorusProcessSample(sampleIn,&pData->chorusData);
+    return gainStageProcessSample(sampleIn,&pData->presetVolume);
 }
 
 static void fxProgram2Param1Callback(uint16_t val,void*data) // frequency
@@ -61,6 +63,31 @@ static void fxProgram2Param3Display(void*data,char*res)
     appendToString(res,"%");
 }
 
+static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
+{
+    FxProgram2DataType* pData = (FxProgram2DataType*)data;
+    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    fxProgram2.parameters[3].rawValue=val;
+}
+
+static void fxProgramPresetVolumeDisplay(void*data,char*res)
+{
+    FxProgram2DataType* pData = (FxProgram2DataType*)data;
+    int16_t dVal;
+    dVal = pData->presetVolume.gain*39; // percent with two decimal points
+    decimalInt16ToChar(dVal,res,2);
+        for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
+}
+
+
 static void fxProgram2Setup(void*data)
 {
     FxProgram2DataType* pData = (FxProgram2DataType*)data;
@@ -72,12 +99,17 @@ FxProgram2DataType fxProgram2data = {
         .mix = 128,
         .frequency = 500,
         .depth = 10
+    },
+    .presetVolume = {
+        .gain=0xFF,
+        .offset=0
     }
+    
 };
 
 FxProgramType fxProgram2 = {
     .name = "Vibrato/Chorus",
-    .nParameters=3,
+    .nParameters=4,
     .processSample = &fxProgram2processSample,
     .parameters = {
         {
@@ -106,6 +138,15 @@ FxProgramType fxProgram2 = {
             .getParameterDisplay=&fxProgram2Param3Display,
             .getParameterValue=0,
             .setParameter=&fxProgram2Param3Callback
+        },
+        {
+            .name="Volume",
+            .control=0xff,
+            .increment=32,
+            .rawValue=0,
+            .setParameter=fxProgramPresetVolumeCallback,
+            .getParameterValue=0,
+            .getParameterDisplay=fxProgramPresetVolumeDisplay
         }
     },
     .setup = &fxProgram2Setup,
