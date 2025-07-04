@@ -206,6 +206,7 @@ $(PROJECT).bin: $(PROJECT).elf
 
 $(PROJECT).uf2: tools/elf2uf2 $(PROJECT).elf 
 	$(ELF2UF2) ./out/$(PROJECT).elf ./out/$(PROJECT).uf2
+	@rm -rf ./out/*.o
 
 # *************************************************************
 #
