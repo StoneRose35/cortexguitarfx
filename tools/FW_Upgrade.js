@@ -3,7 +3,7 @@ let mainConsole;
 let firmwareUpgradeState;
 let fwPromise;
 let firmwareData;
-
+let firmwareUpdateButton;
 const SET_INTERFACE = 11;
 const DFU_GETSTATUS = 3;
 const DFU_DNLOAD = 1;
@@ -11,6 +11,7 @@ const SETUP_REQUEST_DFU_DETACH = 0;
 function init() {
     detectDeviceConsole = document.getElementById("fwu-console-1");
     mainConsole = document.getElementById("fwu-console-2");
+    firmwareUpdateButton = document.getElementById("fwu-button");
     firmwareUpgradeState={state: "initial",stateNr: 0};
     const xhttp = new XMLHttpRequest();
     xhttp.open("GET","pipicofx_firmwares.php?fmt=json",true);
@@ -26,18 +27,16 @@ function init() {
     xhttp.send();
 }
 
-function fakeDetectDevice()
+async function updateFirmwareHandler()
 {
-    detectDeviceConsole.innerText = "PiPicoFX, V0.6 built 21.4.2023";
-}
-
-function fakeUpdatefirmware()
-{
-   
-    mainConsole.innerText="Requesting Interface 2";
-    setTimeout(function() {
-        mainConsole.innerText+=" ... Done";
-    },500);   
+    firmwareUpdateButton.disabled=true;
+    try {
+        firmwareUpgradeStep();
+        firmwareUpdateButton.disabled = false;
+    }
+    catch {
+        firmwareUpdateButton.disabled = false;
+    }
 }
 
 async function firmwareUpgradeStep()
@@ -372,6 +371,7 @@ function requestDevice()
         firmwareUpgradeState.stateNr = 1;
         firmwareUpgradeState.device = usbDevice;
         mainConsole.innerText = "\nPiPicoFX detected";
+        firmwareUpdateButton.disabled=false;
   })
     .catch(() => {
         detectDeviceConsole.innerText = "No Device Present";
