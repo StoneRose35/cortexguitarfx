@@ -21,7 +21,7 @@
 #include "pipicofx/picofxCore.h"
 
 
-#define N_FX_PROGRAMS 15
+#define N_FX_PROGRAMS 16
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
 
@@ -170,6 +170,7 @@ typedef struct
 {
     BitCrusherDataType bitcrusher;
     uint8_t resolution;
+    FirstOrderIirType dcRemoval;
     GainStageDataType presetVolume;
 } FxProgram5DataType;
 
