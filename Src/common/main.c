@@ -140,10 +140,12 @@ int main(void)
 		core1Handshake = *SIO_FIFO_RD;
 	}
 	
-	#ifdef USB_UART
+	#ifdef USB
 	initUSB();
 	#endif
-	//initUart(57600,&usbCommBuffer);
+	#ifdef USB_UART
+	initUart(57600,&usbCommBuffer);
+	#endif
 
 	/*
 	 *
@@ -152,7 +154,7 @@ int main(void)
 	 * */
 
 	#ifdef USB_UART
-	initCliApi(&bufferedInput,NULL,&usbApi,&usbCommBuffer,sendOverUsb);
+	initCliApi(&bufferedInput,NULL,&usbApi,&usbCommBuffer,sendCharAsyncUsb);
 	#endif
 
 	initI2SSlave();
