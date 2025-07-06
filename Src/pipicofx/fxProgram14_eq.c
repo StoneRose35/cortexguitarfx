@@ -93,7 +93,12 @@ static void fxProgramPresetVolumeDisplay(void*data,char*res)
 }
 
 
-FxProgram14DataType fxProgram14data;
+FxProgram14DataType fxProgram14data ={
+    .presetVolume = {
+        .gain =0xff,
+        .offset = 0
+    }
+};
 
 FxProgramType fxProgram14 = {
     .name = "3-Band Equalizer",
@@ -102,7 +107,7 @@ FxProgramType fxProgram14 = {
         {
             .name = "Low           ",
             .control=0,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam1Display,
             .getParameterValue=0,
@@ -111,7 +116,7 @@ FxProgramType fxProgram14 = {
         {
             .name = "Mid            ",
             .control=1,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam2Display,
             .getParameterValue=0,
@@ -120,7 +125,7 @@ FxProgramType fxProgram14 = {
         {
             .name = "High           ",
             .control=2,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam3Display,
             .getParameterValue=0,
@@ -129,8 +134,8 @@ FxProgramType fxProgram14 = {
         {
             .name="Volume",
             .control=0xff,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=0x3FF,
             .setParameter=fxProgramPresetVolumeCallback,
             .getParameterValue=0,
             .getParameterDisplay=fxProgramPresetVolumeDisplay

@@ -176,7 +176,7 @@ FxProgramType fxProgram1 = {
         {
             .name="Hi-Cut         ",
             .control=0,
-            .increment=100,
+            .increment=1,
             .rawValue=31500,
             .setParameter=&fxProgram1Param1Callback,
             .getParameterValue=0,
@@ -194,7 +194,7 @@ FxProgramType fxProgram1 = {
         {
             .name="Delay Intensity",
             .control=2,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .setParameter=&fxProgram1Param3Callback,
             .getParameterValue=0,
@@ -203,8 +203,8 @@ FxProgramType fxProgram1 = {
         {
             .name="Volume",
             .control=0xff,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=0x3FF,
             .setParameter=fxProgramPresetVolumeCallback,
             .getParameterValue=0,
             .getParameterDisplay=fxProgramPresetVolumeDisplay

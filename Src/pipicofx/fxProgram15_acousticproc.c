@@ -176,7 +176,7 @@ FxProgramType fxProgram15 = {
         {
             .name = "EQ Low",
             .control=0,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam1Display,
             .getParameterValue=0,
@@ -185,7 +185,7 @@ FxProgramType fxProgram15 = {
         {
             .name = "EQ Mid",
             .control=1,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam2Display,
             .getParameterValue=0,
@@ -194,7 +194,7 @@ FxProgramType fxProgram15 = {
         {
             .name = "EQ High",
             .control=2,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam3Display,
             .getParameterValue=0,
@@ -203,7 +203,7 @@ FxProgramType fxProgram15 = {
         {
             .name = "Compressor Int.",
             .control=0xFF,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam4Display,
             .getParameterValue=0,
@@ -212,7 +212,7 @@ FxProgramType fxProgram15 = {
         {
             .name = "Reverb Time    ",
             .control=0xFF,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam5Display,
             .getParameterValue=0,
@@ -221,7 +221,7 @@ FxProgramType fxProgram15 = {
         {
             .name = "Reverb Mix     ",
             .control=0xFF,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam6Display,
             .getParameterValue=0,
@@ -230,8 +230,8 @@ FxProgramType fxProgram15 = {
         {
             .name="Volume",
             .control=0xff,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=0x3FF,
             .setParameter=fxProgramPresetVolumeCallback,
             .getParameterValue=0,
             .getParameterDisplay=fxProgramPresetVolumeDisplay

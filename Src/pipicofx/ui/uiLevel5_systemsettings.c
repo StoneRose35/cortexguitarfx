@@ -315,7 +315,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 currentVolume = pcm3060GetOutputVolume();
                 #endif
                 currentVolume &= 0xFF;
-                currentVolume += (encoderDelta << 2);
+                currentVolume += encoderDelta;
                 if (encoderDelta > 0)
                 {
                     if (currentVolume > 0xFF)

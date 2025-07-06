@@ -20,7 +20,7 @@
 //#define TRIGGER_UI_BY_CORE_0
 
 // uncomment to enable UART over USB
-//#define USB_UART
+#undef USB_UART
 
 // set 0 if the clipping LED's are connected between pin and Ground (RP2040 as source)
 // set 1 if the clipping LED's are connected between pin and 3.3V (RP2040 as sink)
@@ -51,7 +51,7 @@
 #error Choose an audio codec.
 #endif
 
-#ifdef USB_UART
+#ifdef USB
 #define USB_CDC_DRIVER
 #define USB_HW_DRIVER
 #endif

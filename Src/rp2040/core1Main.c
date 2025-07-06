@@ -22,6 +22,7 @@
 #include "hardware/regs/dma.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
+#include "consoleBase.h"
 
 
 int16_t firstHalfOut;
@@ -40,6 +41,7 @@ int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
 uint8_t cpuLoadBfr;
 int16_t encoderDelta;
+RotaryEncoderIncrementType rotaryEncoderInfo;
 uint8_t switchVals[2]={0,0};
 //PiPicoFxUiType uiControllerData;
 uint16_t adcChannelOld0=0,adcChannel0=0;
@@ -54,6 +56,7 @@ FxPresetType preset1, preset2;
 static volatile uint32_t * audioStatePtr;
 #define UI_DMIN 1
 #define ADC_LOWPASS 2
+#define ROTARY_ENCODER_LOWER_SPEED_LIMIT 80000
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 
@@ -234,20 +237,59 @@ void core1Main()
             clearReleasedStickyBit(1);
         }
 
-       encoderDelta=getStickyIncrementDelta();
-       if (encoderDelta != 0)
+       getStickyIncrementAndTime(&rotaryEncoderInfo);
+       if (rotaryEncoderInfo.increment != 0)
        {
-            if (encoderDelta > 0)
+            int32_t d_enc; 
+            #ifdef ENCODER_TUNE
+            char chrbfr[32];
+            chrbfr[0]=0;
+            #endif
+            
+            if (rotaryEncoderInfo.deltaTime > ROTARY_ENCODER_LOWER_SPEED_LIMIT)
             {
-                encoderDelta=1;
+                if (rotaryEncoderInfo.increment > 0)
+                {
+                    d_enc = 1;
+                }
+                else
+                {
+                    d_enc = -1;
+                }
+            }
+            else if (rotaryEncoderInfo.deltaTime != 0)
+            {
+                d_enc = rotaryEncoderInfo.increment * ROTARY_ENCODER_LOWER_SPEED_LIMIT;
+                d_enc /= (int32_t)rotaryEncoderInfo.deltaTime; 
+                #ifdef ENCODER_TUNE
+                appendToString(chrbfr,"d_time: ");
+                printf(chrbfr);
+                UInt32ToChar(rotaryEncoderInfo.deltaTime,chrbfr);
+                printf(chrbfr);
+                chrbfr[0]='\r';
+                chrbfr[1]='\n';
+                chrbfr[2]=0;
+                printf(chrbfr);
+                #endif
             }
             else
             {
-                encoderDelta=-1;
+                d_enc = rotaryEncoderInfo.increment * ROTARY_ENCODER_LOWER_SPEED_LIMIT;
             }
-           onRotaryChange(encoderDelta,&piPicoUiController);
-           clearStickyIncrementDelta();
-       }
+            encoderDelta = (int16_t)d_enc;
+            #ifdef ENCODER_TUNE
+            appendToString(chrbfr, "enc delta: ");
+            printf(chrbfr);
+            Int16ToChar(encoderDelta,chrbfr);
+            printf(chrbfr);
+            chrbfr[0]='\r';
+            chrbfr[1]='\n';
+            chrbfr[2]=0;
+            printf(chrbfr);
+            #endif
+            onRotaryChange(encoderDelta,&piPicoUiController);
+            clearStickyIncrementDelta();
+        }
 
        /*
         *

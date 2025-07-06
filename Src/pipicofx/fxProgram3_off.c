@@ -47,13 +47,13 @@ FxProgramType fxProgram3 = {
     .processSample = &fxProgram3processSample,
     .setup = &fxProgram3Setup,
     .reset = 0,
-    .data = (void*)0,
+    .data = (void*)&fxProgram3data,
     .parameters = {
         {
             .name="Volume",
             .control=0x0,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=0x3FF,
             .setParameter=fxProgramPresetVolumeCallback,
             .getParameterValue=0,
             .getParameterDisplay=fxProgramPresetVolumeDisplay

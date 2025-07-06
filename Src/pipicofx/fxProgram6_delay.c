@@ -132,7 +132,7 @@ FxProgramType fxProgram6 = {
         {
             .name = "Time           ",
             .control=0,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgram6Param1Display,
             .getParameterValue=0,
@@ -141,7 +141,7 @@ FxProgramType fxProgram6 = {
         {
             .name = "Feedback       ",
             .control=1,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgram6Param2Display,
             .getParameterValue=0,
@@ -150,7 +150,7 @@ FxProgramType fxProgram6 = {
         {
             .name = "Mix            ",
             .control=2,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgram6Param3Display,
             .getParameterValue=0,
@@ -159,8 +159,8 @@ FxProgramType fxProgram6 = {
         {
             .name="Volume",
             .control=0xff,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=0x3ff,
             .setParameter=fxProgramPresetVolumeCallback,
             .getParameterValue=0,
             .getParameterDisplay=fxProgramPresetVolumeDisplay

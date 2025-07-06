@@ -169,8 +169,8 @@ static void fxProgramP6Display(void*data,char*res)
 
 FxProgram8DataType fxProgram8Data =
 {
-    .compressor.avgLowpass.alphaFalling = 10,
-    .compressor.avgLowpass.alphaRising = 10,
+    .compressor.avgLowpass.alphaFalling = 32703,
+    .compressor.avgLowpass.alphaRising = 32703,
     .compressor.avgLowpass.oldVal = 0,
     .compressor.avgLowpass.oldXVal = 0,
     .compressor.currentAvg = 0,
@@ -196,7 +196,7 @@ FxProgramType fxProgram8 = {
             .control=0x0,
             .getParameterDisplay=&fxProgramP4Display,
             .setParameter=&fxProgramP4Callback,
-            .increment=32,
+            .increment=1,
             .rawValue=0
         },
         {
@@ -212,7 +212,7 @@ FxProgramType fxProgram8 = {
             .control=2,
             .getParameterDisplay=&fxProgramP5Display,
             .setParameter=&fxProgramP5Callback,
-            .increment=32,
+            .increment=1,
             .rawValue=0,
         },
         {
@@ -220,16 +220,16 @@ FxProgramType fxProgram8 = {
             .control=0xff,
             .getParameterDisplay=&fxProgramP1Display,
             .setParameter=&fxProgramP1Callback,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=4095,
         },
         {
             .name="Release        ",
             .control=0xff,
             .getParameterDisplay=&fxProgramP2Display,
             .setParameter=&fxProgramP2Callback,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=4095,
         },
         {
             .name="Flavor        ",

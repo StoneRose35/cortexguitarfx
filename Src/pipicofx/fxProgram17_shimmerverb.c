@@ -215,7 +215,7 @@ FxProgramType fxProgram17 = {
         {
             .name="Decay",
             .control=1,
-            .increment=16,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam2Display,
             .getParameterValue=0,
@@ -224,7 +224,7 @@ FxProgramType fxProgram17 = {
         {
             .name="Mix",
             .control=2,
-            .increment=16,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam3Display,
             .getParameterValue=0,
@@ -233,8 +233,8 @@ FxProgramType fxProgram17 = {
         {
             .name="Volume",
             .control=0xff,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=0x3FF,
             .setParameter=fxProgramPresetVolumeCallback,
             .getParameterValue=0,
             .getParameterDisplay=fxProgramPresetVolumeDisplay

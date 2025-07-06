@@ -31,6 +31,7 @@ void isr_c1_io_irq_bank0_irq13()
     if ((*ENCODER_1_INTR & (1 << ENCODER_1_EDGE_HIGH)) == (1 << ENCODER_1_EDGE_HIGH))
     {
         *ENCODER_1_INTR |= (1 << ENCODER_1_EDGE_HIGH);
+        currentUsVal = getTimeLW();
         if(lastTrigger == 1)
         {
             if ((*GPIO_IN & (1 << ENCODER_2)) == (1 << ENCODER_2)) 
@@ -38,16 +39,14 @@ void isr_c1_io_irq_bank0_irq13()
                 encoderVal--;
                 if (encoderValOld > encoderVal+1)
                 {
-                    encoderStickyDecrement++;
+                    encoderStickyIncrement--;
                     encoderValOld=encoderVal;
-                    lastUsVal = currentUsVal;
-                    currentUsVal = getTimeLW();
+                    
                 }
             }
             else
             { 
                 encoderVal++;
-                //encoderStickyIncrement++;
             }
         }
         lastTrigger = 0;
@@ -55,17 +54,16 @@ void isr_c1_io_irq_bank0_irq13()
     else if ((*ENCODER_1_INTR & (1 << ENCODER_1_EDGE_LOW)) == (1 << ENCODER_1_EDGE_LOW))
     {
         *ENCODER_1_INTR |= (1 << ENCODER_1_EDGE_LOW);
+        currentUsVal = getTimeLW();
         if(lastTrigger==1)
         {
             if ((*GPIO_IN & (1 << ENCODER_2)) == (1 << ENCODER_2)) 
             { 
                 encoderVal++;
-                //encoderStickyIncrement++; 
             }
             else
             { 
                 encoderVal--;
-                //encoderStickyDecrement++;
             }
         }
         lastTrigger = 0;
@@ -73,6 +71,7 @@ void isr_c1_io_irq_bank0_irq13()
     else if ((*ENCODER_2_INTR & (1 << ENCODER_2_EDGE_HIGH)) == (1 << ENCODER_2_EDGE_HIGH))
     {
         *ENCODER_2_INTR |= (1 << ENCODER_2_EDGE_HIGH);
+        currentUsVal = getTimeLW();
         if(lastTrigger == 0)
         {
             if ((*GPIO_IN & (1 << ENCODER_1)) == (1 << ENCODER_1)) 
@@ -82,14 +81,11 @@ void isr_c1_io_irq_bank0_irq13()
                 { 
                     encoderStickyIncrement++;
                     encoderValOld=encoderVal;
-                    lastUsVal = currentUsVal;
-                    currentUsVal = getTimeLW();
                 }
             }
             else 
             { 
                 encoderVal--;
-                //encoderStickyDecrement++;
             }
         }
         lastTrigger = 1;
@@ -97,17 +93,16 @@ void isr_c1_io_irq_bank0_irq13()
     else if ((*ENCODER_2_INTR & (1 << ENCODER_2_EDGE_LOW)) == (1 << ENCODER_2_EDGE_LOW))
     {
         *ENCODER_2_INTR |= (1 << ENCODER_2_EDGE_LOW);
+        currentUsVal = getTimeLW();
         if(lastTrigger == 0)
         {
             if ((*GPIO_IN & (1 << ENCODER_1)) == (1 << ENCODER_1)) 
             {
                 encoderVal--;
-                //encoderStickyDecrement++;
             } 
             else 
             {
                 encoderVal++;
-                //encoderStickyIncrement++;
             }
         }
         lastTrigger = 1;
@@ -223,21 +218,24 @@ void clearReleasedStickyBit(uint8_t nr)
 
 int16_t getStickyIncrementDelta()
 {
-    return encoderStickyIncrement-encoderStickyDecrement;
+    return encoderStickyIncrement;
 }
 
-// returns the time passed in us between sticky increments oder decrements
-uint32_t getRotaryDeltaT()
+void getStickyIncrementAndTime(RotaryEncoderIncrementType * res)
 {
     if (currentUsVal >= lastUsVal)
     {
-        return currentUsVal - lastUsVal;
+        res->deltaTime = currentUsVal - lastUsVal;
     }
-    return 0xFFFFFFFF;
+    else
+    {
+        res->deltaTime = 0xFFFFFFFF;
+    }
+    res->increment=encoderStickyIncrement;
 }
 
 void clearStickyIncrementDelta()
 {
-    encoderStickyDecrement=0;
     encoderStickyIncrement=0;
+    lastUsVal = currentUsVal;
 }

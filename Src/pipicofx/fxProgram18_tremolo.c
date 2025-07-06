@@ -124,7 +124,7 @@ FxProgramType fxProgram18 = {
         {
             .name="Rate",
             .control=0,
-            .increment=16,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam1Display,
             .getParameterValue=0,
@@ -133,7 +133,7 @@ FxProgramType fxProgram18 = {
         {
             .name="Depth",
             .control=1,
-            .increment=16,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam2Display,
             .getParameterValue=0,
@@ -142,7 +142,7 @@ FxProgramType fxProgram18 = {
         {
             .name="Shape",
             .control=2,
-            .increment=16,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam3Display,
             .getParameterValue=0,
@@ -150,8 +150,8 @@ FxProgramType fxProgram18 = {
         },
         {
             .name="PulseWidth",
-            .control=255,
-            .increment=16,
+            .control=0xFF,
+            .increment=1,
             .rawValue=0,
             .getParameterDisplay=&fxProgramParam4Display,
             .getParameterValue=0,
@@ -160,8 +160,8 @@ FxProgramType fxProgram18 = {
         {
             .name="Volume",
             .control=0xff,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=0x3ff,
             .setParameter=fxProgramPresetVolumeCallback,
             .getParameterValue=0,
             .getParameterDisplay=fxProgramPresetVolumeDisplay

@@ -333,6 +333,76 @@ void decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 			out[charpos-decimalPlace]='.';
 		}
 	}
+}
+
+void decimalUInt16ToChar(uint16_t nr,char * out,uint8_t decimalPlace)
+{
+	uint16_t pos=10000;
+	uint16_t cntr=0,charpos=0;
+	uint16_t firstDigit = 0;
+	uint16_t interm_nr;
+	uint8_t c2;
+	if (nr==0)
+	{
+		out[charpos++]=0x30;
+	}
+	else
+	{
+		interm_nr = nr;
+		while (pos > 0)
+		{
+			cntr=0;
+			while (interm_nr >= pos)
+			{
+				interm_nr -= pos;
+				cntr++;
+			}
+			if (cntr > 0 || firstDigit > 0)
+			{
+				out[charpos++] = cntr + 0x30;
+				firstDigit = 1;
+			}
+			pos /= 10;
+		}
+	}
+	out[charpos]=0;
+
+	// have to add least one zero before the decimal separator
+	if(charpos <= decimalPlace)
+	{
+		// shift digits back
+		c2=charpos;
+		for(int8_t c=charpos;c>=0;c--)
+		{
+			out[c2+(decimalPlace-charpos)+2] = out[c2];
+			c2--;
+		}
+
+		// fill with zeros
+		for(uint8_t c=0;c<(decimalPlace-charpos)+2;c++)
+		{
+			if (c==1)
+			{
+				out[c] = '.';
+			}
+			else
+			{
+				out[c] = '0';
+			}
+		}
+	}
+	else
+	{
+		// shift one position back
+		c2=charpos;
+		for(uint8_t c=0;c<decimalPlace+1;c++)
+		{
+			out[c2+1] = out[c2];
+			c2--;
+		}
+		// put in decimal separator
+		out[charpos-decimalPlace]='.';
+	}
 
 }
 
