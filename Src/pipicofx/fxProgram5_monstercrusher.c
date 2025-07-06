@@ -5,6 +5,7 @@ static int16_t fxProgram5processSample(int16_t sampleIn,void*data)
 {
     FxProgram5DataType* pData= (FxProgram5DataType*)data;
     sampleIn = bitCrusherProcessSample(sampleIn,&pData->bitcrusher);
+    sampleIn = firstOrderIirHighpassProcessSample(sampleIn,&pData->dcRemoval);
     sampleIn = gainStageProcessSample(sampleIn,&pData->presetVolume);
     return sampleIn;
 }
@@ -37,9 +38,9 @@ static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
 static void fxProgramPresetVolumeDisplay(void*data,char*res)
 {
     FxProgram5DataType* pData = (FxProgram5DataType*)data;
-    int16_t dVal;
+    uint16_t dVal;
     dVal = pData->presetVolume.gain*39; // percent with two decimal points
-    decimalInt16ToChar(dVal,res,2);
+    decimalUInt16ToChar(dVal,res,2);
         for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
     {
         if(*(res+c)==0)
@@ -60,6 +61,11 @@ FxProgram5DataType fxProgram5data = {
     .bitcrusher = {
         .bitmask = 0x8000
     },
+    .dcRemoval = {
+        .alpha = 32700,
+        .oldVal = 0,
+        .oldXVal = 0
+    },
     .presetVolume = {
         .gain=0xFF,
         .offset=0
@@ -73,7 +79,7 @@ FxProgramType fxProgram5 = {
         {
             .name = "Bit Reduction  ",
             .control=0,
-            .increment=32,
+            .increment=256,
             .rawValue=0,
             .getParameterDisplay=&fxProgram5Param1Display,
             .getParameterValue=0,
@@ -82,8 +88,8 @@ FxProgramType fxProgram5 = {
         {
             .name="Volume",
             .control=0xff,
-            .increment=32,
-            .rawValue=0,
+            .increment=1,
+            .rawValue=0x3FF,
             .setParameter=fxProgramPresetVolumeCallback,
             .getParameterValue=0,
             .getParameterDisplay=fxProgramPresetVolumeDisplay

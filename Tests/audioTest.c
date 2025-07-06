@@ -99,12 +99,24 @@ void delayTimeDiffTest()
         idx1 = idx1New;
         idx2 = idx2New;
     }
+}
 
+void bitMaskingTest()
+{
+    uint16_t bitMask = 0xFFF8;
+    int16_t maskedVal;
+    for (int16_t val = -32;val < 33;val++)
+    {
+        maskedVal = (int16_t)(((uint16_t)val) & bitMask);
+        printf("original: %d, masked: %d\n",val,maskedVal);
+
+    }
 }
 
 int main()
 {
     //impulseTest();
     //waveshaperTest();
-    delayTimeDiffTest();
+    //delayTimeDiffTest();
+    bitMaskingTest();
 }
