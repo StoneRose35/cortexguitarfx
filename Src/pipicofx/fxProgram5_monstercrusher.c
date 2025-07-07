@@ -5,7 +5,6 @@ static int16_t fxProgram5processSample(int16_t sampleIn,void*data)
 {
     FxProgram5DataType* pData= (FxProgram5DataType*)data;
     sampleIn = bitCrusherProcessSample(sampleIn,&pData->bitcrusher);
-    sampleIn = firstOrderIirHighpassProcessSample(sampleIn,&pData->dcRemoval);
     sampleIn = gainStageProcessSample(sampleIn,&pData->presetVolume);
     return sampleIn;
 }
@@ -25,7 +24,9 @@ static void fxProgram5Param1Display(void*data,char*res)
     FxProgram5DataType *  fData = (FxProgram5DataType*)data;
     
     resolution = fData->bitcrusher.bitmask;
-    UInt16ToChar(resolution,res);
+    uint8_t nbits = (4096-fxProgram5.parameters[0].rawValue) >> 8;
+    UInt8ToChar(nbits,res);
+    appendToString(res,"-bits");
 }
 
 static void fxProgramPresetVolumeCallback(uint16_t val,void*data)
@@ -61,11 +62,6 @@ FxProgram5DataType fxProgram5data = {
     .bitcrusher = {
         .bitmask = 0x8000
     },
-    .dcRemoval = {
-        .alpha = 32700,
-        .oldVal = 0,
-        .oldXVal = 0
-    },
     .presetVolume = {
         .gain=0xFF,
         .offset=0
@@ -77,7 +73,7 @@ FxProgramType fxProgram5 = {
     .nParameters=2,
     .parameters = {
         {
-            .name = "Bit Reduction  ",
+            .name = "Resolution",
             .control=0,
             .increment=256,
             .rawValue=0,
