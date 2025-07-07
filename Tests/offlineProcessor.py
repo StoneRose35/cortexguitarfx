@@ -137,6 +137,7 @@ class OfflineProcessorGui:
         for s in self.sliders:
             args.append(str(int(s.get())))
         self.entCommandLineText.set("{}".format(args).replace("'", "\""))
+        print("{}".format(args).replace("'", "\""))
         call_backed(args)
         wf = wave.open(self.currentSample, "rb")
         waveform = wf.readframes(-1)

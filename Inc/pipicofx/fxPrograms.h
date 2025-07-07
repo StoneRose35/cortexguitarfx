@@ -21,7 +21,7 @@
 #include "pipicofx/picofxCore.h"
 
 
-#define N_FX_PROGRAMS 16
+#define N_FX_PROGRAMS 17
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
 
@@ -283,6 +283,16 @@ typedef struct
 } FxProgram18DataType;
 
 
+typedef struct 
+{
+    DelayDataType delays[8];
+    FirstOrderIirType feedbackFilters[8];
+    AllpassType allpasses[4];
+    GainStageDataType presetVolume;
+    int16_t mix;
+} FxProgram19DataType;
+
+
 
 extern FxProgramType fxProgram1;
 extern FxProgramType fxProgram2;
@@ -302,6 +312,7 @@ extern FxProgramType fxProgram15;
 extern FxProgramType fxProgram16;
 extern FxProgramType fxProgram17;
 extern FxProgramType fxProgram18;
+extern FxProgramType fxProgram19;
 extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
 
 #endif

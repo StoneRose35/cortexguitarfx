@@ -21,6 +21,7 @@ FxProgramType* fxPrograms[N_FX_PROGRAMS]={
     &fxProgram16, // pitch shifter
     &fxProgram17, // shimmer reverb
     &fxProgram18, // tremolo
+    &fxProgram19, // FreeVerb
     &fxProgram3 // Off
     };
 

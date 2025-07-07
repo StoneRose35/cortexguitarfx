@@ -28,12 +28,7 @@ void initDelay(DelayDataType*data,int16_t *  memoryPointer,uint32_t bufferLength
     {
         data->delayLine[c]=0;
     }
-    data->delayInSamples=1;
     data->delayLinePtr=0;
-    data->feedback=0;
-    data->mix=0;
-    data->feedbackFunction=0;
-    data->feebackData=0;
 }
 int16_t delayLineProcessSample(int16_t sampleIn,DelayDataType*data)
 {
@@ -52,7 +47,30 @@ int16_t delayLineProcessSample(int16_t sampleIn,DelayDataType*data)
     }
     sampleFedBack = ((data->feedback*sampleFedBack) >> 15);
 
-    //sampleFedBack = clip(sampleFedBack,audioStatePtr);
+    sampleFedBack = clip(sampleIn + sampleFedBack,audioStatePtr);
+    *(data->delayLine + data->delayLinePtr) = (int16_t)sampleFedBack;
+    data->delayLinePtr++;
+    data->delayLinePtr &= (data->delayBufferLength -1);
+    return sampleOut;
+}
+
+int16_t delayLineWetProcessSample(int16_t sampleIn,DelayDataType*data)
+{
+    uint32_t delayIdx;
+    int16_t sampleOut;
+    int32_t sampleFedBack;
+    volatile uint32_t * audioStatePtr = getAudioStatePtr();
+    delayIdx = (data->delayLinePtr - data->delayInSamples) & (data->delayBufferLength -1);
+
+    sampleOut = *(data->delayLine +delayIdx);
+    sampleFedBack = *(data->delayLine +delayIdx); //sampleOut;
+
+    if (data->feedbackFunction != 0)
+    {
+        sampleFedBack = (int32_t)data->feedbackFunction((int16_t)sampleFedBack,data->feebackData,audioStatePtr);
+    }
+    sampleFedBack = ((data->feedback*sampleFedBack) >> 15);
+
     sampleFedBack = clip(sampleIn + sampleFedBack,audioStatePtr);
     *(data->delayLine + data->delayLinePtr) = (int16_t)sampleFedBack;
     data->delayLinePtr++;
