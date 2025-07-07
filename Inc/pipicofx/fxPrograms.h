@@ -170,7 +170,6 @@ typedef struct
 {
     BitCrusherDataType bitcrusher;
     uint8_t resolution;
-    FirstOrderIirType dcRemoval;
     GainStageDataType presetVolume;
 } FxProgram5DataType;
 
