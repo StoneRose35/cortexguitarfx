@@ -100,8 +100,9 @@ int16_t sineChorusInterpolatedProcessSample(int16_t sampleIn,SineChorusType*data
     delayPtr = (data->delayInputPtr - data->offset - (totalDelay >> 3)) & (SINE_CHORUS_DELAY_SIZE-1);
     delayPtrNext = (delayPtr - 1) & (SINE_CHORUS_DELAY_SIZE-1);
     q =totalDelay & 0x7;
-    sampleOut=((sampleIn*((1 << 15)-data->mix)) >> 15) + ((data->mix*((data->delayBuffer[delayPtr]*(8 - q) + data->delayBuffer[delayPtrNext]*q)>>3)) >> 15);
-    *(data->delayBuffer + data->delayInputPtr++)=sampleIn + ((data->feedback*sampleOut) >> 15);
+    int16_t delayedSample = ((data->delayBuffer[delayPtr]*(8 - q) + data->delayBuffer[delayPtrNext]*q)>>3);
+    *(data->delayBuffer + data->delayInputPtr++)=sampleIn + ((data->feedback*delayedSample) >> 15);
+    sampleOut=((sampleIn*((1 << 15)-data->mix)) >> 15) + ((data->mix*(delayedSample)) >> 15);
     return sampleOut;
 }
 

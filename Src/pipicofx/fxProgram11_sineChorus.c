@@ -69,15 +69,15 @@ static void fxProgramParam4Callback(uint16_t val,void*data)
 {
     fxProgram11.parameters[3].rawValue = val;
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
-    pData->sineChorus.offset = 49 + (val >> 1);
+    pData->sineChorus.offset = 4 + (val >> 2);
 }
 
 static void fxProgramParam4Display(void*data,char*res)
 {
     FxProgram11DataType* pData = (FxProgram11DataType*)data;
     uint16_t msValue;
-    msValue = (uint16_t)(((uint32_t)pData->sineChorus.offset*21) >> 10);
-    UInt16ToChar(msValue,res);
+    msValue = (uint16_t)(((uint32_t)pData->sineChorus.offset*213) >> 10);
+    decimalUInt16ToChar(msValue,res,1);
     appendToString(res, " ms");
 }
 
