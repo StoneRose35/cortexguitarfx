@@ -203,5 +203,46 @@
             },
             "detail": "Audio Unit Tests."
         },
+        {
+            "type": "cppbuild",
+            "label": "compile C++ tests",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-I./Inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "./Tests/cpp_tests.cpp", "./Src/pipicofx/*.cpp", "./out/*.o",
+                "-o",
+                "./Tests/cppTests", 
+                "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "dependsOn": "compile c part for c++ test"
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile c part for c++ test",
+            "command": "/usr/bin/gcc",
+            "args": [
+                "-I./../Inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "-c",
+                "./../Src/common/audio/*.c","./../Src/common/stringFunctions.c","./../Src/common/math/*.c"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/out"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        }
     ]
 }

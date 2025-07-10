@@ -20,10 +20,7 @@ static void fxProgram5Param1Callback(uint16_t val,void*data) // set bit mask
 
 static void fxProgram5Param1Display(void*data,char*res)
 {
-    uint16_t resolution;
-    FxProgram5DataType *  fData = (FxProgram5DataType*)data;
-    
-    resolution = fData->bitcrusher.bitmask;
+    //FxProgram5DataType *  fData = (FxProgram5DataType*)data;
     uint8_t nbits = (4096-fxProgram5.parameters[0].rawValue) >> 8;
     UInt8ToChar(nbits,res);
     appendToString(res,"-bits");

@@ -2,7 +2,7 @@
 #include "systemChoice.h"
 
 #ifdef HARDWARE
-
+extern "C" {
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sio.h"
 #include "hardware/rp2040_registers.h"
@@ -46,8 +46,13 @@
 #include "core1Main.h"
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
+#include "pipicofx/FxProgram.hpp"
+#include "pipicofx/FXProgram_AmpModel.hpp"
 #include "globalConfig.h"
 #include "stdio.h"
+}
+
+
 volatile uint32_t task=0;
 volatile uint8_t context;
 
@@ -72,6 +77,9 @@ volatile uint8_t programsToInitialize[3];
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0;
+
+PiPicoFX::AmpModel::AmpModel * exampleFxProg;
+PiPicoFX::FxProgram exampleFxProg2(3,"muh");
 
 // 0: done
 // 1: change request
@@ -164,8 +172,8 @@ int main(void)
 	ticStart=0;
 	programsToInitialize[0]=0xFF;
 
-
-
+	exampleFxProg = new PiPicoFX::AmpModel::AmpModel();
+	exampleFxProg->processSample(65);
 
     /* Loop forever */
 	for(;;)
@@ -186,4 +194,6 @@ int main(void)
 		#endif	
 	}
 }
+
+
 #endif

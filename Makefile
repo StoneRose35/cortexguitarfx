@@ -12,13 +12,15 @@ MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
 CC=arm-none-eabi-gcc
+CPP=-arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
 OPT=-Og
 PAD_CKECKSUM=./tools/pad_checksum
 DEFINES=-DRP2040_FEATHER -DI2S_INPUT 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
-LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -Wl,--wrap=__aeabi_idiv -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -lgcc -Wl,--end-group
+CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -Wall -Wno-error=narrowing -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
+LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -Wl,--wrap=__aeabi_idiv -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lm -lstdc++ -Wl,--end-group
 LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary
 BOOTLOADER=bs2_fast_qspi2
@@ -28,9 +30,11 @@ all: bs2_code_size $(PROJECT).uf2
 RP2040_OBJS := $(patsubst Src/rp2040/%.c,out/%.o,$(wildcard Src/rp2040/*.c))
 RP2040_OBJS_ASM := $(patsubst Src/rp2040/%.S,out/%.o,$(wildcard Src/rp2040/*.S))
 COMMON_OBJS := $(patsubst Src/common/%.c,out/%.o,$(wildcard Src/common/*.c))
+COMMON_OBJS_CPP := $(patsubst Src/common/%.cpp,out/%.o,$(wildcard Src/common/*.cpp))
 AUDIO_OBJS := $(patsubst Src/common/audio/%.c,out/%.o,$(wildcard Src/common/audio/*.c))
 MATH_OBJS := $(patsubst Src/common/math/%.c,out/%.o,$(wildcard Src/common/math/*.c))
 AUDIO_FX_OBJS := $(patsubst Src/pipicofx/%.c,out/%.o,$(wildcard Src/pipicofx/*.c))
+AUDIO_FX_OBJS_CPP := $(patsubst Src/pipicofx/%.cpp,out/%.o,$(wildcard Src/pipicofx/*.cpp))
 AUDIO_FX_UI_OBJS := $(patsubst Src/pipicofx/ui/%.c,out/%.o,$(wildcard Src/pipicofx/ui/*.c))
 GRAPHICS_OBJS := $(patsubst Src/common/graphics/%.c,out/%.o,$(wildcard Src/common/graphics/*.c))
 NEOPIXEL_OBJS := $(patsubst Src/common/neopixel/%.c,out/%.o,$(wildcard Src/common/neopixel/*.c))
@@ -42,7 +46,9 @@ ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 all_rp2040: $(RP2040_OBJS) $(RP2040_OBJS_ASM)
 all_common: $(COMMON_OBJS)
+all_common_cpp: $(COMMON_OBJS_CPP)
 all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS) $(AUDIO_FX_UI_OBJS)
+all_audio_cpp: $(AUDIO_FX_OBJS_CPP)
 all_math: $(MATH_OBJS)
 all_graphics: $(GRAPHICS_OBJS)
 all_neopixel: $(NEOPIXEL_OBJS)
@@ -126,6 +132,10 @@ bootstage2.o: bootstage2.S
 out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
+# common c++ libs
+out/%.o: Src/common/%.cpp $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
+
 # audio libs
 out/%.o: Src/common/audio/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
@@ -137,6 +147,10 @@ out/%.o: Src/common/math/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.
 # audio fx libs
 out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+# audio fx libs, c++
+out/%.o: Src/pipicofx/%.cpp $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # audio fx ui libs
 out/%.o: Src/pipicofx/ui/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
@@ -197,8 +211,8 @@ Inc/gen/version.h: Inc/gen
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # main linking and generating flashable content
-$(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common  all_audio all_graphics all_math $(ASSET_IMAGES)
-	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
+$(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common all_common_cpp  all_audio all_audio_cpp all_graphics all_math $(ASSET_IMAGES)
+	$(CPP) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 #~/pico/pico-libs/rp2_common/pico_stdio/stdio.c.obj ~/pico/pico-libs/common/pico_sync/mutex.c.obj ~/pico/pico-libs/rp2_common/hardware_timer/timer.c.obj ~/pico/pico-libs/common/pico_time/time.c.obj
 
 $(PROJECT).bin: $(PROJECT).elf

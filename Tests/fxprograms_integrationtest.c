@@ -6,8 +6,8 @@
 #include <string.h>
 #include "math.h"
 
-#define SAMPLES_PER_PARAMETER 32
-
+#define SAMPLES_PER_PARAMETER 16
+#define RANDOM_TEST_SAMPLE_SIZE 32768
 float int2float(int32_t a)
 {
     return (float)a;
@@ -66,10 +66,12 @@ int main(int argc, char ** argv)
         }
         fflush(fid);
         nVariations=1;
+        /*
         for(uint8_t p=0;p<fxPrograms[c]->nParameters;p++)
         {
             nVariations *= SAMPLES_PER_PARAMETER;
-        }
+        }*/
+        nVariations = fxPrograms[c]->nParameters*RANDOM_TEST_SAMPLE_SIZE;
         if (nVariations > 1)
         {
             fprintf(fid,"shuffling through %lu variations\r\n",nVariations);

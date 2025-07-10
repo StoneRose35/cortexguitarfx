@@ -52,7 +52,10 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH
 
-    /*
+    
+    /* ----------------- 
+       -  Used for C++ -
+       ----------------- */ 
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -64,18 +67,20 @@ SECTIONS
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     } > FLASH
     __exidx_end = .;
-    
-    
-    . = ALIGN(4);*/
-
+    . = ALIGN(4);
+    /* ----------------- 
+    -  Used for C++ -
+    ----------------- */ 
+    /*
     .filesystem :
    {
       . = ALIGN(4K);
       __filesystem_start = .;
-      LONG(0) /* compatibility: here the baud rate has been placed, its not read, therefore filll the place with 0  */
+      LONG(0) // compatibility: here the baud rate has been placed, its not read, therefore filll the place with 0  
       KEEP(*(.filesysdata))
       __filesystem_end = .;
   } >FLASH
+  */
 
     __etext = .;
     

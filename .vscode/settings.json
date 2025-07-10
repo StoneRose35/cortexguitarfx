@@ -72,7 +72,10 @@
         "romfunc.h": "c",
         "rotencoderswitchpower.h": "c",
         "chardisplay.h": "c",
-        "tremolo.h": "c"
+        "tremolo.h": "c",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": true
