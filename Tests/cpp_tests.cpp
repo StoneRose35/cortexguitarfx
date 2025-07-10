@@ -44,7 +44,7 @@ int main(int argc,char ** argv)
     {
         for (uint16_t q=0;q<(sizeof(paramValues)>>1);q++)
         {
-            prog1->getParameter(c)->parameterCallback(q);
+            prog1->getParameter(c)->parameterCallback(*(paramValues+q));
             prog1->getParameter(c)->parameterDisplay(displayBfr);
             std::cout << "Setting " << prog1->getParameter(c)->getParameterName() << " to " << q << " (raw), yields " << displayBfr << "\n";
         }
