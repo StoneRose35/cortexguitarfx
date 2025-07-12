@@ -2,7 +2,9 @@
 #include "stdint.h"
 #include "math.h"
 
-#include "pipicofx/FXProgram_AmpModel.hpp"
+#include "pipicofx/001_AmpModel.hpp"
+#include "pipicofx/002_VibChorus.hpp"
+#include "pipicofx/003_Off.hpp"
 #include "pipicofx/FxProgram.hpp"
 
 
@@ -29,10 +31,12 @@ int main(int argc,char ** argv)
 {
     char  displayBfr[32];
     int16_t sampleIn, sampleOut;
+    uint8_t pCnt;
     uint16_t paramValues[]={0, 1024, 2048,3072,4095,1023};
-    PiPicoFX::FxProgram  * prog1 = new PiPicoFX::AmpModel::AmpModel();
+    PiPicoFX::FxProgram  * prog1 = new PiPicoFX::Off::Off();
     std::cout << "We've got FX Program \"" << prog1->getName() <<"\"\n";
-    std::cout << "It has " << prog1->getParameterCount() << " editable Parameters\n";
+    pCnt = prog1->getParameterCount();
+    std::cout << "It has " << pCnt << " editable Parameters\n";
     for (uint8_t c=0;c< prog1->getParameterCount();c++)
     {
         prog1->getParameter(c)->parameterDisplay(displayBfr);
@@ -46,7 +50,7 @@ int main(int argc,char ** argv)
         {
             prog1->getParameter(c)->parameterCallback(*(paramValues+q));
             prog1->getParameter(c)->parameterDisplay(displayBfr);
-            std::cout << "Setting " << prog1->getParameter(c)->getParameterName() << " to " << q << " (raw), yields " << displayBfr << "\n";
+            std::cout << "Setting " << prog1->getParameter(c)->getParameterName() << " to " << paramValues[q] << " (raw), yields " << displayBfr << "\n";
         }
     }
     std::cout << "Processing a few Samples\n";

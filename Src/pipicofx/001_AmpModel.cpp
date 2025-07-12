@@ -1,5 +1,5 @@
 
-#include "pipicofx/FXProgram_AmpModel.hpp"
+#include "pipicofx/001_AmpModel.hpp"
 extern "C" {
 #include "audio/gainstage.h"
 
@@ -15,38 +15,37 @@ using namespace PiPicoFX;
 int16_t AmpModel::AmpModel::processSample(int16_t sampleIn) 
 {
     int16_t out;
-    this->dataImpl.highpass_out = (((((1 << 15) + this->dataImpl.highpassCutoff) >> 1)*(sampleIn - dataImpl.highpass_old_in))>>15) + ((this->dataImpl.highpassCutoff *this->dataImpl.highpass_old_out) >> 15);
-    this->dataImpl.highpass_old_in = sampleIn;
-    this->dataImpl.highpass_old_out = dataImpl.highpass_out;
+    this->highpass_out = (((((1 << 15) + this->highpassCutoff) >> 1)*(sampleIn - highpass_old_in))>>15) + ((this->highpassCutoff *this->highpass_old_out) >> 15);
+    this->highpass_old_in = sampleIn;
+    this->highpass_old_out = highpass_out;
 
-    out = dataImpl.highpass_out;
-    for (uint8_t c=0;c<dataImpl.nWaveshapers;c++)
+    out = highpass_out;
+    for (uint8_t c=0;c<nWaveshapers;c++)
     {
-        out = waveShaperProcessSample(out,&dataImpl.waveshaper1);
+        out = waveShaperProcessSample(out,&waveshaper1);
     }
 
-    out = gainStageProcessSample(out,&dataImpl.presetVolume);
+    out = gainStageProcessSample(out,&presetVolume);
 
     out = out >> 1;
 
-    out = secondOrderIirFilterProcessSample(out,&dataImpl.filter1);
+    out = secondOrderIirFilterProcessSample(out,&filter1);
     out >>= 2;
-    out = firFilterProcessSample(out,&dataImpl.filter3);
-    out = delayLineProcessSample(out, &dataImpl.delay);
+    out = firFilterProcessSample(out,&filter3);
+    out = delayLineProcessSample(out, &delay);
     return out;
 }
 
 void AmpModel::AmpModel::setup()
 {
-    this->data = &this->dataImpl;
-    initfirFilter(&dataImpl.filter3);
-    initWaveShaper(&dataImpl.waveshaper1,&waveShaperDefaultOverdrive);
-    initDelay(&dataImpl.delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
-    dataImpl.delay.feebackData = (void*)&dataImpl.feedbackFilter;
-    this->addParameter(new Param1(this->data));
-    this->addParameter(new Param2(this->data));
-    this->addParameter(new Param3(this->data));
-    this->addParameter(new Param4(this->data));
+    initfirFilter(&filter3);
+    initWaveShaper(&waveshaper1,&waveShaperDefaultOverdrive);
+    initDelay(&delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
+    delay.feebackData = (void*)&feedbackFilter;
+    this->addParameter(new Param1(this));
+    this->addParameter(new Param2(this));
+    this->addParameter(new Param3(this));
+    this->addParameter(new Param4(this));
     
 }
 

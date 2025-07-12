@@ -47,7 +47,7 @@ extern "C" {
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
 #include "pipicofx/FxProgram.hpp"
-#include "pipicofx/FXProgram_AmpModel.hpp"
+#include "pipicofx/001_AmpModel.hpp"
 #include "globalConfig.h"
 #include "stdio.h"
 }

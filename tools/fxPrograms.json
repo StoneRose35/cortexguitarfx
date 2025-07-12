@@ -1,0 +1,460 @@
+{
+    "fxPrograms": [
+        {
+            "displayName": "Monstercrusher",
+            "className": "MonsterCrusher",
+            "parameters": [
+                {
+                    "name": "Resolution",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 256
+                },
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "Delay",
+            "className": "Delay",
+            "parameters": [
+                {
+                    "name": "Time",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Feedback",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Mix",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "Compressor",
+            "className": "Compressor",
+            "parameters": [
+                {
+                    "name": "Treshhold",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Ratio",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 512
+                },
+                {
+                    "name": "Makeup Gain",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Attack",
+                    "control": 255,
+                    "rawValue": 4095,
+                    "increment": 1
+                },
+                {
+                    "name": "Release",
+                    "control": 255,
+                    "rawValue": 4095,
+                    "increment": 1
+                },
+                {
+                    "name": "Flavor",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 1024
+                }
+            ]
+        },
+        {
+            "displayName": "Amp High Gain",
+            "className": "AmpModelHighGain",
+            "parameters": [
+                {
+                    "name": "Hi-Cut",
+                    "control": 0,
+                    "rawValue": 4095,
+                    "increment": 1
+                },
+                {
+                    "name": "Gain",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Mod Intensity",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Mod Type",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 2048
+                },
+                {
+                    "name": "Cab Type",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 256
+                },
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                } 
+            ]
+        },
+        {
+            "displayName": "Reverb",
+            "className": "Reverb",
+            "parameters": [
+                {
+                    "name": "Time",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Mix",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Planet",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1024
+                },
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "Sine Modulation",
+            "className": "SineModulation",
+            "parameters": [
+                {
+                    "name": "Frequency",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Depth",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Blend",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Offset",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Feedback",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "Allpass Reverb",
+            "className": "Reverb2",
+            "parameters": [
+                {
+                    "name": "Decay",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Mix",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "Hadamard Reverb",
+            "className": "Reverb3",
+            "parameters": [
+                {
+                    "name": "Decay",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Mix",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "3-Band Equalizer",
+            "className": "Eq",
+            "parameters": [
+                {
+                    "name": "Low",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },     
+                {
+                    "name": "Mid",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                },  
+                {
+                    "name": "High",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                },    
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }    
+            ] 
+        },
+        {
+            "displayName": "Acoustic Proc",
+            "className": "Eq",
+            "parameters": [
+                {
+                    "name": "EQ Low",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },  
+                {
+                    "name": "EQ Mid",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "EQ High",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Compressor Int.",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Reverb Time",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Reverb Mix",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "Pitchshifter",
+            "className": "PitchShifter",
+            "parameters": [
+                {
+                    "name": "ShiftAmt",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 512
+                }, 
+                {
+                    "name": "Mix",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "AvgDelay",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 512
+                }, 
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "ShimmerVerb",
+            "className": "ShimmerVerb",
+            "parameters": [
+                {
+                    "name": "Shimmer",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 512
+                }, 
+                {
+                    "name": "Decay",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Mix",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "Tremolo",
+            "className": "Tremolo",
+            "parameters": [
+                {
+                    "name": "Rate",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Depth",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Shape",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Pulse Width",
+                    "control": 255,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        },
+        {
+            "displayName": "FreeVerb",
+            "className": "FreeVerb",
+            "parameters": [
+                {
+                    "name": "Decay",
+                    "control": 0,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Damping",
+                    "control": 1,
+                    "rawValue": 0,
+                    "increment": 1
+                }, 
+                {
+                    "name": "Mix",
+                    "control": 2,
+                    "rawValue": 0,
+                    "increment": 1
+                },
+                {
+                    "name": "Volume",
+                    "control": 255,
+                    "rawValue": 1023,
+                    "increment": 1
+                }
+            ]
+        }
+    ]
+}

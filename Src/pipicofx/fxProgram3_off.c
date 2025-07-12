@@ -19,7 +19,7 @@ static void fxProgramPresetVolumeDisplay(void*data,char*res)
     FxProgram3DataType* pData = (FxProgram3DataType*)data;
     int16_t dVal;
     dVal = pData->presetVolume.gain*39; // percent with two decimal points
-    decimalInt16ToChar(dVal,res,2);
+    decimalUInt16ToChar(dVal,res,2);
         for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
     {
         if(*(res+c)==0)
