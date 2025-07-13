@@ -1,4 +1,4 @@
-
+extern "C" {
 #include "drivers/dma.h"
 #include "drivers/i2s.h"
 #include "drivers/adc.h"
@@ -14,7 +14,9 @@
 #include "audio/audiotools.h"
 #include "drivers/oled_display.h"
 #include "system.h"
+}
 
+#include "pipicofx/FxProgram.hpp"
 int16_t* audioBufferPtr;
 #ifndef I2S_INPUT
 uint16_t* audioBufferInputPtr;
@@ -127,11 +129,11 @@ void isr_c0_dma_irq0_irq11()
 
 			if (programChangeState != 3) // processing
 			{
-				outputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
+				outputSample = piPicoUiController.currentProgram->processSample(inputSample);
 			}
 			else
 			{
-				outputSample = 0;
+				outputSample = inputSample;
 			}
 			if (programChangeState == 2)// fadeout
 			{

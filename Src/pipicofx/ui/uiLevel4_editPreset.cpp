@@ -1,3 +1,4 @@
+extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "graphics/gfxfont.h"
@@ -10,6 +11,8 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
+}
+#include "pipicofx/FxProgramLoader.hpp"
 
 #define EDITLEVEL_PROGRAM 0
 #define EDITLEVEL_LEDCOLOR 1
@@ -19,7 +22,7 @@
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
-extern volatile uint8_t programsToInitialize[3];
+//extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
 
 static volatile uint8_t editType; // 0: Program
@@ -104,8 +107,8 @@ static void enterCallback(PiPicoFxUiType*data)
             uiStackPush(data,4);
             data->locked = 1;
             data->currentParameterIdx = 0;
-            data->currentParameter = data->currentProgram->parameters + data->currentParameterIdx;
-            if (data->currentProgram->nParameters > 0)
+            data->currentParameter = data->currentProgram->getParameter(data->currentParameterIdx);
+            if (data->currentProgram->getParameterCount() > 0)
             {
                 enterLevel1(data);
             }
@@ -140,12 +143,19 @@ static void exitCallback(PiPicoFxUiType*data)
         {
             generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
         }
-        if (data->currentProgramIdx != presets[currentPreset].programNr)
+        //if (data->currentProgramIdx != presets[currentPreset].programNr)
+        //{
+        //    programsToInitialize[0] = presets[currentPreset].programNr;
+        //    programChangeState = 1;
+        //}
+        // TODO reimplement soft-swap
+        if (data->currentProgram != nullptr)
         {
-            programsToInitialize[0] = presets[currentPreset].programNr;
-            programChangeState = 1;
+            delete data->currentProgram;
+            data->currentProgram = nullptr;
         }
-        applyPreset(presets+currentPreset,fxPrograms);
+        data->currentProgram=PiPicoFX::loadProgram((presets + currentPreset)->programNr);
+        applyPreset(presets+currentPreset,data->currentProgram);
         exitState =  0;   
     }
 }

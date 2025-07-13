@@ -1,3 +1,4 @@
+extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/oled_display.h"
@@ -9,6 +10,8 @@
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
+}
+#include "pipicofx/FxProgramLoader.hpp"
 
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
 BwImageType lock;
@@ -28,33 +31,33 @@ static void create(PiPicoFxUiType*data)
     lock.sy=8;
     lock.type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     clearImage(imgBuffer);
-    drawText(0,1*8,data->currentProgram->name,imgBuffer,0);
+    drawText(0,1*8,data->currentProgram->getName(),imgBuffer,0);
     if (data->locked != 0)
     {
         drawImage(122,0,&lock,imgBuffer);
     }
 
-    for (uint8_t c=0;c<data->currentProgram->nParameters;c++)
+    for (uint8_t c=0;c<data->currentProgram->getParameterCount();c++)
     {
-        if (data->currentProgram->parameters[c].control == 0)
+        if (data->currentProgram->getParameter(c)->getControl() == 0)
         {
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P1:");
-            appendToString(lineBuffer,data->currentProgram->parameters[c].name);
+            appendToString(lineBuffer,data->currentProgram->getParameter(c)->getParameterName());
             drawText(0,5*8,lineBuffer,imgBuffer,0);
         }
-        if (data->currentProgram->parameters[c].control == 1)
+        if (data->currentProgram->getParameter(c)->getControl() == 1)
         {
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P2:");
-            appendToString(lineBuffer,data->currentProgram->parameters[c].name);
+            appendToString(lineBuffer,data->currentProgram->getParameter(c)->getParameterName());
             drawText(0,6*8,lineBuffer,imgBuffer,0);
         }
-        if (data->currentProgram->parameters[c].control == 2)
+        if (data->currentProgram->getParameter(c)->getControl() == 2)
         {
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P3:");
-            appendToString(lineBuffer,data->currentProgram->parameters[c].name);
+            appendToString(lineBuffer,data->currentProgram->getParameter(c)->getParameterName());
             drawText(0,7*8,lineBuffer,imgBuffer,0);
         }                
     }
@@ -116,13 +119,11 @@ static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control
 {
     if (data->locked == 0)
     {
-        for (uint8_t c=0;c<data->currentProgram->nParameters;c++)
+        for (uint8_t c=0;c<data->currentProgram->getParameterCount();c++)
         {
-            if (data->currentProgram->parameters[c].control==control)
+            if (data->currentProgram->getParameter(c)->getControl()==control)
             {
-                data->currentProgram->parameters[c].setParameter(val,data->currentProgram->data);
-                data->currentProgram->parameters[c].rawValue = (int16_t)val;
-
+                data->currentProgram->getParameter(c)->parameterCallback(val);
             }
         }  
     } 
@@ -184,13 +185,14 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         {
             data->currentProgramIdx = 0;
         }
-        data->currentProgram = fxPrograms[data->currentProgramIdx];
+        delete data->currentProgram;
+        data->currentProgram = PiPicoFX::loadProgram(data->currentProgramIdx);
         data->currentParameterIdx=0;
-        data->currentParameter = data->currentProgram->parameters;
+        data->currentParameter = data->currentProgram->getParameter(0);
         // set all parameters controlled by the pots to the current value
-        for(uint8_t c=0; c < data->currentProgram->nParameters; c++)
+        for(uint8_t c=0; c < data->currentProgram->getParameterCount(); c++)
         {
-            switch (data->currentProgram->parameters[c].control)
+            switch (data->currentProgram->getParameter(c)->getControl())
             {
                 case 0:
                     knobVal = getChannel0Value();
@@ -208,7 +210,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     break;
             }
         }
-        parametersToPreset(presets + currentPreset,fxPrograms);
+        //TODO check useage parametersToPreset(presets + currentPreset,fxPrograms);
     }
     create(data);
 }

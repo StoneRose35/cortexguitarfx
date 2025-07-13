@@ -1,3 +1,4 @@
+extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/oled_display.h"
@@ -13,6 +14,7 @@
 #include "images/toggleswitch_on.h"
 #include "images/toggleswitch_off.h"
 #include "globalConfig.h"
+}
 
 static volatile uint8_t paramSelected=0;
 static volatile uint8_t subLevel;

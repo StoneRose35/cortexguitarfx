@@ -12,3 +12,7 @@ const char * FxProgramParameter::getParameterName()
 {
     return parameterName;
 }
+uint8_t PiPicoFX::FxProgramParameter::getControl()
+{
+    return control;
+}

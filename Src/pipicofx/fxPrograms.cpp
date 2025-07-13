@@ -1,30 +1,14 @@
+extern "C" {
 #include <stdint.h>
-#include "pipicofx/fxPrograms.h"
-#include "pipicofx/picofxCore.h"
+
 #include "drivers/24lc128.h"
 #include "stringFunctions.h"
-
-FxProgramType* fxPrograms[N_FX_PROGRAMS]={
-    
-    &fxProgram1, // amp model
-    &fxProgram9, // amp model high gain
-    &fxProgram5, // monster crusher
-    &fxProgram14, // eq
-    &fxProgram15, // vocal processor
-    &fxProgram8, // compressor
-    &fxProgram2, // vibchorus
-    &fxProgram11, // sine chorus
-    &fxProgram6, // delay
-    &fxProgram10, // reverb
-    &fxProgram12, // allpass reverb
-    &fxProgram13, // hadamard diffusor reverb
-    &fxProgram16, // pitch shifter
-    &fxProgram17, // shimmer reverb
-    &fxProgram18, // tremolo
-    &fxProgram19, // FreeVerb
-    &fxProgram3 // Off
-    };
-
+}
+#include "pipicofx/picofxCore.hpp"
+//#include "pipicofx/fxPrograms.h"
+#include "pipicofx/FxProgram.hpp"
+#include "pipicofx/fxProgramParameter.hpp"
+#include "pipicofx/FxProgramLoader.hpp"
 
 void savePreset(FxPresetType* preset,uint16_t presetPos)
 {
@@ -68,23 +52,23 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     return 1;
 }
 
-void applyPreset(FxPresetType* preset,FxProgramType ** programs)
+void applyPreset(FxPresetType* preset,PiPicoFX::FxProgram * program)
 {
     uint8_t nParams;
-    nParams = (*(programs + preset->programNr))->nParameters;
+    nParams = program->getParameterCount();
     for (uint8_t c=0;c<nParams;c++)
     {
-        (*(programs + preset->programNr))->parameters[c].setParameter(preset->parameters[c],(*(programs + preset->programNr))->data);
+        program->getParameter(c)->parameterCallback(preset->parameters[c]);
     }
 }
 
-void parametersToPreset(FxPresetType* preset,FxProgramType ** programs)
+void parametersToPreset(FxPresetType* preset,FxProgram * program)
 {
     uint8_t nParams;
-    nParams = (*(programs+preset->programNr))->nParameters;
+    nParams = program->getParameterCount();
     for (uint8_t c=0;c<nParams;c++)
     {
-        preset->parameters[c] = (*(programs + preset->programNr))->parameters[c].rawValue;
+        preset->parameters[c] = program->getParameter(c)->rawValue;
     }    
 }
 

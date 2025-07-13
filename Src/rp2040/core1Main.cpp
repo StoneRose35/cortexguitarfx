@@ -1,3 +1,4 @@
+extern "C" {
 #include "globalConfig.h"
 #include "system.h"
 #include "drivers/dma.h"
@@ -11,7 +12,7 @@
 #include "audio/delay.h"
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
-#include "pipicofx/picofxCore.h"
+
 #include "drivers/adc.h"
 #include "stringFunctions.h"
 #include "drivers/rotEncoderSwitchPower.h"
@@ -23,6 +24,8 @@
 #include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
 #include "consoleBase.h"
+}
+#include "pipicofx/picofxCore.hpp"
 
 
 int16_t firstHalfOut;
@@ -91,13 +94,13 @@ void core1Main()
 	piPicoFxUiSetup(&piPicoUiController);
 	OledClearDisplay();
     *DMA_INTE0 |= (1 << 4);
-	for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	{
-		if ((uint32_t)fxPrograms[c]->setup != 0)
-		{
-			fxPrograms[c]->setup(fxPrograms[c]->data);
-		}
-	}
+	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
+	//{
+	//	if ((uint32_t)fxPrograms[c]->setup != 0)
+	//	{
+	//		fxPrograms[c]->setup(fxPrograms[c]->data);
+	//	}
+	//}
 	#ifndef FORCE_TEST_MODE
 		enterLevel0(&piPicoUiController);
 	#else
@@ -334,18 +337,19 @@ void core1Main()
 
         if (programChangeState == 3)
         {
-            clearDelayLine();
-            if (programsToInitialize[0] != 0xFF)
-            {
-                if (fxPrograms[programsToInitialize[0]]->reset != 0)
-                {
-                    fxPrograms[programsToInitialize[0]]->reset(fxPrograms[programsToInitialize[0]]->data);
-                }
-                piPicoUiController.currentProgramIdx = programsToInitialize[0];
-                programsToInitialize[0]=0xFF;
-                piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
-                onCreate(&piPicoUiController);
-            }
+            //TODO reimplement soft swap
+            //clearDelayLine();
+            //if (programsToInitialize[0] != 0xFF)
+            //{
+            //    if (fxPrograms[programsToInitialize[0]]->reset != 0)
+            //    {
+            //        fxPrograms[programsToInitialize[0]]->reset(fxPrograms[programsToInitialize[0]]->data);
+            //    }
+            //    piPicoUiController.currentProgramIdx = programsToInitialize[0];
+            //    programsToInitialize[0]=0xFF;
+            //    piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
+            //    onCreate(&piPicoUiController);
+            //}
 
             programChangeState = 4;
         }

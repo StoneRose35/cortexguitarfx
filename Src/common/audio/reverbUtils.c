@@ -23,7 +23,7 @@ int16_t  allpassProcessSample(int16_t sampleIn,AllpassType*allpass,volatile uint
 }
 
 
-int16_t morphingAllpassProcessSample(int16_t sampleIn,AllpassType*allpass,AudioProcessor processor,void * processorData,volatile uint32_t * audioStatePtr)
+int16_t morphingAllpassProcessSample(int16_t sampleIn,AllpassType*allpass,AudioProcessorFunc processor,void * processorData,volatile uint32_t * audioStatePtr)
 {
     int16_t sampleOut;
     int32_t sampleInterm;

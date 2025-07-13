@@ -10,6 +10,9 @@ PiPicoFX::FxProgram::FxProgram(uint8_t nParams,const char * name)
     parameters = new FxProgramParameter*[nParameters];
 }
 
+PiPicoFX::FxProgram::~FxProgram()
+{
+}
 
 void FxProgram::setup(void){}
 uint8_t FxProgram::addParameter(FxProgramParameter*p){

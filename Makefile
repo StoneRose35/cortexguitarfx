@@ -28,6 +28,7 @@ BOOTLOADER=bs2_fast_qspi2
 all: bs2_code_size $(PROJECT).uf2 
 
 RP2040_OBJS := $(patsubst Src/rp2040/%.c,out/%.o,$(wildcard Src/rp2040/*.c))
+RP2040_OBJS_CPP := $(patsubst Src/rp2040/%.cpp,out/%.o,$(wildcard Src/rp2040/*.cpp))
 RP2040_OBJS_ASM := $(patsubst Src/rp2040/%.S,out/%.o,$(wildcard Src/rp2040/*.S))
 COMMON_OBJS := $(patsubst Src/common/%.c,out/%.o,$(wildcard Src/common/*.c))
 COMMON_OBJS_CPP := $(patsubst Src/common/%.cpp,out/%.o,$(wildcard Src/common/*.cpp))
@@ -35,7 +36,7 @@ AUDIO_OBJS := $(patsubst Src/common/audio/%.c,out/%.o,$(wildcard Src/common/audi
 MATH_OBJS := $(patsubst Src/common/math/%.c,out/%.o,$(wildcard Src/common/math/*.c))
 AUDIO_FX_OBJS := $(patsubst Src/pipicofx/%.c,out/%.o,$(wildcard Src/pipicofx/*.c))
 AUDIO_FX_OBJS_CPP := $(patsubst Src/pipicofx/%.cpp,out/%.o,$(wildcard Src/pipicofx/*.cpp))
-AUDIO_FX_UI_OBJS := $(patsubst Src/pipicofx/ui/%.c,out/%.o,$(wildcard Src/pipicofx/ui/*.c))
+AUDIO_FX_UI_OBJS_CPP := $(patsubst Src/pipicofx/ui/%.cpp,out/%.o,$(wildcard Src/pipicofx/ui/*.cpp))
 GRAPHICS_OBJS := $(patsubst Src/common/graphics/%.c,out/%.o,$(wildcard Src/common/graphics/*.c))
 NEOPIXEL_OBJS := $(patsubst Src/common/neopixel/%.c,out/%.o,$(wildcard Src/common/neopixel/*.c))
 SDCARD_OBJS := $(patsubst Src/common/sdcard/%.c,out/%.o,$(wildcard Src/common/sdcard/*.c))
@@ -44,10 +45,10 @@ SERVICES_OBJS := $(patsubst Src/services/%.c,out/%.o,$(wildcard Src/services/*.c
 ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 
-all_rp2040: $(RP2040_OBJS) $(RP2040_OBJS_ASM)
+all_rp2040: $(RP2040_OBJS) $(RP2040_OBJS_ASM) $(RP2040_OBJS_CPP)
 all_common: $(COMMON_OBJS)
 all_common_cpp: $(COMMON_OBJS_CPP)
-all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS) $(AUDIO_FX_UI_OBJS)
+all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS) $(AUDIO_FX_UI_OBJS_CPP)
 all_audio_cpp: $(AUDIO_FX_OBJS_CPP)
 all_math: $(MATH_OBJS)
 all_graphics: $(GRAPHICS_OBJS)
@@ -153,8 +154,8 @@ out/%.o: Src/pipicofx/%.cpp $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h
 	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # audio fx ui libs
-out/%.o: Src/pipicofx/ui/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
-	$(CC) $(CARGS) $(OPT) -c $< -o $@
+out/%.o: Src/pipicofx/ui/%.cpp $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # graphics libs
 out/%.o: Src/common/graphics/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
@@ -171,6 +172,10 @@ out/%.o: Src/common/sdcard/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/versio
 # rp2040 specific libs
 out/%.o: Src/rp2040/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+# rp2040 specific libs, c++
+out/%.o: Src/rp2040/%.cpp $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # rp2040 specific assembly libs
 out/%.o: Src/rp2040/%.S $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h out

@@ -1,3 +1,4 @@
+extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/oled_display.h"
@@ -8,6 +9,7 @@
 #include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
+}
 
 static void create(PiPicoFxUiType*data)
 {

@@ -1,3 +1,5 @@
+extern "C"
+{
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "graphics/gfxfont.h"
@@ -14,6 +16,8 @@
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
 #include "gen/version.h"
+}
+#include "pipicofx/FxProgramLoader.hpp"
 
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
@@ -56,7 +60,14 @@ static void create(PiPicoFxUiType*data)
     appendToString(strbfr,"Out");
     drawText(5,42+20,strbfr,imgBuffer,(void*)0);
 
-    applyPreset(presets+currentPreset,fxPrograms);
+    // TODO reimplement soft-swap
+    if (data->currentProgram != nullptr)
+    {
+        delete data->currentProgram;
+        data->currentProgram = nullptr;
+    }
+    data->currentProgram=PiPicoFX::loadProgram((presets + currentPreset)->programNr);
+    applyPreset(presets+currentPreset,data->currentProgram);
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
@@ -185,16 +196,23 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         {
             currentPreset--;
         }
-        if (data->currentProgramIdx != presets[currentPreset].programNr)
-        {
-            programsToInitialize[0]=presets[currentPreset].programNr;
-            programChangeState=1;
+        //if (data->currentProgramIdx != presets[currentPreset].programNr)
+        //{
+        //    programsToInitialize[0]=presets[currentPreset].programNr;
+        //    programChangeState=1;
             //data->currentProgram = fxPrograms[data->currentProgramIdx];
             //data->currentParameterIdx=0;
             //data->currentParameter = data->currentProgram->parameters;
-        }
+        //}
         setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
-        applyPreset(presets + currentPreset,fxPrograms);
+        // TODO reimplement soft-swap
+        if (data->currentProgram != nullptr)
+        {
+            delete data->currentProgram;
+            data->currentProgram = nullptr;
+        }
+        data->currentProgram=PiPicoFX::loadProgram((presets + currentPreset)->programNr);
+        applyPreset(presets+currentPreset,data->currentProgram);
         create(data);
     }     
 }
@@ -231,13 +249,20 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
             if (currentPreset != 0)
             {
                 currentPreset = 0;
-                if (data->currentProgramIdx != presets[currentPreset].programNr)
-                {
-                    programsToInitialize[0]=presets[currentPreset].programNr;
-                    programChangeState = 1;
-                }
+                //if (data->currentProgramIdx != presets[currentPreset].programNr)
+                //{
+                //    programsToInitialize[0]=presets[currentPreset].programNr;
+                //    programChangeState = 1;
+                //}
                 setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
-                applyPreset(presets,fxPrograms);    
+                // TODO reimplement soft-swap
+                if (data->currentProgram != nullptr)
+                {
+                    delete data->currentProgram;
+                    data->currentProgram = nullptr;
+                }
+                data->currentProgram=PiPicoFX::loadProgram((presets + currentPreset)->programNr);
+                applyPreset(presets+currentPreset,data->currentProgram); 
             }
         }
         create(data);
@@ -302,13 +327,20 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
             if (currentPreset != 1)
             {
                 currentPreset = 1;
-                if (data->currentProgramIdx != presets[currentPreset].programNr)
-                {
-                    programsToInitialize[0]=presets[currentPreset].programNr;
-                    programChangeState = 1;
-                }
+                //if (data->currentProgramIdx != presets[currentPreset].programNr)
+                //{
+                //    programsToInitialize[0]=presets[currentPreset].programNr;
+                //    programChangeState = 1;
+                //}
                 setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
-                applyPreset(presets,fxPrograms);
+                // TODO reimplement soft-swap
+                if (data->currentProgram != nullptr)
+                {
+                    delete data->currentProgram;
+                    data->currentProgram = nullptr;
+                }
+                data->currentProgram=PiPicoFX::loadProgram((presets + currentPreset)->programNr);
+                applyPreset(presets+currentPreset,data->currentProgram);
             }
         }
         create(data);
@@ -357,7 +389,14 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
                     programChangeState = 1;
                 }
                 setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
-                applyPreset(presets,fxPrograms);
+                // TODO reimplement soft-swap
+                if (data->currentProgram != nullptr)
+                {
+                    delete data->currentProgram;
+                    data->currentProgram = nullptr;
+                }
+                data->currentProgram=PiPicoFX::loadProgram((presets + currentPreset)->programNr);
+                applyPreset(presets+currentPreset,data->currentProgram);
             }
         }
         create(data);
@@ -394,12 +433,20 @@ void enterLevel3(PiPicoFxUiType*data)
     registerOnCreateCallback(&create);
     create(data);
     overlayNr=0xFF;
-    if (data->currentProgramIdx != presets[currentPreset].programNr)
-    {
-        programsToInitialize[0]=presets[currentPreset].programNr;
-        programChangeState = 1;
-    }
+    //if (data->currentProgramIdx != presets[currentPreset].programNr)
+    //{
+    //    programsToInitialize[0]=presets[currentPreset].programNr;
+    //    programChangeState = 1;
+    //}
     setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
-    applyPreset(presets, fxPrograms);
+    //applyPreset(presets, fxPrograms);
+    // TODO reimplement soft-swap
+    if (data->currentProgram != nullptr)
+    {
+        delete data->currentProgram;
+        data->currentProgram = nullptr;
+    }
+    data->currentProgram=PiPicoFX::loadProgram((presets + currentPreset)->programNr);
+    applyPreset(presets,data->currentProgram);
 }
 

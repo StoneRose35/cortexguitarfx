@@ -12,7 +12,7 @@ extern "C" {
 #include "audio/firstOrderIirFilter.h"
 #include "audio/gainstage.h"
 #include "stringFunctions.h"
-
+#include "picofxCore.hpp"
 
 int16_t analogDelayFeedbackFunction(int16_t sampleIn,void*fbkFilterData,volatile uint32_t*audioStatePtr);
 
@@ -27,6 +27,8 @@ namespace PiPicoFX {
             AmpModel() : FxProgram(4,"Amp Model"){
                 this->setup();
             };
+
+            ~AmpModel();
             int16_t processSample(int16_t);
 
             int16_t highpassCutoff=31000;

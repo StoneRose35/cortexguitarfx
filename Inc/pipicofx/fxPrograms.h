@@ -1,5 +1,6 @@
 #ifndef _FX_PROGRAM_H_
 #define _FX_PROGRAM_H_
+
 #include <stdint.h>
 #include "audio/waveShaper.h"
 #include "audio/secondOrderIirFilter.h"
@@ -18,12 +19,13 @@
 #include "audio/threebandeq.h"
 #include "audio/pitchshifter.h"
 #include "audio/tremolo.h"
-#include "pipicofx/picofxCore.h"
+#include "pipicofx/picofxCore.hpp"
 
 
-#define N_FX_PROGRAMS 17
+//#define N_FX_PROGRAMS 17
 
 #define FXPROGRAM6_DELAY_TIME_LOWPASS_T 2
+/*
 
 #ifndef FLOAT_AUDIO
 typedef struct {
@@ -292,26 +294,5 @@ typedef struct
 } FxProgram19DataType;
 
 
-
-extern FxProgramType fxProgram1;
-extern FxProgramType fxProgram2;
-extern FxProgramType fxProgram3;
-extern FxProgramType fxProgram4;
-extern FxProgramType fxProgram5;
-extern FxProgramType fxProgram6;
-extern FxProgramType fxProgram7;
-extern FxProgramType fxProgram8;
-extern FxProgramType fxProgram9;
-extern FxProgramType fxProgram10;
-extern FxProgramType fxProgram11;
-extern FxProgramType fxProgram12;
-extern FxProgramType fxProgram13;
-extern FxProgramType fxProgram14;
-extern FxProgramType fxProgram15;
-extern FxProgramType fxProgram16;
-extern FxProgramType fxProgram17;
-extern FxProgramType fxProgram18;
-extern FxProgramType fxProgram19;
-extern FxProgramType* fxPrograms[N_FX_PROGRAMS];
-
+*/
 #endif

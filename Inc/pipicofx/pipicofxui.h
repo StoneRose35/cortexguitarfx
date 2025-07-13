@@ -1,15 +1,23 @@
 #ifndef _PI_PICO_FX_UI_H_
 #define _PI_PICO_FX_UI_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "stdint.h"
 #include "pipicofx/fxPrograms.h"
 #include "graphics/bwgraphics.h"
+#ifdef __cplusplus
+}
+#endif
+#include "pipicofx/FxProgram.hpp"
+#include "pipicofx/fxProgramParameter.hpp"
 
 #define PIPICOFX_UI_STACK_SIZE 8
 
 typedef struct 
 {
-    FxProgramType* currentProgram;
-    FxProgramParameterType * currentParameter;
+    PiPicoFX::FxProgram* currentProgram;
+    PiPicoFX::FxProgramParameter * currentParameter;
     uint8_t uiLevelStack[8];
     void * data;
     uint8_t uiLevelStackPtr;
@@ -19,7 +27,9 @@ typedef struct
     uint8_t editViaRotary : 1;
 } PiPicoFxUiType;
 
-
+#ifdef __cplusplus 
+extern "C" {
+#endif
 typedef struct 
 {
     uint32_t pressedTimestamp;
@@ -67,6 +77,15 @@ BwImageType * getImageBuffer();
 
 
 void piPicoFxUiSetup(PiPicoFxUiType*);
+
+
+uint8_t uiStackPush(PiPicoFxUiType* piPicoUiController,uint8_t val);
+uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController);
+uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController);
+#ifdef __cplusplus
+}
+#endif
+
 void enterLevel0(PiPicoFxUiType*data);
 void enterLevel1(PiPicoFxUiType*data);
 void enterLevel2(PiPicoFxUiType*data);
@@ -75,9 +94,4 @@ void enterLevel4(PiPicoFxUiType*data);
 void enterLevel5(PiPicoFxUiType*data);
 void enterLevel6(PiPicoFxUiType*data);
 void enterLevel7(PiPicoFxUiType*data);
-
-uint8_t uiStackPush(PiPicoFxUiType* piPicoUiController,uint8_t val);
-uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController);
-uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController);
-
 #endif

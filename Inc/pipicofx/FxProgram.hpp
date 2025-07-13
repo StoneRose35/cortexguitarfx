@@ -8,6 +8,7 @@ class FxProgram : public AudioProcessor
 {
     public:
         FxProgram(uint8_t nParams,const char*);
+        virtual ~FxProgram();
         void setup(void);
         virtual uint8_t addParameter(FxProgramParameter*p);
         uint8_t getParameterCount(void);

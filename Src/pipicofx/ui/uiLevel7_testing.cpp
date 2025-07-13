@@ -1,3 +1,5 @@
+extern "C"
+{
 #include "pipicofx/pipicofxui.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/oled_display.h"
@@ -8,6 +10,7 @@
 #include "drivers/stompswitches.h"
 #include "images/testing.h"
 #include "drivers/debugLed.h"
+}
 
 static void create(PiPicoFxUiType*data)
 {

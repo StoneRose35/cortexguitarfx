@@ -179,7 +179,7 @@ void fxProgram17Setup(void*data)
     initDelay(pData->delays+3,delayMemoryPointer+2048+512+256+4096,4096);
     pData->delays[3].delayInSamples = 3989;
     pData->delays[3].mix = ((1 << 15) -1) ;
-    pData->delays[3].feedbackFunction = (AudioProcessor)unicornGlitter;
+    pData->delays[3].feedbackFunction = (AudioProcessorFunc)unicornGlitter;
     pData->delays[3].feebackData = pData;
 
     pData->allpasses[0].delayLineIn = delayMemoryPointer + 4096+2048+512+256+4096;

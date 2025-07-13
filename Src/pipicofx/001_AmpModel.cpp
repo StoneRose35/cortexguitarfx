@@ -2,7 +2,6 @@
 #include "pipicofx/001_AmpModel.hpp"
 extern "C" {
 #include "audio/gainstage.h"
-
 int16_t analogDelayFeedbackFunction(int16_t sampleIn,void*fbkFilterData,volatile uint32_t*audioStatePtr)
 {
     FirstOrderIirType* tData = (FirstOrderIirType*)fbkFilterData;
@@ -36,6 +35,10 @@ int16_t AmpModel::AmpModel::processSample(int16_t sampleIn)
     return out;
 }
 
+PiPicoFX::AmpModel::AmpModel::~AmpModel()
+{
+    
+}
 void AmpModel::AmpModel::setup()
 {
     initfirFilter(&filter3);

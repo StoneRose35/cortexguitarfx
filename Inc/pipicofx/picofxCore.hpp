@@ -1,10 +1,11 @@
 #ifndef _PICOFX_CORE_H_
 #define _PICOFX_CORE_H_
 #include "stdint.h"
+#include "FxProgram.hpp"
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
-
+using namespace PiPicoFX;
 #ifndef FLOAT_AUDIO
 typedef int16_t(*processSampleCallback)(int16_t,void*);
 #else
@@ -46,10 +47,11 @@ typedef struct __attribute__((__packed__)) {
     uint16_t parameters[8];
     uint16_t magicNr; // a magic number/checksum which identifies the memory loaded as a preset
 } FxPresetType;
-
+extern "C" {
 void savePreset(FxPresetType* preset,uint16_t presetPos);
 uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos);
-void applyPreset(FxPresetType* preset,FxProgramType ** programs);
-void parametersToPreset(FxPresetType* preset,FxProgramType ** programs);
+void applyPreset(FxPresetType* preset,FxProgram * program);
+void parametersToPreset(FxPresetType* preset,FxProgram * programs);
 void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos);
+}
 #endif

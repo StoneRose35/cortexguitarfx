@@ -12,7 +12,7 @@ typedef struct
     int16_t feedback; 
     uint32_t delayBufferLength;
     int16_t mix;
-    AudioProcessor feedbackFunction;
+    AudioProcessorFunc feedbackFunction;
     void * feebackData;
 } DelayDataType;
  

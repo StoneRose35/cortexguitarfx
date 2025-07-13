@@ -1,3 +1,4 @@
+extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/oled_display.h"
@@ -8,6 +9,7 @@
 #include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
+}
 
 static volatile uint8_t editPos=0;
 static volatile uint8_t editState=0;
@@ -41,7 +43,7 @@ static void create(PiPicoFxUiType*data)
         maxStringLength++;
     }
 
-    stringBkp = malloc(maxStringLength+1);
+    stringBkp = (char*)malloc(maxStringLength+1);
     for(uint8_t c=0;c<maxStringLength;c++)
     {
         *(stringBkp+c)=*(stringBfr+c);

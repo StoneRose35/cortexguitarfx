@@ -1,5 +1,4 @@
-#ifndef _AUDIO_PROCESSOR_HPP_
-#define _AUDIO_PROCESSOR_HPP_
+#pragma once
 #include <stdint.h>
 namespace PiPicoFX {
     class AudioProcessor
@@ -8,4 +7,3 @@ namespace PiPicoFX {
             virtual int16_t processSample(int16_t sampleIn);
     };
 };
-#endif

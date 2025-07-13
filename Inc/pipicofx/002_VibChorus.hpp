@@ -5,6 +5,7 @@ extern "C" {
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
+#include "picofxCore.hpp"
 }
 
 namespace PiPicoFX {

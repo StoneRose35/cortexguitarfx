@@ -1,3 +1,6 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/oled_display.h"
@@ -8,11 +11,16 @@
 #include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
+#ifdef __cplusplus
+}
+#endif
+#include "pipicofx/FxProgramLoader.hpp"
 
 
 
 static BwImageBufferType imgBuffer;
 static BwImageType img;
+
 const uiEnterFct uiEnterFunctions[]={&enterLevel0, &enterLevel1, &enterLevel2, &enterLevel3, &enterLevel4, &enterLevel5};
 
 
@@ -302,9 +310,9 @@ uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController)
 
 void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
 {
-    piPicoUiController->currentProgram=fxPrograms[0];
+    piPicoUiController->currentProgram=PiPicoFX::loadProgram(0);
     piPicoUiController->currentProgramIdx=0;
-    piPicoUiController->currentParameter=fxPrograms[piPicoUiController->currentProgramIdx]->parameters;
+    piPicoUiController->currentParameter=piPicoUiController->currentProgram->getParameter(0);
     piPicoUiController->currentParameterIdx=0;
     piPicoUiController->locked=0;
     piPicoUiController->editViaRotary =0;

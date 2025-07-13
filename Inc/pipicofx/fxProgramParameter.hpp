@@ -14,6 +14,7 @@ namespace PiPicoFX {
         int16_t increment;
         FxProgram * parent;
         const char * getParameterName();
+        uint8_t getControl();
     private:
         const uint8_t control;
         const char * parameterName;
