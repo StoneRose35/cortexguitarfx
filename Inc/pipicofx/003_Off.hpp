@@ -12,7 +12,7 @@ namespace PiPicoFX {
         class Off : public FxProgram
         {
             public:
-                Off() : FxProgram(1,"Off"){
+                Off() : FxProgram(1,"Off",0){
                     this->setup();
                 };
                 int16_t processSample(int16_t);

@@ -28,8 +28,5 @@ __attribute__ ((section (".ramfunc"))) int16_t getDelayedSample(DelayDataType*da
 // adds a sample to the delay line
 __attribute__ ((section (".ramfunc"))) void addSampleToDelayline(int16_t sampleIn,DelayDataType*data);
 
-int16_t * getDelayMemoryPointer();
-
-__attribute__ ((section (".ramfunc"))) void clearDelayLine();
 
 #endif

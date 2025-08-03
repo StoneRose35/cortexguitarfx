@@ -5,6 +5,7 @@ extern "C" {
 #include <stdint.h>
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
+#include "audio/bitcrusher.h"
 #include "picofxCore.hpp"
 }
 
@@ -13,10 +14,13 @@ namespace PiPicoFX {
         class MonsterCrusher : public FxProgram
         {
             public:
-                MonsterCrusher() : FxProgram(2,"Monstercrusher"){
+                MonsterCrusher() : FxProgram(2,"Monstercrusher",0){
                     this->setup();
                 };
                 int16_t processSample(int16_t);
+
+                BitCrusherDataType bitcrusher;
+                uint8_t resolution;
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

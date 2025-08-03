@@ -4,6 +4,7 @@
 extern "C" {
 #include <stdint.h>
 #include "stringFunctions.h"
+#include "audio/reverb2.h"
 #include "audio/gainstage.h"
 #include "picofxCore.hpp"
 }
@@ -13,10 +14,11 @@ namespace PiPicoFX {
         class Reverb2 : public FxProgram
         {
             public:
-                Reverb2() : FxProgram(3,"Allpass Reverb"){
+                Reverb2() : FxProgram(3,"Allpass Reverb",24576<<1){
                     this->setup();
                 };
                 int16_t processSample(int16_t);
+                Reverb2Type reverb;
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

@@ -2,6 +2,7 @@
 #include "pipicofx/001_AmpModel.hpp"
 extern "C" {
 #include "audio/gainstage.h"
+#include "pipicofx/delayMemoryHandler.h"
 int16_t analogDelayFeedbackFunction(int16_t sampleIn,void*fbkFilterData,volatile uint32_t*audioStatePtr)
 {
     FirstOrderIirType* tData = (FirstOrderIirType*)fbkFilterData;
@@ -37,13 +38,13 @@ int16_t AmpModel::AmpModel::processSample(int16_t sampleIn)
 
 PiPicoFX::AmpModel::AmpModel::~AmpModel()
 {
-    
+    freeDelayMemory(this->delay.delayLine);
 }
 void AmpModel::AmpModel::setup()
 {
     initfirFilter(&filter3);
     initWaveShaper(&waveshaper1,&waveShaperDefaultOverdrive);
-    initDelay(&delay,getDelayMemoryPointer(),DELAY_LINE_LENGTH);
+    initDelay(&delay,mallocDelayMemory(DELAY_LINE_LENGTH << 1),DELAY_LINE_LENGTH);
     delay.feebackData = (void*)&feedbackFilter;
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));

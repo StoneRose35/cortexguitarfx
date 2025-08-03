@@ -5,6 +5,7 @@ extern "C" {
 #include <stdint.h>
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
+#include "audio/delay.h"
 #include "picofxCore.hpp"
 }
 
@@ -13,10 +14,11 @@ namespace PiPicoFX {
         class Delay : public FxProgram
         {
             public:
-                Delay() : FxProgram(4,"Delay"){
+                Delay() : FxProgram(4,"Delay",DELAY_LINE_LENGTH<<1){
                     this->setup();
                 };
                 int16_t processSample(int16_t);
+                DelayDataType delay;
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

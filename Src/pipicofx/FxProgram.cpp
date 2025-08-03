@@ -2,11 +2,12 @@
 
 using namespace PiPicoFX;
 
-PiPicoFX::FxProgram::FxProgram(uint8_t nParams,const char * name)
+PiPicoFX::FxProgram::FxProgram(uint8_t nParams,const char * name,uint32_t memUseage)
 {
     nParameters=nParams;
     paramCnt=0;
     programName = name;
+    memoryUseage = memUseage;
     parameters = new FxProgramParameter*[nParameters];
 }
 
@@ -38,6 +39,11 @@ FxProgramParameter* FxProgram::getParameter(uint8_t pos){
 int16_t FxProgram::processSample(int16_t sampleIn)
 {
     return sampleIn;
+}
+
+uint32_t FxProgram::getDelayMemoryUseage(void)
+{
+    return this->memoryUseage;
 }
 
 const char * FxProgram::getName()

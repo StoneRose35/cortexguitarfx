@@ -4,6 +4,7 @@
 extern "C" {
 #include <stdint.h>
 #include "stringFunctions.h"
+#include "audio/threebandeq.h"
 #include "audio/gainstage.h"
 #include "picofxCore.hpp"
 }
@@ -13,10 +14,11 @@ namespace PiPicoFX {
         class Eq : public FxProgram
         {
             public:
-                Eq() : FxProgram(4,"3-Band Equalizer"){
+                Eq() : FxProgram(4,"3-Band Equalizer",0){
                     this->setup();
                 };
                 int16_t processSample(int16_t);
+                ThreeBandEQType eq;
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

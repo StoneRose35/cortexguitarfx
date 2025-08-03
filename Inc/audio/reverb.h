@@ -15,7 +15,7 @@ typedef struct
 } ReverbType;
 
 __attribute__ ((section (".ramfunc"))) int16_t reverbProcessSample(int16_t sampleIn,ReverbType*reverbData);
-void initReverb(ReverbType*reverbData,int16_t);
+void initReverb(ReverbType*reverbData,int16_t,int16_t*);
 void setReverbTime(int16_t reverbTime,ReverbType*reverbData);
 const char * getReverbParameterSetName(ReverbType*reverbData);
 #else

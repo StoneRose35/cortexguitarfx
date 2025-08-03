@@ -2,9 +2,10 @@
 #include "audio/pitchshifter.h"
 #include "audio/delay.h"
 #include "audio/audiotools.h"
+#include "pipicofx/delayMemoryHandler.h"
+
 int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data,volatile uint32_t*audioStatePtr)
 {
-    int16_t * delayMemoryPointer = getDelayMemoryPointer();
     int32_t sampleOut=0;
     int16_t deltaIndex;
     int16_t envelopeVal;
@@ -29,7 +30,7 @@ int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data,vol
     {
         envelopeVal = (data->buffersize<<2) - data->delayLength1;
     }
-    sampleOut += (*(delayMemoryPointer + deltaIndex)*envelopeVal)>>(data->buffersizePowerTwo+1);
+    sampleOut += (*(data->delayMemoryPtr + deltaIndex)*envelopeVal)>>(data->buffersizePowerTwo+1);
 
     deltaIndex = (data->currentDelayPosition - (data->delayLength2>>2))&(data->buffersize-1);
     if (data->delayLength2 <(data->buffersize<<1))
@@ -40,7 +41,7 @@ int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data,vol
     {
         envelopeVal = (data->buffersize<<2) - data->delayLength2;
     }
-    sampleOut += (*(delayMemoryPointer + deltaIndex)*envelopeVal)>>(data->buffersizePowerTwo+1);
+    sampleOut += (*(data->delayMemoryPtr + deltaIndex)*envelopeVal)>>(data->buffersizePowerTwo+1);
     data->currentDelayPosition++;
     data->currentDelayPosition &= (data->buffersize-1);
     data->delayLength1 += data->delayIncrement;
@@ -63,13 +64,12 @@ int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data,vol
         data->delayLength2 = 0;
     }
 
-    *(delayMemoryPointer + data->currentDelayPosition) = sampleIn;
+    *(data->delayMemoryPtr + data->currentDelayPosition) = sampleIn;
     return clip(sampleOut,audioStatePtr);
 }
 
 int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType * data,volatile uint32_t * audioStatePtr)
 {
-    int16_t * delayMemoryPointer = getDelayMemoryPointer();
     int16_t sampleOut;
     int16_t deltaIndex;
     int16_t delayPointerTemp=0;
@@ -90,13 +90,13 @@ int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType * data
         if (deltaIndex <= data->crossFadeWidth)
         {
             delayPointerTemp = (data->delayPointer1 + (data->crossFadeWidth << 2)) & ((data->buffersize << 2) - 1);
-            sampleOut = clip((deltaIndex*delayMemoryPointer[data->delayPointer1>>2] >> data->crossFadeWidthPwr2) +
-            ((data->crossFadeWidth - deltaIndex)*delayMemoryPointer[delayPointerTemp>>2] >> data->crossFadeWidthPwr2),audioStatePtr);
+            sampleOut = clip((deltaIndex*data->delayMemoryPtr[data->delayPointer1>>2] >> data->crossFadeWidthPwr2) +
+            ((data->crossFadeWidth - deltaIndex)*data->delayMemoryPtr[delayPointerTemp>>2] >> data->crossFadeWidthPwr2),audioStatePtr);
             // (deltaIndex*samples[delayPointer1>>2] >> crossFadeWidthPwr2) + ((crossFadeWidth - 1 - deltaIndex)*samples[delayPointer2>>2] >> crossFadeWidthPwr2)
         }
         else
         {
-            sampleOut = delayMemoryPointer[data->delayPointer1 >> 2]; //((delayMemoryPointer[data->delayPointer1 >> 2]*(4-(data->delayPointer1&3)))>>2) + (delayMemoryPointer[(data->delayPointer1 >> 2) + 1]*(data->delayPointer1&3)) >> 2;
+            sampleOut = data->delayMemoryPtr[data->delayPointer1 >> 2]; //((delayMemoryPointer[data->delayPointer1 >> 2]*(4-(data->delayPointer1&3)))>>2) + (delayMemoryPointer[(data->delayPointer1 >> 2) + 1]*(data->delayPointer1&3)) >> 2;
         }
 
         // compute new index values, swap index1 with index2 if index1 has surpassed currentDelayPosition
@@ -114,7 +114,7 @@ int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType * data
             data->delayPointer1 = delayPointerTemp;
         }
 
-        *(delayMemoryPointer + data->currentDelayPosition) = sampleIn;
+        *(data->delayMemoryPtr + data->currentDelayPosition) = sampleIn;
 
         // increment pointers
         data->currentDelayPosition++;
@@ -140,13 +140,13 @@ int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType * data
         if (deltaIndex <= data->crossFadeWidth)
         {
             delayPointerTemp = (data->delayPointer1 - (data->crossFadeWidth << 2)) & ((data->buffersize << 2) - 1);
-            sampleOut = clip(((deltaIndex*delayMemoryPointer[data->delayPointer1>>2]) >> data->crossFadeWidthPwr2) +
-            ((data->crossFadeWidth - deltaIndex)*delayMemoryPointer[delayPointerTemp>>2] >> data->crossFadeWidthPwr2),audioStatePtr);
+            sampleOut = clip(((deltaIndex*data->delayMemoryPtr[data->delayPointer1>>2]) >> data->crossFadeWidthPwr2) +
+            ((data->crossFadeWidth - deltaIndex)*data->delayMemoryPtr[delayPointerTemp>>2] >> data->crossFadeWidthPwr2),audioStatePtr);
             // (deltaIndex*samples[delayPointer1>>2] >> crossFadeWidthPwr2) + ((crossFadeWidth - 1 - deltaIndex)*samples[delayPointer2>>2] >> crossFadeWidthPwr2)
         }
         else
         {
-            sampleOut = delayMemoryPointer[data->delayPointer1 >> 2];
+            sampleOut = data->delayMemoryPtr[data->delayPointer1 >> 2];
         }
 
 
@@ -165,7 +165,7 @@ int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType * data
             data->delayPointer1 = delayPointerTemp;
         }
 
-        *(delayMemoryPointer + data->currentDelayPosition) = sampleIn;
+        *(data->delayMemoryPtr + data->currentDelayPosition) = sampleIn;
 
         // increment pointers
         data->currentDelayPosition++;
@@ -179,25 +179,35 @@ int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType * data
 
 void initPitchshifter(PitchshifterDataType*data)
 {
-    int16_t * delayMemoryPointer = getDelayMemoryPointer();
     data->buffersize = 1 << data->buffersizePowerTwo;
+    data->delayMemoryPtr = mallocDelayMemory(data->buffersize<<1);
     for (uint16_t c=0;c<data->buffersize;c++)
     {
-        *(delayMemoryPointer + c) = 0;
+        *(data->delayMemoryPtr + c) = 0;
     }
 
     data->delayLength1 = 0; 
     data->delayLength2 = (data->buffersize<<2)/2;
 }
 
+void deinitPitchshifter(PitchshifterDataType*data)
+{
+    freeDelayMemory(data->delayMemoryPtr);
+}
+
 void initPitchshifter2(Pitchshifter2DataType*data)
 {
-    int16_t * delayMemoryPointer = getDelayMemoryPointer();
     data->buffersize = 1 << data->buffersizePowerTwo;
+    data->delayMemoryPtr = mallocDelayMemory(data->buffersize<<1);
     for (uint16_t c=0;c<data->buffersize;c++)
     {
-        *(delayMemoryPointer + c) = 0;
+        *(data->delayMemoryPtr + c) = 0;
     }
     data->delayPointer1 = 0;
     data->crossFadeWidth = 1 << data->crossFadeWidthPwr2;
+}
+
+void deinitPitchshifter2(Pitchshifter2DataType*data)
+{
+    freeDelayMemory(data->delayMemoryPtr);
 }

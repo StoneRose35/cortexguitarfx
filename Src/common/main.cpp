@@ -79,7 +79,7 @@ volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0;
 
 PiPicoFX::AmpModel::AmpModel * exampleFxProg;
-PiPicoFX::FxProgram exampleFxProg2(3,"muh");
+PiPicoFX::FxProgram exampleFxProg2(3,"muh",0);
 
 // 0: done
 // 1: change request

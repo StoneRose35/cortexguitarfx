@@ -6,7 +6,7 @@
 
 #define REV3_MODULATOR_STATE_RISING 0
 #define REV3_MODULATOR_STATE_FALLING 1
-
+#define DIFFUSOR_SIZE 2048
 typedef struct 
 {
     HadamardDiffuserType diffusers[8];
@@ -19,7 +19,7 @@ typedef struct
     uint8_t modulation;
 } Reverb3Type;
 
-void initReverb3(Reverb3Type*data);
+void initReverb3(Reverb3Type*data,int16_t*delayMemoryPtr);
 __attribute__ ((section (".ramfunc"))) int16_t reverb3processSample(int16_t sampleIn,Reverb3Type*data);
 
 

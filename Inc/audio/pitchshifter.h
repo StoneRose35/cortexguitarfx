@@ -5,6 +5,7 @@
 
 typedef struct 
 {
+    int16_t * delayMemoryPtr;
     int16_t delayLength1, delayLength2;
     uint16_t currentDelayPosition;
     int16_t delayIncrement; // fixed point decimal 1=1/4, decimal point after bis position 1, position 0 being lsb
@@ -14,6 +15,7 @@ typedef struct
 
 typedef struct 
 {
+    int16_t * delayMemoryPtr;
     int16_t delayPointer1,delayPointer2;
     uint16_t currentDelayPosition;
     int16_t delayIncrement; // fixed point decimal 1=1/4, decimal point after bis position 1, position 0 being lsb
@@ -27,6 +29,8 @@ typedef struct
 #define PITCHSHIFTER_BUFFER_SIZE (1<<PITSHIFTER_BUFFER_SIZE_TWOS_POWER)
 __attribute__ ((section (".ramfunc"))) int16_t pitchShifterProcessSample(int16_t sampleIn,PitchshifterDataType*data,volatile uint32_t*audioStatePtr);
 void initPitchshifter(PitchshifterDataType*data);
+void deinitPitchshifter(PitchshifterDataType*data);
 __attribute__ ((section (".ramfunc"))) int16_t pitchShifter2ProcessSample(int16_t sampleIn,Pitchshifter2DataType*data,volatile uint32_t*audioStatePtr);
 void initPitchshifter2(Pitchshifter2DataType*data);
+void deinitPitchshifter2(Pitchshifter2DataType*data);
 #endif

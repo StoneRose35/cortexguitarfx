@@ -13,7 +13,7 @@ namespace PiPicoFX {
         class FreeVerb : public FxProgram
         {
             public:
-                FreeVerb() : FxProgram(4,"FreeVerb"){
+                FreeVerb() : FxProgram(4,"FreeVerb",0){
                     this->setup();
                 };
                 int16_t processSample(int16_t);

@@ -1,14 +1,12 @@
 
 #include "audio/simpleChorus.h"
 #include "audio/delay.h"
-//static int16_t delayBuffer[2048];
+#include "pipicofx/delayMemoryHandler.h"
 
-//static volatile SimpleChorusType simpleChorusData;
-//static volatile uint16_t lfoUpdateCnt=0;
 
 void initSimpleChorus(SimpleChorusType*data)
 {
-    data->delayBuffer = (int16_t*)getDelayMemoryPointer();
+    data->delayBuffer = mallocDelayMemory(2048<<1);
     for(uint16_t c=0;c<2048;c++)
     {
         data->delayBuffer[c]=0;

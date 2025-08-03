@@ -13,9 +13,8 @@ const uint16_t ap_delays[]={431,433,439,443,449,457,461,463};
 
 const uint32_t delay_lengths[]={1523,1847,683,971};
 
-void initReverb2(Reverb2Type*reverbData)
+void initReverb2(Reverb2Type*reverbData,int16_t*delayMemoryPointer)
 {
-    int16_t * delayMemoryPointer = getDelayMemoryPointer();
     for (uint8_t c=0;c<8;c++)
     {
         reverbData->aps[c].delayLineIn = delayMemoryPointer + c*1024;

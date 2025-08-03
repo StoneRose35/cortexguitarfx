@@ -122,9 +122,8 @@ void setReverbTime(int16_t reverbTime,ReverbType*reverbData)
 }
 
 
-void initReverb(ReverbType*reverbData,int16_t reverbTime)
+void initReverb(ReverbType*reverbData,int16_t reverbTime,int16_t*delayMemoryPointer)
 {
-    int16_t * delayMemoryPointer = getDelayMemoryPointer();
     for(uint8_t c=0;c<4;c++)
     {
         reverbData->delayPointers[c]=delayMemoryPointer + c*4096;

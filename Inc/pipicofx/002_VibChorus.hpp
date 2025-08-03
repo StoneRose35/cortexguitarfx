@@ -13,7 +13,7 @@ namespace PiPicoFX {
         class VibChorus : public FxProgram
         {
             public:
-                VibChorus() : FxProgram(4,"Vibrato/Chorus"){
+                VibChorus() : FxProgram(4,"Vibrato/Chorus",2048){
                     this->setup();
                 };
                 int16_t processSample(int16_t);

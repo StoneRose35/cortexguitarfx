@@ -5,6 +5,7 @@ extern "C" {
 #include <stdint.h>
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
+#include "audio/pitchshifter.h"
 #include "picofxCore.hpp"
 }
 
@@ -13,7 +14,7 @@ namespace PiPicoFX {
         class PitchShifter : public FxProgram
         {
             public:
-                PitchShifter() : FxProgram(4,"Pitchshifter"){
+                PitchShifter() : FxProgram(4,"Pitchshifter",8192<<2){
                     this->setup();
                 };
                 int16_t processSample(int16_t);
@@ -21,6 +22,9 @@ namespace PiPicoFX {
                     .gain=0xff,
                     .offset=0
                 };
+                Pitchshifter2DataType  pitchShifter;
+                int16_t mix;
+
             private:
                 void setup();
         };

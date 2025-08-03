@@ -5,6 +5,7 @@ extern "C" {
 #include <stdint.h>
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
+#include "audio/compressor.h"
 #include "picofxCore.hpp"
 }
 
@@ -13,10 +14,12 @@ namespace PiPicoFX {
         class Compressor : public FxProgram
         {
             public:
-                Compressor() : FxProgram(6,"Compressor"){
+                Compressor() : FxProgram(6,"Compressor",0){
                     this->setup();
                 };
                 int16_t processSample(int16_t);
+                uint8_t compressorType;
+                CompressorDataType compressor;
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

@@ -2,16 +2,15 @@
 #include "audio/reverbUtils.h"
 #include "audio/audiotools.h"
 
-#define DIFFUSOR_SIZE 2048
+
 const int16_t diffuserTimes[4][4]={
     {53, 701, 1361, 1993},
     {97, 487, 1327, 1973},
     {29, 367, 1493, 1987},
     {73, 293, 1597, 2011}
 };
-void initReverb3(Reverb3Type*data)
+void initReverb3(Reverb3Type*data,int16_t*delayMemoryPtr)
 {
-    int16_t * delayMemoryPtr = getDelayMemoryPointer();
     uint32_t cnt=0;
     for(uint8_t c=0;c<4;c++)
     {

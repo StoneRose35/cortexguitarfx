@@ -243,6 +243,28 @@
                 "$gcc"
             ],
             "group": "build"
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile delay memory handler tests",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-I./Inc",
+                "-fdiagnostics-color=always",
+                "-fpermissive",
+                "-g",
+                "./Tests/delayMemoryHandlerTest.cpp", "./Src/pipicofx/delayMemoryHandler.c",
+                "-o",
+                "./Tests/delayMemoryHandlerTests"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "Compiles Tests for the delay memory handler, compiles with warning on a 64bit system"
         }
     ]
 }

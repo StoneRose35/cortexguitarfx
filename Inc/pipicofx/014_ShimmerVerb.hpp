@@ -13,7 +13,7 @@ namespace PiPicoFX {
         class ShimmerVerb : public FxProgram
         {
             public:
-                ShimmerVerb() : FxProgram(4,"ShimmerVerb"){
+                ShimmerVerb() : FxProgram(4,"ShimmerVerb",0){
                     this->setup();
                 };
                 int16_t processSample(int16_t);
