@@ -8,6 +8,7 @@ namespace PiPicoFX {
 {
     public:
         FxProgramParameter(const uint8_t ctrl,const char*);
+        virtual ~FxProgramParameter()=default;
         virtual void parameterDisplay(char*)=0;
         virtual void parameterCallback(uint16_t val)=0;
         int16_t rawValue;

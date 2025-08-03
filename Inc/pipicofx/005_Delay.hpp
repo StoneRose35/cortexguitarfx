@@ -23,6 +23,7 @@ namespace PiPicoFX {
                     .gain=0xff,
                     .offset=0
                 };
+                ~Delay();
             private:
                 void setup();
         };

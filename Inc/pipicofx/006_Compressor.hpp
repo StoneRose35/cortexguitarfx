@@ -19,7 +19,19 @@ namespace PiPicoFX {
                 };
                 int16_t processSample(int16_t);
                 uint8_t compressorType;
-                CompressorDataType compressor;
+                CompressorDataType compressor={
+                    .gainFunction = {
+                        .threshhold = 32767,
+                        .gainReduction = 1,
+                    },
+                    .avgLowpass={
+                        .oldVal=0,
+                        .oldXVal=0,
+                        .alphaRising=32703,
+                        .alphaFalling=32703,
+                    },
+                    .currentAvg=0
+                };
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

@@ -17,6 +17,7 @@ namespace PiPicoFX {
                 Reverb2() : FxProgram(3,"Allpass Reverb",24576<<1){
                     this->setup();
                 };
+                ~Reverb2();
                 int16_t processSample(int16_t);
                 Reverb2Type reverb;
                 GainStageDataType presetVolume={

@@ -3,6 +3,7 @@
 extern "C" {
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
+#include "pipicofx/delayMemoryHandler.h"
 }
 using namespace PiPicoFX;
 
@@ -15,14 +16,18 @@ int16_t SineModulation::SineModulation::processSample(int16_t sampleIn)
 
 void SineModulation::SineModulation::setup()
 {
-    initSineChorus(&this->sineChorus,0);
+    initSineChorus(&this->sineChorus,mallocDelayMemory(SINE_CHORUS_DELAY_SIZE<<1));
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->addParameter(new Param5(this));
     this->addParameter(new Param6(this));
+}
 
+SineModulation::SineModulation::~SineModulation()
+{
+    freeDelayMemory(this->sineChorus.delayBuffer);
 }
 
 void SineModulation::Param1::parameterCallback(uint16_t val)

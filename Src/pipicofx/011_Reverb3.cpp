@@ -25,6 +25,11 @@ void Reverb3::Reverb3::setup()
 
 }
 
+Reverb3::Reverb3::~Reverb3()
+{
+    freeDelayMemory(this->reverb.diffusers[0].delayPointers[0]);
+}
+
 void Reverb3::Param1::parameterCallback(uint16_t val)
 {
     int16_t intermVal;

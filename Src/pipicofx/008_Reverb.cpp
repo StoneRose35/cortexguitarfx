@@ -23,6 +23,11 @@ void Reverb::Reverb::setup()
 
 }
 
+Reverb::Reverb::~Reverb()
+{
+    freeDelayMemory(this->reverb.delayPointers[0]);
+}
+
 void Reverb::Param1::parameterCallback(uint16_t val)
 {
     this->pData->reverbTime = (((uint32_t)val*1900)>>12) + 100;

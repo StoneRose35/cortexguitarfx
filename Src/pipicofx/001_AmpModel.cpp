@@ -36,7 +36,7 @@ int16_t AmpModel::AmpModel::processSample(int16_t sampleIn)
     return out;
 }
 
-PiPicoFX::AmpModel::AmpModel::~AmpModel()
+AmpModel::AmpModel::~AmpModel()
 {
     freeDelayMemory(this->delay.delayLine);
 }

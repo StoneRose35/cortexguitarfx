@@ -47,7 +47,7 @@ extern "C" {
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
 #include "pipicofx/FxProgram.hpp"
-#include "pipicofx/001_AmpModel.hpp"
+#include "pipicofx/delayMemoryHandler.h"
 #include "globalConfig.h"
 #include "stdio.h"
 }
@@ -73,13 +73,10 @@ volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
 volatile uint8_t programsActivated=0;
 const uint8_t stompswitch_progs[]={8,7,1};
-volatile uint8_t programsToInitialize[3];
+volatile uint8_t programToInitialize;
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0;
-
-PiPicoFX::AmpModel::AmpModel * exampleFxProg;
-PiPicoFX::FxProgram exampleFxProg2(3,"muh",0);
 
 // 0: done
 // 1: change request
@@ -137,6 +134,8 @@ int main(void)
 	#ifdef PCM3060_AUDIO_CODEC
 	setupPCM3060();
 	#endif
+
+	initDelayMemoryHandler();
 	initDebugLed();
 	startCore1(&core1Main);
 	// sync with core 1
@@ -170,10 +169,9 @@ int main(void)
 
 	ticEnd=0;
 	ticStart=0;
-	programsToInitialize[0]=0xFF;
+	programToInitialize=0xFF;
 
-	exampleFxProg = new PiPicoFX::AmpModel::AmpModel();
-	exampleFxProg->processSample(65);
+
 
     /* Loop forever */
 	for(;;)

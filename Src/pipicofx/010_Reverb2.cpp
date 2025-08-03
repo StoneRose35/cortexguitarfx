@@ -21,6 +21,11 @@ void Reverb2::Reverb2::setup()
     this->addParameter(new Param3(this));
 }
 
+Reverb2::Reverb2::~Reverb2()
+{
+    freeDelayMemory(this->reverb.aps[0].delayLineIn);
+}
+
 void Reverb2::Param1::parameterCallback(uint16_t val)
 {
     this->pData->reverb.decay = val << 3;

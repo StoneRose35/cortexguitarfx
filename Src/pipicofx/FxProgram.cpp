@@ -13,6 +13,11 @@ PiPicoFX::FxProgram::FxProgram(uint8_t nParams,const char * name,uint32_t memUse
 
 PiPicoFX::FxProgram::~FxProgram()
 {
+    for (uint8_t c=0;c<this->nParameters;c++)
+    {
+        delete parameters[c];
+    }
+    delete parameters;
 }
 
 void FxProgram::setup(void){}

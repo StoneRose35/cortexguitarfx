@@ -114,3 +114,8 @@ void Delay::Param4::parameterDisplay(char*res)
         }
     }
 }
+
+Delay::Delay::~Delay()
+{
+    freeDelayMemory(this->delay.delayLine);
+}

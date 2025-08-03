@@ -26,7 +26,6 @@ struct hex_output : public output_format {
         if (!out) return 1;
 
         if (source.programs.size() > 1) {
-            // todo don't have locations any more!
             std::cerr << "error: hex output only supports a single program input\n";
             return 1;
         }

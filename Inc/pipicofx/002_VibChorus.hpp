@@ -25,6 +25,7 @@ namespace PiPicoFX {
                     .gain=0xff,
                     .offset=0
                 };
+                ~VibChorus();
             private:
                 void setup();
         };

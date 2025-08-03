@@ -5,22 +5,31 @@ extern "C" {
 #include <stdint.h>
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
+#include "audio/pitchshifter.h"
 #include "picofxCore.hpp"
 }
 
 namespace PiPicoFX {
-    namespace ShimmerVerb {
-        class ShimmerVerb : public FxProgram
+    namespace PitchShifter {
+        class PitchShifter : public FxProgram
         {
             public:
-                ShimmerVerb() : FxProgram(4,"ShimmerVerb",0){
+                PitchShifter() : FxProgram(4,"Pitchshifter",8192<<2){
                     this->setup();
                 };
+                ~PitchShifter();
                 int16_t processSample(int16_t);
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0
                 };
+                Pitchshifter2DataType  pitchShifter={
+                    .currentDelayPosition=0,
+                    .delayIncrement=0x4,
+                    .crossFadeWidthPwr2=8,
+                };
+                int16_t mix;
+
             private:
                 void setup();
         };
@@ -28,7 +37,7 @@ namespace PiPicoFX {
         class Param1:  public FxProgramParameter
         {
             public:
-                Param1(ShimmerVerb* p) :FxProgramParameter(0,"Shimmer")
+                Param1(PitchShifter* p) :FxProgramParameter(0,"ShiftAmt")
                 {
                     rawValue = 0;
                     increment = 512;
@@ -37,12 +46,12 @@ namespace PiPicoFX {
                 void parameterCallback(uint16_t val);
                 void parameterDisplay(char* chrbfr);
             private:
-                ShimmerVerb * pData;
+                PitchShifter * pData;
         };
         class Param2:  public FxProgramParameter
         {
             public:
-                Param2(ShimmerVerb* p) :FxProgramParameter(1,"Decay")
+                Param2(PitchShifter* p) :FxProgramParameter(1,"Mix")
                 {
                     rawValue = 0;
                     increment = 1;
@@ -51,26 +60,26 @@ namespace PiPicoFX {
                 void parameterCallback(uint16_t val);
                 void parameterDisplay(char* chrbfr);
             private:
-                ShimmerVerb * pData;
+                PitchShifter * pData;
         };
         class Param3:  public FxProgramParameter
         {
             public:
-                Param3(ShimmerVerb* p) :FxProgramParameter(2,"Mix")
+                Param3(PitchShifter* p) :FxProgramParameter(2,"AvgDelay")
                 {
                     rawValue = 0;
-                    increment = 1;
+                    increment = 512;
                     pData=p;
                 };
                 void parameterCallback(uint16_t val);
                 void parameterDisplay(char* chrbfr);
             private:
-                ShimmerVerb * pData;
+                PitchShifter * pData;
         };
         class Param4:  public FxProgramParameter
         {
             public:
-                Param4(ShimmerVerb* p) :FxProgramParameter(255,"Volume")
+                Param4(PitchShifter* p) :FxProgramParameter(255,"Volume")
                 {
                     rawValue = 1023;
                     increment = 1;
@@ -79,7 +88,7 @@ namespace PiPicoFX {
                 void parameterCallback(uint16_t val);
                 void parameterDisplay(char* chrbfr);
             private:
-                ShimmerVerb * pData;
+                PitchShifter * pData;
         };
     }
 }

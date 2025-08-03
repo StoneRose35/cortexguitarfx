@@ -17,9 +17,12 @@ namespace PiPicoFX {
                 Reverb() : FxProgram(4,"Reverb",20480<<1){
                     this->setup();
                 };
+                ~Reverb();
                 int16_t processSample(int16_t);
-                ReverbType reverb;
-                int16_t reverbTime;
+                ReverbType reverb={
+                    .paramNr = 0
+                };
+                int16_t reverbTime=300;
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

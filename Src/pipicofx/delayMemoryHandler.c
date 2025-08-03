@@ -3,7 +3,7 @@
 #include "audio/audiotools.h"
 #include "pipicofx/delayMemoryHandler.h"
 
- int16_t delayMemory[DELAY_LINE_LENGTH];
+volatile int16_t delayMemory[DELAY_LINE_LENGTH];
 
 static volatile uint8_t takenDelayMemoryBlocksCnt;
 static volatile uint32_t globalStart;
@@ -24,7 +24,7 @@ void initDelayMemoryHandler(void)
     globalEnd = (uint32_t)(delayMemory + (DELAY_LINE_LENGTH<<1));
 }
 
-int16_t * mallocDelayMemory(uint16_t size)
+int16_t * mallocDelayMemory(uint32_t size)
 {
     uint32_t initialAddress= globalEnd;
     uint8_t indexToEnter=0;

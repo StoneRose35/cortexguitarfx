@@ -15,7 +15,7 @@ extern "C" {
 
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
 BwImageType lock;
-extern volatile uint8_t programsToInitialize[3];
+extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
 extern const uint8_t stompswitch_progs[];
 extern FxPresetType presets[3];
@@ -210,7 +210,6 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     break;
             }
         }
-        //TODO check useage parametersToPreset(presets + currentPreset,fxPrograms);
     }
     create(data);
 }

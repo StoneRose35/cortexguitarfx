@@ -22,7 +22,7 @@ extern "C" {
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
-//extern volatile uint8_t programsToInitialize[3];
+extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
 
 static volatile uint8_t editType; // 0: Program
@@ -143,19 +143,11 @@ static void exitCallback(PiPicoFxUiType*data)
         {
             generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
         }
-        //if (data->currentProgramIdx != presets[currentPreset].programNr)
-        //{
-        //    programsToInitialize[0] = presets[currentPreset].programNr;
-        //    programChangeState = 1;
-        //}
-        // TODO reimplement soft-swap
-        if (data->currentProgram != nullptr)
+        if (data->currentProgramIdx != presets[currentPreset].programNr)
         {
-            delete data->currentProgram;
-            data->currentProgram = nullptr;
+            programToInitialize = presets[currentPreset].programNr;
+            programChangeState = 1;
         }
-        data->currentProgram=PiPicoFX::loadProgram((presets + currentPreset)->programNr);
-        applyPreset(presets+currentPreset,data->currentProgram);
         exitState =  0;   
     }
 }

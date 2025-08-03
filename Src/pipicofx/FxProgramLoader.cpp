@@ -12,10 +12,11 @@
 #include "pipicofx/010_Reverb2.hpp"
 #include "pipicofx/011_Reverb3.hpp"
 #include "pipicofx/012_Eq.hpp"
-#include "pipicofx/013_PitchShifter.hpp"
-#include "pipicofx/014_ShimmerVerb.hpp"
-#include "pipicofx/015_Tremolo.hpp"
-#include "pipicofx/016_FreeVerb.hpp"
+#include "pipicofx/013_AcousticProc.hpp"
+#include "pipicofx/014_PitchShifter.hpp"
+#include "pipicofx/015_ShimmerVerb.hpp"
+#include "pipicofx/016_Tremolo.hpp"
+#include "pipicofx/017_FreeVerb.hpp"
 #include <new>
 namespace PiPicoFX {
     PiPicoFX::FxProgram * loadProgram(uint8_t index)
@@ -60,15 +61,18 @@ namespace PiPicoFX {
                 res = new(std::nothrow) PiPicoFX::Eq::Eq();
                 break;
             case 13:
-                res = new(std::nothrow) PiPicoFX::PitchShifter::PitchShifter();
+                res = new(std::nothrow) PiPicoFX::AcousticProc::AcousticProc();
                 break;
             case 14:
-                res = new(std::nothrow) PiPicoFX::ShimmerVerb::ShimmerVerb();
+                res = new(std::nothrow) PiPicoFX::PitchShifter::PitchShifter();
                 break;
             case 15:
-                res = new(std::nothrow) PiPicoFX::Tremolo::Tremolo();
+                res = new(std::nothrow) PiPicoFX::ShimmerVerb::ShimmerVerb();
                 break;
             case 16:
+                res = new(std::nothrow) PiPicoFX::Tremolo::Tremolo();
+                break;
+            case 17:
                 res = new(std::nothrow) PiPicoFX::FreeVerb::FreeVerb();
                 break;
             default:

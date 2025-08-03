@@ -26,6 +26,7 @@ extern "C" {
 #include "consoleBase.h"
 }
 #include "pipicofx/picofxCore.hpp"
+#include "pipicofx/FxProgramLoader.hpp"
 
 
 int16_t firstHalfOut;
@@ -37,7 +38,9 @@ extern volatile uint8_t fxProgramIdx;
 extern volatile uint32_t cpuLoad;
 extern volatile uint8_t programsActivated;
 extern volatile uint8_t programChangeState;
-extern volatile uint8_t programsToInitialize[3];
+extern volatile uint8_t programToInitialize;
+extern FxPresetType presets[3];
+extern uint8_t currentPreset;
 extern const uint8_t stompswitch_progs[];
 extern PiPicoFxUiType piPicoUiController;
 int16_t avgOldOutBfr;
@@ -336,22 +339,25 @@ void core1Main()
 
 
         if (programChangeState == 3)
-        {
-            //TODO reimplement soft swap
-            //clearDelayLine();
-            //if (programsToInitialize[0] != 0xFF)
-            //{
-            //    if (fxPrograms[programsToInitialize[0]]->reset != 0)
-            //    {
-            //        fxPrograms[programsToInitialize[0]]->reset(fxPrograms[programsToInitialize[0]]->data);
-            //    }
-            //    piPicoUiController.currentProgramIdx = programsToInitialize[0];
-            //    programsToInitialize[0]=0xFF;
-            //    piPicoUiController.currentProgram = fxPrograms[piPicoUiController.currentProgramIdx];
-            //    onCreate(&piPicoUiController);
-            //}
-
-            programChangeState = 4;
+        {            
+            if (programToInitialize != 0xFF)
+            {
+                delete piPicoUiController.currentProgram;
+                piPicoUiController.currentProgram = loadProgram(programToInitialize);
+                if (piPicoUiController.currentProgram != nullptr)
+                {
+                    if (currentPreset != 0xFF)
+                    {
+                        applyPreset(presets+currentPreset,piPicoUiController.currentProgram);
+                    }
+                    onCreate(&piPicoUiController);
+                    programChangeState = 4;
+                }
+            }
+            else
+            {
+                programChangeState = 4;
+            }
         }
         #endif
     }

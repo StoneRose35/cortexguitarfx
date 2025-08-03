@@ -97,6 +97,11 @@ void AmpModelHighGain::AmpModelHighGain::setup()
 
 }
 
+AmpModelHighGain::AmpModelHighGain::~AmpModelHighGain()
+{
+    freeDelayMemory(this->delay.delayLine);
+}
+
 void AmpModelHighGain::Param1::parameterCallback(uint16_t val)
 {
     uint32_t dval;

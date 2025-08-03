@@ -24,7 +24,7 @@ typedef struct
 
 __attribute__ ((section (".ramfunc"))) int16_t sineChorusProcessSample(int16_t sampleIn,SineChorusType*data);
 __attribute__ ((section (".ramfunc"))) int16_t sineChorusInterpolatedProcessSample(int16_t sampleIn,SineChorusType*data);
-void initSineChorus(SineChorusType*data,int8_t instanceNr);
+void initSineChorus(SineChorusType*data,int16_t*delayMemoryPointer);
 void sineChorusSetFrequency(uint16_t freq,SineChorusType*data);
 
 #else

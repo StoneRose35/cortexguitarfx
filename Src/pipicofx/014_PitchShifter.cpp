@@ -1,10 +1,11 @@
 
-#include "pipicofx/013_PitchShifter.hpp"
+#include "pipicofx/014_PitchShifter.hpp"
 extern "C" {
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
 #include "audio/audiotools.h"
 #include "globalConfig.h"
+#include "pipicofx/delayMemoryHandler.h"
 }
 using namespace PiPicoFX;
 
@@ -25,6 +26,11 @@ void PitchShifter::PitchShifter::setup()
 
     initPitchshifter2(&this->pitchShifter);
 
+}
+
+PitchShifter::PitchShifter::~PitchShifter()
+{
+    freeDelayMemory(this->pitchShifter.delayMemoryPtr);
 }
 
 void PitchShifter::Param1::parameterCallback(uint16_t val)

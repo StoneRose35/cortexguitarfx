@@ -2,6 +2,7 @@
 extern "C" {
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
+#include "pipicofx/delayMemoryHandler.h"
 }
 using namespace PiPicoFX;
 
@@ -79,7 +80,6 @@ void VibChorus::Param4::parameterDisplay(char*res)
     }
 }
 
-
 void VibChorus::VibChorus::setup()
 {
     initSimpleChorus(&chorusData);
@@ -87,4 +87,9 @@ void VibChorus::VibChorus::setup()
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
+}
+
+VibChorus::VibChorus::~VibChorus()
+{
+    freeDelayMemory(this->chorusData.delayBuffer);
 }

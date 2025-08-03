@@ -17,6 +17,7 @@ namespace PiPicoFX {
                 Reverb3() : FxProgram(3,"Hadamard Reverb",(16*DIFFUSOR_SIZE + 4096)<<1){
                     this->setup();
                 };
+                ~Reverb3();
                 int16_t processSample(int16_t);
                 int16_t mix;
                 Reverb3Type reverb;

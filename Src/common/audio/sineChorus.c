@@ -45,11 +45,10 @@ int16_t getSineValue(uint32_t phase)
  * @brief 
  * 
  * @param data the data structure holding the dynamic values 
- * @param instanceNr the instance nr: 0-15, up to 16 independent instances can be spawned 
  */
-void initSineChorus(SineChorusType*data,int8_t instanceNr)
+void initSineChorus(SineChorusType*data,int16_t*delayMemoryPointer)
 {
-    data->delayBuffer = (int16_t*)(((uintptr_t)(getDelayMemoryPointer()))+4096*instanceNr);
+    data->delayBuffer = delayMemoryPointer;
     for(uint16_t c=0;c<SINE_CHORUS_DELAY_SIZE;c++)
     {
         *(data->delayBuffer + c)=0;
