@@ -28,9 +28,7 @@ extern "C" {
 #include "pipicofx/picofxCore.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
 
-
-int16_t firstHalfOut;
-FirFilterType**core1FirData;
+extern "C" {
 extern volatile uint32_t task;
 extern volatile int16_t avgOutOld;
 extern volatile int16_t avgInOld;
@@ -66,23 +64,12 @@ static volatile uint32_t * audioStatePtr;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 
-void isr_c1_sio_irq_proc1_irq16() // only fires when a fir computation has to be made
-{
-    if ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_VLD_LSB))!= 0)
-    {
-        core1FirData = (FirFilterType**)*SIO_FIFO_RD;
-        firstHalfOut = processFirstHalf(*core1FirData);
-        *SIO_FIFO_WR = firstHalfOut;
-    }
-    else if (((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_ROE_LSB)) != 0) || ((*SIO_FIFO_ST & (1 << SIO_FIFO_ST_WOF_LSB)) != 0))
-    {
-        *SIO_FIFO_ST = (1 << 2);
-    }
-}
+
 
 void core1Main()
 {
     initSystickTimer();
+    
     audioStatePtr = getAudioStatePtr();
 
 
@@ -98,13 +85,7 @@ void core1Main()
 	piPicoFxUiSetup(&piPicoUiController);
 	OledClearDisplay();
     *DMA_INTE0 |= (1 << 4);
-	//for (uint8_t c=0;c<N_FX_PROGRAMS;c++)
-	//{
-	//	if ((uint32_t)fxPrograms[c]->setup != 0)
-	//	{
-	//		fxPrograms[c]->setup(fxPrograms[c]->data);
-	//	}
-	//}
+
 	#ifndef FORCE_TEST_MODE
 		enterLevel0(&piPicoUiController);
 	#else
@@ -128,13 +109,14 @@ void core1Main()
     setStompswitchColorRaw(0);
     #endif
 
-    *NVIC_ISER = (1 << 16) | (1 << 23) | (1 << 11); // enable interrupt for sio: FIR filteraudio processing, i2c: stomp extension and dma: display update of proc1     
-    //setInterruptPriority(11,1);
-    //*SIO_FIFO_ST = (1 << 2);
-    //*SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
+    *NVIC_ISER = (1 << 16) | (1 << 23) | (1 << 11); 
+    // enable interrupt for sio: FIR filteraudio processing, i2c: stomp extension and dma: display update of proc1     
+    setInterruptPriority(11,1);
+    *SIO_FIFO_ST = (1 << 2);
+    *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
 
     for(;;)
-    {
+    {        
         if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
         {
             // call the update function of the chosen program
@@ -214,12 +196,14 @@ void core1Main()
             handleSwitchesUpdate(I2CGetReceivedData());
             task &= ~(1 << TASK_I2C_DATA_RECEIVED);
         }
-
+        
         /*
          *
          * UI Switches Callback
          * 
         */
+
+        
         switchVals[0] = getSwitchValue(0);
         if ((switchVals[0] & 1) > 0)
         {
@@ -297,12 +281,15 @@ void core1Main()
             onRotaryChange(encoderDelta,&piPicoUiController);
             clearStickyIncrementDelta();
         }
+            
 
        /*
         *
         * Stomp Switches Callback
         * 
        */
+
+        
         #ifdef EXTENSION_BOARD
         stompSwitchState = getStompSwitchState(0);
         if ((stompSwitchState & (1 << 1)) != 0) 
@@ -361,5 +348,8 @@ void core1Main()
             }
         }
         #endif
+        
     }
+}
+
 }

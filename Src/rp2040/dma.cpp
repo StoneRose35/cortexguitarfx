@@ -59,6 +59,8 @@ void initDMA()
  * on channel 0 an interrupt is asserted when the neopixel data has been fully clocked out
  * on channel 1 an interrupt is asserted when data has been sent over the usb uart
  */
+
+extern "C" {
 __attribute__ ((section (".ramfunc"))) 
 void isr_c0_dma_irq0_irq11()
 {
@@ -73,7 +75,8 @@ void isr_c0_dma_irq0_irq11()
 
 		sendState = SEND_STATE_SENT;
 	}
-	else */if ((*DMA_INTS0 & (1<<1))==(1 << 1) ) // from channel 1: usb uart transmission done, handled by core0
+	else */
+	if ((*DMA_INTS0 & (1<<1))==(1 << 1) ) // from channel 1: usb uart transmission done, handled by core0
 	{
 		*DMA_INTS0 = (1<<1);
 		*DMA_CH1_CTRL_TRIG &= ~(1 << DMA_CH1_CTRL_TRIG_EN_LSB); // disable dma channel 1
@@ -204,4 +207,5 @@ void isr_c1_dma_irq0_irq11()
 	}
 	
 	return;
+}
 }

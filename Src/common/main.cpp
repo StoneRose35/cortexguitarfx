@@ -50,7 +50,6 @@ extern "C" {
 #include "pipicofx/delayMemoryHandler.h"
 #include "globalConfig.h"
 #include "stdio.h"
-}
 
 
 volatile uint32_t task=0;
@@ -115,7 +114,6 @@ int main(void)
 	initPio();
 	initTimer();
 	initAdc();
-	initDatetimeClock();
 	#ifdef WM8731
 	initI2c(26);
 	#endif
@@ -191,6 +189,7 @@ int main(void)
 		cliApiTask(&bufferedInput);
 		#endif	
 	}
+}
 }
 
 

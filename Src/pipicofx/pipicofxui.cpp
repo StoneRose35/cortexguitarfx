@@ -310,7 +310,7 @@ uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController)
 
 void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
 {
-    piPicoUiController->currentProgram=PiPicoFX::loadProgram(0);
+    piPicoUiController->currentProgram=PiPicoFX::loadProgram(2);
     piPicoUiController->currentProgramIdx=0;
     piPicoUiController->currentParameter=piPicoUiController->currentProgram->getParameter(0);
     piPicoUiController->currentParameterIdx=0;
