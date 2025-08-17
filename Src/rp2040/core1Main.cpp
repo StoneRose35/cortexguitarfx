@@ -82,10 +82,11 @@ void isr_c1_sio_irq_proc1_irq16() // only fires when a fir computation has to be
 
 void core1Main()
 {
+    initSystickTimer();
     audioStatePtr = getAudioStatePtr();
 
 
-    	initOledDisplay();
+    initOledDisplay();
 
 	/*
      *
@@ -127,10 +128,10 @@ void core1Main()
     setStompswitchColorRaw(0);
     #endif
 
-    *NVIC_ISER = (1 << 16) | (1 << 23) | (1 << 11); // enable interrupt for dma,sio and i2c of proc1 
-    setInterruptPriority(11,1);
-    *SIO_FIFO_ST = (1 << 2);
-    *SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
+    *NVIC_ISER = (1 << 16) | (1 << 23) | (1 << 11); // enable interrupt for sio: FIR filteraudio processing, i2c: stomp extension and dma: display update of proc1     
+    //setInterruptPriority(11,1);
+    //*SIO_FIFO_ST = (1 << 2);
+    //*SIO_FIFO_WR=0xcafeface; // write sync word for core 0 to wait for core 1
 
     for(;;)
     {

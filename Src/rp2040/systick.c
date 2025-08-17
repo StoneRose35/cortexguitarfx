@@ -6,15 +6,25 @@
 #include "hardware/rp2040_registers.h"
 
 volatile static uint32_t ticks=0;
+volatile static uint32_t ticks_c1=0;
 
 void isr_c0_systick()
 {
     ticks++;
 }
 
+void isr_c1_systick()
+{
+    ticks_c1++;
+}
+
 uint32_t getTickValue()
 {
-    return ticks;
+    if (*SIO_CPUID == 0)
+    {
+        return ticks;
+    }
+    return ticks_c1;
 }
 
 void initSystickTimer()
