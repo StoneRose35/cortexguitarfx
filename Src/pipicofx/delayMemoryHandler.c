@@ -21,14 +21,14 @@ void initDelayMemoryHandler(void)
 {
     takenDelayMemoryBlocksCnt = 0;
     globalStart = (uint32_t)delayMemory;
-    globalEnd = (uint32_t)(delayMemory + (DELAY_LINE_LENGTH<<1));
+    globalEnd = globalStart + (DELAY_LINE_LENGTH<<1);
 }
 
 int16_t * mallocDelayMemory(uint32_t size)
 {
     uint32_t initialAddress= globalEnd;
     uint8_t indexToEnter=0;
-    if (takenDelayMemoryBlocksCnt == 0 && size < globalEnd-globalStart)
+    if (takenDelayMemoryBlocksCnt == 0 && size <= globalEnd-globalStart)
     {
         initialAddress -= size;
         takenDelayMemoryBlocks[0].startAddress = initialAddress;
@@ -59,7 +59,6 @@ int16_t * mallocDelayMemory(uint32_t size)
         takenDelayMemoryBlocks[indexToEnter].startAddress = initialAddress-size;
         takenDelayMemoryBlocks[indexToEnter].endAddress = initialAddress;
         takenDelayMemoryBlocksCnt +=1;
-        return (int16_t*)takenDelayMemoryBlocks[indexToEnter].startAddress;
     }
 
     return (int16_t*)0;

@@ -24,55 +24,55 @@ namespace PiPicoFX {
         PiPicoFX::FxProgram * res=nullptr;
         switch(index)
         {
-            case 1:
+            case 0:
                 res = new(std::nothrow)  PiPicoFX::AmpModel::AmpModel();
                 break;
-            case 2:
+            case 1:
                 res = new(std::nothrow) PiPicoFX::VibChorus::VibChorus();
                 break;
-            case 3:
+            case 2:
                 res = new(std::nothrow) PiPicoFX::Off::Off();
                 break;
-            case 4:
+            case 3:
                 res = new(std::nothrow) PiPicoFX::MonsterCrusher::MonsterCrusher();
                 break;
-            case 5:
+            case 4:
                 res = new(std::nothrow) PiPicoFX::Delay::Delay();
                 break;
-            case 6:
+            case 5:
                 res = new(std::nothrow) PiPicoFX::Compressor::Compressor();
                 break;
-            case 7:
+            case 6:
                 res = new(std::nothrow) PiPicoFX::AmpModelHighGain::AmpModelHighGain();
                 break;
-            case 8:
+            case 7:
                 res = new(std::nothrow) PiPicoFX::Reverb::Reverb();
                 break;
-            case 9:
+            case 8:
                 res = new(std::nothrow) PiPicoFX::SineModulation::SineModulation();
                 break;
-            case 10:
+            case 9:
                 res = new(std::nothrow) PiPicoFX::Reverb2::Reverb2();
                 break;
-            case 11:
+            case 10:
                 res = new(std::nothrow) PiPicoFX::Reverb3::Reverb3();
                 break;
-            case 12:
+            case 11:
                 res = new(std::nothrow) PiPicoFX::Eq::Eq();
                 break;
-            case 13:
+            case 12:
                 res = new(std::nothrow) PiPicoFX::AcousticProc::AcousticProc();
                 break;
-            case 14:
+            case 13:
                 res = new(std::nothrow) PiPicoFX::PitchShifter::PitchShifter();
                 break;
-            case 15:
+            case 14:
                 res = new(std::nothrow) PiPicoFX::ShimmerVerb::ShimmerVerb();
                 break;
-            case 16:
+            case 15:
                 res = new(std::nothrow) PiPicoFX::Tremolo::Tremolo();
                 break;
-            case 17:
+            case 16:
                 res = new(std::nothrow) PiPicoFX::FreeVerb::FreeVerb();
                 break;
             default:
