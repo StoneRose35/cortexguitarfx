@@ -2,6 +2,7 @@
 #define _DELAY_H_
 #include <stdint.h>
 #define DELAY_LINE_LENGTH (98304L)
+#define MAX_DELAY_SINGLEBUFFER 65536
 #include "audiotools.h"
 
 typedef struct 

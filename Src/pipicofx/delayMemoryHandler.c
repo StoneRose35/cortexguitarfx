@@ -59,8 +59,8 @@ int16_t * mallocDelayMemory(uint32_t size)
         takenDelayMemoryBlocks[indexToEnter].startAddress = initialAddress-size;
         takenDelayMemoryBlocks[indexToEnter].endAddress = initialAddress;
         takenDelayMemoryBlocksCnt +=1;
+        return (int16_t*)(takenDelayMemoryBlocks[indexToEnter].startAddress);
     }
-
     return (int16_t*)0;
 }
 

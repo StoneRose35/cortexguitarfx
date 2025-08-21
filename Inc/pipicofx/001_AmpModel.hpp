@@ -24,7 +24,7 @@ namespace PiPicoFX {
     class AmpModel : public FxProgram
     {
         public:
-            AmpModel() : FxProgram(4,"Amp Model",DELAY_LINE_LENGTH<<1){
+            AmpModel() : FxProgram(4,"Amp Model",MAX_DELAY_SINGLEBUFFER<<1){
                 this->setup();
             };
 

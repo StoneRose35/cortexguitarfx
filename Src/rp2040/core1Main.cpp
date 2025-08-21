@@ -334,11 +334,12 @@ void core1Main()
                 piPicoUiController.currentProgram = loadProgram(programToInitialize);
                 if (piPicoUiController.currentProgram != nullptr)
                 {
+                    onCreate(&piPicoUiController);
                     if (currentPreset != 0xFF)
                     {
                         applyPreset(presets+currentPreset,piPicoUiController.currentProgram);
                     }
-                    onCreate(&piPicoUiController);
+                    
                     programChangeState = 4;
                 }
             }

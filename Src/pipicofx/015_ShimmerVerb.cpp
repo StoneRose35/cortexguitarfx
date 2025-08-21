@@ -41,12 +41,15 @@ void ShimmerVerb::ShimmerVerb::setup()
     initDelay(this->delays,delayMemoryPointer,256);
     this->delays[0].delayInSamples = 149;
     this->delays[0].mix = ((1 << 15) -1) ;
+    this->delays[0].feedbackFunction=0;
     initDelay(this->delays+1,delayMemoryPointer+256,512);
     this->delays[1].delayInSamples = 337;
     this->delays[1].mix = ((1 << 15) -1) ;
+    this->delays[1].feedbackFunction=0;
     initDelay(this->delays+2,delayMemoryPointer+512+256,2048);
     this->delays[2].delayInSamples = 1597;
-    this->delays[2].mix = ((1 << 15) -1) ;
+    this->delays[2].mix = ((1 << 15) -1);
+    this->delays[2].feedbackFunction=0;
     initDelay(this->delays+3,delayMemoryPointer+2048+512+256,4096);
     this->delays[3].delayInSamples = 3989;
     this->delays[3].mix = ((1 << 15) -1) ;

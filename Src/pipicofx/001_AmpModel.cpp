@@ -44,7 +44,7 @@ void AmpModel::AmpModel::setup()
 {
     initfirFilter(&filter3);
     initWaveShaper(&waveshaper1,&waveShaperDefaultOverdrive);
-    initDelay(&delay,mallocDelayMemory(DELAY_LINE_LENGTH << 1),DELAY_LINE_LENGTH);
+    initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 1),MAX_DELAY_SINGLEBUFFER);
     delay.feebackData = (void*)&feedbackFilter;
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));

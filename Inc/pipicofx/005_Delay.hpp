@@ -14,11 +14,13 @@ namespace PiPicoFX {
         class Delay : public FxProgram
         {
             public:
-                Delay() : FxProgram(4,"Delay",DELAY_LINE_LENGTH<<1){
+                Delay() : FxProgram(4,"Delay",MAX_DELAY_SINGLEBUFFER<<1){
                     this->setup();
                 };
                 int16_t processSample(int16_t);
-                DelayDataType delay;
+                DelayDataType delay={
+                    .feedbackFunction=0
+                };
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

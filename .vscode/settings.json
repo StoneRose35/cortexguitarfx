@@ -79,5 +79,5 @@
         "new": "cpp"
     },
     "cmake.configureOnOpen": false,
-    "cortex-debug.variableUseNaturalFormat": true
+    "cortex-debug.variableUseNaturalFormat": false
 }

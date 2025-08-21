@@ -13,6 +13,10 @@ extern "C" {
 }
 #include "pipicofx/FxProgramLoader.hpp"
 
+static void knob0Callback(uint16_t val,PiPicoFxUiType*data);
+static void knob1Callback(uint16_t val,PiPicoFxUiType*data);
+static void knob2Callback(uint16_t val,PiPicoFxUiType*data);
+
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
 BwImageType lock;
 extern volatile uint8_t programToInitialize;
@@ -60,6 +64,31 @@ static void create(PiPicoFxUiType*data)
             appendToString(lineBuffer,data->currentProgram->getParameter(c)->getParameterName());
             drawText(0,7*8,lineBuffer,imgBuffer,0);
         }                
+    }
+
+    data->currentParameterIdx=0;
+    data->currentParameter = data->currentProgram->getParameter(0);
+    // set all parameters controlled by the pots to the current value
+    uint16_t knobVal;
+    for(uint8_t c=0; c < data->currentProgram->getParameterCount(); c++)
+    {
+        switch (data->currentProgram->getParameter(c)->getControl())
+        {
+            case 0:
+                knobVal = getChannel0Value();
+                knob0Callback(knobVal,data);
+                break;
+            case 1:
+                knobVal = getChannel1Value();
+                knob1Callback(knobVal,data);
+                break;
+            case 2:
+                knobVal = getChannel2Value();
+                knob2Callback(knobVal,data);
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -173,7 +202,7 @@ static void exitCallback(PiPicoFxUiType*data)
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
-    uint16_t knobVal;
+
     if (encoderDelta != 0)
     {
         data->currentProgramIdx += encoderDelta;
@@ -185,33 +214,10 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         {
             data->currentProgramIdx = 0;
         }
-        delete data->currentProgram;
-        data->currentProgram = PiPicoFX::loadProgram(data->currentProgramIdx);
-        data->currentParameterIdx=0;
-        data->currentParameter = data->currentProgram->getParameter(0);
-        // set all parameters controlled by the pots to the current value
-        for(uint8_t c=0; c < data->currentProgram->getParameterCount(); c++)
-        {
-            switch (data->currentProgram->getParameter(c)->getControl())
-            {
-                case 0:
-                    knobVal = getChannel0Value();
-                    knob0Callback(knobVal,data);
-                    break;
-                case 1:
-                    knobVal = getChannel1Value();
-                    knob1Callback(knobVal,data);
-                    break;
-                case 2:
-                    knobVal = getChannel2Value();
-                    knob2Callback(knobVal,data);
-                    break;
-                default:
-                    break;
-            }
-        }
+        programToInitialize=data->currentProgramIdx;
+        programChangeState=1;
     }
-    create(data);
+    //create(data);
 }
 
 static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)

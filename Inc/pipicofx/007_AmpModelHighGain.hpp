@@ -22,7 +22,7 @@ namespace PiPicoFX {
         class AmpModelHighGain : public FxProgram
         {
             public:
-                AmpModelHighGain() : FxProgram(6,"Amp High Gain",DELAY_LINE_LENGTH<<1){
+                AmpModelHighGain() : FxProgram(6,"Amp High Gain",MAX_DELAY_SINGLEBUFFER<<1){
                     this->setup();
                 };
                 ~AmpModelHighGain();
@@ -42,10 +42,10 @@ namespace PiPicoFX {
                     "Vox AC15        (I)",
                     "Off                " 
                 };
-                uint8_t modType;
-                uint8_t cabSimType;
+                uint8_t modType=0;
+                uint8_t cabSimType=0;
                 MultiWaveShaperDataType waveshaper1;
-                DelayDataType delay;
+                DelayDataType delay={.feedbackFunction=0};
                 ReverbType reverb;
                 FirFilterType customCabFir={
                     .coefficients = {0x62c, 0x674, 0x7d6, 0xbc4, 0x1312, 0x1ea7, 0x2e33, 0x3b3a, 0x3a9e, 0x29bf, 0x15f5, 0x878, -0x67c, -0x1412, -0x17ed, -0x16c2, -0x13cc, -0xc2d, -0x2ee, 0x312, 0x5bf, 0x6eb, 0x5da, 0x487, 0x614, 0x771, 0x837, 0x784, 0x299, -0x372, -0x608, -0x42b, 0x2b, 0x44c, 0x599, 0x2f3, 0x43, 0x2, -0x1a5, -0x3c4, -0x2b3, 0xb7, 0x4ac, 0x823, 0xa3b, 0xa6a, 0x915, 0x74c, 0x69c, 0x6e5, 0x73e, 0x6cc, 0x4bf, 0x215, -0x52, -0x265, -0x21b, -0x2e, 0x222, 0x3cd, 0x50d, 0x5fa, 0x659, 0x61f}

@@ -16,7 +16,7 @@ int16_t Delay::Delay::processSample(int16_t sampleIn)
 
 void Delay::Delay::setup()
 {
-    initDelay(&this->delay,mallocDelayMemory(DELAY_LINE_LENGTH<<1),DELAY_LINE_LENGTH);
+    initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<1),MAX_DELAY_SINGLEBUFFER);
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));

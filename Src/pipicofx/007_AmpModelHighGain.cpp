@@ -86,7 +86,7 @@ void AmpModelHighGain::AmpModelHighGain::setup()
     initfirFilter(&this->hiwattFir);
     initfirFilter(&this->voxAC15Fir);
     initMultiWaveShaper(&this->waveshaper1,&multiWaveshaper1);
-    initDelay(&this->delay,mallocDelayMemory(DELAY_LINE_LENGTH<<1),DELAY_LINE_LENGTH);
+    initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<1),MAX_DELAY_SINGLEBUFFER);
     initReverb(&this->reverb,500,this->delay.delayLine); // putting delay and reverb onto the same memory since they are used mutually exclusively
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));

@@ -168,7 +168,7 @@ int main(void)
 	ticEnd=0;
 	ticStart=0;
 	programToInitialize=0xFF;
-
+    currentPreset=0xFF;
 
 
     /* Loop forever */
