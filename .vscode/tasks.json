@@ -209,9 +209,10 @@
             "command": "/usr/bin/g++",
             "args": [
                 "-I./Inc",
+                "-I./Inc/RpiPico",
                 "-fdiagnostics-color=always",
                 "-g",
-                "./Tests/cpp_tests.cpp", "./Src/pipicofx/*.cpp", "./out/*.o",
+                "./Tests/cpp_tests.cpp", "./Src/pipicofx/0*.cpp", "./Src/pipicofx/FxProgram*.cpp", "./Src/pipicofx/*AudioProcessor.cpp","./out/*.o",
                 "-o",
                 "./Tests/cppTests", 
                 "-lm"
@@ -234,7 +235,7 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "-c",
-                "./../Src/common/audio/*.c","./../Src/common/stringFunctions.c","./../Src/common/math/*.c"
+                "./../Src/common/audio/*.c","./../Src/common/stringFunctions.c","./../Src/common/math/*.c","./../Src/pipicofx/delayMemoryHandler.c"
             ],
             "options": {
                 "cwd": "${workspaceFolder}/out"

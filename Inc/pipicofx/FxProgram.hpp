@@ -11,8 +11,8 @@ class FxProgram : public AudioProcessor
         virtual ~FxProgram();
         void setup(void);
         uint8_t addParameter(FxProgramParameter*p);
-        uint8_t getParameterCount(void);
         int16_t processSample(int16_t);
+        uint8_t getParameterCount(void);
         FxProgramParameter* getParameter(uint8_t pos);
         const char * getName();
         uint32_t getDelayMemoryUseage(); // returns the amount of delay memory required in bytes

@@ -5,5 +5,6 @@ namespace PiPicoFX {
     {
         public:
             virtual int16_t processSample(int16_t sampleIn);
+            virtual ~AudioProcessor()=default;
     };
 };

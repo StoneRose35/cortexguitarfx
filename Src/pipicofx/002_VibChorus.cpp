@@ -6,7 +6,7 @@ extern "C" {
 }
 using namespace PiPicoFX;
 
-int16_t VibChorus::VibChorus::processSample(int16_t sampleIn)
+int16_t VibChorus::VibChorus::processSample(int16_t sampleIn) 
 {
     sampleIn >>= 1;
     sampleIn = simpleChorusProcessSample(sampleIn,&chorusData);

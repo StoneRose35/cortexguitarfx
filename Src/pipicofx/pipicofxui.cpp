@@ -8,7 +8,9 @@ extern "C" {
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
 #include "images/pipicofx_param_1_scaled.h"
+#ifdef RP2040_FEATHER
 #include "romfunc.h"
+#endif
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #ifdef __cplusplus

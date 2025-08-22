@@ -6,10 +6,13 @@
 #include "pipicofx/002_VibChorus.hpp"
 #include "pipicofx/003_Off.hpp"
 #include "pipicofx/FxProgram.hpp"
+#include "pipicofx/MultiAudioProcessor.hpp"
+
 
 
 extern "C" 
 {
+    #include "pipicofx/delayMemoryHandler.h"
     float int2float(int32_t a)
     {
         return (float)a;
@@ -27,7 +30,7 @@ extern "C"
 }
 
 
-int main(int argc,char ** argv)
+void fxProgramLoading()
 {
     char  displayBfr[32];
     int16_t sampleIn, sampleOut;
@@ -60,5 +63,23 @@ int main(int argc,char ** argv)
         sampleOut = prog1->processSample(sampleIn);
         std::cout << "In: " << sampleIn << ", Out: " << sampleOut << "\n"; 
     } 
+}
 
+void multiAudioProcessorDemo()
+{
+    MultiAudioProcessor * map = new MultiAudioProcessor();
+    
+    map->appendChild(new VibChorus::VibChorus());
+    map->appendChild(new AmpModel::AmpModel());
+    map->mode = MultiAudioProcessorMode::MODE_PARALLEL;
+    map->processSample(45);
+    AudioProcessor * separateChorus = new VibChorus::VibChorus();
+    delete map;
+    delete separateChorus;
+}
+
+int main(int argc,char ** argv)
+{
+    initDelayMemoryHandler();
+    multiAudioProcessorDemo();
 }

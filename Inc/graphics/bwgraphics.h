@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include "graphics/gfxfont.h"
 #ifndef RP2040_FEATHER
-#include "math.h"
 float fsqrt(float a);
 int32_t float2int(float a);
 float int2float(int32_t a);

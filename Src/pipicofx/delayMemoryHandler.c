@@ -3,15 +3,17 @@
 #include "audio/audiotools.h"
 #include "pipicofx/delayMemoryHandler.h"
 
+
+
 volatile int16_t delayMemory[DELAY_LINE_LENGTH];
 
 static volatile uint8_t takenDelayMemoryBlocksCnt;
-static volatile uint32_t globalStart;
-static volatile uint32_t globalEnd;
+static volatile ptr globalStart;
+static volatile ptr globalEnd;
 static delayMemoryBlockType takenDelayMemoryBlocks[32];
 
 
-void setStart(uint32_t strt)
+void setStart(ptr strt)
 {
     globalStart = strt;
     globalEnd = strt + DELAY_LINE_LENGTH;
@@ -20,13 +22,13 @@ void setStart(uint32_t strt)
 void initDelayMemoryHandler(void)
 {
     takenDelayMemoryBlocksCnt = 0;
-    globalStart = (uint32_t)delayMemory;
+    globalStart = (ptr)delayMemory;
     globalEnd = globalStart + (DELAY_LINE_LENGTH<<1);
 }
 
-int16_t * mallocDelayMemory(uint32_t size)
+int16_t * mallocDelayMemory(ptr size)
 {
-    uint32_t initialAddress= globalEnd;
+    ptr initialAddress= globalEnd;
     uint8_t indexToEnter=0;
     if (takenDelayMemoryBlocksCnt == 0 && size <= globalEnd-globalStart)
     {
@@ -64,12 +66,12 @@ int16_t * mallocDelayMemory(uint32_t size)
     return (int16_t*)0;
 }
 
-void freeDelayMemory(int16_t * ptr)
+void freeDelayMemory(int16_t * pointer)
 {
     // get size to free up
     for (uint8_t c=0;c<takenDelayMemoryBlocksCnt;c++)
     {
-        if (takenDelayMemoryBlocks[c].startAddress == (uint32_t)ptr)
+        if (takenDelayMemoryBlocks[c].startAddress == (ptr)pointer)
         {
             for (uint8_t cc=c;cc<takenDelayMemoryBlocksCnt-1;cc++)
             {
