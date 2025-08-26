@@ -36958,6 +36958,14 @@
 		(uuid "538fdf37-ec55-44c3-aa5c-da34850bf9f5")
 	)
 	(segment
+		(start 111.85 96.52)
+		(end 111.2 96.52)
+		(width 0.35)
+		(layer "F.Cu")
+		(net 1)
+		(uuid "5543ab8c-b03b-4c0f-a5a4-076c68460457")
+	)
+	(segment
 		(start 96.266 83.058)
 		(end 98.682 83.058)
 		(width 0.35)
@@ -37148,14 +37156,6 @@
 		(layer "F.Cu")
 		(net 1)
 		(uuid "a5539e74-1128-4e9e-8b13-7f419f43d4b2")
-	)
-	(segment
-		(start 111.82 96.51)
-		(end 111.17 96.51)
-		(width 0.35)
-		(layer "F.Cu")
-		(net 1)
-		(uuid "ad5efe94-423c-48d1-b2a0-8fc8508af763")
 	)
 	(segment
 		(start 115.72 96.51)
