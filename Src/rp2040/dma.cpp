@@ -12,8 +12,9 @@ extern "C" {
 #include "drivers/timer.h"
 #include "pipicofx/pipicofxui.h"
 #include "audio/audiotools.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "system.h"
+#include "audio/sineplayer.h"
 }
 
 #include "pipicofx/FxProgram.hpp"
@@ -64,18 +65,6 @@ extern "C" {
 __attribute__ ((section (".ramfunc"))) 
 void isr_c0_dma_irq0_irq11()
 {
-	/*
-	if ((*DMA_INTS0 & (1<<0))==(1 << 0)) // if from channel 0: neopixel  frame timer
-	{
-		// clear interrupt
-		*DMA_INTS0 = (1<<0);
-
-		// disable dma channel 0
-		*DMA_CH0_CTRL_TRIG &= ~(1 << 0);
-
-		sendState = SEND_STATE_SENT;
-	}
-	else */
 	if ((*DMA_INTS0 & (1<<1))==(1 << 1) ) // from channel 1: usb uart transmission done, handled by core0
 	{
 		*DMA_INTS0 = (1<<1);
@@ -89,7 +78,6 @@ void isr_c0_dma_irq0_irq11()
 		*NVIC_ICER = (1 << 11);
 		toggleAudioBuffer();	
 		toggleAudioInputBuffer();
-
 
 
 		if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
@@ -132,7 +120,7 @@ void isr_c0_dma_irq0_irq11()
 
 			if (programChangeState != 3) // processing
 			{
-				outputSample = piPicoUiController.currentProgram->processSample(inputSample);
+				outputSample = piPicoUiController.currentProgram->processSample(inputSample); //getNextSineValue();  
 			}
 			else
 			{
@@ -199,7 +187,7 @@ void isr_c1_dma_irq0_irq11()
 	if ((*DMA_INTS0 & (1<<4))==(1 << 4)) // channel 4: one line of display data written, handled by core 1
 	{
 		*DMA_INTS0 = (1<<4);
-		OledWriteNextLine();
+		DisplayWriteNextLine();
 	}
 	else 
 	{

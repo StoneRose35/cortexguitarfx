@@ -2,7 +2,7 @@ extern "C"
 {
 #include "pipicofx/pipicofxui.h"
 #include "graphics/bwgraphics.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "hardware/rp2040_registers.h"
 #include "stdlib.h"
 #include "core1Main.h"
@@ -34,7 +34,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
         *((uint8_t*)data->data+2) = 2;
     }
     drawImage(*((uint8_t*)data->data+2),40,&testing_streamimg,imgBuffer);
-    OledwriteFramebufferAsync(imgBuffer->data);
+    DisplayWriteFramebufferAsync(imgBuffer->data);
 }
 
 static void enterCallback(PiPicoFxUiType*data) 

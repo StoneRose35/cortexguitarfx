@@ -41,7 +41,7 @@
         "pipicofx_param_2_scaled.h": "c",
         "picofxcore.h": "c",
         "gfxfonts.h": "c",
-        "oled_display.h": "c",
+        "display128x64.h": "c",
         "pads_bank0.h": "c",
         "systick.h": "c",
         "core1main.h": "c",
@@ -76,7 +76,8 @@
         "array": "cpp",
         "string": "cpp",
         "string_view": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "resets.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

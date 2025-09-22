@@ -1,7 +1,7 @@
 extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
@@ -141,7 +141,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     }
     drawImage(0,3*8,&bargraph,imgBuffer);
 
-    OledwriteFramebufferAsync(imgBuffer->data);
+    DisplayWriteFramebufferAsync(imgBuffer->data);
 }
 
 static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)

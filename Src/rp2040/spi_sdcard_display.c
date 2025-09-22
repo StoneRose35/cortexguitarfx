@@ -16,6 +16,8 @@
  * 1.8" Color TFT LCD display with MicroSD Card Breakout - ST7735R
  */
 
+
+#ifdef ADAFRUIT_1_8_COLOR_TFT_SDCARD
 void initSpi()
 {
     // get spi out of reset
@@ -579,3 +581,5 @@ void displayOn()
     setSckDisplay();
     sendDisplayCommand(0x29,(uint8_t*)0,0);
 }
+
+#endif

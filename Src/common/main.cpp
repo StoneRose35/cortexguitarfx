@@ -18,7 +18,7 @@ extern "C" {
 #include "drivers/adc.h"
 #include "drivers/timer.h"
 #include "drivers/gpio.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "drivers/wm8731.h"
 #include "usb/usb_common.h"
 #include "usb/usb_cdc.h"

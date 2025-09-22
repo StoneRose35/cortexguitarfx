@@ -1,7 +1,7 @@
 extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
@@ -46,7 +46,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     drawLine(cx,cy,px,py,img);   
     data->currentParameter->parameterDisplay(paramValueBfr);
     drawText(0,64,paramValueBfr,img,0);
-    OledwriteFramebufferAsync(img->data);
+    DisplayWriteFramebufferAsync(img->data);
 }
 
 

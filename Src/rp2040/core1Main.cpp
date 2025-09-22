@@ -6,7 +6,7 @@ extern "C" {
 #include "core1Main.h"
 #include "drivers/gpio.h"
 #include "drivers/irq.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "audio/firFilter.h"
 #include "audio/audiotools.h"
 #include "audio/delay.h"
@@ -73,7 +73,7 @@ void core1Main()
     audioStatePtr = getAudioStatePtr();
 
 
-    initOledDisplay();
+    initDisplay();
 
 	/*
      *
@@ -83,7 +83,7 @@ void core1Main()
 
 	
 	piPicoFxUiSetup(&piPicoUiController);
-	OledClearDisplay();
+	ClearDisplay();
     *DMA_INTE0 |= (1 << 4);
 
 	#ifndef FORCE_TEST_MODE
@@ -104,6 +104,8 @@ void core1Main()
 
     setAsOutput(CLIPPING_LED_INPUT);
     setAsOutput(CLIPPING_LED_OUTPUT);
+    setPin(CLIPPING_LED_INPUT,CLIPPING_LED_POLARITY);
+    setPin(CLIPPING_LED_OUTPUT,CLIPPING_LED_POLARITY);
 
     #ifdef EXTENSION_BOARD
     setStompswitchColorRaw(0);

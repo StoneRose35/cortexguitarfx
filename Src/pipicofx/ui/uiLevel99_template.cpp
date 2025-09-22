@@ -1,7 +1,7 @@
 extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
@@ -18,7 +18,7 @@ static void create(PiPicoFxUiType*data)
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
     BwImageType* imgBuffer = getImageBuffer();
-    OledwriteFramebufferAsync(imgBuffer->data);
+    DisplayWriteFramebufferAsync(imgBuffer->data);
 }
 
 

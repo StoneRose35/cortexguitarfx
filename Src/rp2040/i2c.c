@@ -216,7 +216,6 @@ void I2CSetSlaveMode()
 uint16_t I2CsendMultiple(uint8_t * data, uint16_t nSend,uint8_t slave_address)
 {
     uint16_t sendCnt=0;
-
     I2CSetMasterMode();
     *I2C_IC_INTR_MASK &= ~((1 << I2C_IC_INTR_MASK_M_RX_FULL_LSB) 
                         | (1 << I2C_IC_INTR_MASK_M_START_DET_LSB)

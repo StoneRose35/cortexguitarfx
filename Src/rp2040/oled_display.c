@@ -8,7 +8,9 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#include "drivers/oled_display.h"
+#include "globalConfig.h"
+#ifdef JOYIT_128X64_DISPLAY
+#include "drivers/display128x64.h"
 #include "drivers/systick.h"
 #include "fonts/oled_font_5x7.h"
 #include "hardware/regs/addressmap.h"
@@ -23,7 +25,7 @@ static volatile uint8_t currentDmaRow=SSD1306_DISPLAY_N_PAGES;
 static volatile uint8_t * currentFrameBuffer=0;
 
 
-void initOledDisplay()
+void initDisplay()
 {
     // get spi out of reset
     *RESETS |= (1 << RESETS_RESET_SPI0_LSB); 
@@ -122,7 +124,7 @@ void setCursor(uint8_t row, uint8_t col)
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
 
-void OledClearDisplay()
+void ClearDisplay()
 {
     for(uint8_t r=0;r<SSD1306_DISPLAY_N_PAGES;r++)
     {
@@ -144,7 +146,7 @@ void OledClearDisplay()
  * @param arr the data array (lsb is on top)
  * @param arrayLength the length of the array
  */
-void OledDisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayLength)
+void DisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t arrayLength)
 {
     setCursor(row,col);
     *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD); // switch to data
@@ -155,51 +157,6 @@ void OledDisplayByteArray(uint8_t row,uint8_t col,const uint8_t *arr,uint16_t ar
     }
 }
 
-/**
- * @brief displays an image defines as a row-first array
- * 
- * @param px x value of the top left position (0 to SSD1306_DISPLAY_N_COLUMNS-1)
- * @param py y values of the top left position (0 to SSD1306_DISPLAY_N_PAGES-1)
- * @param sx x size of the image
- * @param sy y size of the image in pages (8 bit)
- * @param img the image data, the number of bytes must be sx*sy
- */
-void OledDisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
-{
-    //setCursor(py,px);
-    *(GPIO_OUT + 2) = (1 << SSD1306_DISPLAY_CD);
-
-    // set vertical addressing mode
-    *SSPDR = 0x20;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-    *SSPDR = 0x02;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-
-    // set column address
-    *SSPDR = 0x21;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-    *SSPDR =px;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );    
-    *SSPDR =px+sx;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );  
-
-    // set page address
-    *SSPDR = 0x22;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-    *SSPDR =py;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );    
-    *SSPDR =py+sy;
-    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );        
-
-    uint16_t c=0;
-    *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD);
-    while(c<sx*sy)
-    {
-        *SSPDR = *(img + c);
-        c++;
-        while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
-    }
-}
 
 /**
  * @brief displays a byte array containing y-x ordered image data using standard addressing mode
@@ -216,7 +173,7 @@ void OledDisplayImage(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
  * @param sy y size of the image in pages (8 bit)
  * @param img the image data, the number of bytes must be sx*sy
  */
-void OledDisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
+void DisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t sy,uint8_t * img)
 {
     uint16_t index;
     for(uint8_t cc=0;cc<sy;cc++)
@@ -232,7 +189,7 @@ void OledDisplayImageStandardAdressing(uint8_t px,uint8_t py,uint8_t sx,uint8_t 
     }
 }
 
-void OledWriteChar(char chr)
+void DisplayWriteChar(char chr)
 {
     uint8_t fontIdx;
 
@@ -248,14 +205,14 @@ void OledWriteChar(char chr)
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
 
-void OledWriteText(const char * str,uint8_t posH,uint8_t posV)
+void DisplayWriteText(const char * str,uint8_t posH,uint8_t posV)
 {
     uint8_t cnt = 0;
     uint8_t hCurrent=posH;
     setCursor(posV,posH*6);
     while(*(str+cnt) != 0)
     {
-        OledWriteChar(*(str+cnt));
+        DisplayWriteChar(*(str+cnt));
         hCurrent += 1;
         cnt++;
     }
@@ -274,18 +231,18 @@ void OledWriteText(const char * str,uint8_t posH,uint8_t posV)
  * @param str 
  * @param posV 
  */
-void OledWriteTextLine(const char * str,uint8_t posV)
+void DisplayWriteTextLine(const char * str,uint8_t posV)
 {
     uint8_t cnt=0;
     setCursor(posV,0);
     while(*(str+cnt) != 0)
     {
-        OledWriteChar(*(str+cnt));
+        DisplayWriteChar(*(str+cnt));
         cnt++;
     }
     while(cnt < 21)
     {
-        OledWriteChar(' ');
+        DisplayWriteChar(' ');
         cnt++;
     }
     *SSPDR = 0x0;
@@ -294,7 +251,7 @@ void OledWriteTextLine(const char * str,uint8_t posV)
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
 }
 
-void OledWriteLineAsync(volatile uint8_t * data)
+void DisplayWriteLineAsync(volatile uint8_t * data)
 {
     *DMA_CH4_WRITE_ADDR = (uint32_t)SSPDR;
 	*DMA_CH4_READ_ADDR = (uint32_t)data;
@@ -305,21 +262,22 @@ void OledWriteLineAsync(volatile uint8_t * data)
 						| (1 << DMA_CH4_CTRL_TRIG_EN_LSB);
 }
 
-void OledWriteNextLine(void)
+void DisplayWriteNextLine(void)
 {
     if (currentDmaRow <SSD1306_DISPLAY_N_PAGES )
     {
         setCursor(currentDmaRow,0);
         *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD);
-        OledWriteLineAsync(currentFrameBuffer + currentDmaRow*SSD1306_DISPLAY_N_COLUMNS);
+        DisplayWriteLineAsync(currentFrameBuffer + currentDmaRow*SSD1306_DISPLAY_N_COLUMNS);
         currentDmaRow++;
     }
 }
 
-void OledwriteFramebufferAsync(uint8_t * fb)
+void DisplayWriteFramebufferAsync(uint8_t * fb)
 {
     while(currentDmaRow<SSD1306_DISPLAY_N_PAGES); // block until previous transfer is done
     currentDmaRow=0;
     currentFrameBuffer=fb;
-    OledWriteNextLine();
+    DisplayWriteNextLine();
 }
+#endif

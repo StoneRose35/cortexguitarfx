@@ -1,6 +1,6 @@
 PROJECTNAME=mic_stomp
 CC=avr-gcc
-CARGS=-Wall -Og -DF_CPU=4000000UL -mmcu=atmega88
+CARGS=-Wall -Og -DF_CPU=4000000UL -mmcu=atmega88p
 OBJCOPY=avr-objcopy
 OCARGS=-j .text -j .data -O ihex 
 
@@ -32,4 +32,4 @@ clean:
 .PHONY: all clean
 
 program: clean all
-	avrdude -p m88 -c dragon_isp -P usb -U flash:w:$(PROJECTNAME).hex
+	avrdude -p m88p -c dragon_isp -P usb -U flash:w:$(PROJECTNAME).hex

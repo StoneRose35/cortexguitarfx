@@ -3,7 +3,7 @@ extern "C"
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "graphics/gfxfont.h"
-#include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
@@ -74,7 +74,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     //out
     drawSquare(40.0f,53.0f,40.0f + int2float(avgOutput)*(128.0f-40.0f)/128.0f,64.0f,imgBuffer);
 
-    OledwriteFramebufferAsync(imgBuffer->data);
+    DisplayWriteFramebufferAsync(imgBuffer->data);
 }
 
 static void enterCallback(PiPicoFxUiType*data) 
@@ -120,7 +120,7 @@ static void enterCallback(PiPicoFxUiType*data)
         else if (overlayNr == OVERLAY_NR_FWUPDATE)
         {
             drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
-            OledDisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
+            DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
             reset_usb_boot(1 << 17,2);
         }
     }

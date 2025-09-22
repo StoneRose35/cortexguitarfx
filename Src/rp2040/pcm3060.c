@@ -65,10 +65,19 @@ void setupPCM3060()
     waitSysticks(1);
 
 
+    // disable powersave
+        i2c_error += pcm3060Write((PCM3060_R64 << 8 )
+                |(0 << PCM3060_R64_ADPSV)
+                |(0 << PCM3060_R64_DAPSV)
+            );
+
     // master mode for adc, systemclock is 256*fs
     i2c_error += pcm3060Write((PCM3060_R72 << 8) | (4 << PCM3060_R72_MS));
 
-    // disable power save, enable single ended mode
+    // select clock 1 for dac
+    i2c_error += pcm3060Write((PCM3060_R67 << 8) | (1 << PCM3060_R67_CSEL2)); 
+
+    // disable power save, disable single ended mode, clock 1 for dac
     i2c_error += pcm3060Write((PCM3060_R64 << 8 )
                 |(0 << PCM3060_R64_ADPSV)
                 |(0 << PCM3060_R64_DAPSV)
