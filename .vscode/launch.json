@@ -70,13 +70,13 @@
             "gdbPath": "gdb-multiarch",
             "device": "RP2040",
             "configFiles": [
-                "interface/picoprobe.cfg",
+                "interface/cmsis-dap.cfg",
                 "target/rp2040.cfg"
             ],
             "svdFile": "/home/philipp/Projekte/PiPicoFX/pico/pico-sdk/src/rp2040/hardware_regs/RP2040.svd",
             "runToEntryPoint": "main",
             "searchDir": [
-                "/home/philipp/pico/openocd/tcl"
+                "/usr/local/share/openocd/scripts"
             ]
         },
         {
@@ -89,12 +89,12 @@
             "gdbPath": "gdb-multiarch",
             "device": "RP2040",
             "configFiles": [
-                "interface/picoprobe.cfg",
+                "interface/cmsis-dap.cfg",
                 "target/rp2040.cfg"
             ],
             "svdFile": "/home/philipp/Projekte/PiPicoFX/pico/pico-sdk/src/rp2040/hardware_regs/RP2040.svd",
             "searchDir": [
-                "/home/philipp/pico/openocd/tcl"
+                "/usr/local/share/openocd/scripts"
             ]
         },
         {
@@ -107,12 +107,12 @@
             "gdbPath": "gdb-multiarch",
             "device": "RP2040",
             "configFiles": [
-                "interface/picoprobe.cfg",
+                "interface/cmsis-dap.cfg",
                 "target/rp2040-core0.cfg"
             ],
             "svdFile": "/home/philipp/Projekte/PiPicoFX/pico/pico-sdk/src/rp2040/hardware_regs/RP2040.svd",
             "searchDir": [
-                "/home/philipp/pico/openocd/tcl"
+                "/usr/local/share/openocd/scripts"
             ]
         },
         {
@@ -125,12 +125,12 @@
             "gdbPath": "gdb-multiarch",
             "device": "RP2040",
             "configFiles": [
-                "interface/picoprobe.cfg",
+                "interface/cmsis-dap.cfg",
                 "target/rp2040-core1.cfg"
             ],
             "svdFile": "/home/philipp/Projekte/PiPicoFX/pico/pico-sdk/src/rp2040/hardware_regs/RP2040.svd",
             "searchDir": [
-                "/home/philipp/pico/openocd/tcl"
+                "/usr/local/share/openocd/scripts"
             ]
         },
         {
