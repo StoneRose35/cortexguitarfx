@@ -8,7 +8,6 @@
 #include <sstream>
 #include <iomanip>
 #include "pio_disassembler.h"
-
 extern "C" void disassemble(char *buf, int buf_len, uint16_t inst, uint sideset_bits, bool sideset_opt) {
     if (buf_len) buf[disassemble(inst, sideset_bits, sideset_opt).copy(buf, buf_len - 1)] = 0;
 }

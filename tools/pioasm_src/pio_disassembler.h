@@ -6,7 +6,7 @@
 
 #ifndef _PIO_DISASSEMBLER_H
 #define _PIO_DISASSEMBLER_H
-
+#include "stdint.h"
 #ifdef __cplusplus
 
 #include <string>
