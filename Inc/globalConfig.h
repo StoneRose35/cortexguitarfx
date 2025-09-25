@@ -44,6 +44,11 @@
 #define HORIZONTAL_FLIP
 #endif
 
+#ifdef DOGM128_DISPLAY
+#define VERTICAL_FLIP
+#define HORIZONTAL_FLIP
+#endif
+
 #if defined(CS4270_AUDIO_CODEC) && defined(PCM3060_AUDIO_CODEC)
 #error Multiple Audio Codecs defined, select only one.
 #endif

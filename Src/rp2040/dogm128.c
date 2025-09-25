@@ -24,6 +24,7 @@ extern uint32_t task;
 
 void dogm128SendCommand(uint8_t cmd)
 {
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
     *(GPIO_OUT + 2) = (1 << SSD1306_DISPLAY_CD);
     nop_wait(DOGM128_CS_DELAY);
     *SSPDR=cmd;
@@ -32,6 +33,7 @@ void dogm128SendCommand(uint8_t cmd)
 
 void dogm128SendData(const uint8_t*data,uint8_t l)
 {
+    while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
     *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD); // cd high
     nop_wait(DOGM128_CS_DELAY);
     for(uint8_t c=0;c<l;c++)
@@ -39,7 +41,6 @@ void dogm128SendData(const uint8_t*data,uint8_t l)
         *SSPDR=*(data+c);
         while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     }
-    nop_wait(DOGM128_CS_DELAY);
 }
 
 void initDisplay()
@@ -82,8 +83,8 @@ void initDisplay()
     waitSysticks(5);
     
     dogm128SendCommand(0x40);// set startline 0
-    dogm128SendCommand(0xA0);// ADC reverse, set A0 to flip display
-    dogm128SendCommand(0xC8); //Normal COM0-COM63, set C8 to reverse display
+    dogm128SendCommand(DOGM128_ADC_REVERSE);// ADC reverse, set A0 to flip display, set A1 for normal
+    dogm128SendCommand(DOGM128_COM_DIRECTION); //Normal COM0-COM63, set C8 to reverse display, set C0 for standard
     dogm128SendCommand(0xA6); //display normal
     dogm128SendCommand(0xA2); // set bias 1/9 (Duty 1/65)
     dogm128SendCommand(0x2F); // Booster, regulator and follower on 
@@ -110,16 +111,12 @@ void initDisplay()
  */
 void setCursor(uint8_t row, uint8_t col)
 {
-    //dogm128Enable();
-    nop_wait(DOGM128_CS_DELAY);
     // set row / page
     dogm128SendCommand(0xB0 | row);
     // set column, high nibble
     dogm128SendCommand(0x10 | ((col+HORIZONTAL_OFFSET) >> 4));
     // set column, low nibble
     dogm128SendCommand((col+HORIZONTAL_OFFSET) & 0x0F);
-    nop_wait(DOGM128_CS_DELAY);
-    //dogm128Disable();
 }
 
 
@@ -282,16 +279,10 @@ void DisplayWriteLineAsync(volatile uint8_t * data)
 
 void DisplayWriteNextLine(void)
 {
-    //if (currentDmaRow == DOGM128_N_PAGES)
-    //{
-    //    gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF))); // cs high
-    //    short_nop_delay();
-    //}
-    //else 
     if (currentDmaRow < DOGM128_N_PAGES )
     {
         setCursor(currentDmaRow,0);
-        //gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF)+16)); // cs low
+        while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) );
         *(GPIO_OUT + 1) = (1 << SSD1306_DISPLAY_CD); // cd high
         nop_wait(DOGM128_CS_DELAY);
         DisplayWriteLineAsync(currentFrameBuffer + currentDmaRow*DOGM128_DISPLAY_N_COLUMNS);
