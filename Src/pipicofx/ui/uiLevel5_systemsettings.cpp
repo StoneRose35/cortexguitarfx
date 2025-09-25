@@ -68,7 +68,12 @@ static void create(PiPicoFxUiType*data)
     appendToString(strbfr,"Vol");
     drawText(87,55,strbfr,img,(void*)0);
 
+    #ifdef CS4270_AUDIO_CODEC
     currentVolume = cs4270GetOutputVolume();
+    #endif
+    #ifdef PCM3060_AUDIO_CODEC
+    currentVolume = pcm3060GetOutputVolume();
+    #endif
     drawOval(10.f,10.f,100.f,32.f,img);
     clearOval(8.f,8.f,100.f,32.f,img);
 
