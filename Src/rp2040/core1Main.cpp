@@ -12,7 +12,6 @@ extern "C" {
 #include "audio/delay.h"
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
-
 #include "drivers/adc.h"
 #include "stringFunctions.h"
 #include "drivers/rotEncoderSwitchPower.h"
@@ -90,8 +89,8 @@ void core1Main()
 		enterLevel0(&piPicoUiController);
 	#else
 	    // switch on program "off"
-		piPicoUiController.currentProgramIdx = N_FX_PROGRAMS-1;
-		piPicoUiController.currentProgram=fxPrograms[piPicoUiController.currentProgramIdx];
+		piPicoUiController.currentProgramIdx = 2;
+		piPicoUiController.currentProgram=loadProgram(piPicoUiController.currentProgramIdx);
 	    enterLevel7(&piPicoUiController);
 	#endif
 
