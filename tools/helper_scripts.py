@@ -79,9 +79,14 @@ def imageToCStream(fname="Rheinisch-Kaltblut-Gespann.png",outfolder=""):
     img = mpimg.imread(fname)
     imgname = fname.split(os.path.sep)[-1].split(".")[0]
     if (len(outfolder) > 0):
-        fp = open(os.path.join(outfolder, imgname + ".h"), "wt")
+        headername = os.path.join(outfolder, imgname + ".h")
     else:
-        fp = open(imgname + ".h", "wt")
+        headername =  imgname + ".h"
+    if not os.path.exists(headername):
+        openmode = "at"
+    else:
+        openmode = "wt"
+    fp = open(headername, openmode)
     bytearray = ""
     c = 0
     for row in range(img.shape[0]):
@@ -98,9 +103,14 @@ def imageToBWCStream(fname="Rheinisch-Kaltblut-Gespann.png",outfolder=""):
     img = mpimg.imread(fname)
     imgname = fname.split(os.path.sep)[-1].split(".")[0]
     if (len(outfolder) > 0):
-        fp = open(os.path.join(outfolder, imgname + ".h"), "wt")
+        headername = os.path.join(outfolder, imgname + ".h")
     else:
-        fp = open(imgname + ".h", "wt")
+        headername =  imgname + ".h"
+    if not os.path.exists(headername):
+        openmode = "at"
+    else:
+        openmode = "wt"
+    fp = open(headername, openmode)
     bytearray = ""
     c = 0
     rownr_old=0
@@ -127,9 +137,14 @@ def imageToBWXYPixelCStream(fname="Rheinisch-Kaltblut-Gespann.png", outfolder=""
     img = mpimg.imread(fname)
     imgname = fname.split(os.path.sep)[-1].split(".")[0]
     if (len(outfolder) > 0):
-        fp = open(os.path.join(outfolder, imgname + ".h"), "wt")
+        headername = os.path.join(outfolder, imgname + ".h")
     else:
-        fp = open(imgname + ".h", "wt")
+        headername =  imgname + ".h"
+    if not os.path.exists(headername):
+        openmode = "at"
+    else:
+        openmode = "wt"
+    fp = open(headername, openmode)
     bytearray = ""
     idx = 0
     bitpos = 0
@@ -156,9 +171,14 @@ def fontImageToArray(fname="sm_ascii_16x16.png", sizex=16, sizey=16, offsetx=0, 
     img = mpimg.imread(fname)
     imgname = fname.split(os.path.sep)[-1].split(".")[0]
     if (len(outfolder) > 0):
-        fp = open(os.path.join(outfolder, imgname + ".h"), "wt")
+        headername = os.path.join(outfolder, imgname + ".h")
     else:
-        fp = open(imgname + ".h", "wt")
+        headername =  imgname + ".h"
+    if not os.path.exists(headername):
+        openmode = "at"
+    else:
+        openmode = "wt"
+    fp = open(headername, openmode)
     asciientries = []
     nfonts = 0
     for col in range(int(img.shape[0]/sizex)):
@@ -272,10 +292,10 @@ def oscillator_freq_calc(target_freq=133000000,spi_freq=5000000,i2c_freq=100000)
     print("System Frequency Error: {}".format(bestparams["f_sys_err"]))
 
 if __name__ == "__main__":
-    asset_path = "../Assets"
-    font_path = "../Assets/fonts"
-    image_inc_path = "../Inc/images"
-    font_inc_path = "../Inc/fonts"
+    asset_path = "Assets"
+    font_path = "Assets/fonts"
+    image_inc_path = "Inc/images"
+    font_inc_path = "Inc/fonts"
     parser = argparse.ArgumentParser()
     parser.add_argument("-calcSysFreqs",help="calculate oscillator frequencies")
     parser.add_argument("-generateAssets",help="generate images and font asset headers",action="store_true")
@@ -302,15 +322,15 @@ if __name__ == "__main__":
             # dircontent = os.listdir(asset_path)
             full_path = args.convertImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToCStream(full_path, "./Inc/images")
+                imageToCStream(full_path,image_inc_path)
         elif args.convertBwImg is not None:
             full_path = args.convertBwImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToBWCStream(full_path, "./Inc/images")
+                imageToBWCStream(full_path, image_inc_path)
         elif args.convertBwXYPixel is not None:
             full_path = args.convertBwXYPixel # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToBWXYPixelCStream(full_path, "./Inc/images")
+                imageToBWXYPixelCStream(full_path, image_inc_path)
 
 
     """

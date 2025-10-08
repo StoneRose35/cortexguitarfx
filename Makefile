@@ -12,7 +12,7 @@ MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
 CC=arm-none-eabi-gcc
-CPP=-arm-none-eabi-g++
+CPP=arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
 OPT=-Og
@@ -193,14 +193,6 @@ out/%.o: Src/services/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h o
 Inc/images/%.h: Assets/%.png
 	python3 ./tools/helper_scripts.py -convertBwImg $<
 
-
-Src/rp2040/neopixelDriver.c: Inc/gen/pio0_pio.h
-
-Src/rp2040/simple_neopixel.c: Inc/gen/pio0_pio.h
-
-Src/rp2040/simple_timertest.c: Inc/gen/pio0_pio.h
-
-Src/rp2040/ds18b20.c: Inc/gen/pio0_pio.h
 
 # pio assembler
 Inc/gen/pio0_pio.h: Inc/gen tools/pioasm
