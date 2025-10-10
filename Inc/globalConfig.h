@@ -8,10 +8,10 @@
 //#define JOYIT_128X64_DISPLAY
 #define DOGM128_DISPLAY
 
-#define INTERNAL_CODEC 
-//#define EXTERNAL_CODEC
-#define WM8731_CODEC
-// #define PCM3060_CODEC
+//#define INTERNAL_CODEC 
+#define EXTERNAL_CODEC
+//#define WM8731_CODEC
+#define PCM3060_CODEC
 
 
 #define USB_VENDOR_ID 0x4A37

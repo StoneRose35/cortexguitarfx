@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "memoryRegions.h"
 #include "pipicofx/FxProgram.hpp"
 #include "pipicofx/001_AmpModel.hpp"
 #include "pipicofx/002_VibChorus.hpp"
@@ -19,6 +20,7 @@
 #include "pipicofx/017_FreeVerb.hpp"
 #include <new>
 namespace PiPicoFX {
+    __QSPI_CODE
     PiPicoFX::FxProgram * loadProgram(uint8_t index)
     {
         PiPicoFX::FxProgram * res=nullptr;

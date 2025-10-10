@@ -59,7 +59,7 @@ void AmpModel::Param1::parameterDisplay(char* chrbfr)
     Int16ToChar(dval,chrbfr);
 }
 
-__attribute__((section (".qspi_code")))
+__QSPI_CODE
 void AmpModel::Param2::parameterCallback(uint16_t val) // number of waveshaper (more means more distortion)
 {
     // map 0-4095 to 1-8

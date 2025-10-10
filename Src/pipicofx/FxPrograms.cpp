@@ -10,6 +10,7 @@ extern "C" {
 #include "pipicofx/fxProgramParameter.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
 
+__QSPI_CODE
 void savePreset(FxPresetType* preset,uint16_t presetPos)
 {
     uint16_t cs=0;
@@ -27,6 +28,7 @@ void savePreset(FxPresetType* preset,uint16_t presetPos)
     #endif
 }
 
+__QSPI_CODE
 uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
 {
     uint16_t cs=0;
@@ -52,6 +54,7 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     return 1;
 }
 
+__QSPI_CODE
 void applyPreset(FxPresetType* preset,PiPicoFX::FxProgram * program)
 {
     uint8_t nParams;
@@ -62,6 +65,7 @@ void applyPreset(FxPresetType* preset,PiPicoFX::FxProgram * program)
     }
 }
 
+__QSPI_CODE
 void parametersToPreset(FxPresetType* preset,FxProgram * program)
 {
     uint8_t nParams;
@@ -72,6 +76,7 @@ void parametersToPreset(FxPresetType* preset,FxProgram * program)
     }    
 }
 
+__QSPI_CODE
 void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
 {
     char nrbfr[8];

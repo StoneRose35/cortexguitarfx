@@ -34,6 +34,8 @@
 #define I2S_EXT_MCLK (0*16+1) // PA1 MCLK
 //cs4270 reset line 
 #define CS4270_RESET (2*16+11) //PC11
+//pcm3060 reset line  (also pc11)
+#define PCM3060_RESET (2*16+11) //PC11
 
 #define DEBUG_OUTPUT_PIN (1*16+12) // PB12
 

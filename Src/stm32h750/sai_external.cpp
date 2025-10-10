@@ -5,6 +5,7 @@ extern "C" {
 #include "stm32h750/stm32h750_cfg_pins.h"
 #include "system.h"
 #include "timer.h"
+#include "audioEngine.h"
 #include "pipicofx/pipicofxui.h"
 #include "gpio.h"
 #include "audio/audiotools.h"
@@ -12,9 +13,6 @@ extern "C" {
 #include "memoryRegions.h"
 
 #ifdef EXTERNAL_CODEC
-
-#define AVERAGING_LOWPASS_CUTOFF 0.0001f
-#define UI_UPDATE_IN_SAMPLE_BUFFERS 256
 
 static int32_t i2sDoubleBuffer[AUDIO_BUFFER_SIZE*2*2];
 #ifdef I2S_INPUT
@@ -25,166 +23,61 @@ static volatile uint32_t dbfrInputPtr;
 
 extern uint32_t task;
 extern float avgInOld, avgOutOld;
-extern uint32_t cpuLoad;
-extern PiPicoFxUiType piPicoUiController;
-uint16_t bufferCnt;
-volatile uint32_t audioState=0;
-volatile int16_t fadeCounter;
-extern volatile uint8_t programChangeState;
 
-int32_t *  audioBufferPtr;
-int32_t *  audioBufferInputPtr;
-int32_t inputSampleInt,outputSampleInt;
-float inputSample, avgIn, avgOut, outputSample;
-uint32_t ticStart, ticEnd;
+volatile uint32_t audioState=0;
+volatile uint16_t audioTransferState=0;
 
 __QSPI_CODE
 void DMA1_Stream0_IRQHandler(void) // adc
 {
-    if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
-    {
-        audioState &= ~(1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
-    }
-    else
-    {
-        audioState  |= (1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
-    }
-
-
     if ((DMA1->LISR & DMA_LISR_TCIF0) != 0) // receiver transfer complete
     {
         dbfrInputPtr = AUDIO_BUFFER_SIZE*2;
         DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF0_Pos); 
+        audioTransferState += 1;
     }
     if ((DMA1->LISR & DMA_LISR_HTIF0) != 0) // receiver half transfer
     {
         dbfrInputPtr=0;
         DMA1->LIFCR = (1 << DMA_LIFCR_CHTIF0_Pos); 
+        audioTransferState += 1;
+    }
+
+    if (audioTransferState == 2)
+    {
+        // jump to audio processing
+        processAudioBuffers();
+    }
+    else
+    {
+        return;
     }
 
     // wait for a transmitter flag to be set
-    //setPin(DS_PIN_30, 1);
-    while (((DMA1->LISR & DMA_LISR_TCIF1) == 0) && ((DMA1->LISR & DMA_LISR_HTIF1) == 0));
-    //setPin(DS_PIN_30, 0);
     if ((DMA1->LISR & DMA_LISR_TCIF1) != 0)
     {
         dbfrPtr = AUDIO_BUFFER_SIZE*2;
         DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF1_Pos); 
+        audioTransferState += 1;
     }
     if ((DMA1->LISR & DMA_LISR_HTIF1) != 0)
     {
         dbfrPtr=0;
         DMA1->LIFCR = (1 << DMA_LIFCR_CHTIF1_Pos); 
+        audioTransferState += 1;
     }
-    task |= (1 << TASK_PROCESS_AUDIO_INPUT) | (1 << TASK_PROCESS_AUDIO);
 
-    if (((task & (1 << TASK_PROCESS_AUDIO))!= 0) && ((task & (1 << TASK_PROCESS_AUDIO_INPUT))!= 0))
+    if (audioTransferState == 2)
     {
-    
-		ticStart = getTimeLW();
-        audioBufferPtr = getEditableAudioBufferHiRes();
-        audioBufferInputPtr = getInputAudioBufferHiRes();
-        for (uint32_t c=0;c<AUDIO_BUFFER_SIZE*2;c+=2) // count in frame of 4 bytes or two  24bit samples
-        {
-            // convert raw input to float   
-            #ifdef EXTENSION_BOARD
-            inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8) + 
-                          ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
-            #else
-            inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
-            #endif
-
-        
-            //inputSampleInt = ((int32_t)((((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF) << 16) 
-                              //| (((uint32_t)*(audioBufferInputPtr + c) & 0xFFFF0000L) >> 16))) >> 8;  
-                              // flip halfwords, then shift right by 8bits since input data is 24bit left-aligned
-            inputSample=(float)inputSampleInt;
-            inputSample /= 8388608.0f;
-            #ifdef EXTENSION_BOARD
-            if (inputSample < -1.0f || inputSample > 1.0f)
-            {
-                audioState |= AUDIO_STATE_INPUT_CLIPPED;
-            }
-            #endif
-    
-
-            if (inputSample < 0.0f)
-            {
-                avgIn = -inputSample;
-            }
-            else
-            {
-                avgIn = inputSample;
-            }
-            avgInOld = AVERAGING_LOWPASS_CUTOFF*avgIn + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgInOld);
-
-            if (programChangeState != 3) // processing
-            {
-                outputSample = piPicoUiController.currentProgram->processSample(inputSample,piPicoUiController.currentProgram->data);
-            }
-            else
-            {
-                outputSample = 0.0f;
-            }
-    
-            if (programChangeState == 2)// fadeout
-            {
-                outputSample = (((float)(32767 - fadeCounter)*inputSample) + (((float)fadeCounter*outputSample)))/32767.0f;
-                fadeCounter -= 256;
-                if (fadeCounter < 0)
-                {
-                    fadeCounter = 0;
-                    programChangeState=3;
-                }
-            }
-            else if (programChangeState==4) // fadein
-            {
-                outputSample = (((float)(32767 - fadeCounter)*inputSample) + (((float)fadeCounter*outputSample)))/32767.0f;
-                fadeCounter += 256;
-                if (fadeCounter < 0) // overrun
-                {
-                    programChangeState = 0;
-                }
-            }
-            if (programChangeState == 1)
-            {
-                fadeCounter = 32767;
-                programChangeState = 2;
-            }
-
-
-            if (inputSample < 0.0f)
-            {
-                avgOut = -inputSample;
-            }
-            else
-            {
-                avgOut = inputSample;
-            }
-            avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
-            outputSample=clip(outputSample,getAudioStatePtr());
-            outputSampleInt=((int32_t)(outputSample*8388607.0f));
-            //inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);
-            *(audioBufferPtr+c) = outputSampleInt;  
-            *(audioBufferPtr+c+1) = outputSampleInt;
-        }
-        task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
-        bufferCnt++;
-        if (bufferCnt == UI_UPDATE_IN_SAMPLE_BUFFERS)
-		{
-			bufferCnt = 0;
-			task |= (1 << TASK_UPDATE_AUDIO_UI);
-		}
-
-        ticEnd = getTimeLW();
-		if(ticEnd > ticStart)
-		{
-			cpuLoad = ticEnd-ticStart;
-			cpuLoad = cpuLoad*196; // *256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
-			cpuLoad = cpuLoad >> 8;
-		}
-        //DebugLedOff();
+        // jump to audio processing
+        processAudioBuffers();
     }
+    else
+    {
+        return;
+    }
+    
+
 }
 
 

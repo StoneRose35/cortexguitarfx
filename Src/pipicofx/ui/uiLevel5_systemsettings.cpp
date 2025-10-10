@@ -10,6 +10,7 @@ extern "C" {
 #include "stringFunctions.h"
 #include "globalConfig.h"
 #include "drivers/cs4270_audio_codec.h"
+#include "pcm3060.h"
 #include "drivers/wm8731.h"
 #include "images/toggleswitch_on.h"
 #include "images/toggleswitch_off.h"
@@ -37,6 +38,9 @@ static void create(PiPicoFxUiType*data)
     #endif
     #ifdef WM8731_CODEC
     regbfr = wm8731GetInputState();
+    #endif
+    #ifdef PCM3060_CODEC
+    regbfr = pcm3060GetInputState();
     #endif
     if (regbfr & 0x2)
     {
@@ -73,6 +77,9 @@ static void create(PiPicoFxUiType*data)
     #endif
     #ifdef WM8731_CODEC
     currentVolume = wm8731GetOutputVolume();
+    #endif
+    #ifdef PCM3060_CODEC
+    currentVolume = pcm3060GetOutputVolume();
     #endif
     drawOval(10.f,10.f,100.f,32.f,img);
     clearOval(8.f,8.f,100.f,32.f,img);
@@ -258,6 +265,9 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 #ifdef WM8731_CODEC
                 regbfr = wm8731GetInputState();
                 #endif
+                #ifdef PCM3060_CODEC
+                regbfr = pcm3060GetInputState();
+                #endif
                 if ((regbfr & 0x2) != 0 && encoderDelta < 0) // switch off, was on
                 {
                     #ifdef CS4270_CODEC
@@ -265,6 +275,9 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #endif
                     #ifdef WM8731_CODEC
                     wm8731SetInputState(WM8731_CHANNEL_B,0);
+                    #endif
+                    #ifdef PCM3060_CODEC
+                    pcm3060SetInputState(PCM3060_CHANNEL_LEFT,0);
                     #endif
                     drawImage(16,20,&toggleswitch_off_streamimg,img);
                 }
@@ -276,6 +289,9 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef WM8731_CODEC
                     wm8731SetInputState(WM8731_CHANNEL_B,1);
                     #endif
+                    #ifdef PCM3060_CODEC
+                    pcm3060SetInputState(PCM3060_CHANNEL_LEFT,1);
+                    #endif
                     drawImage(16,20,&toggleswitch_on_streamimg,img);
                 }
                 break;
@@ -286,6 +302,9 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 #ifdef WM8731_CODEC
                 regbfr = wm8731GetInputState();
                 #endif
+                #ifdef PCM3060_CODEC
+                regbfr = pcm3060GetInputState();
+                #endif
                 if ((regbfr & 0x1) != 0 && encoderDelta < 0) // switch off, was on
                 {
                     #ifdef CS4270_CODEC
@@ -293,6 +312,9 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #endif
                     #ifdef WM8731_CODEC
                     wm8731SetInputState(WM8731_CHANNEL_A,0);
+                    #endif
+                    #ifdef PCM3060_CODEC
+                    pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,0);
                     #endif
                     drawImage(47,20,&toggleswitch_off_streamimg,img);
                 }
@@ -304,6 +326,9 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef WM8731_CODEC
                     wm8731SetInputState(WM8731_CHANNEL_A,1);
                     #endif
+                    #ifdef PCM3060_CODEC
+                    pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,1);
+                    #endif
                     drawImage(47,20,&toggleswitch_on_streamimg,img);
                 }
                 break;
@@ -313,6 +338,9 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 #endif
                 #ifdef WM8731_CODEC
                 currentVolume = wm8731GetOutputVolume();
+                #endif
+                #ifdef PCM3060_CODEC
+                currentVolume = pcm3060GetOutputVolume();
                 #endif
                 currentVolume &= 0xFF;
                 currentVolume += (encoderDelta << 2);
@@ -347,6 +375,9 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 #endif
                 #ifdef WM8731_CODEC
                 wm8731SetOutputVolume(CS4270_CHANNEL_BOTH,(uint8_t)currentVolume);
+                #endif
+                #ifdef PCM3060_CODEC
+                pcm3060SetOutputVolume(PCM3060_CHANNEL_BOTH,(uint8_t)currentVolume);
                 #endif
                 break;
         }
