@@ -28,12 +28,15 @@ c_template_bw = """
 #ifndef _{4}_H_
 #define _{4}_H_
 #include "graphics/bwgraphics.h"
+#include "memoryRegions.h"
 
-static uint8_t {0}_bwdata[]= {{
+__QSPI_DATA
+static const uint8_t {0}_bwdata[]= {{
 {1}
 }};
 
-static const struct BwImageStruct {0}_streamimg = {{
+__QSPI_DATA
+static const struct BwImageStructConst {0}_streamimg = {{
     .data = {0}_bwdata,
     .sx = {2},
     .sy = {3}
@@ -77,10 +80,16 @@ def el_to_bw_pixels(el):
 def imageToCStream(fname="Rheinisch-Kaltblut-Gespann.png",outfolder=""):
     img = mpimg.imread(fname)
     imgname = fname.split(os.path.sep)[-1].split(".")[0]
+    
     if (len(outfolder) > 0):
-        fp = open(os.path.join(outfolder, imgname + ".h"), "wt")
+        headername = os.path.join(outfolder, imgname + ".h")
     else:
-        fp = open(imgname + ".h", "wt")
+        headername =  imgname + ".h"
+    if not os.path.exists(headername):
+        openmode = "at"
+    else:
+        openmode = "wt"
+    fp = open(headername, openmode)
     bytearray = ""
     c = 0
     for row in range(img.shape[0]):
@@ -97,9 +106,14 @@ def imageToBWCStream(fname="Rheinisch-Kaltblut-Gespann.png",outfolder=""):
     img = mpimg.imread(fname)
     imgname = fname.split(os.path.sep)[-1].split(".")[0]
     if (len(outfolder) > 0):
-        fp = open(os.path.join(outfolder, imgname + ".h"), "wt")
+        headername = os.path.join(outfolder, imgname + ".h")
     else:
-        fp = open(imgname + ".h", "wt")
+        headername =  imgname + ".h"
+    if not os.path.exists(headername):
+        openmode = "at"
+    else:
+        openmode = "wt"
+    fp = open(headername, openmode)
     bytearray = ""
     c = 0
     rownr_old=0
@@ -125,9 +139,14 @@ def fontImageToArray(fname="sm_ascii_16x16.png", sizex=16, sizey=16, offsetx=0, 
     img = mpimg.imread(fname)
     imgname = fname.split(os.path.sep)[-1].split(".")[0]
     if (len(outfolder) > 0):
-        fp = open(os.path.join(outfolder, imgname + ".h"), "wt")
+        headername = os.path.join(outfolder, imgname + ".h")
     else:
-        fp = open(imgname + ".h", "wt")
+        headername =  imgname + ".h"
+    if not os.path.exists(headername):
+        openmode = "at"
+    else:
+        openmode = "wt"
+    fp = open(headername, openmode)
     asciientries = []
     nfonts = 0
     for col in range(int(img.shape[0]/sizex)):
@@ -212,10 +231,10 @@ def oscillator_freq_calc():
 
 
 if __name__ == "__main__":
-    asset_path = "../Assets"
-    font_path = "../Assets/fonts"
-    image_inc_path = "../Inc/images"
-    font_inc_path = "../Inc/fonts"
+    asset_path = "Assets"
+    font_path = "Assets/fonts"
+    image_inc_path = "Inc/images"
+    font_inc_path = "Inc/fonts"
     parser = argparse.ArgumentParser()
     parser.add_argument("-calcSysFreqs",help="calculate oscillator frequencies",action="store_true")
     parser.add_argument("-generateAssets",help="generate images and font asset headers",action="store_true")
@@ -240,11 +259,11 @@ if __name__ == "__main__":
             # dircontent = os.listdir(asset_path)
             full_path = args.convertImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToCStream(full_path, "../Inc/images")
+                imageToCStream(full_path, image_inc_path)
         elif args.convertBwImg is not None:
             full_path = args.convertBwImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
-                imageToBWCStream(full_path, "../Inc/images")
+                imageToBWCStream(full_path, image_inc_path)
 
 
 

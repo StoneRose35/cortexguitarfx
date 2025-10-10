@@ -2,11 +2,7 @@
 #include "audio/audiotools.h"
 #include "memoryRegions.h"
 
-__SDRAM_BSS
-float delayLineSdram[DELAY_LINE_SDRAM_LENGTH];
 
-
-float delayLineRam[DELAY_LINE_RAM_LENGTH];
 
 __QSPI_CODE
 void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
@@ -31,19 +27,44 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
     uint32_t delayIdx;
     float sampleOut;
     float sampleFedBack;
+    volatile uint32_t * audioStatePtr = getAudioStatePtr();
     delayIdx = (data->delayLinePtr - data->delayInSamples) & (data->delayBufferLength -1);
 
     sampleOut = *(data->delayLine +delayIdx)*data->mix + sampleIn*(1.0f - data->mix);
     sampleFedBack = *(data->delayLine +delayIdx);
     if (data->feedbackFunction != 0)
     {
-        sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData);
+        sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData,audioStatePtr);
     }
     sampleFedBack=data->feedback*sampleFedBack;
 
     *(data->delayLine + data->delayLinePtr) = sampleIn + sampleFedBack;
     data->delayLinePtr++;
     data->delayLinePtr &= (data->delayBufferLength -1UL);
+    return sampleOut;
+}
+
+__ITCM_CODE
+float delayLineWetProcessSample(float sampleIn,DelayDataType*data)
+{
+    uint32_t delayIdx;
+    float sampleOut;
+    float sampleFedBack;
+    volatile uint32_t * audioStatePtr = getAudioStatePtr();
+    delayIdx = (data->delayLinePtr - data->delayInSamples) & (data->delayBufferLength -1);
+
+    sampleOut = *(data->delayLine +delayIdx);
+    sampleFedBack = *(data->delayLine +delayIdx); //sampleOut;
+
+    if (data->feedbackFunction != 0)
+    {
+        sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData,audioStatePtr);
+    }
+    sampleFedBack *= data->feedback;
+
+    *(data->delayLine + data->delayLinePtr) = sampleFedBack;
+    data->delayLinePtr++;
+    data->delayLinePtr &= (data->delayBufferLength -1);
     return sampleOut;
 }
 
@@ -59,18 +80,6 @@ float getDelayedSample(DelayDataType*data)
     return sampleOut;
 }
 
-__ITCM_CODE
-float * getDelayMemoryPointer(uint8_t delayLineType)
-{
-    if (delayLineType == DELAY_LINE_TYPE_SDRAM)
-    {
-        return (float*)delayLineSdram;
-    }
-    else 
-    {
-        return (float*)delayLineRam;
-    }
-}
 
 
 __ITCM_CODE
@@ -79,18 +88,5 @@ void addSampleToDelayline(float sampleIn,DelayDataType*data)
     *(data->delayLine + data->delayLinePtr) = sampleIn;
     data->delayLinePtr++;
     data->delayLinePtr &= (data->delayBufferLength -1);
-}
-
-__QSPI_CODE
-void clearDelayLine()
-{
-    for (uint32_t c=0;c<DELAY_LINE_SDRAM_LENGTH;c++)
-    {
-        delayLineSdram[c]=0.0f;
-    }
-    for (uint32_t c=0;c<DELAY_LINE_RAM_LENGTH;c++)
-    {
-        delayLineRam[c]=0.0f;
-    }
 }
 

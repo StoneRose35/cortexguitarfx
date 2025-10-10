@@ -12,12 +12,14 @@ MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
 CC=arm-none-eabi-gcc
+CPP=arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
 OPT=-Og
 DEFINES=-DDEBUG -DSTM32 -DSTM32F7 -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc -I./Inc/gen
-LARGS=     -g -nostdlib -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
+CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -Wall -Wno-error=narrowing -I./Inc -I./Inc/gen
+LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lstdc++ -lm -Wl,--end-group
 #LARGS_QSPI=-g -nostdlib -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT)_qspi.map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary --remove-section=.qspi* --remove-section=.dtcm*
@@ -28,27 +30,30 @@ all: out/$(PROJECT).dfu
 	@rm out/*.o
 
 STM32H750_OBJS := $(patsubst Src/stm32h750/%.c,out/%.o,$(wildcard Src/stm32h750/*.c))
+STM32H750_OBJS_CPP := $(patsubst Src/stm32h750/%.cpp,out/%.o,$(wildcard Src/stm32h750/*.cpp))
 COMMON_OBJS := $(patsubst Src/common/%.c,out/%.o,$(wildcard Src/common/*.c))
+COMMON_OBJS_CPP := $(patsubst Src/common/%.cpp,out/%.o,$(wildcard Src/common/*.cpp))
 AUDIO_OBJS := $(patsubst Src/common/audio/%.c,out/%.o,$(wildcard Src/common/audio/*.c))
-AUDIO_FX_OBJS := $(patsubst Src/pipicofx/%.c,out/%.o,$(wildcard Src/pipicofx/*.c))
-UI_OBJS := $(patsubst Src/pipicofx/ui/%.c,out/%.o,$(wildcard Src/pipicofx/ui/*.c))
-GRAPHICS_OBJS := $(patsubst Src/common/graphics/%.c,out/%.o,$(wildcard Src/common/graphics/*.c))
 MATH_OBJS := $(patsubst Src/common/math/%.c,out/%.o,$(wildcard Src/common/math/*.c))
+AUDIO_FX_OBJS := $(patsubst Src/pipicofx/%.c,out/%.o,$(wildcard Src/pipicofx/*.c))
+AUDIO_FX_OBJS_CPP := $(patsubst Src/pipicofx/%.cpp,out/%.o,$(wildcard Src/pipicofx/*.cpp))
+AUDIO_FX_UI_OBJS_CPP := $(patsubst Src/pipicofx/ui/%.cpp,out/%.o,$(wildcard Src/pipicofx/ui/*.cpp))
+GRAPHICS_OBJS := $(patsubst Src/common/graphics/%.c,out/%.o,$(wildcard Src/common/graphics/*.c))
+APPS_OBJS := $(patsubst Src/apps/%.c,out/%.o,$(wildcard Src/apps/*.c))
 SERVICES_OBJS := $(patsubst Src/services/%.c,out/%.o,$(wildcard Src/services/*.c))
 USB_OBJS := $(patsubst Src/common/usb/%.c,out/%.o,$(wildcard Src/common/usb/*.c))
 ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 
-all_stm32h750: $(STM32H750_OBJS)
+all_stm32h750: $(STM32H750_OBJS) $(STM32H750_OBJS_CPP)
 all_common: $(COMMON_OBJS)
-all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS)
+all_common_cpp: $(COMMON_OBJS_CPP)
+all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS) $(AUDIO_FX_UI_OBJS_CPP)
+all_audio_cpp: $(AUDIO_FX_OBJS_CPP)
 all_graphics: $(GRAPHICS_OBJS)
-all_ui: $(UI_OBJS)
-all_neopixel: $(NEOPIXEL_OBJS)
-all_sdcard: $(SDCARD_OBJS)
-all_apps: $(APPS_OBJS)
 all_services: $(SERVICES_OBJS)
 all_usb: $(USB_OBJS)
+all_apps: $(APPS_OBJS)
 all_images: $(ASSET_IMAGES)
 all_math: $(MATH_OBJS)
 
@@ -65,9 +70,6 @@ Inc/gen:
 out:
 	mkdir ./out
 
-Inc/gen/compilationInfo.h: Inc/gen
-	echo "const char * COMPILATIONINFO=\"compiled on " `date` " using \\\\r\\\\n " `arm-none-eabi-gcc --version | sed -z 's/\n/\\\\\\\\r\\\\\\\\n/g'` "\";" > Inc/gen/compilationInfo.h
-
 # generate the startup file
 out/stm32h750_startup.o: Startup/startup_stm32h750ibkx.s out 
 	$(CC) $(CARGS) -c  $< -o ./out/stm32h750_startup.o
@@ -75,29 +77,45 @@ out/stm32h750_startup.o: Startup/startup_stm32h750ibkx.s out
 out/helpers.o: Src/stm32h750/helpers.s out	
 	$(CC) $(CARGS) -c  $< -o ./out/helpers.o
 
-# stm32h750-specific libraries
-out/%.o: Src/stm32h750/%.c $(ASSET_IMAGES) out
+# common libs
+out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
-# common libs
-out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/compilationInfo.h out
-	$(CC) $(CARGS) $(OPT) -c $< -o $@
+# common c++ libs
+out/%.o: Src/common/%.cpp $(ASSET_IMAGES) Inc/gen/version.h out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # audio libs
 out/%.o: Src/common/audio/%.c $(ASSET_IMAGES) out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
+# math libs
+out/%.o: Src/common/math/%.c $(ASSET_IMAGES) out
+	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+# audio fx libs, c++
+out/%.o: Src/pipicofx/%.cpp $(ASSET_IMAGES) out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
+
 # audio fx libs
 out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+# audio fx ui libs
+out/%.o: Src/pipicofx/ui/%.cpp $(ASSET_IMAGES) Inc/gen/version.h out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # graphics libs
 out/%.o: Src/common/graphics/%.c $(ASSET_IMAGES) out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
-#ui elements
-out/%.o: Src/pipicofx/ui/%.c $(ASSET_IMAGES) Inc/gen/version.h out
+# stm32h750-specific libs
+out/%.o: Src/stm32h750/%.c $(ASSET_IMAGES) out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+# stm32h750-specific libs, c++
+out/%.o: Src/stm32h750/%.cpp $(ASSET_IMAGES) out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # application layer
 out/%.o: Src/apps/%.c $(ASSET_IMAGES) out
@@ -107,17 +125,13 @@ out/%.o: Src/apps/%.c $(ASSET_IMAGES) out
 out/%.o: Src/services/%.c $(ASSET_IMAGES) out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
-# math layer
-out/%.o: Src/common/math/%.c $(ASSET_IMAGES) out
-	$(CC) $(CARGS) $(OPT) -c $< -o $@
-
 # usb layer
 out/%.o: Src/common/usb/%.c $(ASSET_IMAGES) out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # image assets
 Inc/images/%.h: Assets/%.png out
-	./tools/helper_scripts.py -convertImg $^
+	python3 ./tools/helper_scripts.py -convertBwImg $<
 
 # qspi uploader tool
 tools/qspi_uart_uploader:
@@ -136,8 +150,8 @@ Inc/gen/version.h: Inc/gen
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # main linking and generating flashable content
-out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_apps all_audio all_graphics all_math all_ui all_usb $(ASSET_IMAGES)
-	$(CC) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
+out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_common_cpp all_audio all_audio_cpp all_graphics all_math all_usb $(ASSET_IMAGES)
+	$(CPP) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
 
 out/$(PROJECT).bin: out/$(PROJECT).elf

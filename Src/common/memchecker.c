@@ -1,6 +1,6 @@
 #include "uart.h"
 #include "stringFunctions.h"
-#include "audio/delay.h"
+#include "pipicofx/delayMemoryHandler.h"
 
 
 
@@ -10,7 +10,7 @@ void writeandCheck(uint32_t testVal,uint16_t readTimes)
     char ncBfr[32];
     uint16_t clen;
     uint32_t val;
-    uint32_t * memPtr = (uint32_t*)getDelayMemoryPointer(DELAY_LINE_TYPE_SDRAM);
+    uint32_t * memPtr = (uint32_t*)0xC0001000;
     clen = copyToString(charBfr,"Initializing SDRAM with ");
     UInt32ToChar(testVal,ncBfr);
     appendToString(charBfr,ncBfr);
@@ -59,7 +59,7 @@ void writeandCheckAscending(uint16_t readTimes)
     char ncBfr[32];
     uint16_t clen;
     uint32_t val;
-    uint32_t * memPtr = (uint32_t*)getDelayMemoryPointer(DELAY_LINE_TYPE_SDRAM);
+    uint32_t * memPtr = (uint32_t*)0xC0001000;
     clen = copyToString(charBfr,"write and read ascending sequence");
     clen = appendToString(charBfr," \r\n");
     sendBlocking((uint8_t*)charBfr,clen);
@@ -106,7 +106,7 @@ void writeandCheckDescending(uint16_t readTimes)
     char ncBfr[32];
     uint16_t clen;
     uint32_t val;
-    uint32_t * memPtr = (uint32_t*)getDelayMemoryPointer(DELAY_LINE_TYPE_SDRAM);
+    uint32_t * memPtr = (uint32_t*)0xC0001000;
     clen = copyToString(charBfr,"write and read descending sequence");
     clen = appendToString(charBfr," \r\n");
     sendBlocking((uint8_t*)charBfr,clen);

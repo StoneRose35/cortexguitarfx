@@ -36,4 +36,6 @@ float clip(float sample,volatile uint32_t*audioStatePtr);
 
 volatile uint32_t * getAudioStatePtr(); 
 
+typedef float(*AudioProcessorFunc)(float,void*,volatile uint32_t*); 
+
 #endif

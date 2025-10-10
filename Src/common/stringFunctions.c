@@ -20,7 +20,78 @@
  * @param percentVal the value to convert
  * @param out the character array holding the converted string, must be initialized and of length 8 minimum
  */
+__QSPI_CODE
+void decimalUInt16ToChar(uint16_t nr,char * out,uint8_t decimalPlace)
+{
+	uint16_t pos=10000;
+	uint16_t cntr=0,charpos=0;
+	uint16_t firstDigit = 0;
+	uint16_t interm_nr;
+	uint8_t c2;
+	if (nr==0)
+	{
+		out[charpos++]=0x30;
+	}
+	else
+	{
+		interm_nr = nr;
+		while (pos > 0)
+		{
+			cntr=0;
+			while (interm_nr >= pos)
+			{
+				interm_nr -= pos;
+				cntr++;
+			}
+			if (cntr > 0 || firstDigit > 0)
+			{
+				out[charpos++] = cntr + 0x30;
+				firstDigit = 1;
+			}
+			pos /= 10;
+		}
+	}
+	out[charpos]=0;
 
+	// have to add least one zero before the decimal separator
+	if(charpos <= decimalPlace)
+	{
+		// shift digits back
+		c2=charpos;
+		for(int8_t c=charpos;c>=0;c--)
+		{
+			out[c2+(decimalPlace-charpos)+2] = out[c2];
+			c2--;
+		}
+
+		// fill with zeros
+		for(uint8_t c=0;c<(decimalPlace-charpos)+2;c++)
+		{
+			if (c==1)
+			{
+				out[c] = '.';
+			}
+			else
+			{
+				out[c] = '0';
+			}
+		}
+	}
+	else
+	{
+		// shift one position back
+		c2=charpos;
+		for(uint8_t c=0;c<decimalPlace+1;c++)
+		{
+			out[c2+1] = out[c2];
+			c2--;
+		}
+		// put in decimal separator
+		out[charpos-decimalPlace]='.';
+	}
+
+}
+__QSPI_CODE
 void toPercentChar(float percentVal,char * out)
 {
 	uint32_t ival = (uint32_t)(percentVal*100000.0);
@@ -44,7 +115,7 @@ void toPercentChar(float percentVal,char * out)
 	out[str_len+1] = 0;
 }
 
-
+__QSPI_CODE
 void fixedPointInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals)
 {
 	uint32_t fracBase=1;
@@ -101,7 +172,7 @@ void fixedPointInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals)
 }
 
 
-
+__QSPI_CODE
 void fixedPointUInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals)
 {
 	uint32_t fracBase=1;
@@ -153,7 +224,7 @@ void fixedPointUInt16ToChar(char * str,uint16_t nr,uint8_t fracDecimals)
  * @param nr the number to convert
  * @param out the character array,must be initialized and of length 4 minimum
  */
-
+__QSPI_CODE
 void UInt8ToChar(uint8_t nr, char * out)
 {
 	uint8_t pos=100;
@@ -191,6 +262,7 @@ void UInt8ToChar(uint8_t nr, char * out)
  * @param out the character array,must be initialized and of length 6 minimum
  */
 
+ __QSPI_CODE
 void UInt16ToChar(uint16_t nr, char * out)
 {
 	uint16_t pos=10000;
@@ -221,7 +293,7 @@ void UInt16ToChar(uint16_t nr, char * out)
 	out[charpos]=0;
 }
 
-
+__QSPI_CODE
 uint16_t decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 {
 	uint16_t pos=10000;
@@ -343,7 +415,8 @@ uint16_t decimalInt16ToChar(int16_t nr,char * out,uint8_t decimalPlace)
 	return charpos+1;
 }
 
-__attribute__((section (".qspi_code")))
+
+__QSPI_CODE
 void Int16ToChar(int16_t nr, char * out)
 {
 	uint16_t pos=10000;
@@ -392,6 +465,7 @@ void Int16ToChar(int16_t nr, char * out)
  * @param out the character array,must be initialized and of length 11 minimum
  */
 
+ __QSPI_CODE
 void UInt32ToChar(uint32_t nr, char * out)
 {
 	uint32_t pos=1000000000;
@@ -429,6 +503,7 @@ void UInt32ToChar(uint32_t nr, char * out)
  * @param nrbfr the buffer to hold the string representation, must be at least 11 chars in size
  */
 
+ __QSPI_CODE
 void UInt32ToHex(uint32_t val,char* nrbfr)
 {
 	uint32_t cval = val;
@@ -473,6 +548,7 @@ void UInt32ToHex(uint32_t val,char* nrbfr)
  * @param nr the array containing the string representation of the integer number, note the extra space must be allocated
  */
 
+ __QSPI_CODE
 void fillWithLeadingZeros(uint8_t minlength,char * nr)
 {
 	uint8_t nrlen=0;
@@ -522,6 +598,7 @@ uint8_t startsWith(char* ptrn,const char* target)
  * @param str 
  */
 
+__QSPI_CODE
 void toUpper(char * str,char endchar)
 {
 	uint16_t c=0;
@@ -547,6 +624,7 @@ void toUpper(char * str,char endchar)
  * @return the string as a uint8_t
  */
 
+ __QSPI_CODE
 uint8_t toUInt8(char * chr)
 {
 	uint8_t res=0;
@@ -567,6 +645,7 @@ uint8_t toUInt8(char * chr)
  * @return the string as a uint32_t
  */
 
+ __QSPI_CODE
 uint32_t toUInt32(char * chr)
 {
 	uint32_t res=0;
@@ -586,7 +665,7 @@ uint32_t toUInt32(char * chr)
  * @param chr the string convert
  * @return the string as a int16_t
  */
-
+__QSPI_CODE
 int16_t toInt16(char * chr)
 {
 	int16_t res=0;
@@ -610,7 +689,7 @@ int16_t toInt16(char * chr)
 	return res;
 }
 
-
+__QSPI_CODE
 int16_t toUInt16(char * chr)
 {
 	uint16_t res=0;
@@ -632,6 +711,7 @@ int16_t toUInt16(char * chr)
  * @param out the content within the brackets
  */
 
+ __QSPI_CODE
 void getBracketContent(const char* input,char * out)
 {
 	uint8_t cnt=0,bcnt=0;
@@ -675,6 +755,7 @@ void getBracketContent(const char* input,char * out)
  * @param input the string for which the whitespace should be removed, note that the operation happens in-place and that the character after the terminating 0 are not zeroed
  */
 
+ __QSPI_CODE
 void stripWhitespaces(char * input)
 {
 
@@ -706,6 +787,7 @@ void stripWhitespaces(char * input)
  * @return the length of the array, 0 if no range has been input
  */
 
+ __QSPI_CODE
 uint8_t expandRange(char * stringinput,uint8_t ** result)
 {
 	char nr[4];
@@ -744,7 +826,7 @@ uint8_t expandRange(char * stringinput,uint8_t ** result)
 	return len;
 }
 
-
+__QSPI_CODE
 void timeToString(char * bfr,uint8_t h,uint8_t m,uint8_t s)
 {
 
@@ -787,6 +869,7 @@ void timeToString(char * bfr,uint8_t h,uint8_t m,uint8_t s)
     *(bfr + strPos) = 0;
 }
 
+__QSPI_CODE
 void dateToString(char * bfr, uint16_t y,uint8_t month, uint8_t d)
 {
 	uint8_t strPos=0;
@@ -823,6 +906,7 @@ void dateToString(char * bfr, uint16_t y,uint8_t month, uint8_t d)
     *(bfr + strPos) = 0;
 }
 
+__QSPI_CODE
 void dateTimeToString(char * out,uint16_t year,uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t seconds)
 {
 	char bfr[12];
@@ -845,7 +929,7 @@ void dateTimeToString(char * out,uint16_t year,uint8_t month,uint8_t day,uint8_t
      *(out + strPos) = 0;
 }
 
-
+__QSPI_CODE
 uint16_t copyToString(char * dest,const char * src)
 {
     dest[0]=0;
@@ -860,6 +944,7 @@ uint16_t copyToString(char * dest,const char * src)
  * @return uint16_t 
  */
 
+ __QSPI_CODE
 uint16_t appendToString(char * appendee,const char *  appender)
 {
 	uint16_t c=0,c2=0;
@@ -875,7 +960,7 @@ uint16_t appendToString(char * appendee,const char *  appender)
 	return c;
 }
 
-
+__QSPI_CODE
 uint16_t appendToStringUntil(char * appendee,const char *  appender,uint8_t maxLen)
 {
 	uint16_t c=0,c2=0;

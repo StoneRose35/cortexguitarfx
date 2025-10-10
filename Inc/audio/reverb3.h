@@ -6,7 +6,7 @@
 
 #define REV3_MODULATOR_STATE_RISING 0
 #define REV3_MODULATOR_STATE_FALLING 1
-
+#define DIFFUSOR_SIZE 2048
 typedef struct 
 {
     HadamardDiffuserType diffusers[8];

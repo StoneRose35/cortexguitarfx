@@ -1,6 +1,7 @@
 #include "audio/simpleChorus.h"
 #include "audio/delay.h"
 #include "memoryRegions.h"
+#include "pipicofx/delayMemoryHandler.h"
 
 /** set frequency in Hz/100 */
 __QSPI_CODE
@@ -12,9 +13,9 @@ void simpleChorusSetFrequency(uint16_t freq,SimpleChorusType*data)
 
 
 __QSPI_CODE
-void initSimpleChorus(SimpleChorusType*data,float*delayMemoryPointer)
+void initSimpleChorus(SimpleChorusType*data)
 {
-    data->delayBuffer = delayMemoryPointer;
+    data->delayBuffer = mallocDelayMemory(2048<<2);
     for(uint16_t c=0;c<SIMPLE_CHORUS_DELAY_SIZE;c++)
     {
         data->delayBuffer[c]=0.0f;

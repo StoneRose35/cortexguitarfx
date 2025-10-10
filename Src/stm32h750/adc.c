@@ -1,4 +1,4 @@
-#include "adc.h"
+#include "drivers/adc.h"
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
 #include "system.h"

@@ -27,4 +27,6 @@ uint16_t getChannel0Value();
 uint16_t getChannel1Value();
 uint16_t getChannel2Value();
 
+void restartAdc();
+
 #endif

@@ -1,6 +1,7 @@
 #ifndef _FIR_FILTER_H_
 #define _FIR_FILTER_H_
 #include <stdint.h>
+#include "memoryRegions.h"
 typedef struct 
 {
     const float coefficients[64];

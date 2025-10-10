@@ -4,7 +4,7 @@
 __QSPI_CODE
 void initBitcrusher(BitCrusherDataType*data)
 {
-    data->bitmask= ~(0x7FFFFF);
+    data->bitmask= 0xFFFFFF;
 }
 
 __ITCM_CODE
@@ -16,7 +16,7 @@ void setBitMask(uint8_t resolution,BitCrusherDataType*data)
         data->bitmask <<=1;
         data->bitmask += 1;
     }
-    data->bitmask = ~(data->bitmask);
+    data->bitmask = ~(data->bitmask) | 0xFF800000;
 }
 
 __ITCM_CODE
