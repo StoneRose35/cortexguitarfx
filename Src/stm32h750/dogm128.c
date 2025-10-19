@@ -181,8 +181,8 @@ void initDisplay()
     waitSysticks(5);
     
     dogm128SendCommand(0x40);// set startline 0
-    dogm128SendCommand(0xA1);// ADC reverse, set A0 to flip display
-    dogm128SendCommand(0xC0); //Normal COM0-COM63, set C8 to reverse display
+    dogm128SendCommand(DOGM128_ADC_REVERSE);// ADC reverse, set A0 to flip display, set A1 for normal
+    dogm128SendCommand(DOGM128_COM_DIRECTION); //Normal COM0-COM63, set C8 to reverse display, set C0 for standard
     dogm128SendCommand(0xA6); //display normal
     dogm128SendCommand(0xA2); // set bias 1/9 (Duty 1/65)
     dogm128SendCommand(0x2F); // Booster, regulator and follower on 

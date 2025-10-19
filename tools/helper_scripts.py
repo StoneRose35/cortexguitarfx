@@ -39,7 +39,8 @@ __QSPI_DATA
 static const struct BwImageStructConst {0}_streamimg = {{
     .data = {0}_bwdata,
     .sx = {2},
-    .sy = {3}
+    .sy = {3},
+    .type = {5}
 }};
 #endif
 """
@@ -118,19 +119,53 @@ def imageToBWCStream(fname="Rheinisch-Kaltblut-Gespann.png",outfolder=""):
     c = 0
     rownr_old=0
     nrows = int(img.shape[0]/8)
-    pixeldata = np.zeros(int(img.shape[0]/8)*img.shape[1],dtype="uint8")
+    pixeldata = np.zeros(int(np.ceil(img.shape[0]/8))*img.shape[1],dtype="uint8")
     for row in range(img.shape[0]):
         rownr = int(np.floor(c/8))
         bwbits = list(map(el_to_bw_pixels, img[row]))
 
         bitpos = c - rownr*8
-        for p in range(img.shape[1]):
-            idx = p*nrows + rownr
-            pixeldata[idx] |= (bwbits[p] << bitpos)
+        ncolumns = img.shape[1]
+        for p in range(ncolumns):
+            bitval = el_to_bw_pixels(img[row][p])
+            idx = p + rownr*ncolumns #p*nrows + rownr
+            pixeldata[idx] |= (bitval << bitpos)
         c += 1
     for el in pixeldata:
         bytearray += hex(el) + ", "
-    fcontent = c_template_bw.format(imgname, bytearray, int(img.shape[1]), int(img.shape[0]),imgname.upper())
+    fcontent = c_template_bw.format(imgname, bytearray, int(img.shape[1]), int(img.shape[0]),imgname.upper(),"BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES")
+    fp.write(fcontent)
+    fp.close()
+
+def imageToBWXYPixelCStream(fname="Rheinisch-Kaltblut-Gespann.png", outfolder=""):
+    img = mpimg.imread(fname)
+    imgname = fname.split(os.path.sep)[-1].split(".")[0]
+    if (len(outfolder) > 0):
+        headername = os.path.join(outfolder, imgname + ".h")
+    else:
+        headername =  imgname + ".h"
+    if not os.path.exists(headername):
+        openmode = "at"
+    else:
+        openmode = "wt"
+    fp = open(headername, openmode)
+    bytearray = ""
+    idx = 0
+    bitpos = 0
+    pixeldata = np.zeros(int(np.ceil(img.shape[0]*img.shape[1])/8),dtype="uint8")
+    for row in range(img.shape[0]):
+        ncolumns = img.shape[1]
+        for p in range(ncolumns):
+            bitval = el_to_bw_pixels(img[row][p])
+            pixeldata[idx] |= (bitval << bitpos)
+            bitpos += 1
+            if bitpos > 7:
+                idx += 1
+                bitpos = 0
+            
+    for el in pixeldata:
+        bytearray += hex(el) + ", "
+    fcontent = c_template_bw.format(imgname, bytearray, int(img.shape[1]), int(img.shape[0]),imgname.upper(),"BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES")
     fp.write(fcontent)
     fp.close()
 
@@ -166,67 +201,6 @@ def fontImageToArray(fname="sm_ascii_16x16.png", sizex=16, sizey=16, offsetx=0, 
 
 
 
-def oscillator_freq_calc():
-        # computed the possible division factors for the pll
-    f_xosc = 12000000.
-
-    f_ws2818 = 800000.
-
-    mult_pio = 10
-    pio0_fact = 1
-
-    feedbck = 1
-    postdiv1 = 1
-    postdiv2 = 1
-
-    f_sys = f_xosc
-    params_array = []
-    bestparams = None
-    while f_sys < 133000000:
-        f_sys = f_ws2818 * mult_pio * pio0_fact
-        if f_sys > f_xosc:
-            postdiv1 = 1
-            postdiv2 = 1
-            while postdiv1 < 8:
-                postdiv2 = 1
-                while postdiv2 < 8:
-                    if f_sys*postdiv1*postdiv2 > 400000000 and f_sys*postdiv1*postdiv2 < 1600000000:
-                        f_vco = f_sys*postdiv1*postdiv2
-                        feedbk_f = f_vco / f_xosc
-                        feedbk = math.floor(feedbk_f)
-                        f_vco_appr = feedbk * f_xosc
-                        f_sys_approx = f_vco_appr/postdiv1/postdiv2
-                        f_ws2812_approx = f_sys_approx/mult_pio/pio0_fact
-                        f_ws2812_err = math.fabs(f_sys - f_ws2812_approx)
-                        params = {"feedbk": feedbk, "pio_clock": pio0_fact, "postdiv1": postdiv1,
-                                  "postdiv2": postdiv2, "f_vco": f_vco_appr,"f_sys": f_vco_appr/postdiv1/postdiv2,
-                                  "f_ws2812": f_ws2812_approx,
-                                  "f_ws_2812_err": f_ws2812_err}
-                        print("Feedback Multiplier: {}".format(params["feedbk"]))
-                        print("PIO0 Clock Divider: {}".format(params["pio_clock"]))
-                        print("Post Divider 1: {}".format(params["postdiv1"]))
-                        print("Post Divider 2: {}".format(params["postdiv2"]))
-                        print("VCO Frequency: {}".format(params["f_vco"]))
-                        print("System Frequency: {}".format(params["f_sys"]))
-                        print("ws2812 Frequency: {}".format(params["f_ws2812"]))
-                        print("")
-                        if bestparams is None:
-                            bestparams = params
-                        elif bestparams["f_ws_2812_err"] > params["f_ws_2812_err"]:
-                            bestparams = params
-                        params_array.append(params)
-                    postdiv2 += 1
-                postdiv1 += 1
-        pio0_fact += 1
-    print("\n\n\nBest Parameter Set")
-    print("Feedback Multiplier: {}".format(bestparams["feedbk"]))
-    print("PIO0 Clock Divider: {}".format(bestparams["pio_clock"]))
-    print("Post Divider 1: {}".format(bestparams["postdiv1"]))
-    print("Post Divider 2: {}".format(bestparams["postdiv2"]))
-    print("VCO Frequency: {}".format(bestparams["f_vco"]))
-    print("System Frequency: {}".format(bestparams["f_sys"]))
-    print("ws2812 Frequency: {}".format(bestparams["f_ws2812"]))
-
 
 
 
@@ -236,17 +210,15 @@ if __name__ == "__main__":
     image_inc_path = "Inc/images"
     font_inc_path = "Inc/fonts"
     parser = argparse.ArgumentParser()
-    parser.add_argument("-calcSysFreqs",help="calculate oscillator frequencies",action="store_true")
     parser.add_argument("-generateAssets",help="generate images and font asset headers",action="store_true")
     parser.add_argument("-convertImg",help="convert specific image to c header as 16bit color image (for ST7735)")
     parser.add_argument("-convertBwImg",help="convert specific image to c header as black/white image (for SSD1306)")
+    parser.add_argument("-convertBwXYPixel",help="convert specific image to c header as black/white image useable with the bwgraphics lib")
 
     args = parser.parse_args()
-    if args.calcSysFreqs is False and args.generateAssets is False and args.convertImg is None and args.convertBwImg is None:
+    if args.generateAssets is False and args.convertImg is None and args.convertBwImg is None and args.convertBwXYPixel is None:
         parser.print_help()
     else:
-        if args.calcSysFreqs is True:
-            oscillator_freq_calc()
         if args.generateAssets is True:
             dircontent = os.listdir(asset_path)
             for el in dircontent:
@@ -264,6 +236,10 @@ if __name__ == "__main__":
             full_path = args.convertBwImg # os.path.join(asset_path,args.convertImg)
             if os.path.isfile(full_path) and full_path.lower().endswith("png"):
                 imageToBWCStream(full_path, image_inc_path)
+        elif args.convertBwXYPixel is not None:
+            full_path = args.convertBwXYPixel # os.path.join(asset_path,args.convertImg)
+            if os.path.isfile(full_path) and full_path.lower().endswith("png"):
+                imageToBWXYPixelCStream(full_path, image_inc_path)
 
 
 

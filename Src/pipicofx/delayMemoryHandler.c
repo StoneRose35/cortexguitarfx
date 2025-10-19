@@ -6,7 +6,7 @@
 
 // TODO: handle SDRAM and RAM delay memories properly
 
-volatile int16_t delayMemory[DELAY_LINE_RAM_LENGTH];
+volatile float delayMemory[DELAY_LINE_RAM_LENGTH];
 
 static volatile uint8_t takenDelayMemoryBlocksCnt;
 static volatile ptr globalStart;

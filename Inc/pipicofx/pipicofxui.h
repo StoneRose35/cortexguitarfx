@@ -27,7 +27,9 @@ typedef struct
     uint8_t editViaRotary : 1;
 } PiPicoFxUiType;
 
-
+#ifdef __cplusplus 
+extern "C" {
+#endif
 typedef struct 
 {
     uint32_t pressedTimestamp;
@@ -74,6 +76,13 @@ void onCreate(PiPicoFxUiType*data);
 BwImageType * getImageBuffer();
 
 
+uint8_t uiStackPush(PiPicoFxUiType* piPicoUiController,uint8_t val);
+uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController);
+uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController);
+#ifdef __cplusplus
+}
+#endif
+
 void piPicoFxUiSetup(PiPicoFxUiType*);
 void enterLevel0(PiPicoFxUiType*data);
 void enterLevel1(PiPicoFxUiType*data);
@@ -82,9 +91,5 @@ void enterLevel3(PiPicoFxUiType*data);
 void enterLevel4(PiPicoFxUiType*data);
 void enterLevel5(PiPicoFxUiType*data);
 void enterLevel6(PiPicoFxUiType*data);
-
-uint8_t uiStackPush(PiPicoFxUiType* piPicoUiController,uint8_t val);
-uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController);
-uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController);
-
+void enterLevel7(PiPicoFxUiType*data);
 #endif
