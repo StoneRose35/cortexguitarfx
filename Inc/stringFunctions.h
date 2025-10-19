@@ -4,7 +4,7 @@
  *  Created on: 20.09.2021
  *      Author: philipp
  */
-#include "systemChoice.h"
+
 #ifndef STRINGFUNCTIONS_H_
 #define STRINGFUNCTIONS_H_
 

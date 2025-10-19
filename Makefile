@@ -16,7 +16,7 @@ CPP=arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
 OPT=-Og
-DEFINES=-DDEBUG -DSTM32 -DSTM32F7 -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
+DEFINES=-DDEBUG -DHARDWARE -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc -I./Inc/gen
 CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -Wall -Wno-error=narrowing -I./Inc -I./Inc/gen
 LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lstdc++ -lm -Wl,--end-group
@@ -78,55 +78,55 @@ out/helpers.o: Src/stm32h750/helpers.s out
 	$(CC) $(CARGS) -c  $< -o ./out/helpers.o
 
 # common libs
-out/%.o: Src/common/%.c $(ASSET_IMAGES) Inc/gen/version.h out
+out/%.o: Src/common/%.c  Inc/gen/version.h out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # common c++ libs
-out/%.o: Src/common/%.cpp $(ASSET_IMAGES) Inc/gen/version.h out
+out/%.o: Src/common/%.cpp Inc/gen/version.h out
 	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # audio libs
-out/%.o: Src/common/audio/%.c $(ASSET_IMAGES) out
+out/%.o: Src/common/audio/%.c  out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # math libs
-out/%.o: Src/common/math/%.c $(ASSET_IMAGES) out
+out/%.o: Src/common/math/%.c  out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio fx libs, c++
-out/%.o: Src/pipicofx/%.cpp $(ASSET_IMAGES) out
+out/%.o: Src/pipicofx/%.cpp  out
 	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # audio fx libs
-out/%.o: Src/pipicofx/%.c $(ASSET_IMAGES) out
+out/%.o: Src/pipicofx/%.c  out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio fx ui libs
-out/%.o: Src/pipicofx/ui/%.cpp $(ASSET_IMAGES) Inc/gen/version.h out
+out/%.o: Src/pipicofx/ui/%.cpp Inc/gen/version.h out
 	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # graphics libs
-out/%.o: Src/common/graphics/%.c $(ASSET_IMAGES) out
+out/%.o: Src/common/graphics/%.c  out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # stm32h750-specific libs
-out/%.o: Src/stm32h750/%.c $(ASSET_IMAGES) out
+out/%.o: Src/stm32h750/%.c  out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # stm32h750-specific libs, c++
-out/%.o: Src/stm32h750/%.cpp $(ASSET_IMAGES) out
+out/%.o: Src/stm32h750/%.cpp  out
 	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # application layer
-out/%.o: Src/apps/%.c $(ASSET_IMAGES) out
+out/%.o: Src/apps/%.c  out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # services layer
-out/%.o: Src/services/%.c $(ASSET_IMAGES) out
+out/%.o: Src/services/%.c out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # usb layer
-out/%.o: Src/common/usb/%.c $(ASSET_IMAGES) out
+out/%.o: Src/common/usb/%.c out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # image assets
@@ -150,7 +150,7 @@ Inc/gen/version.h: Inc/gen
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # main linking and generating flashable content
-out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_common_cpp all_audio all_audio_cpp all_graphics all_math all_usb $(ASSET_IMAGES)
+out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_common_cpp all_audio all_audio_cpp all_graphics all_math all_usb 
 	$(CPP) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
 
