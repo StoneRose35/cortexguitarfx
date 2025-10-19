@@ -6,11 +6,8 @@
 #define FXPROGRAM_NAME_MAXLEN 24
 #define FXPROGRAM_MAX_PARAMETERS 8
 using namespace PiPicoFX;
-#ifndef FLOAT_AUDIO
-typedef int16_t(*processSampleCallback)(int16_t,void*);
-#else
 typedef float(*processSampleCallback)(float,void*);
-#endif
+
 typedef void(*paramChangeCallback)(uint16_t,void*);
 typedef void(*setupCallback)(void*);
 typedef void(*resetCallback)(void*);

@@ -11,7 +11,6 @@
 #define SYSTEM_H_
 
 #include <stdint.h>
-#include "systemChoice.h"
 
 
 #ifdef HARDWARE

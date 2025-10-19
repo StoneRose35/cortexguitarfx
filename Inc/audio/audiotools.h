@@ -12,7 +12,7 @@
 
 #include "stdint.h"
 
-#ifdef STM32
+
 inline float clip(float sample,volatile uint32_t*audioStatePtr)
 {
     if (sample > 0.999999881f)
@@ -30,9 +30,7 @@ inline float clip(float sample,volatile uint32_t*audioStatePtr)
         return sample;
     }
 }
-#else
-float clip(float sample,volatile uint32_t*audioStatePtr);
-#endif
+
 
 volatile uint32_t * getAudioStatePtr(); 
 

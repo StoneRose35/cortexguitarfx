@@ -5,7 +5,6 @@
  *      Author: philipp
  */
 
-#include "systemChoice.h"
 
 #ifdef HARDWARE
 #ifndef UART_H_
@@ -18,7 +17,7 @@
 #define BAUD_RATE 57600
 
 
-#ifdef STM32
+
 typedef volatile uint32_t reg;
 typedef struct
 {
@@ -41,7 +40,7 @@ typedef struct
 
 #define UART1 ((UartTypeDef*)0x40013800UL)
 #define UART2 ((UartTypeDef*)0x40004400UL)
-#endif
+
 
 /**
  * @brief initialize the main uart with a given baud rate

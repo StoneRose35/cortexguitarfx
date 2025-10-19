@@ -4,7 +4,7 @@
  *  Created on: Oct 26, 2021
  *      Author: philipp
  */
-#ifdef STM32
+
 #ifndef CORE_H_
 #define CORE_H_
 #include <stdint.h>
@@ -14,4 +14,3 @@
 void enableFpu();
 
 #endif /* CORE_H_ */
-#endif

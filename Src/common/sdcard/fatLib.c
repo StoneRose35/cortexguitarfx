@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "systemChoice.h"
 #include "fatLib.h"
 #include "stringFunctions.h"
 #include "systick.h"

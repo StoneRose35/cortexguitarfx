@@ -4,7 +4,7 @@
 
 static volatile uint32_t audioState=0;
 
-#ifndef STM32
+#ifndef HARDWARE
 float clip(float sample,volatile uint32_t*audioStatePtr)
 {
     if (sample > 1.0f)

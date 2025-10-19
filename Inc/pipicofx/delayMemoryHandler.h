@@ -2,10 +2,10 @@
 #define _DELAY_MEMORY_HANDLER_H_
 #include "stdint.h"
 #define DELAY_LINE_SDRAM_LENGTH (1<<23)
-#define DELAY_LINE_RAM_LENGTH (1<<17)
+#define DELAY_LINE_RAM_LENGTH (1<<16 )
 #define MAX_DELAY_SINGLEBUFFER (1<<15)
 
-#ifdef STM32
+#ifdef HARDWARE
 typedef uint32_t ptr;
 #else
 typedef uint64_t ptr;

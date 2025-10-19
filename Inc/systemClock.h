@@ -7,7 +7,6 @@
 #ifndef SYSTEMCLOCK_H_
 #define SYSTEMCLOCK_H_
 
-#include "systemChoice.h"
 #include <stdint.h>
 #ifdef HARDWARE
 

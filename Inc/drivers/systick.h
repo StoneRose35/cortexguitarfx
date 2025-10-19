@@ -1,7 +1,6 @@
 #ifndef _SYSTICK_
 #define _SYSTICK_
 
-#include "systemChoice.h"
 #include <stdint.h>
 #ifdef HARDWARE
 

@@ -9,7 +9,6 @@
  * @copyright Copyright (c) 2021
  * 
  */
-#include "systemChoice.h"
 
 #ifndef BUFFEREDINPUTSTRUCTS_H_
 #define BUFFEREDINPUTSTRUCTS_H_

@@ -1,6 +1,5 @@
 #ifndef _UTIL_COMMANDS_H_
 #define UTIL_COMMANDS_H_
-#include "systemChoice.h"
 
 #ifdef HARDWARE
 register void* address __asm__("sp");
