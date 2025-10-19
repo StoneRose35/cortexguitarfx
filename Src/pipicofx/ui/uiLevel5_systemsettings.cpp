@@ -39,7 +39,7 @@ static void create(PiPicoFxUiType*data)
     #ifdef WM8731_CODEC
     regbfr = wm8731GetInputState();
     #endif
-    #ifdef PCM3060_CODEC
+    #ifdef PCM3060_CODEC_EXTERNAL
     regbfr = pcm3060GetInputState();
     #endif
     if (regbfr & 0x2)
@@ -78,7 +78,7 @@ static void create(PiPicoFxUiType*data)
     #ifdef WM8731_CODEC
     currentVolume = wm8731GetOutputVolume();
     #endif
-    #ifdef PCM3060_CODEC
+    #ifdef PCM3060_CODEC_EXTERNAL
     currentVolume = pcm3060GetOutputVolume();
     #endif
     drawOval(10.f,10.f,100.f,32.f,img);
@@ -265,7 +265,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 #ifdef WM8731_CODEC
                 regbfr = wm8731GetInputState();
                 #endif
-                #ifdef PCM3060_CODEC
+                #ifdef PCM3060_CODEC_EXTERNAL
                 regbfr = pcm3060GetInputState();
                 #endif
                 if ((regbfr & 0x2) != 0 && encoderDelta < 0) // switch off, was on
@@ -276,7 +276,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef WM8731_CODEC
                     wm8731SetInputState(WM8731_CHANNEL_B,0);
                     #endif
-                    #ifdef PCM3060_CODEC
+                    #ifdef PCM3060_CODEC_EXTERNAL
                     pcm3060SetInputState(PCM3060_CHANNEL_LEFT,0);
                     #endif
                     drawImage(16,20,&toggleswitch_off_streamimg,img);
@@ -289,7 +289,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef WM8731_CODEC
                     wm8731SetInputState(WM8731_CHANNEL_B,1);
                     #endif
-                    #ifdef PCM3060_CODEC
+                    #ifdef PCM3060_CODEC_EXTERNAL
                     pcm3060SetInputState(PCM3060_CHANNEL_LEFT,1);
                     #endif
                     drawImage(16,20,&toggleswitch_on_streamimg,img);
@@ -302,7 +302,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 #ifdef WM8731_CODEC
                 regbfr = wm8731GetInputState();
                 #endif
-                #ifdef PCM3060_CODEC
+                #ifdef PCM3060_CODEC_EXTERNAL
                 regbfr = pcm3060GetInputState();
                 #endif
                 if ((regbfr & 0x1) != 0 && encoderDelta < 0) // switch off, was on
@@ -313,7 +313,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef WM8731_CODEC
                     wm8731SetInputState(WM8731_CHANNEL_A,0);
                     #endif
-                    #ifdef PCM3060_CODEC
+                    #ifdef PCM3060_CODEC_EXTERNAL
                     pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,0);
                     #endif
                     drawImage(47,20,&toggleswitch_off_streamimg,img);
@@ -326,7 +326,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef WM8731_CODEC
                     wm8731SetInputState(WM8731_CHANNEL_A,1);
                     #endif
-                    #ifdef PCM3060_CODEC
+                    #ifdef PCM3060_CODEC_EXTERNAL
                     pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,1);
                     #endif
                     drawImage(47,20,&toggleswitch_on_streamimg,img);
@@ -339,7 +339,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 #ifdef WM8731_CODEC
                 currentVolume = wm8731GetOutputVolume();
                 #endif
-                #ifdef PCM3060_CODEC
+                #ifdef PCM3060_CODEC_EXTERNAL
                 currentVolume = pcm3060GetOutputVolume();
                 #endif
                 currentVolume &= 0xFF;
@@ -376,7 +376,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 #ifdef WM8731_CODEC
                 wm8731SetOutputVolume(CS4270_CHANNEL_BOTH,(uint8_t)currentVolume);
                 #endif
-                #ifdef PCM3060_CODEC
+                #ifdef PCM3060_CODEC_EXTERNAL
                 pcm3060SetOutputVolume(PCM3060_CHANNEL_BOTH,(uint8_t)currentVolume);
                 #endif
                 break;
