@@ -27,7 +27,7 @@ extern float avgInOld, avgOutOld;
 volatile uint32_t audioState=0;
 volatile uint16_t audioTransferState=0;
 
-__QSPI_CODE
+__ITCM_CODE
 void DMA1_Stream0_IRQHandler(void) // adc
 {
     if ((DMA1->LISR & DMA_LISR_TCIF0) != 0) // receiver transfer complete
@@ -47,9 +47,11 @@ void DMA1_Stream0_IRQHandler(void) // adc
     {
         // jump to audio processing
         processAudioBuffers();
+        audioTransferState=0;
     }
-    else
+    else if (audioTransferState > 2)
     {
+        audioState |= (1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
         return;
     }
 
@@ -71,12 +73,18 @@ void DMA1_Stream0_IRQHandler(void) // adc
     {
         // jump to audio processing
         processAudioBuffers();
+        audioTransferState=0;
+    }
+    else if (audioTransferState > 2)
+    {
+        audioState |= (1 << AUDIO_STATE_BUFFER_UNDERRUN);
+        return;
+        //audioTransferState=0;
     }
     else
     {
         return;
     }
-    
 
 }
 
