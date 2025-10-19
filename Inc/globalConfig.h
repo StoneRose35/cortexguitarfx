@@ -11,7 +11,7 @@
 //#define INTERNAL_CODEC 
 #define EXTERNAL_CODEC
 //#define WM8731_CODEC
-#define PCM3060_CODEC
+#define PCM3060_CODEC_EXTERNAL
 
 
 #define USB_VENDOR_ID 0x4A37
@@ -22,7 +22,7 @@
 
 #define DFU_SIM
 
-
+//#define FORCE_TEST_MODE
 
 
 
@@ -42,8 +42,17 @@
 #define HORIZONTAL_FLIP
 #endif
 
+#ifdef DOGM128_DISPLAY
+#define VERTICAL_FLIP
+#define HORIZONTAL_FLIP
+#endif
+
 #if !defined EXTERNAL_CODEC && !defined INTERNAL_CODEC
     #error "define either EXTERNAL_CODED or INTERNAL_CODEC"
 #endif 
+
+#if defined PCM3060_CODEC_EXTERNAL || defined PCM3060_CODEC_INTERNAL
+#define PCM3060_CODEC
+#endif
 
 #endif

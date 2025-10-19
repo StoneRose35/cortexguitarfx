@@ -6,7 +6,7 @@
 #include "drivers/systick.h"
 
 static uint32_t oldtickenc,oldtickswitch;
-static volatile uint32_t encoderLastVal=0;
+static volatile uint32_t encoderLastVal;
 static volatile uint32_t currentUsVal;
 static volatile uint32_t lastUsVal;
 static volatile uint8_t switchVal;
@@ -14,11 +14,12 @@ static volatile uint8_t switchPins[8];
 static volatile uint8_t switchVals[8]; // bit 0: sticky bit set when button is pressed (chage from 0 to 1), bit 1: sticky bit set when button is released, bit 2: momentary value
 static volatile uint32_t oldTickSwitches[8];
 static volatile uint8_t lastTrigger;
+static volatile uint8_t nSwitches;
 
 void processExternalInterrupt()
 {
     GPIO_TypeDef * gpio;
-    for (uint8_t c=0;c<8;c++)
+    for (uint8_t c=0;c<nSwitches;c++)
     {
         if ((EXTI->PR1 & (1 << (switchPins[c] & 0xF)))!= 0)
         {
@@ -39,10 +40,12 @@ void processExternalInterrupt()
             EXTI->PR1 = (1 << (switchPins[c] & 0xF));
         }
     }
+    #ifdef CS4270_CODEC
     if ((EXTI->PR1 & (1 << (POWERSENSE_PIN & 0xF)))!= 0)
     {
         cs4270PowerDown();
     }
+    #endif
 }
 
 
@@ -175,8 +178,9 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     //TIM3->CNT = 0x7FFF;
     TIM3->ARR = 0xFFFF;
     TIM3->CNT = 0x7FFF;
+    encoderLastVal = 0x7FFF;
     TIM3->CR1 |= (1 << TIM_CR1_CEN_Pos);
-
+    nSwitches = nswitches;
     for (uint8_t c=0;c< nswitches;c++)
     {
         port = pins[c] >> 4;
@@ -204,7 +208,9 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         switchVals[c]=0;
         enableExternalInterrupt(pins[c]);
     }
+    
 
+    #ifdef CS4270_CODEC
     port = POWERSENSE_PIN >> 4;
     RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
@@ -226,6 +232,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     EXTI->IMR1 |= (1 << (POWERSENSE_PIN & 0xF));
     EXTI->FTSR1 |= (1 << (POWERSENSE_PIN & 0xF));
     enableExternalInterrupt(POWERSENSE_PIN);
+    #endif
     
     oldtickenc=getTickValue();
     oldtickswitch=getTickValue();

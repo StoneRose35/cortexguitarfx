@@ -52,9 +52,14 @@
 
 #define PCM3060_DEEMPHASIS (1*16 + 11) // PB11
 
+#ifdef CS4270_CODEC
 #define POWERSENSE_PIN (2*16 + 9) //PC9
 #define CLIPPING_LED_INPUT (2*16 + 10) //PC10
 #define CLIPPING_LED_OUTPUT (2*16 + 11) //PC11
+#else
+#define CLIPPING_LED_INPUT (2*16 + 10) //PC10
+#define CLIPPING_LED_OUTPUT (2*16 + 9) //PC9
+#endif
 
 //ssd1306 display interfaced using spi
 #define DISPLAY_SCK (6*16+11) // PG11

@@ -12,7 +12,7 @@ extern "C" {
 #include "globalConfig.h"
 #include "memoryRegions.h"
 
-#ifdef INTERNAL_CODEC
+#ifdef INTERNAL_CODEC //could be wm8731, cs4270 or pcm3060
 
 static int32_t i2sDoubleBuffer[AUDIO_BUFFER_SIZE*2*2];
 #ifdef I2S_INPUT
@@ -29,13 +29,13 @@ volatile uint16_t audioTransferState=0;
 
 
 __ITCM_CODE
-#ifdef PCM3060_CODEC
+#ifdef PCM3060_CODEC_INTERNAL
 void DMA1_Stream1_IRQHandler(void) // adc
 #else
 void DMA1_Stream0_IRQHandler(void) // adc
 #endif
 {
-    #ifdef PCM3060_CODEC
+    #ifdef PCM3060_CODEC_INTERNAL
     if ((DMA1->LISR & DMA_LISR_TCIF1) != 0) // receiver transfer complete
     {
         dbfrInputPtr = AUDIO_BUFFER_SIZE*2;
@@ -176,7 +176,7 @@ void initSAI()
 
 
     // configure sai1 
-    #ifdef PCM3060_CODEC
+    #ifdef PCM3060_CODEC_INTERNAL
     // block a is master transmitter, block b is slave receiver
     SAI1_Block_A->CR1 = (6 << SAI_xCR1_DS_Pos) // 24 bit data size
                     | (0 << SAI_xCR1_MODE_Pos) // master transmitter
@@ -311,7 +311,7 @@ void initSAI()
 
 void enableAudioEngine()
 {
-    #ifdef PCM3060_CODEC
+    #ifdef PCM3060_CODEC_INTERNAL
     NVIC_EnableIRQ(DMA1_Stream1_IRQn);
     #else
     NVIC_EnableIRQ(DMA1_Stream0_IRQn);
@@ -320,7 +320,7 @@ void enableAudioEngine()
 }
 void disableAudioEngine()
 {   
-    #ifdef PCM3060_CODEC
+    #ifdef PCM3060_CODEC_INTERNAL
     NVIC_DisableIRQ(DMA1_Stream1_IRQn);
     #else
     NVIC_DisableIRQ(DMA1_Stream0_IRQn);

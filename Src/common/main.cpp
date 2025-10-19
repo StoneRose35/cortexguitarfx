@@ -1,6 +1,4 @@
 
-#include "systemChoice.h"
-
 #ifdef HARDWARE
 
 extern "C" {
@@ -96,7 +94,7 @@ volatile uint8_t programToInitialize;
 // 2: fade out
 // 3: in bypass / change in progress
 // 4: fade in
-volatile uint8_t programChangeState;
+volatile uint8_t programChangeState=0;
 volatile uint8_t stompSwitchState;
 #endif
 
@@ -144,8 +142,14 @@ int main(void)
 
 	initAdc();
     initTimer();
-	#ifndef PCM3060_CODEC
+    #ifdef WM8731_CODEC
     initI2c(WM8731_ADDRESS,STOMPSWITCHES_I2C_ADDRESS); // 26 for wm8731, 72 for cs4270, none for pcm3060 (first argument)
+    #endif
+    #ifdef CS4270_CODEC
+    initI2c(CS4270_I2C_ADDRESS,STOMPSWITCHES_I2C_ADDRESS); // 26 for wm8731, 72 for cs4270, none for pcm3060 (first argument)
+    #endif
+	#ifdef PCM3060_CODEC_EXTERNAL // TODO: still init i2c
+    initI2c(0,STOMPSWITCHES_I2C_ADDRESS); // 26 for wm8731, 72 for cs4270, none for pcm3060 (first argument)
     #endif
 
 	//Initialise Component-specific drivers
@@ -208,8 +212,8 @@ int main(void)
 		enterLevel0(&piPicoUiController);
 	#else
 	    // switch on program "off"
-		piPicoUiController.currentProgramIdx = 2;
-		piPicoUiController.currentProgram=loadProgram(piPicoUiController.currentProgramIdx);
+		//piPicoUiController.currentProgramIdx = 2;
+		//piPicoUiController.currentProgram=loadProgram(piPicoUiController.currentProgramIdx);
 	    enterLevel7(&piPicoUiController);
 	#endif
     
@@ -408,6 +412,8 @@ int main(void)
             {
                 delete piPicoUiController.currentProgram;
                 piPicoUiController.currentProgram = loadProgram(programToInitialize);
+                piPicoUiController.currentParameterIdx = 0;
+                piPicoUiController.currentParameter = piPicoUiController.currentProgram->getParameter(piPicoUiController.currentParameterIdx);
                 if (piPicoUiController.currentProgram != nullptr)
                 {
                     onCreate(&piPicoUiController);

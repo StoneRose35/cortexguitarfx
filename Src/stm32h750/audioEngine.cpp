@@ -46,7 +46,7 @@ void processAudioBuffers(void)
                              ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
         #else
 
-            #ifdef PCM3060_CODEC
+            #ifdef PCM3060_CODEC_INTERNAL
             inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c + 1)) << 8) >> 8);
             #else
             inputSampleInt = ((int32_t)(((uint32_t)*(audioBufferInputPtr + c)) << 8) >> 8);
