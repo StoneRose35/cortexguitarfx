@@ -4,7 +4,7 @@ extern "C" {
 #include "audio/gainstage.h"
 #include "pipicofx/delayMemoryHandler.h"
 #include "memoryRegions.h"
-__QSPI_CODE
+
 float analogDelayFeedbackFunction(float sampleIn,void*fbkFilterData,volatile uint32_t*audioStatePtr)
 {
     FirstOrderIirType* tData = (FirstOrderIirType*)fbkFilterData;
@@ -14,7 +14,7 @@ float analogDelayFeedbackFunction(float sampleIn,void*fbkFilterData,volatile uin
 
 using namespace PiPicoFX;
 
-__ITCM_CODE
+
 float AmpModel::AmpModel::processSample(float sampleIn)
 {
     float out;
@@ -41,7 +41,7 @@ float AmpModel::AmpModel::processSample(float sampleIn)
 
 
 
-__QSPI_CODE
+
 void AmpModel::Param1::parameterCallback(uint16_t val) // highpass cutoff before the nonlinear stage
 {
     float fval;
@@ -51,7 +51,7 @@ void AmpModel::Param1::parameterCallback(uint16_t val) // highpass cutoff before
     rawValue=val;
 }
 
-__QSPI_CODE
+
 void AmpModel::Param1::parameterDisplay(char* chrbfr)
 {
     uint32_t dval;
@@ -59,7 +59,7 @@ void AmpModel::Param1::parameterDisplay(char* chrbfr)
     Int16ToChar(dval,chrbfr);
 }
 
-__QSPI_CODE
+
 void AmpModel::Param2::parameterCallback(uint16_t val) // number of waveshaper (more means more distortion)
 {
     // map 0-4095 to 1-8
@@ -69,13 +69,13 @@ void AmpModel::Param2::parameterCallback(uint16_t val) // number of waveshaper (
     pData->nWaveshapers = val;
 }
 
-__QSPI_CODE
+
 void AmpModel::Param2::parameterDisplay(char* res)
 {
     UInt8ToChar(pData->nWaveshapers,res);
 };
 
-__QSPI_CODE
+
 void AmpModel::Param3::parameterCallback(uint16_t val)// delay intensity
 {
     
@@ -84,7 +84,7 @@ void AmpModel::Param3::parameterCallback(uint16_t val)// delay intensity
     pData->delay.feedback = 0.25f;
     rawValue=val;
 }
-__QSPI_CODE
+
 void AmpModel::Param3::parameterDisplay(char* res)
 {
     int16_t dVal;
@@ -93,13 +93,13 @@ void AmpModel::Param3::parameterDisplay(char* res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
+
 void AmpModel::Param4::parameterCallback(uint16_t val)
 {
     pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
 };
 
-__QSPI_CODE
+
 void AmpModel::Param4::parameterDisplay(char* res)
 {
     int16_t dVal;
@@ -108,13 +108,13 @@ void AmpModel::Param4::parameterDisplay(char* res)
     appendToString(res,"%");
 };
 
-__QSPI_CODE
+
 AmpModel::AmpModel::~AmpModel()
 {
     freeDelayMemory(this->delay.delayLine);
 }
 
-__QSPI_CODE
+
 void AmpModel::AmpModel::setup()
 {
     initfirFilter(&filter3);
