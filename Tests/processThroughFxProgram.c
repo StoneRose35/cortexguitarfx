@@ -11,11 +11,8 @@
 #define FX_PROGRAM_PARAM1_VAL 200 // amp model 2: gain 
 #define FX_PROGRAM_PARAM2_VAL 3800 // 
 #define FX_PROGRAM_PARAM3_VAL 520 // 
-#ifndef FLOAT_AUDIO
-#define TAIL_TIME 48000
-#else
 #define TAIL_TIME (48000*3)
-#endif
+
 
 void zeroString(char*data,int16_t len)
 {

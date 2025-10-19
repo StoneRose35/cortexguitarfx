@@ -33,7 +33,6 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
         *((uint8_t*)data->data+2) = 2;
     }
     drawImage(*((uint8_t*)data->data+2),40,&testing_streamimg,imgBuffer);
-    DisplayWriteFramebufferAsync(imgBuffer->data);
 }
 
 static void enterCallback(PiPicoFxUiType*data) 

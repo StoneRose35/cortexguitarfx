@@ -1,8 +1,12 @@
 
-#include "pipicofx/delayMemoryHandler.h"
 #include "stdint.h"
+extern "C" {
+#include "pipicofx/delayMemoryHandler.h"
+
 #include "stm32h750/helpers.h"
 #include "pipicofx/fxPrograms.h"
+}
+
 #include "pipicofx/FxProgramLoader.hpp"
 
 using namespace PiPicoFX;
