@@ -2,6 +2,9 @@
 #include "drivers/systick.h"
 #include "drivers/i2c.h"
 #include "stdlib.h"
+#include "memoryRegions.h"
+
+__QSPI_CODE
 uint8_t eeprom24s128WritePage(uint32_t address,uint16_t len, uint8_t* data)
 {
     uint8_t * sendBfr;
@@ -27,6 +30,7 @@ uint8_t eeprom24s128WritePage(uint32_t address,uint16_t len, uint8_t* data)
     return 0;
 }
 
+__QSPI_CODE
 uint8_t eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data)
 {
     uint16_t addrCnt=startAdress;
@@ -63,6 +67,7 @@ uint8_t eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data
     return 0;
 }
 
+__QSPI_CODE
 uint8_t eeprom24lc128ReadArray(uint32_t startAdress,uint16_t len,uint8_t* data)
 {
     uint8_t sendBfr[2];
@@ -81,6 +86,7 @@ uint8_t eeprom24lc128ReadArray(uint32_t startAdress,uint16_t len,uint8_t* data)
     return 0;
 }
 
+__QSPI_CODE
 void eeprom24lc128WaitUntilAvailable()
 {
     uint8_t sendBfr[1]={0};

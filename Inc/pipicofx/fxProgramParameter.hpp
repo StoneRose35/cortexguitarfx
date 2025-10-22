@@ -1,6 +1,7 @@
 #ifndef _FXPROGRAMPARAMETER_HPP_
 #define _FXPROGRAMPARAMETER_HPP_
 #include "stdint.h"
+#include "memoryRegions.h"
 namespace PiPicoFX {
 
     class FxProgram;

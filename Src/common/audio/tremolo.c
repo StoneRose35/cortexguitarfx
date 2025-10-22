@@ -4,7 +4,9 @@
 #include "drivers/adc.h"
 #include "stdlib.h"
 #include "stdio.h"
+#include "memoryRegions.h"
 
+__ITCM_CODE
 float tremoloProcessSample(float sample,TremoloType*data)
 {
     int16_t currentAmpValue;
@@ -22,6 +24,7 @@ float tremoloProcessSample(float sample,TremoloType*data)
     return (sample*((float)currentAmpValue)/32768.0f);
 }
 
+__QSPI_CODE
 void initTremolo(TremoloType*data)
 {
     data->depth = 0;

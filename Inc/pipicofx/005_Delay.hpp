@@ -15,7 +15,7 @@ namespace PiPicoFX {
         class Delay : public FxProgram
         {
             public:
-                Delay() : FxProgram(4,"Delay",MAX_DELAY_SINGLEBUFFER<<2){
+                Delay() : FxProgram(4,"Delay",DELAY_LINE_RAM_LENGTH<<2){
                     this->setup();
                 };
                 float processSample(float);

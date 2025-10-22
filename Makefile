@@ -22,8 +22,8 @@ CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloa
 LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lstdc++ -lm -Wl,--end-group
 #LARGS_QSPI=-g -nostdlib -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT)_qspi.map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
-CPYARGS=-Obinary --remove-section=.qspi* --remove-section=.dtcm*
-CPYARGS_QSPIBIN=-Obinary --only-section=.qspi* --only-section=.dtcm*
+CPYARGS=-Obinary  --remove-section=.qspi* --remove-section=.dtcm* 
+CPYARGS_QSPIBIN=-Obinary  --only-section=.qspi* --only-section=.dtcm* 
 DEBUGGER_UART=/dev/ttyACM0
 
 all: out/$(PROJECT).dfu

@@ -38,8 +38,9 @@ bne nop_wait_l1
 pop {r1}
 bx lr
 
-.section .RamFunc.convolve
+.section .qspi_itcm_code.convolve
 // computes the sum of the products of two float vectors
+// the vectors must be 64 elements in size
 // a[0]*b[0] + a[1]*b[1] + a[2]*b[2] .... 
 // r0: pointer to coefficients, r1: pointer to data, r2: pointer offset
 .global convolve

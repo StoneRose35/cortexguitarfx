@@ -35,11 +35,11 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-//_estack = ORIGIN(RAM_D1) + LENGTH(RAM_D1);    /* end of RAM */
+/*_estack = ORIGIN(RAM_D1) + LENGTH(RAM_D1);    /* end of RAM */
 _estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM); /* end of ITCM RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x8000 ;      /* required amount of heap  */
-_Min_Stack_Size = 0x8000 ; /* required amount of stack */
+_Min_Stack_Size = 0x4000 ; /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
@@ -64,6 +64,26 @@ SECTIONS
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
   } >FLASH
+
+_siqspicode = LOADADDR(.qspi_code);
+
+  .qspi_code :
+  {
+    . = ALIGN(4);
+		_sqspi_code = .;
+
+		PROVIDE(__qspi_code_start = _sqspi_code);
+    *(.text.*PiPicoFX*)
+    *(.text.*PiPicoFxUi*)
+		*(.qspi_code)
+		*(.qspi_code*)
+    *(.qspi_fast_data)
+		*(.qspi_fast_data*)
+		. = ALIGN(4);
+		_eqspi_code = .;
+
+		PROVIDE(__qspi_code_end = _eqspi_code);
+  } > RAM_D2 AT> QSPIFLASH
 
   /* The program code and other data goes into FLASH */
   .text :
@@ -91,7 +111,9 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
+  .ARM.extab   : { 
+    *(.ARM.extab* .gnu.linkonce.armextab.*) 
+  } >FLASH
   .ARM : {
     __exidx_start = .;
     *(.ARM.exidx*)
@@ -221,23 +243,22 @@ SECTIONS
   } > QSPIFLASH
   . = ALIGN(4);
 
-  _siqspicode = LOADADDR(.qspi_code);
-  
-  .qspi_code :
+
+
+
+  .qspi_slow_code :
   {
     . = ALIGN(4);
-		_sqspi_code = .;
+		_sqspi_slow_code = .;
 
-		PROVIDE(__qspi_code_start = _sqspi_code);
-		*(.qspi_code)
-		*(.qspi_code*)
-    *(.qspi_fast_data)
-		*(.qspi_fast_data*)
+		PROVIDE(__qspi_slow_code_start = _sqspi_slow_code);
+		*(.qspi_slow_code)
+		*(.qspi_slow_code*)
 		. = ALIGN(4);
-		_eqspi_code = .;
+		_eqspi_slow_code = .;
 
-		PROVIDE(__qspi_code_end = _eqspi_code);
-  } > RAM_D1 AT> QSPIFLASH
+		PROVIDE(__qspi_slow_code_end = _eqspi_slow_code);
+  } > QSPIFLASH
 
   _siitcmcode = LOADADDR(.qspi_itcm_code);
 

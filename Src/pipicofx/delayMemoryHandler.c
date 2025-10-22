@@ -17,14 +17,14 @@ static delayMemoryBlockType takenDelayMemoryBlocks[32];
 void setStart(ptr strt)
 {
     globalStart = strt;
-    globalEnd = strt + DELAY_LINE_RAM_LENGTH;
+    globalEnd = strt + (DELAY_LINE_RAM_LENGTH<<2);
 }
 
 void initDelayMemoryHandler(void)
 {
     takenDelayMemoryBlocksCnt = 0;
     globalStart = (ptr)delayMemory;
-    globalEnd = globalStart + (DELAY_LINE_RAM_LENGTH<<1);
+    globalEnd = globalStart + (DELAY_LINE_RAM_LENGTH<<2);
 }
 
 float * mallocDelayMemory(ptr size)

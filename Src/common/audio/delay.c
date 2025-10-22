@@ -7,7 +7,7 @@
 __QSPI_CODE
 void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
 {
-    data->delayLine = (float*)memoryPointer;
+    data->delayLine = memoryPointer;
     data->delayBufferLength = bufferLength;
     for (uint32_t c=0;c<bufferLength;c++)
     {
