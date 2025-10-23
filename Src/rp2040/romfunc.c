@@ -32,7 +32,8 @@ void initFloatFunctions()
     _f2i = (f_f2i_conv)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x1c));
 }
 
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
 void * getRomFunction(char c1,char c2)
 {
     void * fct;
@@ -54,6 +55,7 @@ void * getRomData(char c1,char c2)
     fct = rom_table_lookup((uint16_t*)(void*)(uint32_t)*((uint16_t*)0x16),code);
     return fct;
 }
+#pragma GCC diagnostic pop
 
 
 void flash_range_erase(uint32_t addr, uint32_t count, uint32_t block_size, uint8_t block_cmd)

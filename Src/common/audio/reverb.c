@@ -97,7 +97,7 @@ const char * getReverbParameterSetName(ReverbType*reverbData)
 int16_t getFeedback(uint8_t delayLineIndex,int16_t tau,uint8_t paramNr)
 {
     int16_t feedbackVal=0;
-    for(uint8_t c=0;c<4;c++)
+    for(uint8_t c=0;c<3;c++)
     {
         if (reverbParameterSet[paramNr].taus[c] < tau && reverbParameterSet[paramNr].taus[c+1] > tau)
         {
