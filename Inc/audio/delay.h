@@ -1,7 +1,14 @@
 #ifndef _DELAY_H_
 #define _DELAY_H_
 #include <stdint.h>
+#include "preprocessorHelpers.h"
+#define MAX_DELAY_SINGLEBUFFER 65536
 
+
+
+#if IS_NOT_POWER_OF_2(MAX_DELAY_SINGLEBUFFER)
+#error maximum delay of a single buffer must be a power of two
+#endif
 #include "audiotools.h"
 
 typedef struct 
