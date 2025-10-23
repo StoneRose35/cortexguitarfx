@@ -54,7 +54,7 @@ namespace PiPicoFX {
         class Param2:  public FxProgramParameter
         {
             public:
-                Param2(Tremolo* p) :FxProgramParameter(0,"Depth")
+                Param2(Tremolo* p) :FxProgramParameter(1,"Depth")
                 {
                     rawValue = 0;
                     increment = 1;

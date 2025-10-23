@@ -4,7 +4,7 @@
 #include "fastExpLog.h"
 #include "ln.h"
 #include "uart.h"
-
+/*
 #define SPEEDTEST_N_ITERATION_FOR_LOG 100000
 #define SPEEDTEST_FOR_LOG_INCREMENT 0.01f
 #define SPEEDTEST_FOR_LIN_INCREMENT 0.1f
@@ -98,3 +98,4 @@ float testSpeed()
     }
     return unusedResult;
 }
+*/

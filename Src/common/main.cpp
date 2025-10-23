@@ -132,7 +132,6 @@ int main(void)
 	 * */
     setupClock();
 	initSystickTimer();
-	initDatetimeClock();
 	initUart(2000000);
 	initDMA();
     initFmcSdram();
@@ -168,14 +167,14 @@ int main(void)
     }
 
     // start memchecker if exit is pressed during startup
-    currentSwitchVal = getMomentarySwitchValue(1);
-    if ((currentSwitchVal & 0x01)==1)
-    {
-        while (1)
-        {
-            testSpeed();
-        }
-    }
+    //currentSwitchVal = getMomentarySwitchValue(1);
+    //if ((currentSwitchVal & 0x01)==1)
+    //{
+    //    while (1)
+    //    {
+    //        testSpeed();
+    //    }
+    //}
 
 	#ifdef PCM3060_CODEC
     setupPCM3060();
@@ -416,14 +415,13 @@ int main(void)
                 piPicoUiController.currentParameter = piPicoUiController.currentProgram->getParameter(piPicoUiController.currentParameterIdx);
                 if (piPicoUiController.currentProgram != nullptr)
                 {
-                    onCreate(&piPicoUiController);
                     if (currentPreset != 0xFF)
                     {
                         applyPreset(presets+currentPreset,piPicoUiController.currentProgram);
                     }
-                    
                     programChangeState = 4;
                 }
+                onCreate(&piPicoUiController);
             }
             else
             {
