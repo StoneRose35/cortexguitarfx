@@ -23,7 +23,7 @@ namespace PiPicoFX {
         class AmpModelHighGain : public FxProgram
         {
             public:
-                AmpModelHighGain() : FxProgram(6,"Amp High Gain",DELAY_LINE_RAM_LENGTH<<2){
+                AmpModelHighGain() : FxProgram(6,"Amp High Gain",MAX_DELAY_SINGLEBUFFER<<2){
                     this->setup();
                 };
                 ~AmpModelHighGain();
