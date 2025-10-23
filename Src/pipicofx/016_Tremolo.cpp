@@ -74,8 +74,8 @@ void Tremolo::Param4::parameterDisplay(char*res)
 }
 void Tremolo::Param5::parameterCallback(uint16_t val)
 {
-    this->pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val; 
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
 void Tremolo::Param5::parameterDisplay(char*res)

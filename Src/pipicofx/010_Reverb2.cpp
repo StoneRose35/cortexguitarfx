@@ -15,41 +15,35 @@ float Reverb2::Reverb2::processSample(float sampleIn)
     return reverb2ProcessSample(sampleIn,&this->reverb);
 }
 
-__QSPI_CODE
 void Reverb2::Param1::parameterCallback(uint16_t val) // reverb time
 {
     pData->reverb.decay = (float)val/4095.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void Reverb2::Param1::parameterDisplay(char*res)
 {
     Int16ToChar((int16_t)(pData->reverb.decay*100.0f), res);
 }
 
-__QSPI_CODE
 void Reverb2::Param2::parameterCallback(uint16_t val) // Mix
 {
     pData->reverb.mix=val/4095.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void Reverb2::Param2::parameterDisplay(char*res)
 {
     Int16ToChar((int16_t)(pData->reverb.mix*100.0f),res);
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void Reverb2::Param3::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val;
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void Reverb2::Param3::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -58,16 +52,14 @@ void Reverb2::Param3::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void Reverb2::Reverb2::setup()
 {
-    initReverb2(&this->reverb,mallocDelayMemory(24576<<1));
+    initReverb2(&this->reverb,mallocDelayMemory(24576<<2));
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
 }
 
-__QSPI_CODE
 Reverb2::Reverb2::~Reverb2()
 {
     freeDelayMemory(this->reverb.aps[0].delayLineIn);

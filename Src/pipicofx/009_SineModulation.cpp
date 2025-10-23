@@ -15,7 +15,6 @@ float SineModulation::SineModulation::processSample(float sampleIn)
     return sineChorusInterpolatedProcessSample(sampleIn,&this->sineChorus);
 }
 
-__QSPI_CODE
 void SineModulation::Param1::parameterCallback(uint16_t val) // frequency
 {
     // map 0 - 4095 to 1 1000
@@ -24,14 +23,12 @@ void SineModulation::Param1::parameterCallback(uint16_t val) // frequency
     sineChorusSetFrequency(val,&pData->sineChorus);
 }
 
-__QSPI_CODE
 void SineModulation::Param1::parameterDisplay(char*res)
 {
     decimalInt16ToChar(pData->sineChorus.frequency,res,2);
     appendToString(res," Hz");
 }
 
-__QSPI_CODE
 void SineModulation::Param2::parameterCallback(uint16_t val) // depth
 {
     rawValue = val;
@@ -40,7 +37,6 @@ void SineModulation::Param2::parameterCallback(uint16_t val) // depth
     pData->sineChorus.depth = (uint8_t)val;
 }
 
-__QSPI_CODE
 void SineModulation::Param2::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -48,14 +44,12 @@ void SineModulation::Param2::parameterDisplay(char*res)
     Int16ToChar(dVal,res);
 }
 
-__QSPI_CODE
 void SineModulation::Param3::parameterCallback(uint16_t val) // mix
 {
     pData->sineChorus.mix = ((float)val)/4095.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void SineModulation::Param3::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -64,14 +58,12 @@ void SineModulation::Param3::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void SineModulation::Param4::parameterCallback(uint16_t val)
 {
     rawValue = val;
     pData->sineChorus.offset = 49 + (val >> 1);
 }
 
-__QSPI_CODE
 void SineModulation::Param4::parameterDisplay(char*res)
 {
     uint16_t msValue;
@@ -80,28 +72,24 @@ void SineModulation::Param4::parameterDisplay(char*res)
     appendToString(res, " ms");
 }
 
-__QSPI_CODE
 void SineModulation::Param5::parameterCallback(uint16_t val)
 {
     pData->sineChorus.feedback = val/4095.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void SineModulation::Param5::parameterDisplay(char*res)
 {
     Int16ToChar((int16_t)(pData->sineChorus.feedback*100.0f),res);
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void SineModulation::Param6::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val;
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void SineModulation::Param6::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -110,7 +98,6 @@ void SineModulation::Param6::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void SineModulation::SineModulation::setup()
 {
     initSineChorus(&this->sineChorus,mallocDelayMemory(SINE_CHORUS_DELAY_SIZE<<2));

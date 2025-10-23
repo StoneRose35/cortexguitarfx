@@ -14,7 +14,6 @@ float Eq::Eq::processSample(float sampleIn)
     return threeBandEqProcessSample(sampleIn,&this->eq);
 }
 
-__QSPI_CODE
 void Eq::Eq::setup()
 {
     initThreeBandEq(&this->eq);
@@ -32,54 +31,45 @@ void fxProgramReset(void*data)
     threeBandEqReset(&pData->eq);   
 }*/
 
-
-__QSPI_CODE
 void Eq::Param1::parameterCallback(uint16_t val) // low
 {
     pData->eq.lowFactor = (float)val/512.0f-1.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void Eq::Param1::parameterDisplay(char*res)
 {
     decimalInt16ToChar((int16_t)(pData->eq.lowFactor*100.f),res,2);
 }
 
-__QSPI_CODE
 void Eq::Param2::parameterCallback(uint16_t val) // mid
 {
     pData->eq.midFactor = (float)val/512.0f-1.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void Eq::Param2::parameterDisplay(char*res)
 {
     decimalInt16ToChar((int16_t)(pData->eq.midFactor*100.f),res,2);
 }
 
-__QSPI_CODE
 void Eq::Param3::parameterCallback(uint16_t val) // high
 {
     pData->eq.highFactor = (float)val/512.0f-1.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void Eq::Param3::parameterDisplay(char*res)
 {
     decimalInt16ToChar((int16_t)(pData->eq.highFactor*100.f),res,2);
 }
 
-__QSPI_CODE
 void Eq::Param4::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val;
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void Eq::Param4::parameterDisplay(char*res)
 {
     int16_t dVal;

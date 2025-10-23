@@ -6,7 +6,7 @@ extern "C" {
 }
 using namespace PiPicoFX;
 
-
+__ITCM_CODE
 float Off::Off::processSample(float sampleIn)
 {
     return gainStageProcessSample(sampleIn,&presetVolume);
@@ -15,8 +15,8 @@ float Off::Off::processSample(float sampleIn)
 
 void Off::Param1::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val;
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
 

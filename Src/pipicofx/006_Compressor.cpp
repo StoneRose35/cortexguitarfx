@@ -28,21 +28,18 @@ __ITCM_CODE
     return sampleIn;
 }
 
-__QSPI_CODE
  void Compressor::Param1::parameterCallback(uint16_t val) 
 {
     pData->compressor.gainFunction.threshhold = -60.0f + (float)val/4095.f*60.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
  void Compressor::Param1::parameterDisplay(char*res)
 {
     decimalInt16ToChar((int16_t)(pData->compressor.gainFunction.threshhold*10.0f),res,1);
     appendToString(res," dB");
 }
 
-__QSPI_CODE
  void Compressor::Param2::parameterCallback(uint16_t val) 
 {
     uint16_t enumVal = (val >> 9) + 1;
@@ -71,7 +68,6 @@ __QSPI_CODE
     }
 }
 
-__QSPI_CODE
  void Compressor::Param2::parameterDisplay(char*res)
 {
     uint16_t c=0,cres=0;
@@ -98,16 +94,12 @@ __QSPI_CODE
     }
 }
 
-
-
-__QSPI_CODE
  void Compressor::Param3::parameterCallback(uint16_t val) 
 {
     pData->presetVolume.gain = (float)val/256.0f + 1.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
  void Compressor::Param3::parameterDisplay(char*res)
 {
     uint32_t dval;
@@ -115,14 +107,12 @@ __QSPI_CODE
     decimalInt16ToChar((int16_t)dval,res,2);
 }
 
-__QSPI_CODE
  void Compressor::Param4::parameterCallback(uint16_t val) 
 {
     pData->compressor.avgLowpass.alphaRising = 1.0f - 2.0f/32768.0f -val/64.0f/32768.0;
     rawValue = val;
 }
 
-__QSPI_CODE
  void Compressor::Param4::parameterDisplay(char*res)
 {
     float attackFloat;
@@ -138,15 +128,12 @@ __QSPI_CODE
     appendToString(res, " ms");
 }
 
-
-__QSPI_CODE
  void Compressor::Param5::parameterCallback(uint16_t val) 
 {
     pData->compressor.avgLowpass.alphaFalling = 1.0f - 2.0f/32768.0f - val/64.0f/32768.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
  void Compressor::Param5::parameterDisplay(char*res)
 {
     float releaseFloat;
@@ -162,7 +149,6 @@ __QSPI_CODE
     appendToString(res, " ms");
 }
 
-__QSPI_CODE
  void Compressor::Param6::parameterCallback(uint16_t val) 
 {
     uint8_t intermVal;
@@ -175,7 +161,6 @@ __QSPI_CODE
     rawValue = val;
 }
 
-__QSPI_CODE
  void Compressor::Param6::parameterDisplay(char*res)
 {
     *res=0;
@@ -193,8 +178,6 @@ __QSPI_CODE
     }
 }
 
-
-__QSPI_CODE
 void Compressor::Compressor::setup()
 {
     this->addParameter(new Param1(this));

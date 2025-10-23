@@ -20,7 +20,6 @@ float PitchShifter::PitchShifter::processSample(float sampleIn)
     return sampleOut;
 }
 
-__QSPI_CODE
 void PitchShifter::Param1::parameterCallback(uint16_t val) // low
 {
     pData->pitchShifter.delayIncrement = (val >> 9) - 4;
@@ -31,7 +30,6 @@ void PitchShifter::Param1::parameterCallback(uint16_t val) // low
     rawValue = val;
 }
 
-__QSPI_CODE
 void PitchShifter::Param1::parameterDisplay(char*res)
 {
     *res=0;
@@ -67,21 +65,18 @@ void PitchShifter::Param1::parameterDisplay(char*res)
     }
 }
 
-__QSPI_CODE
 void PitchShifter::Param2::parameterCallback(uint16_t val) // Mix
 {
     pData->mix=val/4095.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void PitchShifter::Param2::parameterDisplay(char*res)
 {
     Int16ToChar(pData->mix*100.0f,res);
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void PitchShifter::Param3::parameterCallback(uint16_t val) // BufferSize
 {
     uint16_t newVal = (val >> 10)+9;
@@ -96,7 +91,6 @@ void PitchShifter::Param3::parameterCallback(uint16_t val) // BufferSize
     rawValue = val;
 }
 
-__QSPI_CODE
 void PitchShifter::Param3::parameterDisplay(char*res)
 {
     int16_t avgDelayMs=((pData->pitchShifter.buffersize >> 1) / (AUDIO_SAMPLING_RATE/1000));
@@ -104,14 +98,12 @@ void PitchShifter::Param3::parameterDisplay(char*res)
     appendToString(res, "ms");
 }
 
-__QSPI_CODE
 void PitchShifter::Param4::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val;
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void PitchShifter::Param4::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -120,7 +112,6 @@ void PitchShifter::Param4::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void PitchShifter::PitchShifter::setup()
 {
     this->addParameter(new Param1(this));

@@ -14,7 +14,6 @@ float VibChorus::VibChorus::processSample(float sampleIn)
     return gainStageProcessSample(sampleIn,&presetVolume);
 }
 
-__QSPI_CODE
 void VibChorus::Param1::parameterCallback(uint16_t val) // frequency
 {
     // map 0 - 4095 to 1 1000
@@ -23,14 +22,12 @@ void VibChorus::Param1::parameterCallback(uint16_t val) // frequency
     rawValue = val;
 }
 
-__QSPI_CODE
 void VibChorus::Param1::parameterDisplay(char*res)
 {
     decimalInt16ToChar(pData->chorusData.frequency,res,2);
     appendToString(res," Hz");
 }
 
-__QSPI_CODE
 void VibChorus::Param2::parameterCallback(uint16_t val) // depth
 {
     // map to 0 to 255
@@ -39,7 +36,6 @@ void VibChorus::Param2::parameterCallback(uint16_t val) // depth
     rawValue = val;
 }
 
-__QSPI_CODE
 void VibChorus::Param2::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -48,14 +44,12 @@ void VibChorus::Param2::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void VibChorus::Param3::parameterCallback(uint16_t val) // mix
 {
     pData->chorusData.mix = ((float)val)/4095.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void VibChorus::Param3::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -64,13 +58,13 @@ void VibChorus::Param3::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void VibChorus::Param4::parameterCallback(uint16_t val)
 {
     pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 };
 
-__QSPI_CODE
+
 void VibChorus::Param4::parameterDisplay(char* res)
 {
     int16_t dVal;
@@ -79,7 +73,6 @@ void VibChorus::Param4::parameterDisplay(char* res)
     appendToString(res,"%");
 };
 
-__QSPI_CODE
 void VibChorus::VibChorus::setup()
 {
     initSimpleChorus(&chorusData);
@@ -89,8 +82,6 @@ void VibChorus::VibChorus::setup()
     this->addParameter(new Param4(this));
 }
 
-
-__QSPI_CODE
 VibChorus::VibChorus::~VibChorus()
 {
     freeDelayMemory(this->chorusData.delayBuffer);

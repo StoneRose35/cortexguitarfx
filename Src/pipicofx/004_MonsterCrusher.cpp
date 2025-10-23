@@ -15,7 +15,6 @@ float MonsterCrusher::MonsterCrusher::processSample(float sampleIn)
     return sampleIn;
 }
 
-__QSPI_CODE
 void MonsterCrusher::Param1::parameterCallback(uint16_t val) // set bit mask
 {
     uint32_t resolution;
@@ -26,7 +25,6 @@ void MonsterCrusher::Param1::parameterCallback(uint16_t val) // set bit mask
     setBitMask((uint8_t)resolution,&pData->bitcrusher);
 }
 
-__QSPI_CODE
 void MonsterCrusher::Param1::parameterDisplay(char*res)
 {
     uint8_t resolution;    
@@ -34,14 +32,12 @@ void MonsterCrusher::Param1::parameterDisplay(char*res)
     UInt8ToChar(resolution,res);
 }
 
-__QSPI_CODE
 void MonsterCrusher::Param2::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val; 
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void MonsterCrusher::Param2::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -50,7 +46,6 @@ void MonsterCrusher::Param2::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void MonsterCrusher::MonsterCrusher::setup()
 {
     this->addParameter(new Param1(this));

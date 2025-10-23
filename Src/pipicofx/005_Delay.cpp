@@ -15,7 +15,6 @@ float Delay::Delay::processSample(float sampleIn)
     return sampleIn;
 }
 
-__QSPI_CODE
 void Delay::Param1::parameterCallback(uint16_t val) // Delay Time
 {
 
@@ -26,7 +25,6 @@ void Delay::Param1::parameterCallback(uint16_t val) // Delay Time
     rawValue = val;
 }
 
-__QSPI_CODE
 void Delay::Param1::parameterDisplay(char*res)
 {
     int16_t dval;
@@ -44,13 +42,12 @@ void Delay::Param1::parameterDisplay(char*res)
     }
 }
 
-__QSPI_CODE
 void Delay::Param2::parameterCallback(uint16_t val) // Feedback
 {
     pData->delay.feedback=((float)val)/4096.0f;
 }
 
-__QSPI_CODE
+
 void Delay::Param2::parameterDisplay(char*res)
 {
     Int16ToChar((int16_t)(pData->delay.feedback*100.0f),res);
@@ -65,14 +62,12 @@ void Delay::Param2::parameterDisplay(char*res)
     }
 }
 
-__QSPI_CODE
 void Delay::Param3::parameterCallback(uint16_t val) // Mix
 {
     pData->delay.mix = ((float)val)/4096.0f;
     this->rawValue = val; 
 }
 
-__QSPI_CODE
 void Delay::Param3::parameterDisplay(char*res)
 {
     Int16ToChar(pData->delay.mix*100.0f,res);
@@ -87,14 +82,12 @@ void Delay::Param3::parameterDisplay(char*res)
     }
 }
 
-__QSPI_CODE
 void Delay::Param4::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0 to 1024
     this->rawValue = val;
 }
 
-__QSPI_CODE
 void Delay::Param4::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -103,11 +96,9 @@ void Delay::Param4::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-
-__QSPI_CODE
 void Delay::Delay::setup()
 {
-    initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<1),MAX_DELAY_SINGLEBUFFER);
+    initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<2),MAX_DELAY_SINGLEBUFFER);
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
@@ -115,7 +106,6 @@ void Delay::Delay::setup()
 
 }
 
-__QSPI_CODE
 Delay::Delay::~Delay()
 {
     freeDelayMemory(this->delay.delayLine);

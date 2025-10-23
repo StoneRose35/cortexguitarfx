@@ -5,6 +5,7 @@ extern "C" {
 #include "pipicofx/delayMemoryHandler.h"
 #include "memoryRegions.h"
 
+__ITCM_CODE
 float analogDelayFeedbackFunction(float sampleIn,void*fbkFilterData,volatile uint32_t*audioStatePtr)
 {
     FirstOrderIirType* tData = (FirstOrderIirType*)fbkFilterData;
@@ -14,7 +15,7 @@ float analogDelayFeedbackFunction(float sampleIn,void*fbkFilterData,volatile uin
 
 using namespace PiPicoFX;
 
-
+__ITCM_CODE
 float AmpModel::AmpModel::processSample(float sampleIn)
 {
     float out;
@@ -39,9 +40,6 @@ float AmpModel::AmpModel::processSample(float sampleIn)
     return out;
 }
 
-
-
-
 void AmpModel::Param1::parameterCallback(uint16_t val) // highpass cutoff before the nonlinear stage
 {
     float fval;
@@ -51,14 +49,12 @@ void AmpModel::Param1::parameterCallback(uint16_t val) // highpass cutoff before
     rawValue=val;
 }
 
-
 void AmpModel::Param1::parameterDisplay(char* chrbfr)
 {
     uint32_t dval;
     dval=(uint32_t)(pData->highpassCutoff*100.0f);
     Int16ToChar(dval,chrbfr);
 }
-
 
 void AmpModel::Param2::parameterCallback(uint16_t val) // number of waveshaper (more means more distortion)
 {
@@ -69,12 +65,10 @@ void AmpModel::Param2::parameterCallback(uint16_t val) // number of waveshaper (
     pData->nWaveshapers = val;
 }
 
-
 void AmpModel::Param2::parameterDisplay(char* res)
 {
     UInt8ToChar(pData->nWaveshapers,res);
 };
-
 
 void AmpModel::Param3::parameterCallback(uint16_t val)// delay intensity
 {
@@ -93,12 +87,10 @@ void AmpModel::Param3::parameterDisplay(char* res)
     appendToString(res,"%");
 }
 
-
 void AmpModel::Param4::parameterCallback(uint16_t val)
 {
     pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
 };
-
 
 void AmpModel::Param4::parameterDisplay(char* res)
 {
@@ -108,18 +100,16 @@ void AmpModel::Param4::parameterDisplay(char* res)
     appendToString(res,"%");
 };
 
-
 AmpModel::AmpModel::~AmpModel()
 {
     freeDelayMemory(this->delay.delayLine);
 }
 
-
 void AmpModel::AmpModel::setup()
 {
     initfirFilter(&filter3);
     initWaveShaper(&waveshaper1,&waveShaperDefaultOverdrive);
-    initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 1),MAX_DELAY_SINGLEBUFFER);
+    initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 2),MAX_DELAY_SINGLEBUFFER);
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));

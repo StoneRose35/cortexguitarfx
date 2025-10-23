@@ -18,7 +18,6 @@ float AcousticProc::AcousticProc::processSample(float sampleIn)
     return sampleIn;
 }
 
-__QSPI_CODE
 void AcousticProc::AcousticProc::setup()
 {
     initThreeBandEq(&this->eq);
@@ -46,46 +45,39 @@ void fxProgramReset(void*data)
 }
 */
 
-__QSPI_CODE
 void AcousticProc::Param1::parameterCallback(uint16_t val) // low
 {
     pData->eq.lowFactor = (float)val/512.0f-1.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void AcousticProc::Param1::parameterDisplay(char*res)
 {
     decimalInt16ToChar((int16_t)(pData->eq.lowFactor),res,2);
 }
 
-__QSPI_CODE
 void AcousticProc::Param2::parameterCallback(uint16_t val) // mid
 {
     pData->eq.midFactor = (float)val/512.0f-1.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void AcousticProc::Param2::parameterDisplay(char*res)
 {
     decimalInt16ToChar((int16_t)(pData->eq.midFactor),res,2);
 }
 
-__QSPI_CODE
 void AcousticProc::Param3::parameterCallback(uint16_t val) // high
 {
     pData->eq.highFactor = (float)val/512.0f-1.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void AcousticProc::Param3::parameterDisplay(char*res)
 {
     decimalInt16ToChar((int16_t)(pData->eq.highFactor),res,2);
 }
 
-__QSPI_CODE
 void AcousticProc::Param4::parameterCallback(uint16_t val) // compressor (one-knob setting)
 {
     float maxGain;
@@ -98,7 +90,6 @@ void AcousticProc::Param4::parameterCallback(uint16_t val) // compressor (one-kn
     rawValue = val;
 }
 
-__QSPI_CODE
 void AcousticProc::Param4::parameterDisplay(char*res)
 {
     int16_t comppercent = (int16_t)(rawValue << 3);
@@ -106,7 +97,6 @@ void AcousticProc::Param4::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void AcousticProc::Param5::parameterCallback(uint16_t val) // reverb time
 {
     pData->reverbTime = 0.1f + val/4095.f*1.9f;
@@ -114,21 +104,18 @@ void AcousticProc::Param5::parameterCallback(uint16_t val) // reverb time
     rawValue = val;
 }
 
-__QSPI_CODE
 void AcousticProc::Param5::parameterDisplay(char*res)
 {
     Int16ToChar((float)(pData->reverbTime*1000.0f),res);
     appendToString(res," ms");
 }
 
-__QSPI_CODE
 void AcousticProc::Param6::parameterCallback(uint16_t val) // reverb mix
 {
     pData->reverb.mix=(float)val/4095.0f;
     rawValue = val;
 }
 
-__QSPI_CODE
 void AcousticProc::Param6::parameterDisplay(char*res)
 {
     int16_t mixpercent = (int16_t)(pData->reverb.mix*100.0f);
@@ -136,14 +123,13 @@ void AcousticProc::Param6::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void AcousticProc::Param7::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val;
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
+
 void AcousticProc::Param7::parameterDisplay(char*res)
 {
     int16_t dVal;

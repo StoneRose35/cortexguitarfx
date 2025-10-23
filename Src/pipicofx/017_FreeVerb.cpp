@@ -23,14 +23,14 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float FreeVerb::FreeVerb::processSample(float sampleIn)
 {
-    int32_t sampleOut;
+    float sampleOut;
     volatile uint32_t * audioStatePtr = getAudioStatePtr();
-    int32_t delaySum=0;
+    float delaySum=0.0f;
     for (uint8_t c=0;c<8;c++)
     {
         delaySum += delayLineWetProcessSample(sampleIn,this->delays+c);
     }
-    sampleOut = delaySum >> 3;
+    sampleOut = delaySum;
     for (uint8_t c=0;c<4;c++)
     {
         sampleOut = allpassProcessSample(sampleOut,this->allpasses+c,audioStatePtr);
@@ -39,7 +39,6 @@ float FreeVerb::FreeVerb::processSample(float sampleIn)
     return gainStageProcessSample(sampleOut,&this->presetVolume);
 }
 
-__QSPI_CODE
 void FreeVerb::FreeVerb::setup()
 {
     float* delayMemPtr = mallocDelayMemory(24576<<2);
@@ -62,24 +61,21 @@ void FreeVerb::FreeVerb::setup()
 
 }
 
-__QSPI_CODE
 FreeVerb::FreeVerb::~FreeVerb()
 {
     freeDelayMemory(this->delays[0].delayLine);
 }
 
-__QSPI_CODE
 void FreeVerb::Param1::parameterCallback(uint16_t val)
 {
-    int32_t feedback = (((val << 3)*9175)>>15) + 22938;// val*0.28+0.7;
+    float feedback = ((float)val)/4095.0f*0.28f+0.7f; // val*0.28+0.7;
     for (uint8_t c=0;c<8;c++)
     {
-        (this->pData->delays+c)->feedback = (int16_t)feedback;
+        (this->pData->delays+c)->feedback = feedback;
     }
     this->rawValue = val; 
 }
 
-__QSPI_CODE
 void FreeVerb::Param1::parameterDisplay(char*res)
 {
     float ffbk;
@@ -97,7 +93,6 @@ void FreeVerb::Param1::parameterDisplay(char*res)
     appendToString(res," ms");
 }
 
-__QSPI_CODE
 void FreeVerb::Param2::parameterCallback(uint16_t val)
 {
     for (uint8_t c=0;c<8;c++)
@@ -107,7 +102,6 @@ void FreeVerb::Param2::parameterCallback(uint16_t val)
     this->rawValue = val; 
 }
 
-__QSPI_CODE
 void FreeVerb::Param2::parameterDisplay(char*res)
 {
     int16_t damping = this->pData->feedbackFilters[0].alpha;
@@ -115,29 +109,32 @@ void FreeVerb::Param2::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
 void FreeVerb::Param3::parameterCallback(uint16_t val)
 {
-    this->pData->mix=(val << 3);
+    this->pData->mix=((float)val)/4096.0f;
     this->rawValue = val; 
 }
 
-__QSPI_CODE
 void FreeVerb::Param3::parameterDisplay(char*res)
 {
-    int16_t mixpercent = (int16_t)(this->pData->mix/328);
-    Int16ToChar(mixpercent,res);
-    appendToString(res,"%");
+    Int16ToChar(pData->mix*100.0f,res);
+    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
+    {
+        if(*(res+c)==0)
+        {
+            *(res+c)='%';
+            *(res+c+1)=(char)0;
+            break;
+        }
+    }
 }
 
-__QSPI_CODE
 void FreeVerb::Param4::parameterCallback(uint16_t val)
 {
-    this->pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val; 
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void FreeVerb::Param4::parameterDisplay(char*res)
 {
     int16_t dVal;

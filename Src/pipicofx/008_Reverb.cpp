@@ -15,7 +15,6 @@ __ITCM_CODE
     return reverbProcessSample(sampleIn,&this->reverb);
 }
 
-__QSPI_CODE
  void Reverb::Param1::parameterCallback(uint16_t val) // reverb time
 {
     pData->reverbTime = ((float)val)/4095.0f*(2.0f-0.1f) + 0.1f;
@@ -23,7 +22,6 @@ __QSPI_CODE
     rawValue = val;
 }
 
-__QSPI_CODE
  void Reverb::Param1::parameterDisplay(char*res)
 {
     int16_t reverbms = (int16_t)(pData->reverbTime*1000.0f);
@@ -31,7 +29,6 @@ __QSPI_CODE
     appendToString(res," ms");
 }
 
-__QSPI_CODE
  void Reverb::Param2::parameterCallback(uint16_t val) // Mix
 {
     float fval=(float)val/4095.0;
@@ -39,7 +36,6 @@ __QSPI_CODE
     rawValue = val;
 }
 
-__QSPI_CODE
  void Reverb::Param2::parameterDisplay(char*res)
 {
     int16_t mixpercent = (int16_t)(pData->reverb.mix*100.0);
@@ -47,7 +43,6 @@ __QSPI_CODE
     appendToString(res,"%");
 }
 
-__QSPI_CODE
  void Reverb::Param3::parameterCallback(uint16_t val) // Parameter
 {
     pData->reverb.paramNr=(val >> 10);
@@ -56,21 +51,18 @@ __QSPI_CODE
     rawValue = val;
 }
 
-__QSPI_CODE
  void Reverb::Param3::parameterDisplay(char*res)
 {
     *res=0;
     appendToString(res,getReverbParameterSetName(&pData->reverb));
 }
 
-__QSPI_CODE
 void Reverb::Param4::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val;
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void Reverb::Param4::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -79,7 +71,6 @@ void Reverb::Param4::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-__QSPI_CODE
  void Reverb::Reverb::setup()
 {
     initReverb(&this->reverb,this->reverbTime,mallocDelayMemory(this->getDelayMemoryUseage()));
@@ -89,7 +80,6 @@ __QSPI_CODE
     this->addParameter(new Param4(this));
 }
 
-__QSPI_CODE
 Reverb::Reverb::~Reverb()
 {
     freeDelayMemory(this->reverb.delayPointers[0]);

@@ -37,10 +37,9 @@ float ShimmerVerb::ShimmerVerb::processSample(float sampleIn)
     return (1.0f - this->mix)*sampleIn  + this->mix*sampleProc;
 }
 
-__QSPI_CODE
 void ShimmerVerb::ShimmerVerb::setup()
 {
-    float * delayMemoryPointer = mallocDelayMemory(11008<<1); 
+    float * delayMemoryPointer = mallocDelayMemory(11008<<2); 
     initPitchshifter2(&this->unicornGlitterData.pitchShifter);
 
     initDelay(this->delays,delayMemoryPointer,256);
@@ -83,21 +82,18 @@ void ShimmerVerb::ShimmerVerb::setup()
 
 }
 
-__QSPI_CODE
 ShimmerVerb::ShimmerVerb::~ShimmerVerb()
 {
     freeDelayMemory(this->unicornGlitterData.pitchShifter.delayMemoryPtr);
     freeDelayMemory(this->delays->delayLine);
 }
 
-__QSPI_CODE
 void ShimmerVerb::Param1::parameterCallback(uint16_t val)
 {
     this->pData->unicornGlitterData.pitchShifter.delayIncrement = (val >> 9) + 1;
     this->rawValue = val; 
 }
 
-__QSPI_CODE
 void ShimmerVerb::Param1::parameterDisplay(char*res)
 {
     *res=0;
@@ -133,7 +129,6 @@ void ShimmerVerb::Param1::parameterDisplay(char*res)
     }
 }
 
-__QSPI_CODE
 void ShimmerVerb::Param2::parameterCallback(uint16_t val)
 {
     (this->pData->delays+0)->feedback = val << 3;
@@ -144,7 +139,6 @@ void ShimmerVerb::Param2::parameterCallback(uint16_t val)
     this->rawValue = val; 
 }
 
-__QSPI_CODE
 void ShimmerVerb::Param2::parameterDisplay(char*res)
 {
     float ffbk;
@@ -162,14 +156,12 @@ void ShimmerVerb::Param2::parameterDisplay(char*res)
     appendToString(res," ms");
 }
 
-__QSPI_CODE
 void ShimmerVerb::Param3::parameterCallback(uint16_t val)
 {
     this->pData->mix=(val << 3);
     this->rawValue = val; 
 }
 
-__QSPI_CODE
 void ShimmerVerb::Param3::parameterDisplay(char*res)
 {
     int16_t mixpercent = (int16_t)(this->pData->mix/328);
@@ -178,11 +170,10 @@ void ShimmerVerb::Param3::parameterDisplay(char*res)
 }
 void ShimmerVerb::Param4::parameterCallback(uint16_t val)
 {
-    this->pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val; 
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void ShimmerVerb::Param4::parameterDisplay(char*res)
 {
     int16_t dVal;

@@ -85,7 +85,6 @@ switch (this->cabSimType)
     return out;
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param1::parameterCallback(uint16_t val) // highpass cutoff before the nonlinear stage
 {
     float fval;
@@ -95,7 +94,6 @@ __QSPI_CODE
     rawValue = val;
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param1::parameterDisplay(char*res)
 {
     uint32_t dval;
@@ -103,7 +101,6 @@ __QSPI_CODE
     Int16ToChar(dval,res);
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param2::parameterCallback(uint16_t val) // number of waveshaper (more means more distortion)
 {
     // map 0-4095 to 0-63
@@ -112,13 +109,11 @@ __QSPI_CODE
     pData->waveshaper1.functionIndex=(uint8_t)val;
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param2::parameterDisplay(char*res)
 {
     UInt8ToChar(pData->waveshaper1.functionIndex,res);
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param3::parameterCallback(uint16_t val) // delay/reverb intensity
 {
     pData->delay.delayInSamples = 2400 + (val << 3);
@@ -130,7 +125,6 @@ __QSPI_CODE
     rawValue = val;
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param3::parameterDisplay(char*res)
 {
     int16_t dVal;
@@ -139,14 +133,12 @@ __QSPI_CODE
     appendToString(res,"%");
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param4::parameterCallback(uint16_t val) // modulation type
 {
     pData->modType = val >> 11;
     rawValue = val;
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param4::parameterDisplay(char*res) // modulation type
 {
     *res=0;
@@ -160,7 +152,6 @@ __QSPI_CODE
     }
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param5::parameterCallback(uint16_t val) // cab type
 {
     pData->cabSimType = val >> 8;
@@ -171,7 +162,6 @@ __QSPI_CODE
     rawValue = val;
 }
 
-__QSPI_CODE
  void AmpModelHighGain::Param5::parameterDisplay(char*res) // cab type
 {
 
@@ -181,7 +171,6 @@ __QSPI_CODE
     }
 }
 
-__QSPI_CODE
  void AmpModelHighGain::AmpModelHighGain::setup()
 {
     initfirFilter(&this->customCabFir);
@@ -200,20 +189,23 @@ __QSPI_CODE
 
 }
 
-__QSPI_CODE
 void AmpModelHighGain::Param6::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = val >> 2; // 0 to 1024
-    this->rawValue = val;
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 }
 
-__QSPI_CODE
 void AmpModelHighGain::Param6::parameterDisplay(char*res)
 {
     int16_t dVal;
     dVal=(int16_t)(pData->presetVolume.gain*100.0f);
     Int16ToChar(dVal,res);
     appendToString(res,"%");
+}
+
+AmpModelHighGain::AmpModelHighGain::~AmpModelHighGain()
+{
+    freeDelayMemory(this->delay.delayLine);
 }
 
 /*
@@ -258,10 +250,7 @@ __QSPI_CODE
 }
 */
 
-AmpModelHighGain::AmpModelHighGain::~AmpModelHighGain()
-{
-    freeDelayMemory(this->delay.delayLine);
-}
+
 
 /*
 FxProgram9DataType fxProgram9data = {
