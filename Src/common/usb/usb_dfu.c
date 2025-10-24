@@ -213,8 +213,8 @@ void prepareSystemForDFU()
         // audio engine
         #ifdef EXTERNAL_CODEC
         #ifdef PCM3060_CODEC_EXTERNAL
-        NVIC_ClearPendingIRQ(DMA1_Stream1_IRQn);
-        NVIC_DisableIRQ(DMA1_Stream1_IRQn);
+        NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
+        NVIC_DisableIRQ(DMA1_Stream0_IRQn);
         #endif
         #else
         NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);

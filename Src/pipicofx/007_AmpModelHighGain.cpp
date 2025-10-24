@@ -128,7 +128,7 @@ switch (this->cabSimType)
  void AmpModelHighGain::Param3::parameterDisplay(char*res)
 {
     int16_t dVal;
-    dVal=(int16_t)(pData->delay.mix*100.0f);
+    dVal=rawValue/41;
     Int16ToChar(dVal,res);
     appendToString(res,"%");
 }

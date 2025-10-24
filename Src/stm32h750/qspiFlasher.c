@@ -117,8 +117,7 @@ void flashingTask()
         }
         bytesReceived++;
     }
-    __NVIC_EnableIRQ(USART1_IRQn);
-    enableAudioEngine();
+    __NVIC_SystemReset();
 }
 
 

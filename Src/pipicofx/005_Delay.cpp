@@ -44,6 +44,7 @@ void Delay::Param1::parameterDisplay(char*res)
 
 void Delay::Param2::parameterCallback(uint16_t val) // Feedback
 {
+    rawValue = val;
     pData->delay.feedback=((float)val)/4096.0f;
 }
 

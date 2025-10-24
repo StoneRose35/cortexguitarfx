@@ -60,8 +60,6 @@ static void create(PiPicoFxUiType*data)
     appendToString(strbfr,"Out");
     drawText(5,42+20,strbfr,imgBuffer,(void*)0);
 
-    programToInitialize = (presets + currentPreset)->programNr;
-    programChangeState = 1;
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)

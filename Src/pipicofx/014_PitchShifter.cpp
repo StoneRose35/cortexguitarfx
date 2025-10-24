@@ -22,7 +22,7 @@ float PitchShifter::PitchShifter::processSample(float sampleIn)
 
 void PitchShifter::Param1::parameterCallback(uint16_t val) // low
 {
-    pData->pitchShifter.delayIncrement = (val >> 9) - 4;
+    pData->pitchShifter.delayIncrement = (val >> 9) + 4;
     if (pData->pitchShifter.delayIncrement>=0)
     {
         pData->pitchShifter.delayIncrement+=1;

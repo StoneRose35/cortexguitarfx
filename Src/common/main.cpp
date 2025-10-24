@@ -86,8 +86,9 @@ const uint8_t stompswitch_progs[]={8,7,1};
 volatile uint8_t programsToInitialize[3];
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
-volatile uint8_t currentPreset=0;
-volatile uint8_t programToInitialize;
+volatile uint8_t currentPreset=0xFF;
+volatile uint8_t programToInitialize=0xFF;
+
 #ifdef EXTENSION_BOARD
 // 0: done
 // 1: change request
@@ -352,18 +353,18 @@ int main(void)
         }
         encoderDelta=getStickyIncrementDelta();
 
-        if (encoderDelta > 2)
-        {
-            encoderDelta = 1;
+        //if (encoderDelta > 2)
+        //{
+        //    encoderDelta = 1;
             onRotaryChange(encoderDelta,&piPicoUiController);
             clearStickyIncrementDelta();
-        }
-        else if (encoderDelta < -2)
-        {
-            encoderDelta = -1;
-            onRotaryChange(encoderDelta,&piPicoUiController);
-            clearStickyIncrementDelta();
-        }
+        //}
+        //else if (encoderDelta < -2)
+        //{
+        //    encoderDelta = -1;
+        //    onRotaryChange(encoderDelta,&piPicoUiController);
+        //    clearStickyIncrementDelta();
+        //}
 
         /*
         *

@@ -18,7 +18,7 @@ namespace PiPicoFX {
                     this->setup();
                 };
                 float processSample(float);
-                uint8_t compressorType;
+                uint8_t compressorType=0;
                 CompressorDataType compressor={
                     .gainFunction = {
                         .threshhold = 32767,

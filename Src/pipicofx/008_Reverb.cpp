@@ -24,7 +24,7 @@ __ITCM_CODE
 
  void Reverb::Param1::parameterDisplay(char*res)
 {
-    int16_t reverbms = (int16_t)(pData->reverbTime*1000.0f);
+    int16_t reverbms = (int16_t)(pData->reverbTime*1000);
     Int16ToChar(reverbms,res);
     appendToString(res," ms");
 }

@@ -22,7 +22,7 @@ namespace PiPicoFX {
                 ReverbType reverb={
                     .paramNr = 0
                 };
-                int16_t reverbTime=300;
+                float reverbTime=300;
                 GainStageDataType presetVolume={
                     .gain=1.0f,
                     .offset=0.0f

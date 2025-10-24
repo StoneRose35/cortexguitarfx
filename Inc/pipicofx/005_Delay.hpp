@@ -78,7 +78,7 @@ namespace PiPicoFX {
             public:
                 Param4(Delay* p) :FxProgramParameter(255,"Volume")
                 {
-                    rawValue = 0;
+                    rawValue = 0x3FF;
                     increment = 1;
                     pData=p;
                 };

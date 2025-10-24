@@ -113,7 +113,7 @@ namespace PiPicoFX {
             Param4(AmpModel* p) :FxProgramParameter(0xff,"Volume")
             {
                 pData=p;
-                rawValue=0;
+                rawValue=0x3FF;
                 increment=1;
             };
             void parameterCallback(uint16_t val);

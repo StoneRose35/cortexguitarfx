@@ -30,10 +30,11 @@ void VibChorus::Param1::parameterDisplay(char*res)
 
 void VibChorus::Param2::parameterCallback(uint16_t val) // depth
 {
+    rawValue = val;
     // map to 0 to 255
     val >>= 4;
     pData->chorusData.depth = (uint8_t)val;
-    rawValue = val;
+
 }
 
 void VibChorus::Param2::parameterDisplay(char*res)

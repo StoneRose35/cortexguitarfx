@@ -90,7 +90,7 @@ void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
     UInt8ToChar(pos,nrbfr);
     appendToString(preset->name,nrbfr);
     appendToStringUntil(preset->name,"        ",8);
-    preset->programNr = N_FX_PROGRAMS -1; // off should always be last
+    preset->programNr = 2; 
     for (uint8_t c=0;c< 8; c++)
     {
         preset->parameters[c] = 0;

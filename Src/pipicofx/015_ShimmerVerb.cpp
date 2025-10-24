@@ -131,11 +131,11 @@ void ShimmerVerb::Param1::parameterDisplay(char*res)
 
 void ShimmerVerb::Param2::parameterCallback(uint16_t val)
 {
-    (this->pData->delays+0)->feedback = val << 3;
-    (this->pData->delays+1)->feedback = val << 3;
-    (this->pData->delays+2)->feedback = val << 3;
-    (this->pData->delays+3)->feedback = val << 3;
-    this->pData->feedback = val << 3;
+    (this->pData->delays+0)->feedback = ((float)val)/4096.0f;
+    (this->pData->delays+1)->feedback = ((float)val)/4096.0f;
+    (this->pData->delays+2)->feedback = ((float)val)/4096.0f;
+    (this->pData->delays+3)->feedback = ((float)val)/4096.0f;
+    this->pData->feedback = ((float)val)/4096.0f;
     this->rawValue = val; 
 }
 
@@ -177,15 +177,7 @@ void ShimmerVerb::Param4::parameterCallback(uint16_t val)
 void ShimmerVerb::Param4::parameterDisplay(char*res)
 {
     int16_t dVal;
-    dVal = this->pData->presetVolume.gain*39; // percent with two decimal points
-    decimalInt16ToChar(dVal,res,2);
-    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
-    {
-        if(*(res+c)==0)
-        {
-            *(res+c)='%';
-            *(res+c+1)=(char)0;
-            break;
-        }
-    }
+    dVal=(int16_t)(pData->presetVolume.gain*100.0f);
+    Int16ToChar(dVal,res);
+    appendToString(res,"%");
 }

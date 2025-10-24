@@ -21,7 +21,7 @@ namespace PiPicoFX {
                 };
                 ~AcousticProc();
                 float processSample(float);
-                int16_t reverbTime;
+                float reverbTime;
                 ThreeBandEQType eq={
                     .lowFactor = 0.0f,
                     .midFactor = 0.0f,

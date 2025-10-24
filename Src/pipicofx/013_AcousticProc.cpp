@@ -53,7 +53,7 @@ void AcousticProc::Param1::parameterCallback(uint16_t val) // low
 
 void AcousticProc::Param1::parameterDisplay(char*res)
 {
-    decimalInt16ToChar((int16_t)(pData->eq.lowFactor),res,2);
+    decimalInt16ToChar((int16_t)(pData->eq.lowFactor*100.f),res,2);
 }
 
 void AcousticProc::Param2::parameterCallback(uint16_t val) // mid
@@ -64,7 +64,7 @@ void AcousticProc::Param2::parameterCallback(uint16_t val) // mid
 
 void AcousticProc::Param2::parameterDisplay(char*res)
 {
-    decimalInt16ToChar((int16_t)(pData->eq.midFactor),res,2);
+    decimalInt16ToChar((int16_t)(pData->eq.midFactor*100.0f),res,2);
 }
 
 void AcousticProc::Param3::parameterCallback(uint16_t val) // high
@@ -75,7 +75,7 @@ void AcousticProc::Param3::parameterCallback(uint16_t val) // high
 
 void AcousticProc::Param3::parameterDisplay(char*res)
 {
-    decimalInt16ToChar((int16_t)(pData->eq.highFactor),res,2);
+    decimalInt16ToChar((int16_t)(pData->eq.highFactor*100.0f),res,2);
 }
 
 void AcousticProc::Param4::parameterCallback(uint16_t val) // compressor (one-knob setting)
