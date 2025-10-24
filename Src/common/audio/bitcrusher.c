@@ -4,6 +4,7 @@
 void initBitcrusher(BitCrusherDataType*data)
 {
     data->bitmask= (0xFFFF);
+    data->halfvalue = 0;
 }
 
 void setBitMask(uint8_t resolution,BitCrusherDataType*data)
@@ -14,11 +15,12 @@ void setBitMask(uint8_t resolution,BitCrusherDataType*data)
         data->bitmask <<=1;
         data->bitmask += 1;
     }
+    data->halfvalue = data->bitmask >> 1;
     data->bitmask = (~(data->bitmask)) | 0x8000;
 }
 
 int16_t bitCrusherProcessSample(int16_t sampleIn,BitCrusherDataType*data)
 {
-    return (int16_t)(((uint16_t)sampleIn) & data->bitmask);
+    return (int16_t)(((uint16_t)sampleIn + data->halfvalue) & data->bitmask);
 
 }
