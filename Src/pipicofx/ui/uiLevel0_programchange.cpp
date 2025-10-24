@@ -1,6 +1,7 @@
 extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
+#include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
