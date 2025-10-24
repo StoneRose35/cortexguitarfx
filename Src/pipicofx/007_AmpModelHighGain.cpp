@@ -139,7 +139,7 @@ void AmpModelHighGain::Param3::parameterCallback(uint16_t val)
 void AmpModelHighGain::Param3::parameterDisplay(char*res)
 {
     int16_t dVal;
-    dVal=pData->delay.mix/164;
+    dVal=rawValue/41;
     Int16ToChar(dVal,res);
     appendToString(res,"%");
 }

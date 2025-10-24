@@ -22,18 +22,20 @@ void VibChorus::Param1::parameterCallback(uint16_t val)
 
 void VibChorus::Param2::parameterCallback(uint16_t val)
 {
+    rawValue = val;
     // map to 0 to 255
     val >>= 4;
     pData->chorusData.depth = (uint8_t)val;
-    rawValue = val;
+
 }
 
 void VibChorus::Param3::parameterCallback(uint16_t val)
 {
+    rawValue = val;
     // map to 0 to 255
     val >>= 4;
     pData->chorusData.mix = (uint8_t)val;
-    rawValue = val;
+
 }
 
 void VibChorus::Param4::parameterCallback(uint16_t val)

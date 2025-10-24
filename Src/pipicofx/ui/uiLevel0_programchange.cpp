@@ -203,7 +203,7 @@ static void exitCallback(PiPicoFxUiType*data)
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
 
-    if (encoderDelta != 0)
+    if (encoderDelta != 0 && programChangeState == 0)
     {
         data->currentProgramIdx += encoderDelta;
         if (data->currentProgramIdx >= N_FX_PROGRAMS && encoderDelta > 0)
@@ -217,7 +217,6 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         programToInitialize=data->currentProgramIdx;
         programChangeState=1;
     }
-    //create(data);
 }
 
 static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)

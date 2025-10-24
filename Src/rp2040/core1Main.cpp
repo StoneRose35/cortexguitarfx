@@ -333,9 +333,11 @@ void core1Main()
             {
                 delete piPicoUiController.currentProgram;
                 piPicoUiController.currentProgram = loadProgram(programToInitialize);
+                piPicoUiController.currentParameterIdx = 0;
+                piPicoUiController.currentParameter = piPicoUiController.currentProgram->getParameter(piPicoUiController.currentParameterIdx);
                 if (piPicoUiController.currentProgram != nullptr)
                 {
-                    onCreate(&piPicoUiController);
+                    
                     if (currentPreset != 0xFF)
                     {
                         applyPreset(presets+currentPreset,piPicoUiController.currentProgram);
@@ -343,6 +345,7 @@ void core1Main()
                     
                     programChangeState = 4;
                 }
+                onCreate(&piPicoUiController);
             }
             else
             {

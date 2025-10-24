@@ -72,10 +72,10 @@ volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t ticStart,ticEnd,cpuLoad;
 volatile uint8_t programsActivated=0;
 const uint8_t stompswitch_progs[]={8,7,1};
-volatile uint8_t programToInitialize;
+volatile uint8_t programToInitialize=0xFF;
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
-volatile uint8_t currentPreset=0;
+volatile uint8_t currentPreset=0xFF;
 
 // 0: done
 // 1: change request
