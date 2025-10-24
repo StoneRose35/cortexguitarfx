@@ -11,10 +11,10 @@ int wavReader_main(int argc,char** argv)
     
     openWavFile("./audiosamples/guit_riff_16bit.wav",&inFile);
     createWavFile("testout.wav",&outFile,23);
-
+    return 0;
 }
 
-int openWavFile(char* filename,WavFileType*wavFile)
+int openWavFile(const char* filename,WavFileType*wavFile)
 {
     char chunkID[5];
     uint32_t junkSize;
@@ -68,13 +68,13 @@ int openWavFile(char* filename,WavFileType*wavFile)
     {
         return WAVREADER_FORMAT_ERROR;
     }
-    wavFile->data =  malloc(wavFile->dataSize);
+    wavFile->data =  (int16_t*)malloc(wavFile->dataSize);
     uint32_t c=0;
     fread(wavFile->data,wavFile->dataSize,1,wavFile->filePointer);
     return 0;
 }
 
-int createWavFile(char*filename,WavFileType*wavFile,uint32_t length)
+int createWavFile(const char*filename,WavFileType*wavFile,uint32_t length)
 {
     const uint32_t zeroSize=0;
     wavFile->filePointer = fopen(filename,"wb");
@@ -105,7 +105,8 @@ int createWavFile(char*filename,WavFileType*wavFile,uint32_t length)
     fwrite(dataId,4,1,wavFile->filePointer);
     fwrite(&length,4,1,wavFile->filePointer); 
     wavFile->dataSize=length;
-    wavFile->data = malloc(length);
+    wavFile->data = (int16_t*)malloc(length);
+    return 0;
 }
 
 void getNextSample(int16_t*sample,WavFileType*wavFile)

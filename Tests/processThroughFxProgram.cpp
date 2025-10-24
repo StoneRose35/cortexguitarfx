@@ -1,19 +1,20 @@
+#include "pipicofx/FxProgramLoader.hpp"
+extern "C" {
 #include "inc/wavReader.h"
-#include "pipicofx/fxPrograms.h"
-#include "audio/audiotools.h"
-
+#include "pipicofx/delayMemoryHandler.h"
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
 #include "math.h"
+}
 
 #define SELECTED_FX_PROGRAM 1
 #define FX_PROGRAM_PARAM1_VAL 200 // amp model 2: gain 
 #define FX_PROGRAM_PARAM2_VAL 3800 // 
 #define FX_PROGRAM_PARAM3_VAL 520 // 
-#define TAIL_TIME (48000*3)
+#define TAIL_TIME 48000
 
-
+extern "C" {
 void zeroString(char*data,int16_t len)
 {
     for (uint16_t c=0;c<len;c++)
@@ -48,10 +49,11 @@ float convolve(const float*coeffs,float*data,uint32_t offset)
     return res;
 }
 
+}
 
 uint32_t processOffline(int argc,char ** argv,char * jsonBfr)
 {
-    uint32_t byteCnt=0;
+uint32_t byteCnt=0;
     char filenameOut[256];
     char filenameIn[256];
     uint8_t fxProgramNr;
@@ -60,10 +62,17 @@ uint32_t processOffline(int argc,char ** argv,char * jsonBfr)
     WavFileType wavFileIn;
     WavFileType wavFileOut;
     char paramDisplay[64];
-    uint16_t params[8]={0,0,0,0,0,0,0,0};
+    uint16_t params[64]={   0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0};
     int16_t sample[2];
     uint32_t jsonStringPtr=0;
-
+    FxProgram * currentProgram;
     strcpy(filenameIn,argv[2]);
     strcpy(filenameOut,argv[2]);
     fnameLength = strlen(filenameOut);
@@ -74,53 +83,47 @@ uint32_t processOffline(int argc,char ** argv,char * jsonBfr)
     {
         params[c-4]=(uint16_t)atoi(argv[c]);
     }
+    currentProgram = PiPicoFX::loadProgram(fxProgramNr);
     jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"inputFile\": \"%s\",",filenameIn);
-    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"\"FxProgram\": \"%s\",\r\n",fxPrograms[fxProgramNr]->name);
+    jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"\"FxProgram\": \"%s\",\r\n",currentProgram->getName());
     size_t fnamelen = strlen(filenameIn);
     strcpy(filenameOut+fnamelen-4,"_proc.wav");
     openWavFile(filenameIn,&wavFileIn);
     createWavFile(filenameOut,&wavFileOut,wavFileIn.dataSize+TAIL_TIME);
-    for (uint16_t c=0;c<N_FX_PROGRAMS;c++)
-    {
-        if (fxPrograms[c]->setup != 0)
-        {
-            fxPrograms[c]->setup(fxPrograms[c]->data);
-        }
-    }
     jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"\"parameters\":[");
-    for (uint8_t c=0;c<fxPrograms[fxProgramNr]->nParameters;c++)
+    for (uint8_t c=0;c<currentProgram->getParameterCount();c++)
     {
-        if (fxPrograms[fxProgramNr]->parameters[c].control == 0)
+        if (currentProgram->getParameter(c)->getControl() == 0)
         {
             zeroString(paramDisplay,64);
-            fxPrograms[fxProgramNr]->parameters[c].setParameter(params[0],fxPrograms[fxProgramNr]->data);
-            fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
+            currentProgram->getParameter(c)->parameterCallback(params[0]);
+            currentProgram->getParameter(c)->parameterDisplay(paramDisplay);
             jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"nr\": 0,\"value\": \"%s\"}, \r\n",paramDisplay);
         }
-        else if (fxPrograms[fxProgramNr]->parameters[c].control == 1)
+        else if (currentProgram->getParameter(c)->getControl() == 1)
         {
             zeroString(paramDisplay,64);
-            fxPrograms[fxProgramNr]->parameters[c].setParameter(params[1],fxPrograms[fxProgramNr]->data);
-            fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
+            currentProgram->getParameter(c)->parameterCallback(params[1]);
+            currentProgram->getParameter(c)->parameterDisplay(paramDisplay);
             jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"nr\": 1, \"value\": \"%s\"}, \r\n",paramDisplay);
         }
-        else if (fxPrograms[fxProgramNr]->parameters[c].control == 2)
+        else if (currentProgram->getParameter(c)->getControl() == 2)
         {
             zeroString(paramDisplay,64);           
-            fxPrograms[fxProgramNr]->parameters[c].setParameter(params[2],fxPrograms[fxProgramNr]->data);
-            fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
+            currentProgram->getParameter(c)->parameterCallback(params[2]);
+            currentProgram->getParameter(c)->parameterDisplay(paramDisplay);
             jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"nr\": 2, \"value\": \"%s\"}, \r\n",paramDisplay);
         }
         else
         {
             zeroString(paramDisplay,64);           
-            fxPrograms[fxProgramNr]->parameters[c].setParameter(params[c],fxPrograms[fxProgramNr]->data);
-            fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
+            currentProgram->getParameter(c)->parameterCallback(params[c]);
+            currentProgram->getParameter(c)->parameterDisplay(paramDisplay);
             jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"nr\": %d, \"value\": \"%s\"}, \r\n",c+1,paramDisplay);
         }
 
     }
-    if(fxPrograms[fxProgramNr]->nParameters > 0)
+    if(currentProgram->getParameterCount() > 0)
     {
         jsonStringPtr -=4;
         *(jsonBfr + jsonStringPtr) = 0;
@@ -142,7 +145,7 @@ uint32_t processOffline(int argc,char ** argv,char * jsonBfr)
         {
             sample[0]=0.0f;
         }
-        dataOut = fxPrograms[fxProgramNr]->processSample(((float)sample[0])/32768.0f,fxPrograms[fxProgramNr]->data);
+        dataOut = currentProgram->processSample(((float)sample[0])/32768.0f);
         dataOut = clip(dataOut,getAudioStatePtr());
         if (wavFileIn.wavFormat.wChannels==2)
         {
@@ -163,15 +166,13 @@ uint32_t processOffline(int argc,char ** argv,char * jsonBfr)
 uint32_t getOverview(int args,char ** argv,char * jsonBfr)
 {
     uint32_t jsonStringPtr=0;
-
+    FxProgram * fxProgram;
     jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"programs\": [");
     for (uint16_t c=0;c<N_FX_PROGRAMS;c++)
     {
-        if (fxPrograms[c]->setup != 0)
-        {
-            fxPrograms[c]->setup(fxPrograms[c]->data);
-        }
-        jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"\"%s\", ",fxPrograms[c]->name);
+        fxProgram = PiPicoFX::loadProgram(c);
+        jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"\"%s\", ",fxProgram->getName());
+        delete fxProgram;
     }
     jsonStringPtr -= 2;
     *(jsonBfr + jsonStringPtr) = 0;
@@ -183,22 +184,17 @@ uint32_t getParamNames(int args,char ** argv,char * jsonBfr)
 {
     uint32_t jsonStringPtr=0;
     uint8_t fxProgramNr;
+    FxProgram * fxProgram;
     jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"parameterNames\":[");
-    for (uint16_t c=0;c<N_FX_PROGRAMS;c++)
-    {
-        if (fxPrograms[c]->setup != 0)
-        {
-            fxPrograms[c]->setup(fxPrograms[c]->data);
-        }
-        fxPrograms[c]->name;
-    }
+
     fxProgramNr = (uint8_t)atoi(argv[2]);
-    for (uint8_t c=0;c<fxPrograms[fxProgramNr]->nParameters;c++)
+    fxProgram = PiPicoFX::loadProgram(fxProgramNr);
+    for (uint8_t c=0;c<fxProgram->getParameterCount();c++)
     {
-        jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"name\": \"%s\",\"control\": %d}, \r\n",fxPrograms[fxProgramNr]->parameters[c].name,fxPrograms[fxProgramNr]->parameters[c].control);
+        jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"name\": \"%s\",\"control\": %d}, \r\n",fxProgram->getParameter(c)->getParameterName(),fxProgram->getParameter(c)->getControl());
 
     }
-    if(fxPrograms[fxProgramNr]->nParameters > 0)
+    if(fxProgram->getParameterCount() > 0)
     {
         jsonStringPtr -= 4;
         *(jsonBfr + jsonStringPtr) = 0;
@@ -215,35 +211,36 @@ uint32_t getParamValues(int argc,char ** argv,char * jsonBfr)
     int16_t dataOut;
     size_t fnameLength;
     char paramDisplay[64];
-    uint16_t params[8]={0,0,0,0,0,0,0,0};
+    uint16_t params[64]=    {0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0};
     int16_t sample[2];
     uint32_t jsonStringPtr=0;
-
+    FxProgram * fxProgram;
     fxProgramNr = (uint8_t)atoi(argv[2]);
     for (uint8_t c=3;c<argc;c++)
     {
         params[c-3]=(uint16_t)atoi(argv[c]);
     }
     jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"parameterValues\":[");
+    fxProgram = PiPicoFX::loadProgram(fxProgramNr);
 
-    for (uint16_t c=0;c<N_FX_PROGRAMS;c++)
-    {
-        if (fxPrograms[c]->setup != 0)
-        {
-            fxPrograms[c]->setup(fxPrograms[c]->data);
-        }
-    }
-    for (uint8_t c=0;c<fxPrograms[fxProgramNr]->nParameters;c++)
+    for (uint8_t c=0;c<fxProgram->getParameterCount();c++)
     {
         zeroString(paramDisplay,64);
-        fxPrograms[fxProgramNr]->parameters[c].setParameter(params[c],fxPrograms[fxProgramNr]->data);
-        fxPrograms[fxProgramNr]->parameters[c].getParameterDisplay(fxPrograms[fxProgramNr]->data,paramDisplay);
+        fxProgram->getParameter(c)->parameterCallback(params[c]);
+        fxProgram->getParameter(c)->parameterDisplay(paramDisplay);
         jsonStringPtr += sprintf(jsonBfr+jsonStringPtr,"{\"control\": %d,\"name\": \"%s\",\"value\": \"%s\"}, \r\n",
-            fxPrograms[fxProgramNr]->parameters[c].control,
-            fxPrograms[fxProgramNr]->parameters[c].name,
+            fxProgram->getParameter(c)->getControl(),
+            fxProgram->getParameter(c)->getParameterName(),
             paramDisplay);
     }
-    if (fxPrograms[fxProgramNr]->nParameters > 0)
+    if (fxProgram->getParameterCount() > 0)
     {
         jsonStringPtr -= 4;
         *(jsonBfr + jsonStringPtr) = 0;
@@ -254,9 +251,10 @@ uint32_t getParamValues(int argc,char ** argv,char * jsonBfr)
 
 int main(int argc, char ** argv)
 {
+    
     char jsonBfr[2048];
     uint32_t charsWritten;
-    
+    initDelayMemoryHandler();
     if (argc == 1)
     {
         printf("Offline FxProgram Processor v0.1\r\n\r\n");
@@ -291,5 +289,6 @@ int main(int argc, char ** argv)
         }
         printf("%s",jsonBfr);
     }
+        
     
 }

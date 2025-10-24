@@ -112,7 +112,7 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
-            "name": "gcc-9 - offline Audio processing",
+            "name": "g++ - offline Audio processing",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/processThroughFxProgram",

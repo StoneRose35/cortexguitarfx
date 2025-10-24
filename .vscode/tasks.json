@@ -30,22 +30,21 @@
         {
             "type": "cppbuild",
             "label": "compile offline audio processor",
-            "command": "/usr/bin/gcc-9",
+            "command": "g++",
             "args": [
                 "-I./Inc",
                 "-I./Tests/inc",
                 "-fdiagnostics-color=always",
-                "-DFLOAT_AUDIO",
                 "-g",
-                "./Tests/processThroughFxProgram.c",
-                "./Src/common/audio/*.c",
-                "./Src/common/math/*.c",
-                "./Src/common/stringFunctions.c",
-                "./Src/pipicofx/fxProgram*.c",
-                "./Tests/libs/wavReader.c",
+                "./Src/pipicofx/FxProgram.cpp",
+                "./Src/pipicofx/FxProgramLoader.cpp",
+                "./Src/pipicofx/FxProgramParameter.cpp",
+                "./Src/pipicofx/0*.cpp",
+                "./Src/pipicofx/*AudioProcessor.cpp",
+                "out/*.o",
+                "./Tests/processThroughFxProgram.cpp", 
                 "-o",
-                "./Tests/processThroughFxProgram",
-                "-lm"
+                "./Tests/processThroughFxProgram", "-lm"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -53,7 +52,11 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "compile c part for c++ test",
             "detail": "Function to run a given wavefile through a predefined fx program."
         },
         {
@@ -160,6 +163,25 @@
                 "isDefault": false
             },
             "detail": "Erstellt das Tool bin2dfu."
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile c part for c++ test",
+            "command": "/usr/bin/gcc",
+            "args": [
+                "-I./../Inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "-c",
+                "./../Src/common/audio/*.c","./../Src/common/stringFunctions.c","./../Src/common/math/*.c","./../Src/pipicofx/delayMemoryHandler.c", "./../Tests/libs/wavReader.c"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/out"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
         },
         {
             "type": "cppbuild",
