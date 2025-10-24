@@ -4,6 +4,7 @@
 typedef struct 
 {
     uint32_t bitmask;
+    int32_t halfvalue;
 } BitCrusherDataType;
 
 

@@ -20,16 +20,15 @@ void MonsterCrusher::Param1::parameterCallback(uint16_t val) // set bit mask
     uint32_t resolution;
     resolution = (4096 - val)*24;
     resolution >>= 12;
-    pData->resolution = (uint8_t)resolution;
     rawValue = val;
     setBitMask((uint8_t)resolution,&pData->bitcrusher);
 }
 
 void MonsterCrusher::Param1::parameterDisplay(char*res)
-{
-    uint8_t resolution;    
-    resolution = pData->resolution;
-    UInt8ToChar(resolution,res);
+{  
+    uint8_t nbits = ((4096 - rawValue)*24) >> 12;
+    UInt8ToChar(nbits,res);
+    appendToString(res,"-bits");
 }
 
 void MonsterCrusher::Param2::parameterCallback(uint16_t val)
