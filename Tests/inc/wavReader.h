@@ -29,8 +29,8 @@ typedef struct {
     FILE * filePointer;
 } WavFileType;
 
-int openWavFile(char* filename,WavFileType*wavFile);
-int createWavFile(char*filename,WavFileType*wavFile,uint32_t length);
+int openWavFile(const char* filename,WavFileType*wavFile);
+int createWavFile(const char*filename,WavFileType*wavFile,uint32_t length);
 void getNextSample(int16_t*sample,WavFileType*wavFile);
 void writeNextSample(int16_t*sample,WavFileType*wavFile);
 void writeWavFile(WavFileType*wavFile);

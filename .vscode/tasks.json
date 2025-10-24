@@ -47,15 +47,19 @@
         {
             "type": "cppbuild",
             "label": "compile offline audio processor",
-            "command": "/usr/bin/gcc-9",
+            "command": "g++",
             "args": [
                 "-I./Inc",
                 "-I./Tests/inc",
                 "-fdiagnostics-color=always",
                 "-g",
-                "./Tests/processThroughFxProgram.c", "./Src/common/audio/*.c",
-                "./Src/common/stringFunctions.c","./Src/pipicofx/fxProgram*.c","./Tests/libs/wavReader.c",
-                "./Src/common/math/*.c",
+                "./Src/pipicofx/FxProgram.cpp",
+                "./Src/pipicofx/FxProgramLoader.cpp",
+                "./Src/pipicofx/FxProgramParameter.cpp",
+                "./Src/pipicofx/0*.cpp",
+                "./Src/pipicofx/*AudioProcessor.cpp",
+                "out/*.o",
+                "./Tests/processThroughFxProgram.cpp", 
                 "-o",
                 "./Tests/processThroughFxProgram", "-lm"
             ],
@@ -69,6 +73,7 @@
                 "kind": "build",
                 "isDefault": true
             },
+            "dependsOn": "compile c part for c++ test",
             "detail": "Function to run a given wavefile through a predefined fx program."
         },
         {
@@ -235,7 +240,7 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "-c",
-                "./../Src/common/audio/*.c","./../Src/common/stringFunctions.c","./../Src/common/math/*.c","./../Src/pipicofx/delayMemoryHandler.c"
+                "./../Src/common/audio/*.c","./../Src/common/stringFunctions.c","./../Src/common/math/*.c","./../Src/pipicofx/delayMemoryHandler.c", "./../Tests/libs/wavReader.c"
             ],
             "options": {
                 "cwd": "${workspaceFolder}/out"
