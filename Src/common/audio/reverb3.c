@@ -27,6 +27,7 @@ void initReverb3(Reverb3Type*data,float*delayMemoryPtr)
         data->diffusers[c].diffusorSize=DIFFUSOR_SIZE;
     }
     data->delayLength = 3911;
+    data->delay.delayLinePtr = 0;
     data->delay.delayBufferLength = 0x1000;
     data->delay.delayInSamples = data->delayLength;
     data->delay.delayLine = delayMemoryPtr + cnt*DIFFUSOR_SIZE;

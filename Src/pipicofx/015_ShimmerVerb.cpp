@@ -44,25 +44,25 @@ void ShimmerVerb::ShimmerVerb::setup()
 
     initDelay(this->delays,delayMemoryPointer,256);
     this->delays[0].delayInSamples = 149;
-    this->delays[0].mix = ((1 << 15) -1) ;
+    this->delays[0].mix = 0.997f;
     this->delays[0].feedbackFunction=0;
     initDelay(this->delays+1,delayMemoryPointer+256,512);
     this->delays[1].delayInSamples = 337;
-    this->delays[1].mix = ((1 << 15) -1) ;
+    this->delays[1].mix = 0.997f;
     this->delays[1].feedbackFunction=0;
     initDelay(this->delays+2,delayMemoryPointer+512+256,2048);
     this->delays[2].delayInSamples = 1597;
-    this->delays[2].mix = ((1 << 15) -1);
+    this->delays[2].mix = 0.997f;
     this->delays[2].feedbackFunction=0;
     initDelay(this->delays+3,delayMemoryPointer+2048+512+256,4096);
     this->delays[3].delayInSamples = 3989;
-    this->delays[3].mix = ((1 << 15) -1) ;
+    this->delays[3].mix = 0.997f;
     this->delays[3].feedbackFunction = (AudioProcessorFunc)unicornGlitter;
     this->delays[3].feebackData = &this->unicornGlitterData;
 
     this->allpasses[0].delayLineIn = delayMemoryPointer + 4096+2048+512+256;
     this->allpasses[0].delayLineOut = delayMemoryPointer + 1024+4096+2048+512+256;
-    this->allpasses[0].coefficient = 22936;
+    this->allpasses[0].coefficient = 22936.0f/32768.0f;
     this->allpasses[0].delayPtr = 0;
     this->allpasses[0].oldValues = 0;
     this->allpasses[0].delayInSamples=617;
@@ -70,7 +70,7 @@ void ShimmerVerb::ShimmerVerb::setup()
 
     this->allpasses[1].delayLineIn = delayMemoryPointer + 1024+1024+4096+2048+512+256;
     this->allpasses[1].delayLineOut = delayMemoryPointer + 1024+1024+1024+4096+2048+512+256;
-    this->allpasses[1].coefficient = 22936;
+    this->allpasses[1].coefficient = 22936.0f/32768.0f;
     this->allpasses[1].delayPtr = 0;
     this->allpasses[1].oldValues = 0;
     this->allpasses[1].delayInSamples=907;
@@ -158,13 +158,13 @@ void ShimmerVerb::Param2::parameterDisplay(char*res)
 
 void ShimmerVerb::Param3::parameterCallback(uint16_t val)
 {
-    this->pData->mix=(val << 3);
+    this->pData->mix=((float)val)/4096.0f;
     this->rawValue = val; 
 }
 
 void ShimmerVerb::Param3::parameterDisplay(char*res)
 {
-    int16_t mixpercent = (int16_t)(this->pData->mix/328);
+    int16_t mixpercent = (int16_t)(this->pData->mix*100.0f);
     Int16ToChar(mixpercent,res);
     appendToString(res,"%");
 }

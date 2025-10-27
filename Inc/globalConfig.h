@@ -20,10 +20,8 @@
 #undef USB_DBG
 #undef  I2C_DBG
 
-#define DFU_SIM
-
+//#define DFU_SIM
 //#define FORCE_TEST_MODE
-
 
 
 // --------------------------

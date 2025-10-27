@@ -20,7 +20,7 @@ namespace PiPicoFX {
                 SimpleChorusType chorusData={        
                     .frequency = 500,
                     .depth = 10,
-                    .mix = 128};
+                    .mix = 0.5f};
                 GainStageDataType presetVolume={
                     .gain=1.0f,
                     .offset=0.0f

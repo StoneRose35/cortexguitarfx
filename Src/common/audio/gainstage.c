@@ -14,7 +14,5 @@ float gainStageProcessSample(float sampleIn,GainStageDataType*data)
 {
     float sampleOut;
     sampleOut = sampleIn * data->gain + data->offset;
-    
-    sampleOut=sampleOut;
     return sampleOut;
 }

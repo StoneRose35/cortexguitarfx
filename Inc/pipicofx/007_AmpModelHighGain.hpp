@@ -47,7 +47,10 @@ namespace PiPicoFX {
                 uint8_t cabSimType=0;
                 MultiWaveShaperDataType waveshaper1;
                 DelayDataType delay={.feedbackFunction=0};
-                ReverbType reverb;
+                ReverbType reverb={
+                    .mix=0.5f,
+                    .paramNr=0
+                };
                 FirFilterType customCabFir={
                     .coefficients = {((int16_t)0x62c)/32768.0f, ((int16_t)0x674)/32768.0f, ((int16_t)0x7d6)/32768.0f, ((int16_t)0xbc4)/32768.0f, ((int16_t)0x1312)/32768.0f, ((int16_t)0x1ea7)/32768.0f,
          ((int16_t)0x2e33)/32768.0f, ((int16_t)0x3b3a)/32768.0f, ((int16_t)0x3a9e)/32768.0f, ((int16_t)0x29bf)/32768.0f, ((int16_t)0x15f5)/32768.0f,

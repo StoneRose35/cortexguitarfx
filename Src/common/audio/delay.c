@@ -13,12 +13,7 @@ void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
     {
         data->delayLine[c]=0.0f;
     }
-    data->delayInSamples=1;
     data->delayLinePtr=0;
-    data->feedback=0.0f;
-    data->mix=0.0f;
-    data->feedbackFunction=0;
-    data->feebackData=0;
 }
 
 __ITCM_CODE
@@ -62,7 +57,7 @@ float delayLineWetProcessSample(float sampleIn,DelayDataType*data)
     }
     sampleFedBack *= data->feedback;
 
-    *(data->delayLine + data->delayLinePtr) = sampleFedBack;
+    *(data->delayLine + data->delayLinePtr) = sampleIn + sampleFedBack;
     data->delayLinePtr++;
     data->delayLinePtr &= (data->delayBufferLength -1);
     return sampleOut;

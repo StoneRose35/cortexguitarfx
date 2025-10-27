@@ -11,5 +11,7 @@
 
 void enableFpu();
 
+uint32_t configureAndEnableMPU();
+
 #endif /* CORE_H_ */
 

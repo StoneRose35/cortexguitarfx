@@ -21,14 +21,14 @@ namespace PiPicoFX {
                 uint8_t compressorType=0;
                 CompressorDataType compressor={
                     .gainFunction = {
-                        .threshhold = 32767,
+                        .threshhold = -30.0f,
                         .gainReduction = 1,
                     },
                     .avgLowpass={
                         .oldVal=0,
                         .oldXVal=0,
-                        .alphaRising=32703,
-                        .alphaFalling=32703,
+                        .alphaRising=32703.0f/32768.0f,
+                        .alphaFalling=32703.0f/32768.0f,
                     },
                     .currentAvg=0
                 };

@@ -97,7 +97,7 @@ void FreeVerb::Param2::parameterCallback(uint16_t val)
 {
     for (uint8_t c=0;c<8;c++)
     {
-        (this->pData->feedbackFilters+c)->alpha = 32767 - (val << 3);
+        (this->pData->feedbackFilters+c)->alpha = 1.0f - ((float)val)/4096.0f;
     }
     this->rawValue = val; 
 }

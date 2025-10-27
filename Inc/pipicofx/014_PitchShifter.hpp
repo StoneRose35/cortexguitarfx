@@ -26,7 +26,8 @@ namespace PiPicoFX {
                 Pitchshifter2DataType  pitchShifter={
                     .currentDelayPosition=0,
                     .delayIncrement=0x4,
-                    .crossFadeWidthPwr2=8,
+                    .buffersizePowerTwo=13,
+                    .crossFadeWidthPwr2=11,
                 };
                 float mix;
 
