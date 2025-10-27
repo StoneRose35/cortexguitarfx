@@ -117,6 +117,7 @@ void flashingTask()
         }
         bytesReceived++;
     }
+    waitSysticks(5); // wait until last ack is sent
     __NVIC_SystemReset();
 }
 

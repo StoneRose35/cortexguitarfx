@@ -9,6 +9,7 @@ PROJECT=microsys_audio
 MAIN_VERSION=0
 SUB_VERSION=7
 MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
+FLASH_QSPI_SYNC_NUMBER:=$(shell awk 'BEGIN{srand();print int(rand()*(4294967296))};')
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
 MCU_BOARD=Daisy Seed
@@ -72,7 +73,7 @@ out:
 	mkdir ./out
 
 # generate the startup file
-out/stm32h750_startup.o: Startup/startup_stm32h750ibkx.s out 
+out/stm32h750_startup.o: Startup/startup_stm32h750ibkx.S out 
 	$(CC) $(CARGS) -c  $< -o ./out/stm32h750_startup.o
 
 out/helpers.o: Src/stm32h750/helpers.s out	
@@ -148,6 +149,8 @@ Inc/gen/version.h: Inc/gen
 	@echo "const char PI_PICO_FX_VERSION_NR[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION) for $(MCU_BOARD)\";\r\n" >> Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_BUILD_DATE[]=\"$(BUILD_DATE)\";\r\n" >> Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_BUILD_TIME[]=\"$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
+	@echo "__attribute__ ((section (\".sync_number_flash\"))) uint32_t FLASH_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
+	@echo "__attribute__ ((section (\".sync_number_qspi\"))) uint32_t QSPI_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # main linking and generating flashable content
@@ -174,7 +177,8 @@ program_flash: out/$(PROJECT).bin
 	rm out/*.o
 
 program_all: out/$(PROJECT).bin out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
-	st-flash --connect-under-reset write out/$(PROJECT).bin 0x8000000
+	st-flash --connect-under-reset --reset write out/$(PROJECT).bin 0x8000000
+	sleep 3
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
 	rm out/*.o
 
@@ -208,4 +212,4 @@ testout/%.o: Src/mock/%.c
 testout/%.o: Tests/%.c
 	$(CC_TEST) -o $@ -c $^
 
-.PHONY: Inc/gen/compilationInfo.h
+.PHONY: Inc/gen/version.h

@@ -64,7 +64,8 @@ volatile uint8_t context;
 
 extern CommBufferType usbCommBuffer;
 extern CommBufferType btCommBuffer;
-
+extern uint32_t FLASH_SYNC_NUMBER; 
+extern uint32_t QSPI_SYNC_NUMBER;
 
 float inputSampleScaled;
 volatile float avgOutOld=0,avgInOld=0;
@@ -133,6 +134,9 @@ int main(void)
 	 * */
     setupClock();
 	initSystickTimer();
+    configureAndEnableMPU();
+    SCB_EnableICache();
+    SCB_EnableDCache();
 	initUart(2000000);
 	initDMA();
     initFmcSdram();
@@ -160,7 +164,7 @@ int main(void)
     // wait for flashing when button 0 (Enter switch) is pressed during startup 
     // allows flashing the QSPI from a corrupted state
     uint8_t currentSwitchVal = getMomentarySwitchValue(0);
-    if ((currentSwitchVal & 0x01)==1)
+    if ((currentSwitchVal & 0x01)==1 || FLASH_SYNC_NUMBER != QSPI_SYNC_NUMBER)
     {
         while ((task & (1 << TASK_FLASH_QSPI)) == 0);    
         flashingTask();
@@ -353,18 +357,13 @@ int main(void)
         }
         encoderDelta=getStickyIncrementDelta();
 
-        //if (encoderDelta > 2)
-        //{
-        //    encoderDelta = 1;
+
+        if (encoderDelta != 0)
+        {
             onRotaryChange(encoderDelta,&piPicoUiController);
             clearStickyIncrementDelta();
-        //}
-        //else if (encoderDelta < -2)
-        //{
-        //    encoderDelta = -1;
-        //    onRotaryChange(encoderDelta,&piPicoUiController);
-        //    clearStickyIncrementDelta();
-        //}
+        }
+
 
         /*
         *

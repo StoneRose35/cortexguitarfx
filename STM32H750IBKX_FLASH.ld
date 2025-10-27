@@ -65,6 +65,10 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  .qspi_static :  {
+    KEEP(*(.sync_number_qspi))
+  } > QSPIFLASH
+
 _siqspicode = LOADADDR(.qspi_code);
 
   .qspi_code :
@@ -89,6 +93,7 @@ _siqspicode = LOADADDR(.qspi_code);
   .text :
   {
     . = ALIGN(4);
+    KEEP(*(.sync_number_flash))
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
     *(.glue_7)         /* glue arm to thumb code */

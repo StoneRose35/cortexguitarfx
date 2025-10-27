@@ -24,7 +24,10 @@ uint32_t getTickValue()
  */
 void initSystickTimer()
 {
-
+    if (SysTick->CTRL & (1 << SysTick_CTRL_ENABLE_Pos))
+    {
+        return;
+    }
     SysTick->LOAD = (AHB_CLOCK>>3)/100;
     SysTick->VAL = (AHB_CLOCK>>3)/100;
     SysTick->CTRL = (1 << SysTick_CTRL_ENABLE_Pos) | (1 << SysTick_CTRL_TICKINT_Pos);

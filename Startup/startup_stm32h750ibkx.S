@@ -24,6 +24,8 @@
   ******************************************************************************
   */
 
+  #include "./../Inc/globalConfig.h"
+
   .syntax unified
   .cpu cortex-m7
   .fpu softvfp
@@ -31,6 +33,7 @@
 
 .global  g_pfnVectors
 .global  Default_Handler
+.global HardFault_Handler
 
 /* start address for the initialization values of the .data section.
 defined in linker script */
@@ -45,6 +48,7 @@ defined in linker script */
 .word  _ebss
 /* stack used for SystemInit_ExtMemCtl; always internal RAM used */
 
+
 /**
  * @brief  This is the code that gets called when the processor first
  *          starts execution following a reset event. Only the absolutely
@@ -54,7 +58,10 @@ defined in linker script */
  * @retval : None
 */
 
-    .section  .text.Reset_Handler
+
+
+
+  .section  .text.Reset_Handler
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:
