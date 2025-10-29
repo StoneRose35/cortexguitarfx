@@ -75,7 +75,7 @@ PiPicoFxUiType piPicoUiController;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define ADC_LOWPASS 60
-#define UI_DMIN 16
+#define UI_DMIN 8
 uint32_t encoderVal,encoderCntr,encNew;
 int16_t encoderDelta;
 uint8_t enterSwitchVal;

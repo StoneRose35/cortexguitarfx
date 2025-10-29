@@ -25,18 +25,22 @@ float AmpModel::AmpModel::processSample(float sampleIn)
     this->highpass_old_out = this->highpass_out;
 
     out = this->highpass_out;
+    
     for (uint8_t c=0;c<this->nWaveshapers;c++)
     {
         out = waveShaperProcessSample(out,&this->waveshaper1);
     }
+    
 
     out = gainStageProcessSample(out,&presetVolume);
 
     out = out/2.0f;
     out = secondOrderIirFilterProcessSample(out,&this->filter1);
-    //out = out/2.0f;
+    
     out = firFilterProcessSample(out, &this->filter3);
+    
     out = delayLineProcessSample(out, &this->delay);
+    
     return out;
 }
 
@@ -110,6 +114,7 @@ void AmpModel::AmpModel::setup()
     initfirFilter(&filter3);
     initWaveShaper(&waveshaper1,&waveShaperDefaultOverdrive);
     initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 2),MAX_DELAY_SINGLEBUFFER);
+    delay.feebackData = (void*)&feedbackFilter;
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));

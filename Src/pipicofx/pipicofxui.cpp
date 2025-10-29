@@ -20,27 +20,27 @@ extern "C" {
 static BwImageBufferType imgBuffer;
 static BwImageType img;
 const uiEnterFct uiEnterFunctions[]={&enterLevel0, &enterLevel1, &enterLevel2, &enterLevel3, &enterLevel4, &enterLevel5};
-
+extern PiPicoFxUiType piPicoUiController;
 
 /*
 Callback function pointers
 */
-static void (*enterButtonPressedCallback)(PiPicoFxUiType *ui)=0; 
-static void (*enterButtonReleasedCallback)(PiPicoFxUiType* ui)=0; 
-static void (*exitButtonPressedCallback)(PiPicoFxUiType* ui)=0;
-static void (*exitButtonReleasedCallback)(PiPicoFxUiType* ui)=0;
-static void (*rotaryCallback)(int16_t val,PiPicoFxUiType* ui)=0;
-static void (*knob0Callback)(uint16_t val,PiPicoFxUiType* ui)=0;
-static void (*knob1Callback)(uint16_t val,PiPicoFxUiType* ui)=0;
-static void (*knob2Callback)(uint16_t val,PiPicoFxUiType* ui)=0;
-static void (*stompSwitch1PressedCallback)(PiPicoFxUiType* ui)=0;
-static void (*stompSwitch1ReleasedCallback)(PiPicoFxUiType* ui)=0;
-static void (*stompSwitch2PressedCallback)(PiPicoFxUiType* ui)=0;
-static void (*stompSwitch2ReleasedCallback)(PiPicoFxUiType* ui)=0;
-static void (*stompSwitch3PressedCallback)(PiPicoFxUiType* ui)=0;
-static void (*stompSwitch3ReleasedCallback)(PiPicoFxUiType* ui)=0;
-static void (*onUpdateCallback)(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)=0;
-static void (*onCreateCallback)(PiPicoFxUiType* ui)=0;
+static void (*enterButtonPressedCallback)(void)=0; 
+static void (*enterButtonReleasedCallback)(void)=0; 
+static void (*exitButtonPressedCallback)(void)=0;
+static void (*exitButtonReleasedCallback)(void)=0;
+static void (*rotaryCallback)(int16_t val)=0;
+static void (*knob0Callback)(uint16_t val)=0;
+static void (*knob1Callback)(uint16_t val)=0;
+static void (*knob2Callback)(uint16_t val)=0;
+static void (*stompSwitch1PressedCallback)(void)=0;
+static void (*stompSwitch1ReleasedCallback)(void)=0;
+static void (*stompSwitch2PressedCallback)(void)=0;
+static void (*stompSwitch2ReleasedCallback)(void)=0;
+static void (*stompSwitch3PressedCallback)(void)=0;
+static void (*stompSwitch3ReleasedCallback)(void)=0;
+static void (*onUpdateCallback)(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)=0;
+static void (*onCreateCallback)(void)=0;
 
 __QSPI_CODE
 BwImageType * getImageBuffer()
@@ -58,82 +58,82 @@ BwImageType * getImageBuffer()
  ui element callback
  */
 __QSPI_CODE
-void registerEnterButtonPressedCallback(void(*cb)(PiPicoFxUiType*))
+void registerEnterButtonPressedCallback(void(*cb)(void))
 {
     enterButtonPressedCallback=cb;
 }
 __QSPI_CODE
-void registerEnterButtonReleasedCallback(void(*cb)(PiPicoFxUiType*))
+void registerEnterButtonReleasedCallback(void(*cb)(void))
 {
     enterButtonReleasedCallback=cb;
 }
 __QSPI_CODE
-void registerExitButtonPressedCallback(void(*cb)(PiPicoFxUiType*))
+void registerExitButtonPressedCallback(void(*cb)(void))
 {
     exitButtonPressedCallback=cb;
 }
 __QSPI_CODE
-void registerExitButtonReleasedCallback(void(*cb)(PiPicoFxUiType*))
+void registerExitButtonReleasedCallback(void(*cb)(void))
 {
     exitButtonReleasedCallback=cb;
 }
 __QSPI_CODE
-void registerStompswitch1PressedCallback(void(*cb)(PiPicoFxUiType*))
+void registerStompswitch1PressedCallback(void(*cb)(void))
 {
     stompSwitch1PressedCallback=cb;
 }
 __QSPI_CODE
-void registerStompswitch1ReleasedCallback(void(*cb)(PiPicoFxUiType*))
+void registerStompswitch1ReleasedCallback(void(*cb)(void))
 {
     stompSwitch1ReleasedCallback=cb;
 }
 __QSPI_CODE
-void registerStompswitch2PressedCallback(void(*cb)(PiPicoFxUiType*))
+void registerStompswitch2PressedCallback(void(*cb)(void))
 {
     stompSwitch2PressedCallback=cb;
 }
 __QSPI_CODE
-void registerStompswitch2ReleasedCallback(void(*cb)(PiPicoFxUiType*))
+void registerStompswitch2ReleasedCallback(void(*cb)(void))
 {
     stompSwitch2ReleasedCallback=cb;
 }
 __QSPI_CODE
-void registerStompswitch3PressedCallback(void(*cb)(PiPicoFxUiType*))
+void registerStompswitch3PressedCallback(void(*cb)(void))
 {
     stompSwitch3PressedCallback=cb;
 }
 __QSPI_CODE
-void registerStompswitch3ReleasedCallback(void(*cb)(PiPicoFxUiType*))
+void registerStompswitch3ReleasedCallback(void(*cb)(void))
 {
     stompSwitch3ReleasedCallback=cb;
 }
 __QSPI_CODE
-void registerRotaryCallback(void(*cb)(int16_t,PiPicoFxUiType*))
+void registerRotaryCallback(void(*cb)(int16_t))
 {
     rotaryCallback=cb;
 }
 __QSPI_CODE
-void registerKnob0Callback(void(*cb)(uint16_t,PiPicoFxUiType*))
+void registerKnob0Callback(void(*cb)(uint16_t))
 {
     knob0Callback=cb;
 }
 __QSPI_CODE
-void registerKnob1Callback(void(*cb)(uint16_t,PiPicoFxUiType*))
+void registerKnob1Callback(void(*cb)(uint16_t))
 {
     knob1Callback=cb;
 }
 __QSPI_CODE
-void registerKnob2Callback(void(*cb)(uint16_t,PiPicoFxUiType*))
+void registerKnob2Callback(void(*cb)(uint16_t))
 {
     knob2Callback=cb;
 }
 __QSPI_CODE
-void registerOnUpdateCallback(void(*cb)(int16_t,int16_t,uint8_t,PiPicoFxUiType*))
+void registerOnUpdateCallback(void(*cb)(int16_t,int16_t,uint8_t))
 {
     onUpdateCallback=cb;
 }
 __QSPI_CODE
-void registerOnCreateCallback(void(*cb)(PiPicoFxUiType*))
+void registerOnCreateCallback(void(*cb)(void))
 {
     onCreateCallback=cb;
 }
@@ -167,7 +167,7 @@ void onEnterPressed(PiPicoFxUiType*data)
 {
     if (enterButtonPressedCallback!=0)
     {
-        enterButtonPressedCallback(data);
+        enterButtonPressedCallback();
     }
 }
 __QSPI_CODE
@@ -175,7 +175,7 @@ void onEnterReleased(PiPicoFxUiType*data)
 {
     if (enterButtonReleasedCallback!=0)
     {
-        enterButtonReleasedCallback(data);
+        enterButtonReleasedCallback();
     }
 }
 __QSPI_CODE
@@ -183,7 +183,7 @@ void onExitPressed(PiPicoFxUiType*data)
 {
     if (exitButtonPressedCallback!=0)
     {
-        exitButtonPressedCallback(data);
+        exitButtonPressedCallback();
     }
     if(uiStackCurrent(data) != 0xFF)
     {
@@ -195,7 +195,7 @@ void onExitReleased(PiPicoFxUiType*data)
 {
     if (exitButtonReleasedCallback!=0)
     {
-        exitButtonReleasedCallback(data);
+        exitButtonReleasedCallback();
     }
 }
 __QSPI_CODE
@@ -203,7 +203,7 @@ void onRotaryChange(int16_t delta,PiPicoFxUiType*data)
 {
     if(rotaryCallback!=0)
     {
-        rotaryCallback(delta,data);
+        rotaryCallback(delta);
     }
 }
 __QSPI_CODE
@@ -211,7 +211,7 @@ void onKnob0(uint16_t val,PiPicoFxUiType*data)
 {
     if(knob0Callback!=0)
     {
-        knob0Callback(val,data);
+        knob0Callback(val);
     }
 }
 __QSPI_CODE
@@ -219,7 +219,7 @@ void onKnob1(uint16_t val,PiPicoFxUiType*data)
 {
     if(knob1Callback!=0)
     {
-        knob1Callback(val,data);
+        knob1Callback(val);
     }
 }
 __QSPI_CODE
@@ -227,7 +227,7 @@ void onKnob2(uint16_t val,PiPicoFxUiType*data)
 {
     if(knob2Callback!=0)
     {
-        knob2Callback(val,data);
+        knob2Callback(val);
     }
 }
 __QSPI_CODE
@@ -235,7 +235,7 @@ void onStompSwitch1Pressed(PiPicoFxUiType*data)
 {
     if (stompSwitch1PressedCallback!=0)
     {
-        stompSwitch1PressedCallback(data);
+        stompSwitch1PressedCallback();
     }
 }
 __QSPI_CODE
@@ -243,7 +243,7 @@ void onStompSwitch1Released(PiPicoFxUiType*data)
 {
     if (stompSwitch1ReleasedCallback!=0)
     {
-        stompSwitch1ReleasedCallback(data);
+        stompSwitch1ReleasedCallback();
     }
 }
 __QSPI_CODE
@@ -251,7 +251,7 @@ void onStompSwitch2Pressed(PiPicoFxUiType*data)
 {
     if (stompSwitch2PressedCallback!=0)
     {
-        stompSwitch2PressedCallback(data);
+        stompSwitch2PressedCallback();
     }
 }
 __QSPI_CODE
@@ -259,7 +259,7 @@ void onStompSwitch2Released(PiPicoFxUiType*data)
 {
     if (stompSwitch2ReleasedCallback!=0)
     {
-        stompSwitch2ReleasedCallback(data);
+        stompSwitch2ReleasedCallback();
     }
 }
 __QSPI_CODE
@@ -267,7 +267,7 @@ void onStompSwitch3Pressed(PiPicoFxUiType*data)
 {
     if (stompSwitch3PressedCallback!=0)
     {
-        stompSwitch3PressedCallback(data);
+        stompSwitch3PressedCallback();
     }
 }
 __QSPI_CODE
@@ -275,7 +275,7 @@ void onStompSwitch3Released(PiPicoFxUiType*data)
 {
     if (stompSwitch3ReleasedCallback!=0)
     {
-        stompSwitch3ReleasedCallback(data);
+        stompSwitch3ReleasedCallback();
     }
 }
 __QSPI_CODE
@@ -283,7 +283,7 @@ void onUpdate(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*
 {
     if (onUpdateCallback != 0)
     {
-        onUpdateCallback(avgInput, avgOutput, cpuLoad, data);
+        onUpdateCallback(avgInput, avgOutput, cpuLoad);
     }
 }
 __QSPI_CODE
@@ -291,7 +291,7 @@ void onCreate(PiPicoFxUiType*data)
 {
     if (onCreateCallback != 0)
     {
-        onCreateCallback(data);
+        onCreateCallback();
     }
 }
 __QSPI_CODE
@@ -326,7 +326,7 @@ __QSPI_CODE
 void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
 {
     piPicoUiController->currentProgram=PiPicoFX::loadProgram(2);
-    piPicoUiController->currentProgramIdx=0;
+    piPicoUiController->currentProgramIdx=2;
     piPicoUiController->currentParameter=piPicoUiController->currentProgram->getParameter(0);
     piPicoUiController->currentParameterIdx=0;
     piPicoUiController->locked=0;

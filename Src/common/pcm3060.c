@@ -155,14 +155,14 @@ void pcm3060SetInputState(uint8_t channel,uint8_t val)
 */
 uint8_t pcm3060GetInputState()
 {
-    uint8_t regContent;
+    uint8_t regContent, regContentBuffer;
     if (getTargetAddressExternal()!=PCM3060_I2C_ADDRESS)
     {
         setTargetAddressExternal(PCM3060_I2C_ADDRESS);
     }
     regContent = pcm3060Read(PCM3060_R73);
-    regContent &= 0x3;
-    regContent = ((regContent & 0x2) >> 1) | (regContent &0x1 << 1);
+    regContentBuffer = regContent ^ 0x3;
+    regContent = ((regContentBuffer & 0x2) >> 1) | ((regContentBuffer & 0x1) << 1);
     return regContent;
 }
 

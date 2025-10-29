@@ -176,6 +176,14 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
     if (encoderDelta != 0 && programChangeState==0)
     {
+        if (encoderDelta > 0)
+        {
+            encoderDelta = 1;
+        }
+        else
+        {
+            encoderDelta = -1;
+        }
         data->currentProgramIdx += encoderDelta;
         if (data->currentProgramIdx >= N_FX_PROGRAMS && encoderDelta > 0)
         {

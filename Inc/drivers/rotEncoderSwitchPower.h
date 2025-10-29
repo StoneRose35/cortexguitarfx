@@ -2,7 +2,7 @@
 #define _ROTARY_ENCODER_H_
 #include <stdint.h>
 
-#define ROTARY_ENCODER_DEBOUNCE 3
+#define ROTARY_ENCODER_DEBOUNCE 10
 
 
 void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches);

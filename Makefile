@@ -178,7 +178,7 @@ program_flash: out/$(PROJECT).bin
 
 program_all: out/$(PROJECT).bin out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
 	st-flash --connect-under-reset --reset write out/$(PROJECT).bin 0x8000000
-	sleep 3
+	sleep 1
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
 	rm out/*.o
 
