@@ -36,7 +36,7 @@ extern volatile uint8_t programChangeState;
 
 static void create(PiPicoFxUiType*data)
 {
-    char strbfr[8];
+    char strbfr[24];
     char nrbfr[8];
     BwImageType* imgBuffer = getImageBuffer();
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
@@ -126,7 +126,7 @@ static void enterCallback(PiPicoFxUiType*data)
 
 static void exitCallback(PiPicoFxUiType*data)
 {
-    char strbfr[8];
+    char strbfr[24];
     char nrbfr[8];
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
     BwImageType* imgBuffer = getImageBuffer();
