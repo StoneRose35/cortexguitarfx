@@ -23,6 +23,10 @@ void MonsterCrusher::Param1::parameterCallback(uint16_t val)
 {
     uint16_t resolution;
     resolution = (4096 - val) >> 8;
+    if (resolution==0)
+    {
+        resolution = 1;
+    }
     setBitMask((uint8_t)resolution,&this->pData->bitcrusher);
     this->rawValue = val; 
 }
@@ -30,6 +34,10 @@ void MonsterCrusher::Param1::parameterCallback(uint16_t val)
 void MonsterCrusher::Param1::parameterDisplay(char*res)
 {
     uint8_t nbits = (4096-this->rawValue) >> 8;
+    if (nbits==0)
+    {
+        nbits = 1;
+    }
     UInt8ToChar(nbits,res);
     appendToString(res,"-bits");
 }
