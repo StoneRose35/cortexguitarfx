@@ -9,6 +9,7 @@ extern "C" {
 #include "audio/firstOrderIirFilter.h"
 #include "romfunc.h"
 
+__attribute__ ((section (".ramfunc"))) 
 int16_t freeVerbLowpass(int16_t sampleIn,void * filterData,volatile uint32_t * audioStatePtr)
 {
     return firstOrderIirLowpassProcessSample(sampleIn,(FirstOrderIirType*)filterData);
@@ -22,6 +23,7 @@ int16_t FreeVerb::FreeVerb::processSample(int16_t sampleIn)
     int32_t sampleOut;
     volatile uint32_t * audioStatePtr = getAudioStatePtr();
     int32_t delaySum=0;
+    
     for (uint8_t c=0;c<8;c++)
     {
         delaySum += delayLineWetProcessSample(sampleIn,this->delays+c);
