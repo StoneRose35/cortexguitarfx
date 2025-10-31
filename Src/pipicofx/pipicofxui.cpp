@@ -309,7 +309,8 @@ uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController)
     {
         return *(piPicoUiController->uiLevelStack + --piPicoUiController->uiLevelStackPtr);
     }
-    return 0xFF;
+    return  *(piPicoUiController->uiLevelStack + piPicoUiController->uiLevelStackPtr);
+    //return 0xFF;
 }
 __QSPI_CODE
 uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController)
@@ -318,7 +319,7 @@ uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController)
     {
         return *(piPicoUiController->uiLevelStack + piPicoUiController->uiLevelStackPtr-1);
     }
-    return 0xFF;
+    return *(piPicoUiController->uiLevelStack);
 }
 __QSPI_CODE
 void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
@@ -330,7 +331,8 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     piPicoUiController->locked=0;
     piPicoUiController->editViaRotary =0;
     piPicoUiController->uiLevelStackPtr = 0;
-    for (uint8_t c=0;c<8;c++)
+    *(piPicoUiController->uiLevelStack) = 0;
+    for (uint8_t c=1;c<8;c++)
     {
         *(piPicoUiController->uiLevelStack + c) = 0xFF;
     }

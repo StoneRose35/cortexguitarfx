@@ -12,6 +12,10 @@ extern "C" {
 }
 #include "pipicofx/FxProgramLoader.hpp"
 
+static void knob0Callback(uint16_t val,PiPicoFxUiType*data);
+static void knob1Callback(uint16_t val,PiPicoFxUiType*data);
+static void knob2Callback(uint16_t val,PiPicoFxUiType*data);
+
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
 BwImageTypeConst lock=
 {
@@ -159,17 +163,16 @@ static void enterCallback(PiPicoFxUiType*data)
 static void exitCallback(PiPicoFxUiType*data)
 {
 
+    if (uiStackCurrent(data) == 0x0)
+    {
+        data->locked ^=1;
+        return;
+    }
     // apply current program to preset when coming from 4
     if(uiStackCurrent(data)==4)
     {
         presets[currentPreset].programNr = data->currentProgramIdx;
     }
-    else
-    {
-        data->locked ^= 0x1;
-        create(data);
-    }
-
 }
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
