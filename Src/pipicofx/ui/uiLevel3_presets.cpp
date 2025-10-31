@@ -6,6 +6,7 @@ extern "C"
 #include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
+#include "images/playoverlay.h"
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
 #include "images/fwUpgradeOverlay.h"
@@ -25,19 +26,27 @@ extern uint8_t currentPreset;
 static volatile uint8_t overlayNr=0xFF;
 static volatile uint8_t bankChanged=0; // flag indicating that the bank has been changed upon stomp switch release
                                        // used to prohibit action when the second stomp switch is released
-const BwImageType* overlays[]={&editOverlay_streamimg, &settingsOverlay_streamimg, &aboutoverlay_streamimg, &fwUpgradeOverlay_streamimg};
+static const BwImageType* overlays[]={&playoverlay_streamimg,&editOverlay_streamimg, &settingsOverlay_streamimg, &aboutoverlay_streamimg, &fwUpgradeOverlay_streamimg};
 extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
 
-#define OVERLAY_NR_EDIT 0
-#define OVERLAY_NR_SYSTEMSETTINGS 1
-#define OVERLAY_NR_ABOUT 2
-#define OVERLAY_NR_FWUPDATE 3
+
+static uint16_t pot1Val=0;
+static uint16_t pot2Val=0;
+static uint16_t pot3Val=0;
+
+#define OVERLAY_NR_PLAY 0
+#define OVERLAY_NR_EDIT 1
+#define OVERLAY_NR_SYSTEMSETTINGS 2
+#define OVERLAY_NR_ABOUT 3
+#define OVERLAY_NR_FWUPDATE 4
 
 static void create(PiPicoFxUiType*data)
 {
     char strbfr[24];
     char nrbfr[8];
+    uint8_t startY;
+    uint16_t val_p1=0xFFFF,val_p2=0xFFFF,val_p3=0xFFFF;
     BwImageType* imgBuffer = getImageBuffer();
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
     // display preset Name and Bank Number
@@ -51,26 +60,103 @@ static void create(PiPicoFxUiType*data)
     appendToString(strbfr,presets[currentPreset].name);
     drawText(5,42,strbfr,imgBuffer,font);
 
-    *(strbfr) = 0;
-    appendToString(strbfr,"In");
-    font = getGFXFont(FREEMONO12PT7B);
-    drawText(5,42+10,strbfr,imgBuffer,(void*)0);
+    for (uint8_t c=0;c<data->currentProgram->getParameterCount();c++)
+    {
+        uint8_t currentCtrl = data->currentProgram->getParameter(c)->getControl();
+        switch (currentCtrl)
+        {
+        case 0:
+            val_p1 = data->currentProgram->getParameter(c)->rawValue;
+            break;
+        case 1:
+            val_p2 = data->currentProgram->getParameter(c)->rawValue;
+            break;
+        case 2: 
+            val_p3 = data->currentProgram->getParameter(c)->rawValue;
+        default:
+            break;
+        }
+    }
 
-    *(strbfr) = 0;
-    appendToString(strbfr,"Out");
-    drawText(5,42+20,strbfr,imgBuffer,(void*)0);
+    if (val_p3 != 0xFFFF)
+    {
+        startY = ((uint16_t)4096-val_p3)>>6;
+        // frame for value of p3
+        drawSquareInt(128-4,0,128,64,imgBuffer);
+        clearSquareInt(128-4+1,1,128-1,64-1,imgBuffer);
+        // value of p1
+        drawSquareInt(128-4+1,startY, 128-1,64-1,imgBuffer);
+    }
 
+    if (val_p2 != 0xFFFF)
+    {
+        startY = ((uint16_t)4096-val_p2)>>6;
+        // frame for value of p2
+        drawSquareInt(128-4-1*6,0,128-1*6,64,imgBuffer);
+        clearSquareInt(128-4+1-1*6,1,128-1-1*6,64-1,imgBuffer);
+        // value of p2
+        drawSquareInt(128-4+1-1*6,startY,128-1-1*6,64-1,imgBuffer);
+    }
+
+    if (val_p1 != 0xFFFF)
+    {
+        startY = ((uint16_t)4096-val_p1)>>6;
+        // frame for value of p1
+        drawSquareInt(128-4-2*6,0,128-2*6,64,imgBuffer);
+        clearSquareInt(128-4+1-2*6,1,128-1-2*6,64-1,imgBuffer);
+        // value of p3
+        drawSquareInt(128-4+1-2*6,startY,128-1-2*6,64-1,imgBuffer);
+    }
+    
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {    
+    uint16_t yval; 
     BwImageType* imgBuffer = getImageBuffer();
     // draw Level bars
-    clearSquare(40.0f,43.0f,128.0f,64.0f,imgBuffer);
+    clearSquareInt(0,56,128-3*6,64,imgBuffer);
     //in
-    drawSquare(40.0f,43.0f,40.0f + int2float(avgInput)*(128.0f-40.0f)/128.0f,52.0f,imgBuffer);
+    drawSquareInt(0,58,40 + ((avgInput)*(128-3*6))/128,60,imgBuffer);
     //out
-    drawSquare(40.0f,53.0f,40.0f + int2float(avgOutput)*(128.0f-40.0f)/128.0f,64.0f,imgBuffer);
+    drawSquareInt(0,62,40 + ((avgOutput)*(128-3*6))/128,64,imgBuffer);
+
+    // draw current position of potentiometers
+    clearSquareInt(122,0,124,64,imgBuffer);
+    yval =  (4096-pot3Val)>>6;
+    if (yval == 0)
+    {
+        yval = 1;
+    }
+    else if (yval == 63)
+    {
+        yval = 62;
+    }
+    drawSquareInt(122,yval-1,124,yval+1,imgBuffer);
+
+    clearSquareInt(122-1*6,0,124-1*6,64,imgBuffer);
+    yval =  (4096-pot2Val)>>6;
+    if (yval == 0)
+    {
+        yval = 1;
+    }
+    else if (yval == 63)
+    {
+        yval = 62;
+    }
+    drawSquareInt(122-1*6,yval-1,124-1*6,yval+1,imgBuffer);
+
+    clearSquareInt(122-2*6,0,124-2*6,64,imgBuffer);
+    yval =  (4096-pot1Val)>>6;
+    if (yval == 0)
+    {
+        yval = 1;
+    }
+    else if (yval == 63)
+    {
+        yval = 62;
+    }
+    drawSquareInt(122-2*6,yval-1,124-2*6,yval+1,imgBuffer);
 
     DisplayWriteFramebufferAsync(imgBuffer->data);
 }
@@ -82,15 +168,19 @@ static void enterCallback(PiPicoFxUiType*data)
     // show overlay menu (if not there)
     if (overlayNr == 0xFF)
     {
-        overlayNr = OVERLAY_NR_EDIT;
-        drawImage(41,0,&editOverlay_streamimg,imgBuffer);
+        overlayNr = OVERLAY_NR_PLAY;
+        drawImage(41,0,&playoverlay_streamimg,imgBuffer);
         uiStackPush(data,0xFF);
     }
     else
     {
         uiStackPop(data);
         uiStackPush(data, 3);
-        if (overlayNr == OVERLAY_NR_EDIT)
+        if (overlayNr == OVERLAY_NR_PLAY)
+        {
+            enterLevel0(data);
+        }
+        else if (overlayNr == OVERLAY_NR_EDIT)
         {
             enterLevel4(data);
         }
@@ -162,15 +252,15 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         if (encoderDelta > 0)
         {
             overlayNr++;
-            if (overlayNr > 3)
+            if (overlayNr > 4)
             {
-                overlayNr=3;
+                overlayNr=4;
             }
         }
         else
         {
             overlayNr--;
-            if (overlayNr > 3)
+            if (overlayNr > 4)
             {
                 overlayNr=0;
             }
@@ -364,6 +454,21 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
     }
 }
 
+static void knob0Callback(uint16_t val, PiPicoFxUiType*data)
+{
+    pot1Val = val;
+}
+
+static void knob1Callback(uint16_t val, PiPicoFxUiType*data)
+{
+    pot2Val = val;
+}
+
+static void knob2Callback(uint16_t val, PiPicoFxUiType*data)
+{
+    pot3Val = val;
+}
+
 void enterLevel3(PiPicoFxUiType*data)
 {
     if (loadPreset(presets,currentBank*3)!=0)
@@ -386,6 +491,9 @@ void enterLevel3(PiPicoFxUiType*data)
     registerStompswitch1ReleasedCallback(&stompswitch1Callback);
     registerStompswitch2ReleasedCallback(&stompswitch2Callback);
     registerStompswitch3ReleasedCallback(&stompswitch3Callback);
+    registerKnob0Callback(&knob0Callback);
+    registerKnob1Callback(&knob1Callback);
+    registerKnob2Callback(&knob2Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
     create(data);
