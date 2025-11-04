@@ -10,7 +10,7 @@
 extern uint32_t task;
 extern uint8_t context; // used by printf to decide where a certain information should be output
 
-//CommBufferType usbCommBuffer __attribute__((aligned (256)));
+extern CommBufferType usbCommBuffer __attribute__((aligned (256)));
 //CommBufferType btCommBuffer;
 
 
@@ -112,17 +112,17 @@ void initBTUart(uint16_t baudrate)
  */
 uint8_t sendCharAsyncUsb()
 {
-	//if (usbCommBuffer.outputBufferWriteCnt != usbCommBuffer.outputBufferReadCnt && ((USART1->ISR & (1 << USART_ISR_TXE_TXFNF_Pos))== (1 << USART_ISR_TXE_TXFNF_Pos)))
-	//{
-	//	USART1->TDR = *(usbCommBuffer.outputBuffer+usbCommBuffer.outputBufferWriteCnt);
-	//	usbCommBuffer.outputBufferWriteCnt++;
-    //    usbCommBuffer.outputBufferWriteCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
-    //    return 0;
-	//}
-	//if (usbCommBuffer.outputBufferWriteCnt == usbCommBuffer.outputBufferReadCnt)
-	//{
-	//	return 1;
-	//}
+	if (usbCommBuffer.outputBufferWriteCnt != usbCommBuffer.outputBufferReadCnt && ((USART1->ISR & (1 << USART_ISR_TXE_TXFNF_Pos))== (1 << USART_ISR_TXE_TXFNF_Pos)))
+	{
+		USART1->TDR = *(usbCommBuffer.outputBuffer+usbCommBuffer.outputBufferWriteCnt);
+		usbCommBuffer.outputBufferWriteCnt++;
+        usbCommBuffer.outputBufferWriteCnt &= ((1 << OUTPUT_BUFFER_SIZE)-1);
+        return 0;
+	}
+	if (usbCommBuffer.outputBufferWriteCnt == usbCommBuffer.outputBufferReadCnt)
+	{
+		return 1;
+	}
     return 0;
 }
 

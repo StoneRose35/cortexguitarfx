@@ -78,6 +78,7 @@ const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define UI_DMIN 8
 uint32_t encoderVal,encoderCntr,encNew;
 int16_t encoderDelta;
+RotaryEncoderIncrementType rotaryEncoderInfo;
 uint8_t enterSwitchVal;
 uint8_t exitSwitchVal;
 char displayData[128];
@@ -98,6 +99,9 @@ volatile uint8_t programToInitialize=0xFF;
 // 4: fade in
 volatile uint8_t programChangeState=0;
 volatile uint8_t stompSwitchState;
+#define ROTARY_ENCODER_LOWER_SPEED_LIMIT 80000
+#define ROTARY_ENCODER_UPPER_SPEED_LIMIT 80
+#define ROTARY_ENCODER_MAX_INCR 512
 #endif
 
 
@@ -232,7 +236,7 @@ int main(void)
     fb = imgBfr->data;
 
 
-    #ifdef USB_DBG
+    #if defined USB_DBG || defined ENCODER_TUNE
     initUart(115200);
     #endif
     /* Loop forever */
@@ -355,15 +359,67 @@ int main(void)
             onExitReleased(&piPicoUiController);
             clearReleasedStickyBit(1);
         }
-        encoderDelta=getStickyIncrementDelta();
-
-
-        if (encoderDelta != 0)
-        {
+       getStickyIncrementAndTime(&rotaryEncoderInfo);
+       if (rotaryEncoderInfo.increment != 0 && rotaryEncoderInfo.deltaTime > ROTARY_ENCODER_UPPER_SPEED_LIMIT)
+       {
+            int32_t d_enc; 
+            #ifdef ENCODER_TUNE
+            char chrbfr[32];
+            chrbfr[0]=0;
+            #endif
+            
+            if (rotaryEncoderInfo.deltaTime > ROTARY_ENCODER_LOWER_SPEED_LIMIT)
+            {
+                if (rotaryEncoderInfo.increment > 0)
+                {
+                    d_enc = 1;
+                }
+                else
+                {
+                    d_enc = -1;
+                }
+            }
+            else 
+            {
+                d_enc = rotaryEncoderInfo.increment * ROTARY_ENCODER_LOWER_SPEED_LIMIT;
+                d_enc /= (int32_t)rotaryEncoderInfo.deltaTime; 
+                if (d_enc > ROTARY_ENCODER_MAX_INCR)
+                {
+                    d_enc = ROTARY_ENCODER_MAX_INCR;
+                }
+                else if (d_enc < -ROTARY_ENCODER_MAX_INCR)
+                {
+                    d_enc = -ROTARY_ENCODER_MAX_INCR;
+                }
+                #ifdef ENCODER_TUNE
+                appendToString(chrbfr,"d_time: ");
+                printf(chrbfr);
+                UInt32ToChar(rotaryEncoderInfo.deltaTime,chrbfr);
+                printf(chrbfr);
+                chrbfr[0]='\r';
+                chrbfr[1]='\n';
+                chrbfr[2]=0;
+                printf(chrbfr);
+                #endif
+            }
+            //else
+            //{
+            //    d_enc = 0; rotaryEncoderInfo.increment * ROTARY_ENCODER_LOWER_SPEED_LIMIT;
+            //}
+            encoderDelta = (int16_t)d_enc;
+            #ifdef ENCODER_TUNE
+            appendToString(chrbfr, "enc delta: ");
+            printf(chrbfr);
+            Int16ToChar(encoderDelta,chrbfr);
+            printf(chrbfr);
+            chrbfr[0]='\r';
+            chrbfr[1]='\n';
+            chrbfr[2]=0;
+            printf(chrbfr);
+            #endif
             onRotaryChange(encoderDelta,&piPicoUiController);
             clearStickyIncrementDelta();
         }
-
 
         /*
         *

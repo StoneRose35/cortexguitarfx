@@ -133,14 +133,13 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
 
-    // set as input with pullup enabled
+    // set as hi-z input 
     regbfr = gpio->MODER;
     regbfr &= ~(3 << ((ENCODER_1 & 0xF)<<1));
     regbfr |= (2 << ((ENCODER_1 & 0xF)<<1));
     gpio->MODER=regbfr;    
     regbfr = gpio->PUPDR;
     regbfr &= ~(3 << ((ENCODER_1 & 0xF)<< 1));
-    regbfr |= (1 << ((ENCODER_1  & 0xF)<<1));
     gpio->PUPDR = regbfr;
     regbfr = gpio->AFR[(ENCODER_1 & 0xF)>>3];
     regbfr &= ~(0xF << ((ENCODER_1 & 0xF) << 2));
@@ -152,14 +151,13 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     RCC->AHB4ENR |= (1 << port);
     gpio=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
 
-    // set as input with pullup enabled
+    // set as hi-z input 
     regbfr = gpio->MODER;
     regbfr &= ~(3 << ((ENCODER_2 & 0xF)<<1));
     regbfr |= (2 << ((ENCODER_2 & 0xF)<<1));
     gpio->MODER=regbfr;    
     regbfr = gpio->PUPDR;
     regbfr &= ~(3 << ((ENCODER_2 & 0xF)<<1));
-    regbfr |= (1 << ((ENCODER_2 & 0xF)<<1));
     gpio->PUPDR = regbfr;
     regbfr = gpio->AFR[(ENCODER_2 & 0xF)>>3];
     regbfr &= ~(0xF << ((ENCODER_2 & 0xF) << 2));
@@ -171,8 +169,8 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     RCC->APB1LENR |= (1 << RCC_APB1LENR_TIM3EN_Pos);
     TIM3->SMCR |= (3 << TIM_SMCR_SMS_Pos); // encoder mode 3
     TIM3->CCMR1 |= (1 << TIM_CCMR1_CC1S_Pos) | (1 << TIM_CCMR1_CC2S_Pos) | 
-                   (7 << TIM_CCMR1_IC1F_Pos) | (7 << TIM_CCMR1_IC2F_Pos)  ; 
-                   // channel 1 to TI1, channel 2 to TI2, apply filtering
+                   (3 << TIM_CCMR1_IC1F_Pos) | (3 << TIM_CCMR1_IC2F_Pos)  ; 
+                   // channel 1 to TI1, channel 2 to TI2, max filtering and lowest sampling rate
     TIM3->CCER = (0 << TIM_CCER_CC1NP_Pos) | (0 << TIM_CCER_CC1P_Pos) | (0 << TIM_CCER_CC1E_Pos) |
                 (0 << TIM_CCER_CC2NP_Pos) | (0 << TIM_CCER_CC2P_Pos) | (0 << TIM_CCER_CC2E_Pos);
     //TIM3->CNT = 0x7FFF;
@@ -180,6 +178,17 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     TIM3->CNT = 0x7FFF;
     encoderLastVal = 0x7FFF;
     TIM3->CR1 |= (1 << TIM_CR1_CEN_Pos);
+
+    //enable timer 5 as us counter
+    RCC->APB1LENR |= (1 << RCC_APB1LENR_TIM5EN_Pos);
+    TIM5->CNT = 0;
+    TIM5->ARR = 0xFFFFFFFF;
+    TIM5->PSC = 240;
+    TIM5->CR1 |= (1 << TIM_CR1_CEN_Pos);
+
+    currentUsVal = 0;
+    lastUsVal = 0;
+
     nSwitches = nswitches;
     for (uint8_t c=0;c< nswitches;c++)
     {
@@ -277,17 +286,24 @@ uint8_t getMomentarySwitchValue(uint8_t sw)
     return 0;
 }
 
-// returns the time passed in us between sticky increments oder decrements
-uint32_t getRotaryDeltaT()
+
+void getStickyIncrementAndTime(RotaryEncoderIncrementType * res)
 {
+    currentUsVal = TIM5->CNT;
     if (currentUsVal >= lastUsVal)
     {
-        return currentUsVal - lastUsVal;
+        res->deltaTime = currentUsVal - lastUsVal;
+        res->increment=((int16_t)((TIM3->CNT) - encoderLastVal))>>1;
     }
-    return 0xFFFFFFFF;
+    else
+    {
+        res->increment = 0;
+    }
+    //res->increment=((int16_t)((TIM3->CNT) - encoderLastVal))>>1;
 }
 
 void clearStickyIncrementDelta()
 {
     encoderLastVal = TIM3->CNT;
+    lastUsVal = currentUsVal;
 }

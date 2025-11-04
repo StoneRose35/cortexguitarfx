@@ -22,7 +22,7 @@
 
 //#define DFU_SIM
 //#define FORCE_TEST_MODE
-
+//#define ENCODER_TUNE
 
 // --------------------------
 // derived preprocessor directives
