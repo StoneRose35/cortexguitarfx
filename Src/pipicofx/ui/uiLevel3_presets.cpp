@@ -29,10 +29,11 @@ const BwImageTypeConst* overlays[]={&editOverlay_streamimg, &settingsOverlay_str
 extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
 
-#define OVERLAY_NR_EDIT 0
-#define OVERLAY_NR_SYSTEMSETTINGS 1
-#define OVERLAY_NR_ABOUT 2
-#define OVERLAY_NR_FWUPDATE 3
+#define OVERLAY_NR_PLAY 0
+#define OVERLAY_NR_EDIT 1
+#define OVERLAY_NR_SYSTEMSETTINGS 2
+#define OVERLAY_NR_ABOUT 3
+#define OVERLAY_NR_FWUPDATE 4
 
 static void create(PiPicoFxUiType*data)
 {
@@ -81,7 +82,7 @@ static void enterCallback(PiPicoFxUiType*data)
     // show overlay menu (if not there)
     if (overlayNr == 0xFF)
     {
-        overlayNr = OVERLAY_NR_EDIT;
+        overlayNr = OVERLAY_NR_PLAY;
         drawImage(41,0,&editOverlay_streamimg,imgBuffer);
         uiStackPush(data,0xFF);
     }
@@ -89,7 +90,11 @@ static void enterCallback(PiPicoFxUiType*data)
     {
         uiStackPop(data);
         uiStackPush(data, 3);
-        if (overlayNr == OVERLAY_NR_EDIT)
+        if (overlayNr == OVERLAY_NR_PLAY)
+        {
+            enterLevel0(data);
+        }
+        else if (overlayNr == OVERLAY_NR_EDIT)
         {
             enterLevel4(data);
         }
@@ -161,15 +166,15 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         if (encoderDelta > 0)
         {
             overlayNr++;
-            if (overlayNr > 3)
+            if (overlayNr > 4)
             {
-                overlayNr=3;
+                overlayNr=4;
             }
         }
         else
         {
             overlayNr--;
-            if (overlayNr > 3)
+            if (overlayNr > 4)
             {
                 overlayNr=0;
             }
