@@ -90,10 +90,10 @@ void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
     UInt8ToChar(pos,nrbfr);
     appendToString(preset->name,nrbfr);
     appendToStringUntil(preset->name,"        ",8);
-    preset->programNr = 2; 
+    preset->programNr = 2;
     for (uint8_t c=0;c< 8; c++)
     {
-        preset->parameters[c] = 0;
+        preset->parameters[c] = 0x3FF; //set all values to 1023 to start with Volume 1
     } 
     preset->ledColor = 1;
 

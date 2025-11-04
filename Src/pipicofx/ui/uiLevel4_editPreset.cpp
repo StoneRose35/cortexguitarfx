@@ -19,6 +19,10 @@ extern "C" {
 #define EDITLEVEL_PARAMETERS 2
 #define EDITLEVEL_NAME 3
 
+#define EXIT_PRESSED_FIRST_TIME 0
+#define EXIT_PRESSED_SAVE 1
+#define EXIT_PRESSED_REVERT 2
+
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
@@ -118,19 +122,19 @@ static void enterCallback(PiPicoFxUiType*data)
 
 static void exitCallback(PiPicoFxUiType*data)
 {
-    if (exitState == 0)
+    if (exitState == EXIT_PRESSED_FIRST_TIME)
     {
         uiStackPush(data,0xFF);
         exitState=1;
         create(data);
     }
-    else if (exitState == 1)
+    else if (exitState == EXIT_PRESSED_SAVE)
     {
         uiStackPop(data);
         savePreset(presets+currentPreset,currentBank*3 + currentPreset);
         exitState = 0;
     }
-    else if (exitState == 2)
+    else if (exitState == EXIT_PRESSED_REVERT)
     {
         uiStackPop(data);
         if (loadPreset(presets+currentPreset,currentBank*3 + currentPreset)!=0)
@@ -142,13 +146,13 @@ static void exitCallback(PiPicoFxUiType*data)
             programsToInitialize[0] = presets[currentPreset].programNr;
             programChangeState = 1;
         }
-        exitState =  0;   
+        exitState =  EXIT_PRESSED_FIRST_TIME;   
     }
 }
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
-    if (exitState == 0)
+    if (exitState == EXIT_PRESSED_FIRST_TIME)
     {
         if (encoderDelta > 0)
         {
@@ -170,14 +174,14 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
     }
     else
     {
-        if (encoderDelta > 0 && exitState == 1)
+        if (encoderDelta > 0 && exitState == EXIT_PRESSED_SAVE)
         {
-            exitState = 2;
+            exitState = EXIT_PRESSED_REVERT;
             create(data);
         }
-        else if (encoderDelta < 0 && exitState == 2)
+        else if (encoderDelta < 0 && exitState == EXIT_PRESSED_REVERT)
         {
-            exitState = 1;
+            exitState = EXIT_PRESSED_SAVE;
             create(data);
         }
     }
