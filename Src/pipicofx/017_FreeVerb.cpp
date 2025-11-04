@@ -137,16 +137,8 @@ void FreeVerb::Param4::parameterCallback(uint16_t val)
 
 void FreeVerb::Param4::parameterDisplay(char*res)
 {
-    int16_t dVal;
-    dVal = this->pData->presetVolume.gain*39; // percent with two decimal points
-    decimalInt16ToChar(dVal,res,2);
-    for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-1;c++)
-    {
-        if(*(res+c)==0)
-        {
-            *(res+c)='%';
-            *(res+c+1)=(char)0;
-            break;
-        }
-    }
+    uint16_t dVal;
+    dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);
+    decimalUInt16ToChar(dVal,res,2);
+    appendToString(res,"%");
 }

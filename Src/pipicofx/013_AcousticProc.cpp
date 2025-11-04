@@ -132,9 +132,9 @@ void AcousticProc::Param7::parameterCallback(uint16_t val)
 
 void AcousticProc::Param7::parameterDisplay(char*res)
 {
-    int16_t dVal;
-    dVal=(int16_t)(pData->presetVolume.gain*100.0f);
-    Int16ToChar(dVal,res);
+    uint16_t dVal;
+    dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);
+    decimalUInt16ToChar(dVal,res,2);
     appendToString(res,"%");
 }
 

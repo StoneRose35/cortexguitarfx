@@ -197,9 +197,9 @@ void AmpModelHighGain::Param6::parameterCallback(uint16_t val)
 
 void AmpModelHighGain::Param6::parameterDisplay(char*res)
 {
-    int16_t dVal;
-    dVal=(int16_t)(pData->presetVolume.gain*100.0f);
-    Int16ToChar(dVal,res);
+    uint16_t dVal;
+    dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);
+    decimalUInt16ToChar(dVal,res,2);
     appendToString(res,"%");
 }
 
