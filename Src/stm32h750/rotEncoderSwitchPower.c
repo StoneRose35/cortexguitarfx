@@ -4,6 +4,7 @@
 #include "stm32h750/stm32h750_cfg_pins.h"
 #include "drivers/cs4270_audio_codec.h"
 #include "drivers/systick.h"
+#include "memoryRegions.h"
 
 static uint32_t oldtickenc,oldtickswitch;
 static volatile uint32_t encoderLastVal;
@@ -16,6 +17,8 @@ static volatile uint32_t oldTickSwitches[8];
 static volatile uint8_t lastTrigger;
 static volatile uint8_t nSwitches;
 
+
+__ITCM_CODE_FLASH
 void processExternalInterrupt()
 {
     GPIO_TypeDef * gpio;
@@ -49,39 +52,57 @@ void processExternalInterrupt()
 }
 
 
-
+__ITCM_CODE_FLASH
 void EXTI0_IRQHandler()
 {
     processExternalInterrupt();
 }
 
+__ITCM_CODE_FLASH
 void EXTI1_IRQHandler()
 {
     processExternalInterrupt();
 }
+
+__ITCM_CODE_FLASH
 void EXTI2_IRQHandler()
 {
     processExternalInterrupt();
 }
 
+__ITCM_CODE_FLASH
 void EXTI3_IRQHandler()
 {
     processExternalInterrupt();
 }
 
+__ITCM_CODE_FLASH
 void EXTI4_IRQHandler()
 {
     processExternalInterrupt();
 }
 
+__ITCM_CODE_FLASH
 void EXTI9_5_IRQHandler()
 {
     processExternalInterrupt();
 }
 
+__ITCM_CODE_FLASH
 void EXTI15_10_IRQHandler()
 {
     processExternalInterrupt();
+}
+
+__ITCM_CODE_FLASH
+void TIM5_IRQHandler()
+{
+    uint32_t statusreg = TIM5->SR;
+    if (statusreg & (1 << TIM_SR_UIF_Pos))
+    {
+        TIM5->SR = 0;
+        currentUsVal = TIM5->CNT;
+    }
 }
 
 void enableExternalInterrupt(uint8_t pinnr)
@@ -184,7 +205,10 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     TIM5->CNT = 0;
     TIM5->ARR = 0xFFFFFFFF;
     TIM5->PSC = 240;
+    TIM5->DIER |= (1 << TIM_DIER_UIE_Pos);
     TIM5->CR1 |= (1 << TIM_CR1_CEN_Pos);
+    TIM5->SMCR = (4 << TIM_SMCR_SMS_Pos) | (2 << TIM_SMCR_TS_Pos); // reset mode, select ITR2 as trigger source, which is tim3
+    NVIC_EnableIRQ(TIM5_IRQn);
 
     currentUsVal = 0;
     lastUsVal = 0;
@@ -289,21 +313,22 @@ uint8_t getMomentarySwitchValue(uint8_t sw)
 
 void getStickyIncrementAndTime(RotaryEncoderIncrementType * res)
 {
-    currentUsVal = TIM5->CNT;
-    if (currentUsVal >= lastUsVal)
-    {
-        res->deltaTime = currentUsVal - lastUsVal;
-        res->increment=((int16_t)((TIM3->CNT) - encoderLastVal))>>1;
-    }
-    else
-    {
-        res->increment = 0;
-    }
+    //currentUsVal = TIM5->CNT;
+    //if (currentUsVal >= lastUsVal)
+    //{
+        //res->deltaTime = currentUsVal - lastUsVal;
+    res->increment=((int16_t)((TIM3->CNT) - encoderLastVal))>>1;
+    res->deltaTime = currentUsVal;
+    //}
+    //else
+    //{
+    //_    res->increment = 0;
+    //}
     //res->increment=((int16_t)((TIM3->CNT) - encoderLastVal))>>1;
 }
 
 void clearStickyIncrementDelta()
 {
     encoderLastVal = TIM3->CNT;
-    lastUsVal = currentUsVal;
+    //lastUsVal = currentUsVal;
 }
