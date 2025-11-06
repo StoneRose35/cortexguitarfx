@@ -8,7 +8,7 @@ extern "C" {
 #include "globalConfig.h"
 #include "memoryRegions.h"
 #include "audio/audiotools.h"
-
+#include "audio/looper.h"
 #include "pipicofx/pipicofxui.h"
 
 #define AVERAGING_LOWPASS_CUTOFF 0.000305f // 10/32768
@@ -33,7 +33,7 @@ void processAudioBuffers(void)
     extern float avgInOld,avgOutOld;
     extern uint32_t task;
     extern PiPicoFxUiType piPicoUiController;
-
+    extern LooperDataType looper;
     ticStart = getTimeLW();
     audioBufferPtr = getEditableAudioBufferHiRes();
     audioBufferInputPtr = getInputAudioBufferHiRes();
@@ -80,6 +80,8 @@ void processAudioBuffers(void)
         {
             outputSample = 0.0f;
         }
+
+        outputSample = LooperProcessSample(outputSample,&looper);
 
         if (programChangeState == 2)// fadeout
         {

@@ -2,6 +2,7 @@
 #ifndef _PLAYOVERLAY_H_
 #define _PLAYOVERLAY_H_
 #include "graphics/bwgraphics.h"
+#include "memoryRegions.h"
 
 __QSPI_DATA
 static const uint8_t playoverlay_bwdata[]= {

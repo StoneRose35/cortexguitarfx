@@ -41,6 +41,7 @@
 #endif
 
 #ifdef DOGM128_DISPLAY
+#define HORIZONTAL_DISPLAY
 #define VERTICAL_FLIP
 #define HORIZONTAL_FLIP
 #endif

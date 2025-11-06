@@ -12,6 +12,7 @@ extern "C" {
 #include "images/fwUpgradeOverlay.h"
 #include "images/aboutoverlay.h"
 #include "images/fwupdateScreen.h"
+#include "images/looperOverlay.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
@@ -27,7 +28,7 @@ static volatile uint8_t overlayNr=0xFF;
 static volatile uint8_t bankChanged=0; // flag indicating that the bank has been changed upon stomp switch release
 
                                        // used to prohibit action when the second stomp switch is released
-static const BwImageTypeConst* overlays[]={&playoverlay_streamimg,&editOverlay_streamimg, &settingsOverlay_streamimg, &aboutoverlay_streamimg, &fwUpgradeOverlay_streamimg};
+static const BwImageTypeConst* overlays[]={&looperOverlay_streamimg,&editOverlay_streamimg, &settingsOverlay_streamimg, &aboutoverlay_streamimg, &fwUpgradeOverlay_streamimg};
 extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
 
@@ -50,6 +51,7 @@ static void setPreset(PiPicoFxUiType*);
 #define OVERLAY_NR_SYSTEMSETTINGS 2
 #define OVERLAY_NR_ABOUT 3
 #define OVERLAY_NR_FWUPDATE 4
+#define OVERLAY_NR_LOOPER 5
 
 static void create(PiPicoFxUiType*data)
 {
@@ -189,17 +191,17 @@ static void enterCallback(PiPicoFxUiType*data)
     // show overlay menu (if not there)
     if (overlayNr == 0xFF)
     {
-        overlayNr = OVERLAY_NR_PLAY;
-        drawImage(41,0,&playoverlay_streamimg,imgBuffer);
+        overlayNr = OVERLAY_NR_LOOPER;
+        drawImage(41,0,&looperOverlay_streamimg,imgBuffer);
         uiStackPush(data,0xFF);
     }
     else
     {
         uiStackPop(data);
         uiStackPush(data, 3);
-        if (overlayNr == OVERLAY_NR_PLAY)
+        if (overlayNr == OVERLAY_NR_LOOPER)
         {
-            enterLevel0(data);
+            enterLevel8(data);
         }
         else if (overlayNr == OVERLAY_NR_EDIT)
         {

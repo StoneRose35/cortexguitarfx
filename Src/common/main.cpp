@@ -42,6 +42,7 @@ extern "C" {
 #include "audio/firFilter.h"
 #include "audio/waveShaper.h"
 #include "audio/oversamplingWaveshaper.h"
+#include "audio/looper.h"
 #include "audio/audiotools.h"
 #include "pipicofx/delayMemoryHandler.h"
 #include "pipicofx/fxPrograms.h"
@@ -90,7 +91,7 @@ FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0xFF;
 volatile uint8_t programToInitialize=0xFF;
-
+LooperDataType looper;
 #ifdef EXTENSION_BOARD
 // 0: done
 // 1: change request
@@ -225,6 +226,7 @@ int main(void)
 	    enterLevel7(&piPicoUiController);
 	#endif
     
+    LooperInit(&looper);
     
     //enable audio engine last (when fx programs have been set up)
     initSAI();
@@ -234,6 +236,7 @@ int main(void)
     audioStatePtr = getAudioStatePtr();
     BwImageType * imgBfr = getImageBuffer();
     fb = imgBfr->data;
+
 
 
     #if defined USB_DBG || defined ENCODER_TUNE

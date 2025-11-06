@@ -19,7 +19,7 @@ extern "C" {
 
 static BwImageBufferType imgBuffer;
 static BwImageType img;
-const uiEnterFct uiEnterFunctions[]={&enterLevel0, &enterLevel1, &enterLevel2, &enterLevel3, &enterLevel4, &enterLevel5};
+const uiEnterFct uiEnterFunctions[]={&enterLevel0, &enterLevel1, &enterLevel2, &enterLevel3, &enterLevel4, &enterLevel5,&enterLevel6,&enterLevel7,&enterLevel8};
 /*
 Callback function pointers
 */

@@ -7,7 +7,7 @@
 
 PROJECT=microsys_audio
 MAIN_VERSION=0
-SUB_VERSION=7
+SUB_VERSION=8
 MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
 FLASH_QSPI_SYNC_NUMBER:=$(shell awk 'BEGIN{srand();print int(rand()*(4294967296))};')
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
