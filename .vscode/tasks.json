@@ -12,6 +12,16 @@
             }
         },
         {
+            "label": "Build and program using make",
+            "type": "shell",
+            "command": "make clean_objs; make -j16 program_all",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
             "label": "Clean using make",
             "type": "shell",
             "command": "make clean",
