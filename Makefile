@@ -104,7 +104,7 @@ out/%.o: Src/pipicofx/%.c  out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # audio fx ui libs
-out/%.o: Src/pipicofx/ui/%.cpp Inc/gen/version.h out
+out/%.o: Src/pipicofx/ui/%.cpp Inc/gen/version.h out all_images
 	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # graphics libs
