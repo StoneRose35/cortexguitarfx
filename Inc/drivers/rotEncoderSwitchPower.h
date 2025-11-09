@@ -6,7 +6,7 @@
 
 typedef struct {
     int16_t increment; // the actual increment value
-    uint32_t deltaTime; // the time measured between this and the previous increment in microsecond ticks
+    int32_t speed; // the number of increments in the last 10 ms
 } RotaryEncoderIncrementType;
 
 void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches);
@@ -19,11 +19,10 @@ void clearPressedStickyBit(uint8_t nr);
 
 void clearReleasedStickyBit(uint8_t nr);
 
-int16_t getStickyIncrementDelta();
 
 void clearStickyIncrementDelta();
 
-void getStickyIncrementAndTime(RotaryEncoderIncrementType * res);
+void getStickyIncrementAndSpeed(RotaryEncoderIncrementType * res);
 
 
 #endif

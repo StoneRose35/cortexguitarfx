@@ -14,10 +14,9 @@
 #include "globalConfig.h"
 
 static uint32_t oldtickenc,oldtickswitch;
-static volatile uint32_t encoderVal = 0x7FFFFFFF;
-static volatile uint32_t encoderValOld = 0x7FFFFFFF;
-static volatile int16_t encoderStickyIncrement=0;
-static volatile int16_t encoderStickyDecrement=0;
+volatile int32_t encoderVal = 0x0;
+volatile int32_t encoderValOld = 0x0;
+volatile uint32_t encoderSpeed;
 static volatile uint32_t currentUsVal;
 static volatile uint32_t lastUsVal;
 static volatile uint8_t switchVal;
@@ -36,19 +35,14 @@ void isr_c1_io_irq_bank0_irq13()
             if ((*GPIO_IN & (1 << ENCODER_2)) == (1 << ENCODER_2)) 
             { 
                 encoderVal--;
-                if (encoderValOld > encoderVal+1)
-                {
-                    encoderStickyIncrement--;
-                    encoderValOld=encoderVal;
-                    
-                }
             }
             else
             { 
                 encoderVal++;
             }
+            lastTrigger = 0;
         }
-        lastTrigger = 0;
+        
     }
     else if ((*ENCODER_1_INTR & (1 << ENCODER_1_EDGE_LOW)) == (1 << ENCODER_1_EDGE_LOW))
     {
@@ -63,8 +57,9 @@ void isr_c1_io_irq_bank0_irq13()
             { 
                 encoderVal--;
             }
+            lastTrigger = 0;
         }
-        lastTrigger = 0;
+        
     }
     else if ((*ENCODER_2_INTR & (1 << ENCODER_2_EDGE_HIGH)) == (1 << ENCODER_2_EDGE_HIGH))
     {
@@ -74,18 +69,14 @@ void isr_c1_io_irq_bank0_irq13()
             if ((*GPIO_IN & (1 << ENCODER_1)) == (1 << ENCODER_1)) 
             { 
                 encoderVal++;
-                if (encoderVal > encoderValOld+1)
-                { 
-                    encoderStickyIncrement++;
-                    encoderValOld=encoderVal;
-                }
             }
             else 
             { 
                 encoderVal--;
             }
+            lastTrigger = 1;
         }
-        lastTrigger = 1;
+        
     }
     else if ((*ENCODER_2_INTR & (1 << ENCODER_2_EDGE_LOW)) == (1 << ENCODER_2_EDGE_LOW))
     {
@@ -100,8 +91,9 @@ void isr_c1_io_irq_bank0_irq13()
             {
                 encoderVal++;
             }
+            lastTrigger = 1;
         }
-        lastTrigger = 1;
+
     }
     else if ((*POWERSENSE_INTR & (1 << POWERSENSE_EDGE_LOW)) == (1 << POWERSENSE_EDGE_LOW))
     {
@@ -212,27 +204,16 @@ void clearReleasedStickyBit(uint8_t nr)
     switchVals[nr] &= ~(1 << 1);
 }
 
-int16_t getStickyIncrementDelta()
-{
-    return encoderStickyIncrement;
-}
 
-void getStickyIncrementAndTime(RotaryEncoderIncrementType * res)
+void getStickyIncrementAndSpeed(RotaryEncoderIncrementType * res)
 {
-    currentUsVal = getTimeLW();
-    if (currentUsVal >= lastUsVal)
-    {
-        res->deltaTime = currentUsVal - lastUsVal;
-    }
-    else
-    {
-        res->deltaTime = 0xFFFFFFFF;
-    }
-    res->increment=encoderStickyIncrement;
+    int16_t current_increment = encoderVal - encoderValOld;
+    current_increment /= 4; // !! Don't replace with "">> 2" since choosing arithmentic right shift or logical right shift is implementation specific
+    res->increment = current_increment;
+    res->speed = encoderSpeed;    
 }
 
 void clearStickyIncrementDelta()
 {
-    encoderStickyIncrement=0;
-    lastUsVal = currentUsVal;
+    encoderValOld = encoderVal;
 }

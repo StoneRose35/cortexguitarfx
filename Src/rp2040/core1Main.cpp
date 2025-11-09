@@ -59,8 +59,8 @@ FxPresetType preset1, preset2;
 static volatile uint32_t * audioStatePtr;
 #define UI_DMIN 1
 #define ADC_LOWPASS 2
-#define ROTARY_ENCODER_LOWER_SPEED_LIMIT 80000
-
+#define ROTARY_ENCODER_MAX_INCR 512
+#define ROTARY_ENCODER_SPEED_FACTOR 32
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 
 
@@ -229,16 +229,15 @@ void core1Main()
             clearReleasedStickyBit(1);
         }
 
-       getStickyIncrementAndTime(&rotaryEncoderInfo);
-       if (rotaryEncoderInfo.increment != 0)
+       getStickyIncrementAndSpeed(&rotaryEncoderInfo);
+if (rotaryEncoderInfo.increment != 0)
        {
             int32_t d_enc; 
             #ifdef ENCODER_TUNE
             char chrbfr[32];
             chrbfr[0]=0;
             #endif
-            
-            if (rotaryEncoderInfo.deltaTime > ROTARY_ENCODER_LOWER_SPEED_LIMIT)
+            if (rotaryEncoderInfo.speed == 0)
             {
                 if (rotaryEncoderInfo.increment > 0)
                 {
@@ -249,10 +248,17 @@ void core1Main()
                     d_enc = -1;
                 }
             }
-            else if (rotaryEncoderInfo.deltaTime != 0)
+            else 
             {
-                d_enc = rotaryEncoderInfo.increment * ROTARY_ENCODER_LOWER_SPEED_LIMIT;
-                d_enc /= (int32_t)rotaryEncoderInfo.deltaTime; 
+                d_enc = rotaryEncoderInfo.increment*rotaryEncoderInfo.speed*ROTARY_ENCODER_SPEED_FACTOR;
+                if (d_enc > ROTARY_ENCODER_MAX_INCR)
+                {
+                    d_enc = ROTARY_ENCODER_MAX_INCR;
+                }
+                else if (d_enc < -ROTARY_ENCODER_MAX_INCR)
+                {
+                    d_enc = -ROTARY_ENCODER_MAX_INCR;
+                }
                 #ifdef ENCODER_TUNE
                 appendToString(chrbfr,"d_time: ");
                 printf(chrbfr);
@@ -263,10 +269,6 @@ void core1Main()
                 chrbfr[2]=0;
                 printf(chrbfr);
                 #endif
-            }
-            else
-            {
-                d_enc = rotaryEncoderInfo.increment * ROTARY_ENCODER_LOWER_SPEED_LIMIT;
             }
             encoderDelta = (int16_t)d_enc;
             #ifdef ENCODER_TUNE
