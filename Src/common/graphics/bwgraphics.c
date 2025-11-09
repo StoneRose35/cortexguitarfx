@@ -4,6 +4,7 @@
 #include "stdlib.h"
 #ifdef RP2040_FEATHER
 #include "romfunc.h"
+extern uint8_t oled_font_5x7[98][5];
 #else
 #include "math.h"
 float fsqrt(float a)
@@ -28,10 +29,11 @@ float fsin(float x)
 {
 	return sinf(x);
 }
-
+#include "fonts/oled_font_5x7.h"
 #endif
 
-extern const uint8_t oled_font_5x7[98][5];
+
+
 
 void changeLine(float spx,float spy,float epx, float epy,uint8_t draw,BwImageType* img)
 {
