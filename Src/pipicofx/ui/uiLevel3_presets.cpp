@@ -49,12 +49,12 @@ static void limitPreviewBankRange(uint8_t increase);
 #define BANK_PRESET_CHANGE_INCREASE 1
 #define BANK_PRESET_CHANGE_DECREASE 0 
 
-#define OVERLAY_NR_PLAY 0
+#define OVERLAY_NR_LOOPER 0
 #define OVERLAY_NR_EDIT 1
 #define OVERLAY_NR_SYSTEMSETTINGS 2
 #define OVERLAY_NR_ABOUT 3
 #define OVERLAY_NR_FWUPDATE 4
-#define OVERLAY_NR_LOOPER 5
+
 
 static void create(PiPicoFxUiType*data)
 {
@@ -487,15 +487,17 @@ static void handleBankChange(uint8_t increase, PiPicoFxUiType* data)
         }
         limitPreviewBankRange(increase);
     }
-    BwImageType previewImage;
-    previewImage.sx=96;
-    previewImage.sy=48;
+    BwImageType previewImage=
+    {
+        .sx=96,
+        .sy=48,
+        .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES
+    };
     previewImage.data = (uint8_t*)malloc(96*48/8);
-    previewImage.type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     createBankPreviewOverlay(previewBankNr,&previewImage);
     BwImageType* imgBuffer = getImageBuffer();
-    drawImage(2,2,&previewImage,imgBuffer);
-    free(previewImage.data);
+    drawImage(2,2,(BwImageTypeConst*)&previewImage,imgBuffer);
+    free((void*)previewImage.data);
     presetChangeLock = 1;
     // move preset index away to force reload
     //currentPreset = 0xFF;
