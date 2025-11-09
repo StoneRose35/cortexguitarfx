@@ -128,6 +128,14 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
     int8_t newChar;
     BwImageType* imgBuffer = getImageBuffer();
     const GFXfont * font = getGFXFont(FREEMONO9PT7B);
+    if (encoderDelta > 1)
+    {
+        encoderDelta = 1;
+    }
+    else if (encoderDelta < -1)
+    {
+        encoderDelta = -1;
+    }
     if (editState == 0) // change letter / OK / Cancel button
     {
         newPos = editPos + encoderDelta;
