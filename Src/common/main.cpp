@@ -100,16 +100,14 @@ LooperDataType looper;
 // 4: fade in
 volatile uint8_t programChangeState=0;
 volatile uint8_t stompSwitchState;
-#define ROTARY_ENCODER_LOWER_SPEED_LIMIT 80000
-#define ROTARY_ENCODER_UPPER_SPEED_LIMIT 80
 #define ROTARY_ENCODER_MAX_INCR 512
+#define ROTARY_ENCODER_SPEED_FACTOR 32
 #endif
 
 
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
 uint16_t cpuLoadBfr;
-uint32_t encoderValOld=0;
 uint8_t switchVals[2]={0,0};
 uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
@@ -362,16 +360,15 @@ int main(void)
             onExitReleased(&piPicoUiController);
             clearReleasedStickyBit(1);
         }
-       getStickyIncrementAndTime(&rotaryEncoderInfo);
-       if (rotaryEncoderInfo.increment != 0 && rotaryEncoderInfo.deltaTime > ROTARY_ENCODER_UPPER_SPEED_LIMIT)
+       getStickyIncrementAndSpeed(&rotaryEncoderInfo);
+       if (rotaryEncoderInfo.increment != 0)
        {
             int32_t d_enc; 
             #ifdef ENCODER_TUNE
             char chrbfr[32];
             chrbfr[0]=0;
             #endif
-            
-            if (rotaryEncoderInfo.deltaTime > ROTARY_ENCODER_LOWER_SPEED_LIMIT)
+            if (rotaryEncoderInfo.speed == 0)
             {
                 if (rotaryEncoderInfo.increment > 0)
                 {
@@ -384,8 +381,7 @@ int main(void)
             }
             else 
             {
-                d_enc = rotaryEncoderInfo.increment * ROTARY_ENCODER_LOWER_SPEED_LIMIT;
-                d_enc /= (int32_t)rotaryEncoderInfo.deltaTime; 
+                d_enc = rotaryEncoderInfo.increment*rotaryEncoderInfo.speed*ROTARY_ENCODER_SPEED_FACTOR;
                 if (d_enc > ROTARY_ENCODER_MAX_INCR)
                 {
                     d_enc = ROTARY_ENCODER_MAX_INCR;
@@ -405,10 +401,6 @@ int main(void)
                 printf(chrbfr);
                 #endif
             }
-            //else
-            //{
-            //    d_enc = 0; rotaryEncoderInfo.increment * ROTARY_ENCODER_LOWER_SPEED_LIMIT;
-            //}
             encoderDelta = (int16_t)d_enc;
             #ifdef ENCODER_TUNE
             appendToString(chrbfr, "enc delta: ");

@@ -7,9 +7,8 @@
 #include "memoryRegions.h"
 
 static uint32_t oldtickenc,oldtickswitch;
-static volatile uint32_t encoderLastVal;
-static volatile uint32_t currentUsVal;
-static volatile uint32_t lastUsVal;
+volatile uint32_t encoderValOld;
+volatile uint32_t encoderSpeed;
 static volatile uint8_t switchVal;
 static volatile uint8_t switchPins[8];
 static volatile uint8_t switchVals[8]; // bit 0: sticky bit set when button is pressed (chage from 0 to 1), bit 1: sticky bit set when button is released, bit 2: momentary value
@@ -94,16 +93,6 @@ void EXTI15_10_IRQHandler()
     processExternalInterrupt();
 }
 
-__ITCM_CODE_FLASH
-void TIM5_IRQHandler()
-{
-    uint32_t statusreg = TIM5->SR;
-    if (statusreg & (1 << TIM_SR_UIF_Pos))
-    {
-        TIM5->SR = 0;
-        currentUsVal = TIM5->CNT;
-    }
-}
 
 void enableExternalInterrupt(uint8_t pinnr)
 {
@@ -191,27 +180,16 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
     TIM3->SMCR |= (3 << TIM_SMCR_SMS_Pos); // encoder mode 3
     TIM3->CCMR1 |= (1 << TIM_CCMR1_CC1S_Pos) | (1 << TIM_CCMR1_CC2S_Pos) | 
                    (3 << TIM_CCMR1_IC1F_Pos) | (3 << TIM_CCMR1_IC2F_Pos)  ; 
-                   // channel 1 to TI1, channel 2 to TI2, max filtering and lowest sampling rate
+                   // channel 1 to TI1, channel 2 to TI2,
     TIM3->CCER = (0 << TIM_CCER_CC1NP_Pos) | (0 << TIM_CCER_CC1P_Pos) | (0 << TIM_CCER_CC1E_Pos) |
                 (0 << TIM_CCER_CC2NP_Pos) | (0 << TIM_CCER_CC2P_Pos) | (0 << TIM_CCER_CC2E_Pos);
-    //TIM3->CNT = 0x7FFF;
     TIM3->ARR = 0xFFFF;
     TIM3->CNT = 0x7FFF;
-    encoderLastVal = 0x7FFF;
+    encoderValOld = 0x7FFF;
     TIM3->CR1 |= (1 << TIM_CR1_CEN_Pos);
 
-    //enable timer 5 as us counter
-    RCC->APB1LENR |= (1 << RCC_APB1LENR_TIM5EN_Pos);
-    TIM5->CNT = 0;
-    TIM5->ARR = 0xFFFFFFFF;
-    TIM5->PSC = 240;
-    TIM5->DIER |= (1 << TIM_DIER_UIE_Pos);
-    TIM5->CR1 |= (1 << TIM_CR1_CEN_Pos);
-    TIM5->SMCR = (4 << TIM_SMCR_SMS_Pos) | (2 << TIM_SMCR_TS_Pos); // reset mode, select ITR2 as trigger source, which is tim3
-    NVIC_EnableIRQ(TIM5_IRQn);
 
-    currentUsVal = 0;
-    lastUsVal = 0;
+  
 
     nSwitches = nswitches;
     for (uint8_t c=0;c< nswitches;c++)
@@ -292,11 +270,7 @@ void clearReleasedStickyBit(uint8_t nr)
     switchVals[nr] &= ~(1 << 1);
 }
 
-int16_t getStickyIncrementDelta()
-{
-    int16_t nval = ((int16_t)((TIM3->CNT) - encoderLastVal))>>1;
-    return nval;
-}
+
 
 uint8_t getMomentarySwitchValue(uint8_t sw)
 {
@@ -311,24 +285,15 @@ uint8_t getMomentarySwitchValue(uint8_t sw)
 }
 
 
-void getStickyIncrementAndTime(RotaryEncoderIncrementType * res)
+void getStickyIncrementAndSpeed(RotaryEncoderIncrementType * res)
 {
-    //currentUsVal = TIM5->CNT;
-    //if (currentUsVal >= lastUsVal)
-    //{
-        //res->deltaTime = currentUsVal - lastUsVal;
-    res->increment=((int16_t)((TIM3->CNT) - encoderLastVal))>>1;
-    res->deltaTime = currentUsVal;
-    //}
-    //else
-    //{
-    //_    res->increment = 0;
-    //}
-    //res->increment=((int16_t)((TIM3->CNT) - encoderLastVal))>>1;
+    int16_t current_increment = ((int16_t)((TIM3->CNT) - encoderValOld));
+    current_increment /= 4; // !! Don't replace with "">> 2" since choosing arithmentic right shift or logical right shift is implementation specific
+    res->increment=current_increment;
+    res->speed = encoderSpeed;
 }
 
 void clearStickyIncrementDelta()
 {
-    encoderLastVal = TIM3->CNT;
-    //lastUsVal = currentUsVal;
+    encoderValOld = TIM3->CNT;
 }
