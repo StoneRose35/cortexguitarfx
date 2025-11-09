@@ -32,15 +32,18 @@ static const BwImageTypeConst* overlays[]={&looperOverlay_streamimg,&editOverlay
 extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
 
-
+static uint8_t presetChangeLock = 0;
 static uint16_t pot1Val=0;
 static uint16_t pot2Val=0;
 static uint16_t pot3Val=0;
+static uint8_t previewBankNr=0xFF;
 
 static void handleBankChange(uint8_t, PiPicoFxUiType*);
 static void handlePresetChange(uint8_t , PiPicoFxUiType*);
 static void setPresetNr(uint8_t,PiPicoFxUiType*);
 static void setPreset(PiPicoFxUiType*);
+static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img);
+static void limitPreviewBankRange(uint8_t increase);
 
 #define BANK_PRESET_CHANGE_NONE 2
 #define BANK_PRESET_CHANGE_INCREASE 1
@@ -131,6 +134,11 @@ static void create(PiPicoFxUiType*data)
         // value of p3
         drawSquareInt(128-4+1-2*6,startY,128-1-2*6,64-1,imgBuffer);
     }
+
+    pot1Val = getChannel0Value();
+    pot2Val = getChannel1Value();
+    pot3Val = getChannel2Value();
+
     
 }
 
@@ -314,11 +322,20 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
         {
             handleBankChange(BANK_PRESET_CHANGE_DECREASE,data);
         }
-        else if (currentPreset != 0)
+        else if ((currentPreset != 0 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(0,data);
             create(data);
         }
+        else if (presetChangeLock == 1)
+        {
+            presetChangeLock = 0;
+        }
+        else
+        {
+            create(data);
+        }
+        
     }
     else
     {
@@ -341,9 +358,17 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
         {
             handleBankChange(BANK_PRESET_CHANGE_INCREASE,data);
         }
-        else if (currentPreset != 1)
+        else if ((currentPreset != 1 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(1,data);
+            create(data);
+        }
+        else if (presetChangeLock == 1)
+        {
+            presetChangeLock = 0;
+        }
+        else
+        {
             create(data);
         }
     }
@@ -363,9 +388,17 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
         {
             handleBankChange(BANK_PRESET_CHANGE_INCREASE,data);
         }
-        else if (currentPreset != 2)
+        else if ((currentPreset != 2 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(2,data);
+            create(data);
+        }
+        else if (presetChangeLock == 1)
+        {
+            presetChangeLock = 0;
+        }
+        else
+        {
             create(data);
         }
     }
@@ -430,35 +463,43 @@ void enterLevel3(PiPicoFxUiType*data)
 
 static void handleBankChange(uint8_t increase, PiPicoFxUiType* data)
 {
-    bankChanged = 1;
-    if (increase)
+    // display preset overlay if not there already
+    if (previewBankNr == 0xFF)
     {
-        currentBank++;
+        if (increase)
+        {
+            previewBankNr = currentBank+1;
+        }
+        else {
+            previewBankNr = currentBank-1;
+        }
+        limitPreviewBankRange(increase);
     }
     else
     {
-        currentBank--;
+        if (increase)
+        {
+            previewBankNr++;
+        }
+        else
+        {
+            previewBankNr--;
+        }
+        limitPreviewBankRange(increase);
     }
-    if (currentBank > 31)
-    {
-        currentBank = 0;
-    }
-    if (loadPreset(presets,currentBank*3)!=0)
-    {
-        generateEmptyPreset(presets,currentBank,0);
-    }
-    if (loadPreset(presets+1,currentBank*3+1)!=0)
-    {
-        generateEmptyPreset(presets+1,currentBank,1);
-    }
-    if (loadPreset(presets+2, currentBank*3+2)!=0)
-    {
-        generateEmptyPreset(presets+2,currentBank,2);
-    }
-    // move preset and current program index away to force reload
-    currentPreset = 0xFF;
-    data->currentProgramIdx = 0xff;
-    
+    BwImageType previewImage;
+    previewImage.sx=96;
+    previewImage.sy=48;
+    previewImage.data = (uint8_t*)malloc(96*48/8);
+    previewImage.type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
+    createBankPreviewOverlay(previewBankNr,&previewImage);
+    BwImageType* imgBuffer = getImageBuffer();
+    drawImage(2,2,&previewImage,imgBuffer);
+    free(previewImage.data);
+    presetChangeLock = 1;
+    // move preset index away to force reload
+    //currentPreset = 0xFF;
+    //data->currentProgramIdx = 0xff;
 }
 
 static void handlePresetChange(uint8_t increase, PiPicoFxUiType*data)
@@ -476,6 +517,23 @@ static void handlePresetChange(uint8_t increase, PiPicoFxUiType*data)
 
 static void setPresetNr(uint8_t nr,PiPicoFxUiType* data)
 {
+    if (previewBankNr != currentBank && previewBankNr != 0xFF)
+    {
+        currentBank = previewBankNr;
+        previewBankNr = 0xFF;
+        if (loadPreset(presets,currentBank*3)!=0)
+        {
+            generateEmptyPreset(presets,currentBank,0);
+        }
+        if (loadPreset(presets+1,currentBank*3+1)!=0)
+        {
+            generateEmptyPreset(presets+1,currentBank,1);
+        }
+        if (loadPreset(presets+2, currentBank*3+2)!=0)
+        {
+            generateEmptyPreset(presets+2,currentBank,2);
+        }
+    }
     currentPreset = nr;
     setPreset(data);
 }
@@ -494,5 +552,77 @@ static void setPreset(PiPicoFxUiType*data)
     }
     setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
     create(data);
+}
+
+static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img)
+{
+    FxPresetType previewPresets[3];
+    char bfr[32];
+    char nrBfr[8];
+    //const GFXfont * font = getGFXFont(TOMTHUMB);
+    if (loadPreset(previewPresets,bankNr*3)!=0)
+    {
+        generateEmptyPreset(previewPresets,bankNr,0);
+    }
+    if (loadPreset(previewPresets+1,bankNr*3+1)!=0)
+    {
+        generateEmptyPreset(previewPresets+1,bankNr,1);
+    }
+    if (loadPreset(previewPresets+2,bankNr*3+2)!=0)
+    {
+        generateEmptyPreset(previewPresets+2,bankNr,2);
+    }
+    clearSquareInt(0,0,96,48,img);
+    //clearSquareInt(1,1,96-1,48-1,img);
+    drawHorizontal(0,0,96,img);
+    drawHorizontal(47,0,96,img);
+    drawVertical(0,0,48,img);
+    drawVertical(95,0,48,img);
+    *bfr=0;
+    *nrBfr=0;
+    appendToString(bfr,"Bank ");
+    UInt8ToChar(bankNr,nrBfr);
+    appendToString(bfr,nrBfr);
+    if (bankNr == currentBank)
+    {
+        appendToString(bfr, " *");
+    }
+    drawText(3,0*10+9,bfr,img,0);
+    *bfr=0;
+    appendToString(bfr,previewPresets->name);
+    if (bankNr == currentBank && currentPreset == 0)
+    {
+        appendToString(bfr, " *");
+    }
+    drawText(3,1*10+9,bfr,img,0);
+    *bfr=0;
+    appendToString(bfr,(previewPresets+1)->name);
+    if (bankNr == currentBank && currentPreset == 1)
+    {
+        appendToString(bfr, " *");
+    }
+    drawText(3,2*10+9,bfr,img,0);
+    *bfr=0;
+    appendToString(bfr,(previewPresets+2)->name);
+    if (bankNr == currentBank && currentPreset == 2)
+    {
+        appendToString(bfr, " *");
+    }
+    drawText(3,3*10+9,bfr,img,0);    
+}
+
+static void limitPreviewBankRange(uint8_t increase)
+{
+    if (previewBankNr > 31)
+    {
+        if (increase==0)
+        {
+            previewBankNr = 0;
+        }
+        else
+        {
+            previewBankNr = 31;
+        }
+    }
 }
 
