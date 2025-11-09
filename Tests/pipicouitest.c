@@ -7,13 +7,13 @@
 #include "math.h"
 #include "stdio.h"
 #include "string.h"
-
+#include "stdlib.h"
 #define F_MIN_VALUE 0.0f
 #define F_MAX_VALUE 32.0f
 #define F_VALUE 1500
 
 
-void bmImageToBitmapStruct(BwImageBufferType*bwImg,BitmapFileHeaderType*bmp)
+void bmImageToBitmapStruct(BwImageType*bwImg,BitmapFileHeaderType*bmp)
 {
     uint8_t pixelVal;
     initBmpFile(bmp,bwImg->sy,bwImg->sx);
@@ -36,51 +36,59 @@ void bmImageToBitmapStruct(BwImageBufferType*bwImg,BitmapFileHeaderType*bmp)
 
 void fontTest(void)
 {
-    BwImageBufferType testImg;
+    BwImageType testImg;
     BitmapFileHeaderType bmp;
     const char testtext[]="Hallo";
-    char *  testImageFilename = "screen0.bmp";
+    char *  testImageFilename = "./out/screen0.bmp";
     testImg.sx=128;
     testImg.sy=64;
+    testImg.data=(uint8_t*)malloc(1024);
     for (uint8_t c=0;c<0xFF;c++)
     {
         *(((uint32_t*)testImg.data) + c)=0;
     }
-    drawText(12,15,testtext,&testImg,&FreeMono12pt7b);
+    drawText(12,15,testtext,(BwImageType*)&testImg,&FreeMono12pt7b);
     bmImageToBitmapStruct(&testImg,&bmp);
     writeBmp(testImageFilename,&bmp);
+    free(testImg.data);
 }
 
 void gfxFontDemo(void)
 {
-    BwImageBufferType testImg;
+    BwImageType imgPtr;
     BitmapFileHeaderType bmp;
     const char testtext[]="Megadeth";
     char fname[32];
-    testImg.sx=128;
-    testImg.sy=64;
+    imgPtr.sx=128;
+    imgPtr.sy=64;
+    imgPtr.type = BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES;
+    imgPtr.data=(uint8_t*)malloc(1024);
     for (uint8_t f=0;f<(sizeof(gfxfonts)/sizeof(GFXfont*));f++)
     {
         for (uint8_t c=0;c<0xFF;c++)
         {
-            *(((uint32_t*)testImg.data) + c)=0;
+            *(((uint32_t*)imgPtr.data) + c)=0;
         }
-        sprintf(fname,"%s.bmp",gfxfontNames[f]);
-        drawText(0,32,testtext,&testImg,gfxfonts[f]);
-        bmImageToBitmapStruct(&testImg,&bmp);
+        sprintf(fname,"./out/%s.bmp",gfxfontNames[f]);
+        drawText(0,32,testtext,&imgPtr,gfxfonts[f]);
+        bmImageToBitmapStruct(&imgPtr,&bmp);
         writeBmp(fname,&bmp);
     }
+    free(imgPtr.data);
 }
 
 void potentiometerImageTest()
 {
     float cx,cy,px,py,fValue;
-    BwImageBufferType testImg;
+    BwImageType testImg;
     BitmapFileHeaderType bmp;
-    char *  testImageFilename = "screen%d.bmp";
+    char *  testImageFilename = "./out/screen%d.bmp";
     char fname[16];
     FILE * fid;
-
+    testImg.sx = 128;
+    testImg.sy = 64;
+    testImg.type = BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES;
+    testImg.data = (uint8_t)malloc(1024);
     for (uint16_t c=0;c<32;c++)
     {
         fValue = (float)c;
@@ -106,6 +114,7 @@ void potentiometerImageTest()
 
         writeBmp(fname,&bmp);
     }
+    free(testImg.data);
 }
 
 int main(int argc,char** argv)
