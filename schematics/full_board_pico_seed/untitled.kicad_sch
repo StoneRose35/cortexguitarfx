@@ -920,6 +920,16 @@
 	)
 	(wire
 		(pts
+			(xy 123.19 40.64) (xy 123.19 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "448816ca-cca0-422f-8ba6-d20bcaa5ff36")
+	)
+	(wire
+		(pts
 			(xy 97.79 62.23) (xy 104.14 62.23)
 		)
 		(stroke
@@ -967,16 +977,6 @@
 			(type default)
 		)
 		(uuid "51482ce5-4a63-4567-a730-133026da63f6")
-	)
-	(wire
-		(pts
-			(xy 105.41 40.64) (xy 123.19 40.64)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "58a2404b-f499-437c-b908-da803cb3e570")
 	)
 	(wire
 		(pts
@@ -1030,13 +1030,13 @@
 	)
 	(wire
 		(pts
-			(xy 125.73 40.64) (xy 125.73 39.37)
+			(xy 125.73 40.64) (xy 123.19 40.64)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "87a9a74c-a624-41c6-9e3a-8e32d821d288")
+		(uuid "88422015-81ff-4689-87d5-dfcdad3faac2")
 	)
 	(wire
 		(pts
@@ -1130,16 +1130,6 @@
 	)
 	(wire
 		(pts
-			(xy 123.19 40.64) (xy 123.19 39.37)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cc61f9dd-dd5f-44c9-9dca-cd887de56b5e")
-	)
-	(wire
-		(pts
 			(xy 177.8 59.69) (xy 177.8 49.53)
 		)
 		(stroke
@@ -1150,13 +1140,43 @@
 	)
 	(wire
 		(pts
-			(xy 120.65 39.37) (xy 120.65 43.18)
+			(xy 120.65 31.75) (xy 120.65 43.18)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "df1b4588-67f3-420d-bbd3-27b02b39fdad")
+	)
+	(wire
+		(pts
+			(xy 105.41 34.29) (xy 125.73 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e8364660-4f44-4f45-9d3b-f7fccf37e846")
+	)
+	(wire
+		(pts
+			(xy 105.41 40.64) (xy 105.41 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4b4b613-2e97-4caf-ae3b-9cccb7db852e")
+	)
+	(wire
+		(pts
+			(xy 125.73 34.29) (xy 125.73 31.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fe743f6f-b7de-4a01-9b3f-683f6f0df42e")
 	)
 	(global_label "5V"
 		(shape input)
@@ -1762,7 +1782,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_01x03_Female")
-		(at 123.19 34.29 90)
+		(at 123.19 26.67 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -1771,7 +1791,7 @@
 		(fields_autoplaced yes)
 		(uuid "d23d391d-cc17-41c7-99e9-515c7f92744f")
 		(property "Reference" "J5"
-			(at 123.19 30.641 90)
+			(at 123.19 23.021 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1779,7 +1799,7 @@
 			)
 		)
 		(property "Value" "Conn_01x03_Female"
-			(at 123.19 33.1779 90)
+			(at 123.19 25.5579 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1787,7 +1807,7 @@
 			)
 		)
 		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
-			(at 123.19 34.29 0)
+			(at 123.19 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1796,7 +1816,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 123.19 34.29 0)
+			(at 123.19 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1805,7 +1825,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 123.19 34.29 0)
+			(at 123.19 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
