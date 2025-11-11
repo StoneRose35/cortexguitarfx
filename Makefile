@@ -146,7 +146,8 @@ Inc/gen/version.h: Inc/gen
 #REV=`expr %REV% / 60`
 	@echo "#ifndef _PI_PICO_VERSION_H_\r\n#define _PI_PICO_VERSION_H_\r\n" > Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_FULL_VERSION[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION) for $(MCU_BOARD) built $(BUILD_DATE)T$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_VERSION_NR[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION) for $(MCU_BOARD)\";\r\n" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_VERSION_NR[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION)\";\r\n" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_MCU_BOARD[]=\"$(MCU_BOARD)\";\r\n" >> Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_BUILD_DATE[]=\"$(BUILD_DATE)\";\r\n" >> Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_BUILD_TIME[]=\"$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
 	@echo "__attribute__ ((section (\".sync_number_flash\"))) uint32_t FLASH_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
