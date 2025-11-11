@@ -229,9 +229,9 @@ void core1Main()
             clearReleasedStickyBit(1);
         }
 
-       getStickyIncrementAndSpeed(&rotaryEncoderInfo);
-if (rotaryEncoderInfo.increment != 0)
-       {
+        getStickyIncrementAndSpeed(&rotaryEncoderInfo);
+        if (rotaryEncoderInfo.increment != 0)
+        {
             int32_t d_enc; 
             #ifdef ENCODER_TUNE
             char chrbfr[32];
