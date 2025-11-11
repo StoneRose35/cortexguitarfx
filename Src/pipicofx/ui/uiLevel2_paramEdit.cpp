@@ -88,6 +88,17 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
+    if (data->currentParameter->increment > 1) // handle parameter whose increments are
+    {                                          // larger than one as discrete param, thus increment only by one
+        if (encoderDelta > 1)
+        {
+            encoderDelta = 1;
+        }
+        else if (encoderDelta < -1)
+        {
+            encoderDelta = -1;
+        }
+    }
     data->currentParameter->rawValue += encoderDelta*data->currentParameter->increment;
     if (data->currentParameter->rawValue < 0)
     {

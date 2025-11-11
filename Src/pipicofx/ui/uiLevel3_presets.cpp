@@ -30,7 +30,7 @@ static const BwImageType* overlays[]={&playoverlay_streamimg,&editOverlay_stream
 extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
 
-static uint8_t presetChangeLock = 0;
+static uint8_t presetChangeLock = 0; // used to prohibit action when the second stomp switch is released
 static uint16_t pot1Val=0;
 static uint16_t pot2Val=0;
 static uint16_t pot3Val=0;
@@ -52,6 +52,8 @@ static void limitPreviewBankRange(uint8_t increase);
 #define OVERLAY_NR_SYSTEMSETTINGS 2
 #define OVERLAY_NR_ABOUT 3
 #define OVERLAY_NR_FWUPDATE 4
+#define OVERLAY_NR_ABOUT_SHOWING 8
+
 
 static void create(PiPicoFxUiType*data)
 {
@@ -142,6 +144,10 @@ static void create(PiPicoFxUiType*data)
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {    
     uint16_t yval; 
+    if (overlayNr == OVERLAY_NR_ABOUT_SHOWING)
+    {
+        return;
+    }
     BwImageType* imgBuffer = getImageBuffer();
     // draw Level bars
     clearSquareInt(0,56,128-3*6,64,imgBuffer);
@@ -186,8 +192,6 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
         yval = 62;
     }
     drawSquareInt(122-2*6,yval-1,124-2*6,yval+1,imgBuffer);
-
-    DisplayWriteFramebufferAsync(imgBuffer->data);
 }
 
 static void enterCallback(PiPicoFxUiType*data) 
@@ -219,19 +223,22 @@ static void enterCallback(PiPicoFxUiType*data)
         }
         else if (overlayNr == OVERLAY_NR_ABOUT)
         {
+            overlayNr = OVERLAY_NR_ABOUT_SHOWING;
             clearSquareInt(0,0,128,43,imgBuffer);
             *strbfr=0;
             appendToString(strbfr,"About PiPicoFX");
             drawText(0,8,strbfr,imgBuffer,(void*)0);
             drawText(0,16,PI_PICO_FX_VERSION_NR,imgBuffer,(void*)0);
+            drawText(0,24,PI_PICO_FX_MCU_BOARD,imgBuffer,(void*)0);
             *strbfr=0;
             appendToString(strbfr,"built ");
             appendToString(strbfr,PI_PICO_FX_BUILD_DATE);
-            drawText(0,24,strbfr,imgBuffer,(void*)0);
+            drawText(0,32,strbfr,imgBuffer,(void*)0);
             *strbfr=0;
             appendToString(strbfr,"      ");
             appendToString(strbfr,PI_PICO_FX_BUILD_TIME);
-            drawText(0,32,strbfr,imgBuffer,(void*)0);
+            drawText(0,40,strbfr,imgBuffer,(void*)0);
+
 
         }
         else if (overlayNr == OVERLAY_NR_FWUPDATE)

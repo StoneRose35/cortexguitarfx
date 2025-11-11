@@ -40,33 +40,33 @@ static void create(PiPicoFxUiType*data)
     #endif
     if (regbfr & 0x2)
     {
-        drawImage(16,20,&toggleswitch_on_streamimg,img);
+        drawImage(16,24,&toggleswitch_on_streamimg,img);
     }
     else
     {
-        drawImage(16,20,&toggleswitch_off_streamimg,img);
+        drawImage(16,24,&toggleswitch_off_streamimg,img);
     }
 
     if (regbfr & 0x1)
     {
-        drawImage(47,20,&toggleswitch_on_streamimg,img);
+        drawImage(47,24,&toggleswitch_on_streamimg,img);
     }
     else
     {
-        drawImage(47,20,&toggleswitch_off_streamimg,img);
+        drawImage(47,24,&toggleswitch_off_streamimg,img);
     } 
 
     *(strbfr) = 0;  
     appendToString(strbfr,"Mic");
-    drawText(9,55,strbfr,img,(void*)0);
+    drawText(9,60,strbfr,img,(void*)0);
 
     *(strbfr) = 0;  
     appendToString(strbfr,"Instr");
-    drawText(35,55,strbfr,img,(void*)0);
+    drawText(35,60,strbfr,img,(void*)0);
 
     *(strbfr) = 0;  
     appendToString(strbfr,"Vol");
-    drawText(87,55,strbfr,img,(void*)0);
+    drawText(94,60,strbfr,img,(void*)0);
 
     #ifdef CS4270_AUDIO_CODEC
     currentVolume = cs4270GetOutputVolume();
@@ -90,16 +90,16 @@ static void create(PiPicoFxUiType*data)
     switch (paramSelected)
     {
         case 0:
-            drawHorizontal(18,14,27,img);
-            drawHorizontal(46,14,27,img);
-            drawVertical(14,18,46,img);
-            drawVertical(27,18,46,img);
+            drawHorizontal(22,14,27,img);
+            drawHorizontal(50,14,27,img);
+            drawVertical(14,22,50,img);
+            drawVertical(27,22,50,img);
             break;
         case 1:
-            drawHorizontal(18,45,45+13,img);
-            drawHorizontal(46,45,45+13,img);
-            drawVertical(45,18,46,img);
-            drawVertical(45+13,18,46,img);
+            drawHorizontal(22,45,45+13,img);
+            drawHorizontal(50,45,45+13,img);
+            drawVertical(45,22,50,img);
+            drawVertical(45+13,22,50,img);
             break;
         case 2:
             drawHorizontal(21,89,111,img);
@@ -128,16 +128,16 @@ static void enterCallback(PiPicoFxUiType*data)
         switch (paramSelected)
         {
             case 0:
-                drawHorizontal(18-1,14-1,27+1,img);
-                drawHorizontal(46+1,14-1,27+1,img);
-                drawVertical(14-1,18-1,46+1,img);
-                drawVertical(27+1,18-1,46+1,img);
+                drawHorizontal(22-1,14-1,27+1,img);
+                drawHorizontal(50+1,14-1,27+1,img);
+                drawVertical(14-1,22-1,50+1,img);
+                drawVertical(27+1,22-1,50+1,img);
                 break;
             case 1:
-                drawHorizontal(18-1,45-1,45+13+1,img);
-                drawHorizontal(46+1,45-1,45+13+1,img);
-                drawVertical(45-1,18-1,46+1,img);
-                drawVertical(45+13+1,18-1,46+1,img);
+                drawHorizontal(22-1,45-1,45+13+1,img);
+                drawHorizontal(50+1,45-1,45+13+1,img);
+                drawVertical(45-1,22-1,50+1,img);
+                drawVertical(45+13+1,22-1,50+1,img);
                 break;
             case 2:
                 drawHorizontal(21-1,89-1,111+1,img);

@@ -49,7 +49,6 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     drawLine(cx,cy,px,py,img);
     data->currentParameter->parameterDisplay(paramValueBfr);
     drawText(0,64,paramValueBfr,img,0);
-    DisplayWriteFramebufferAsync(img->data);
 }
 
 static void enterCallback(PiPicoFxUiType*data) 
@@ -99,6 +98,14 @@ static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
 
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
+    if (encoderDelta > 1)
+    {
+        encoderDelta = 1;
+    }
+    else if (encoderDelta < -1)
+    {
+        encoderDelta = -1;
+    }
     data->currentParameterIdx += encoderDelta;
     if (data->currentParameterIdx >= data->currentProgram->getParameterCount() && encoderDelta > 0)
     {
