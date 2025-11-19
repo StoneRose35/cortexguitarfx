@@ -34,5 +34,6 @@ void DisplayWriteText(const char * str,uint8_t posH,uint8_t posV);
 void DisplayWriteTextLine(const char * str,uint8_t posV);
 void DisplayWriteNextLine(void);
 void DisplayWriteFramebufferAsync(uint8_t * fb);
+uint8_t IsDisplayUpdateOngoing(); // returns 0/false only when the row counter is at the last position, dma transfer is done and spi is not busy
 
 #endif

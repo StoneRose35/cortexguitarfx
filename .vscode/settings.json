@@ -77,7 +77,9 @@
         "string": "cpp",
         "string_view": "cpp",
         "new": "cpp",
-        "resets.h": "c"
+        "resets.h": "c",
+        "fxprogramloader.hpp": "c",
+        "pcm3060.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cortex-debug.variableUseNaturalFormat": false

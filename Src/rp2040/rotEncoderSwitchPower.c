@@ -95,16 +95,6 @@ void isr_c1_io_irq_bank0_irq13()
         }
 
     }
-    else if ((*POWERSENSE_INTR & (1 << POWERSENSE_EDGE_LOW)) == (1 << POWERSENSE_EDGE_LOW))
-    {
-        *POWERSENSE_INTR |= (1 << POWERSENSE_EDGE_LOW);
-        #ifdef CS4270_AUDIO_CODEC
-        cs4270PowerDown();
-        #endif
-        #ifdef PCM3060_AUDIO_CODEC
-        pcm3060PowerDown();
-        #endif
-    }
 
     // UI switches 
     for (uint8_t c=0;c<3;c++)
@@ -169,10 +159,6 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         switchPins[c]=pins[c];
     }
 
-    // powersense config
-    *POWERSENSE_PAD_CNTR &= ~ ((1 << PADS_BANK0_GPIO0_PDE_LSB) | (1 << PADS_BANK0_GPIO0_PDE_LSB));
-    *POWERSENSE_PIN_CNTR = 5;
-    *POWERSENSE_INTE |= (1 << POWERSENSE_EDGE_LOW); 
 
 
     *NVIC_ISER = (1 << 13);

@@ -32,8 +32,7 @@
 #define ENCODER_1 7
 #define ENCODER_2 6
 #define ENTER_SWITCH 22
-#define EXIT_SWITCH 20
-#define POWERSENSE 13
+#define EXIT_SWITCH 2
 
 // driver for ssd1306-based display (128*64 pixel oled display interfaced using spi)
 #define SSD1306_CS_DISPLAY 21
@@ -41,6 +40,9 @@
 #define SSD1306_MOSI 19
 #define SSD1306_DISPLAY_CD 14
 #define SSD1306_DISPLAY_RESET 15
+#define PROG_MISO 20
+
+#define PROG_RESET 13
 
 // pin definitions for two uart ports
 #define UART_USB_RX 1
@@ -65,24 +67,24 @@
 #define DISPLAY_CD 25
 #define DISPLAY_BACKLIGHT 8 
 
-#define REMOTESWITCH_PIN 14 // 433 MHz radio-controller switch, reverse-engineered
+//#define REMOTESWITCH_PIN 14 // 433 MHz radio-controller switch, reverse-engineered
 
-#define DS18B20_PIN 2
+//#define DS18B20_PIN 2
 
-#define HEATER  6 // heating element controlled using pwm
+//#define HEATER  6 // heating element controlled using pwm
 
 // backlight for lcd display
-#define BACKLIGHT 8
+//#define BACKLIGHT 8
 
 // GPIO number where the neopixel is attached
 // Integrated Neopixel on RP2040 Feather: 16
 // Integrated Neopixel on RP2040 Itsybitsy: 17
-#ifdef ITSYBITSY
-#define NEOPIXEL_PIN 17
-#define NEOPIXEL_POWER_PIN 16
-#else
-#define NEOPIXEL_PIN 16
-#endif
+//#ifdef ITSYBITSY
+//#define NEOPIXEL_PIN 17
+//#define NEOPIXEL_POWER_PIN 16
+//#else
+//#define NEOPIXEL_PIN 16
+//#endif
 
 // ****************************************
 // * other device-specific configurations *
@@ -369,11 +371,11 @@ typedef struct {
 #define ENCODER_2_EDGE_LOW (((4*ENCODER_2) & 0x1F)+2)
 #define ENCODER_2_EDGE_HIGH (((4*ENCODER_2) & 0x1F)+3)
 
-#define POWERSENSE_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*POWERSENSE))
-#define POWERSENSE_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*POWERSENSE))
-#define POWERSENSE_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*POWERSENSE) & 0xFFE0) >> 3)))
-#define POWERSENSE_INTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*POWERSENSE) & 0xFFE0) >> 3)))
-#define POWERSENSE_EDGE_LOW (((4*POWERSENSE) & 0x1F)+2)
+#define PROG_RESET_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*PROG_RESET))
+#define PROG_RESET_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*PROG_RESET))
+#define PROG_RESET_INTE ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*PROG_RESET) & 0xFFE0) >> 3)))
+#define PROG_RESET_INTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*PROG_RESET) & 0xFFE0) >> 3)))
+#define PROG_RESET_EDGE_LOW (((4*POWERSENSE) & 0x1F)+2)
 
 #define SWITCH_PIN_CNTR  ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*SWITCH))
 #define SWITCH_PAD_CNTR ((volatile uint32_t*)(PADS_BANK0_BASE + PADS_BANK0_GPIO0_OFFSET + 4*SWITCH))
@@ -408,6 +410,8 @@ typedef struct {
 #define SSD1306_DISPLAY_CD_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*SSD1306_DISPLAY_CD))
 #define SSD1306_SCK_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*SSD1306_SCK))
 #define SSD1306_DISPLAY_RESET_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*SSD1306_DISPLAY_RESET))
+
+#define PROG_MISO_PIN_CNTR ((volatile uint32_t*)(IO_BANK0_BASE + IO_BANK0_GPIO0_CTRL_OFFSET + 8*PROG_MISO))
 
 #define TIMER_TIMEHW ((volatile uint32_t*)(TIMER_BASE + TIMER_TIMEHW_OFFSET))
 #define TIMER_TIMELW ((volatile uint32_t*)(TIMER_BASE + TIMER_TIMELW_OFFSET))

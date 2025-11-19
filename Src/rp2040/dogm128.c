@@ -45,6 +45,7 @@ void dogm128SendData(const uint8_t*data,uint8_t l)
 
 void initDisplay()
 {
+    #ifndef EXTENSION_BOARD
     // get spi out of reset
     *RESETS |= (1 << RESETS_RESET_SPI0_LSB); 
 	*RESETS &= ~(1 << RESETS_RESET_SPI0_LSB);
@@ -53,6 +54,8 @@ void initDisplay()
     // wire up the spi
     *SSD1306_MOSI_PIN_CNTR = 1;
     *SSD1306_SCK_PIN_CNTR = 1;
+    #endif
+
     *SSD1306_CS_DISPLAY_PIN_CNTR = 1;
 
     *GPIO_OE |= (1 << SSD1306_DISPLAY_RESET);
@@ -299,6 +302,13 @@ void DisplayWriteFramebufferAsync(uint8_t * fb)
         currentFrameBuffer=fb;
         DisplayWriteNextLine();
     }
+}
+
+uint8_t IsDisplayUpdateOngoing()
+{
+    return (*DMA_CH4_TRANS_COUNT == 0 &&
+         (*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==0 &&
+          currentDmaRow == DOGM128_DISPLAY_N_COLUMNS);
 }
 
 #endif

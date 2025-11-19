@@ -1,14 +1,15 @@
-
 # **********************************
 #
 # RP2040 Builds
 #
 # **********************************
 
-PROJECT=microsys_audio
+PROJECT=freestompfx
 MAIN_VERSION=0
 SUB_VERSION=7
 MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
+FLASH_QSPI_SYNC_NUMBER:=$(shell awk 'BEGIN{srand();print int(rand()*(4294967296))};')
+AVR_SYNC_NUMBER:=$(shell date -r mic_stomp_expansion_board/src/main.c.i +%s)
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
 MCU_BOARD=Raspberry Pi Pico
@@ -26,6 +27,7 @@ LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary
 BOOTLOADER=bs2_fast_qspi2
 
+export AVR_SYNC_NUMBER
 all: bs2_code_size $(PROJECT).uf2 
 
 RP2040_OBJS := $(patsubst Src/rp2040/%.c,out/%.o,$(wildcard Src/rp2040/*.c))
@@ -207,12 +209,19 @@ Inc/gen/version.h: Inc/gen
 	@echo "const char PI_PICO_FX_MCU_BOARD[]=\"$(MCU_BOARD)\";\r\n" >> Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_BUILD_DATE[]=\"$(BUILD_DATE)\";\r\n" >> Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_BUILD_TIME[]=\"$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
+	@echo "const uint32_t FLASH_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);\r\n" >> Inc/gen/version.h
+	@echo "const uint32_t AVR_SYNC_NUMBER=$(AVR_SYNC_NUMBER);\r\n" >> Inc/gen/version.h
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
+# AVR Firmware
+mic_stomp_expansion_board/mic_stomp.bin:
+	$(MAKE) -C mic_stomp_expansion_board
+
+
 # main linking and generating flashable content
-$(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common all_common_cpp  all_audio all_audio_cpp all_graphics all_math $(ASSET_IMAGES)
+$(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common all_common_cpp  all_audio all_audio_cpp all_graphics all_math $(ASSET_IMAGES) mic_stomp_expansion_board/mic_stomp.bin
 	$(CPP) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
-#~/pico/pico-libs/rp2_common/pico_stdio/stdio.c.obj ~/pico/pico-libs/common/pico_sync/mutex.c.obj ~/pico/pico-libs/rp2_common/hardware_timer/timer.c.obj ~/pico/pico-libs/common/pico_time/time.c.obj
+
 
 $(PROJECT).bin: $(PROJECT).elf
 	@$(OBJCPY) $(CPYARGS) ./out/$(PROJECT).elf ./out/$(PROJECT).bin
@@ -220,6 +229,9 @@ $(PROJECT).bin: $(PROJECT).elf
 $(PROJECT).uf2: tools/elf2uf2 $(PROJECT).elf 
 	$(ELF2UF2) ./out/$(PROJECT).elf ./out/$(PROJECT).uf2
 	@rm -rf ./out/*.o
+
+.PHONY: mic_stomp_expansion_board/mic_stomp.bin
+
 
 # *************************************************************
 #

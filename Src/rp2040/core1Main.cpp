@@ -7,6 +7,7 @@ extern "C" {
 #include "drivers/gpio.h"
 #include "drivers/irq.h"
 #include "drivers/display128x64.h"
+#include "avrProgrammer.h"
 #include "audio/firFilter.h"
 #include "audio/audiotools.h"
 #include "audio/delay.h"
@@ -23,6 +24,8 @@ extern "C" {
 #include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
 #include "consoleBase.h"
+#include "gen/version.h"
+
 }
 #include "pipicofx/picofxCore.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
@@ -54,6 +57,8 @@ uint16_t adcChannel=0;
 uint8_t stompSwitchState;
 FxPresetType preset1, preset2;
 
+extern uint32_t  _binary___mic_stomp_expansion_board_mic_stomp_bin_start;
+extern uint32_t  _binary___mic_stomp_expansion_board_mic_stomp_bin_end;
 
 
 static volatile uint32_t * audioStatePtr;
@@ -71,6 +76,19 @@ void core1Main()
     
     audioStatePtr = getAudioStatePtr();
 
+
+
+    #ifdef EXTENSION_BOARD
+    initAvrProgrammer();
+    int8_t firmwareMatch = matchAvrFirmwareVersion(AVR_SYNC_NUMBER);
+    if (firmwareMatch == 0)
+    {
+        clearAvrFlash();
+        uploadAvrFirmware((uint16_t*)&_binary___mic_stomp_expansion_board_mic_stomp_bin_start,((uint32_t)&_binary___mic_stomp_expansion_board_mic_stomp_bin_end-(uint32_t)&_binary___mic_stomp_expansion_board_mic_stomp_bin_start)>>1 );
+        disableAvrProgrammingMode();
+        waitSysticks(10);
+    }
+    #endif
 
     initDisplay();
 
@@ -96,9 +114,7 @@ void core1Main()
 
     // initalized the rotary encoder and the switches so that core 1 handler the interrupts of the ui elements
     initRotaryEncoder(switchesPins,2);
-    #ifdef EXTENSION_BOARD
-    initStompSwitchesInterface();
-    #endif
+
     initRoundRobinReading(); // internal adc for reading parameters
 
     setAsOutput(CLIPPING_LED_INPUT);
@@ -107,6 +123,7 @@ void core1Main()
     setPin(CLIPPING_LED_OUTPUT,CLIPPING_LED_POLARITY);
 
     #ifdef EXTENSION_BOARD
+    initStompSwitchesInterface();
     setStompswitchColorRaw(0);
     #endif
 

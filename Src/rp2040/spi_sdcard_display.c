@@ -1,3 +1,6 @@
+#ifdef ADAFRUIT_1_8_COLOR_TFT_SDCARD
+
+
 
 #include "drivers/spi_sdcard_display.h"
 #include "drivers/systick.h"
@@ -16,8 +19,6 @@
  * 1.8" Color TFT LCD display with MicroSD Card Breakout - ST7735R
  */
 
-
-#ifdef ADAFRUIT_1_8_COLOR_TFT_SDCARD
 void initSpi()
 {
     // get spi out of reset
