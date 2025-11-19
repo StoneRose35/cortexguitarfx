@@ -5403,7 +5403,7 @@
 		(descr "Through hole straight pin header, 1x03, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x03 2.54mm single row")
 		(property "Reference" "J5"
-			(at 1.905 -3.175 360)
+			(at 1.905 -3.175 0)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "4a954955-5eb1-4783-94fc-fbb1243593c6")
@@ -5617,7 +5617,7 @@
 			(uuid "db2e011d-5676-433a-ac9b-62c1c0301ead")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 2.54 360)
+			(at 0 2.54 0)
 			(layer "F.Fab")
 			(uuid "9af4609a-7663-4e1e-9290-d773f3662838")
 			(effects
@@ -30026,7 +30026,7 @@
 		(descr "Through hole straight pin header, 1x03, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x03 2.54mm single row")
 		(property "Reference" "J4"
-			(at 0.635 7.62 360)
+			(at 0.635 7.62 0)
 			(layer "F.SilkS")
 			(uuid "77785855-ffa7-40ce-8ad1-599d44c40e29")
 			(effects
@@ -30239,7 +30239,7 @@
 			(uuid "a10fc59e-a15e-409b-b5fd-e5fa79a27554")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 2.54 360)
+			(at 0 2.54 0)
 			(layer "F.Fab")
 			(uuid "aabf7bd8-2782-4fde-9295-e915d4e2e6e8")
 			(effects
@@ -31407,7 +31407,7 @@
 		(descr "Through hole straight pin header, 1x07, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x07 2.54mm single row")
 		(property "Reference" "U10"
-			(at 0 -3.175 360)
+			(at 0 -3.175 0)
 			(layer "F.SilkS")
 			(uuid "a444d991-8841-4f1b-bfec-61d62375ddc4")
 			(effects
@@ -31619,7 +31619,7 @@
 			(uuid "f695b16d-7cee-4cbf-851c-5ca75fc58d3f")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 7.62 360)
+			(at 0 7.62 0)
 			(layer "F.Fab")
 			(uuid "18fdf632-dcbc-4ef7-aeed-050d92654aed")
 			(effects
@@ -36961,6 +36961,18 @@
 			(justify left bottom)
 		)
 	)
+	(gr_text "+"
+		(at 72.39 127.508 0)
+		(layer "F.SilkS")
+		(uuid "26527272-d165-430b-b250-e62e3a9a2d99")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
 	(gr_text "I2C SCL"
 		(at 157.226 98.552 90)
 		(layer "F.SilkS")
@@ -37116,7 +37128,7 @@
 		)
 	)
 	(gr_text "9V In"
-		(at 73.152 116.332 0)
+		(at 73.66 116.84 0)
 		(layer "F.SilkS")
 		(uuid "472ac11d-a2f7-4de5-b6de-0a34d0095333")
 		(effects
@@ -37202,6 +37214,18 @@
 		(at 189.992 78.994 0)
 		(layer "F.SilkS")
 		(uuid "5f4a310d-5d1b-4a3e-964f-4bafe4eaf3e4")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "-"
+		(at 72.136 119.888 0)
+		(layer "F.SilkS")
+		(uuid "73c0bd6a-3af1-43d6-bed8-dddeecc0ddbc")
 		(effects
 			(font
 				(size 1 1)
@@ -43254,11 +43278,11 @@
 	)
 	(segment
 		(start 87.8175 132.715)
-		(end 91.4675 132.715)
+		(end 87.9445 132.842)
 		(width 0.25)
 		(layer "F.Cu")
 		(net 64)
-		(uuid "11dc6cdc-ce54-470c-9619-5a0b20ce79f8")
+		(uuid "02eb9982-adf8-41db-bfe2-c3e76081ab24")
 	)
 	(segment
 		(start 86.83 130.34)
@@ -43285,6 +43309,22 @@
 		(uuid "9dbcd6a7-8530-4f8e-ae6b-95d3e63aa5a7")
 	)
 	(segment
+		(start 87.9445 132.842)
+		(end 92.1195 132.842)
+		(width 0.25)
+		(layer "F.Cu")
+		(net 64)
+		(uuid "a52bfe74-2ca4-4a4e-999b-499ca6afb8af")
+	)
+	(segment
+		(start 92.1195 132.842)
+		(end 93.03 133.7525)
+		(width 0.25)
+		(layer "F.Cu")
+		(net 64)
+		(uuid "b90964f5-661b-4e6b-a14d-c1d1d760bea3")
+	)
+	(segment
 		(start 86.83 132.389999)
 		(end 87.155001 132.715)
 		(width 0.25)
@@ -43299,14 +43339,6 @@
 		(layer "F.Cu")
 		(net 64)
 		(uuid "c8c31d52-f617-4e52-97c6-6034e8bbd17c")
-	)
-	(segment
-		(start 91.4675 132.715)
-		(end 93.03 134.2775)
-		(width 0.25)
-		(layer "F.Cu")
-		(net 64)
-		(uuid "fb75a66d-2fed-4986-b0bb-9def156c2214")
 	)
 	(segment
 		(start 77.1125 81.28)

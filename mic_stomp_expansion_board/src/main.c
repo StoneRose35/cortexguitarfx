@@ -21,7 +21,10 @@ volatile int ledState=0, ledStateOld=0;
 void sendStompSwitchesState(void);
 void startDebounceTimer(void);
 
-
+__attribute__((section(".firmwaresig")))
+const volatile uint32_t firmwareVersion=1763588242;
+volatile uint32_t semiticks=0;
+volatile uint32_t semiticks_old=0;
 void startDebounceTimer(void)
 {
 	TCNT0 = 0;
@@ -47,6 +50,7 @@ int main(void)
 	TWCR |= (1 << TWIE) | (1 << TWEA) | (1 << TWEN);
 	footswitchstate = PINB & 0x7;	
 	footswitchstateOld = footswitchstate;
+	startDebounceTimer();
 	sei();
 	while(1)
 	{
@@ -61,11 +65,18 @@ int main(void)
 				startDebounceTimer();
 			}
 		}
+		/*
 		if (ledState != ledStateOld)
 		{
 			PORTC = (ledState & 0xF);
 			PORTD = ((ledState >> 4) & 0x3); 
 			ledStateOld = ledState;
+		}
+		*/
+		if ((semiticks - semiticks_old) > 19)
+		{
+			PORTC ^= 0xF;
+			semiticks_old = semiticks;
 		}	
 	}
 }
@@ -136,5 +147,7 @@ ISR ( TWI_vect )
 
 ISR ( TIMER0_COMPA_vect )
 {
-	TCCR0B = 0;
+	TCNT0 = 0;
+	//TCCR0B = 0;
+	semiticks++;
 }
