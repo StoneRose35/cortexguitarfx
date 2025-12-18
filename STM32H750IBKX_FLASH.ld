@@ -31,6 +31,11 @@
 ****************************************************************************
 */
 
+TARGET(binary)
+INPUT (./mic_stomp_expansion_board/mic_stomp.bin)
+
+OUTPUT_FORMAT("elf32-littlearm")
+
 /* Entry Point */
 ENTRY(Reset_Handler)
 

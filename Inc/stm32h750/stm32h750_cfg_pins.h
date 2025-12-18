@@ -64,12 +64,14 @@
 //ssd1306 display interfaced using spi
 #define DISPLAY_SCK (6*16+11) // PG11
 #define DISPLAY_MOSI (1*16+5) // PB5
-#define DISPLAY_MISO (1*16+4) // PB4
+//#define DISPLAY_MISO (1*16+4) // PB4
 #define DISPLAY_CD (1*16+9) // PB9
 #define DISPLAY_RESET (1*16+8) //PB8
 #define DISPLAY_CS (6*16+10) //PG10
 
-
+// avr programmer also interface over spi
+#define AVRPROG_MISO (1*16+4) // PB4
+#define AVRPROG_RESET (2*16 + 8) // PC8
 
 // ***************************************
 // * additional device-specific settings *

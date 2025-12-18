@@ -13,4 +13,5 @@ void DisplayWriteText(const char * str,uint8_t posH,uint8_t posV);
 void DisplayWriteTextLine(const char * str,uint8_t posV);
 void DisplayWriteNextLine(void);
 void DisplayWriteFramebufferAsync(uint8_t * fb);
+uint8_t IsDisplayUpdateOngoing();
 #endif

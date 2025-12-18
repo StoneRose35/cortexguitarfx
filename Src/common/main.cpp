@@ -1,6 +1,6 @@
 
 #ifdef HARDWARE
-
+#define SYNC_NUMBERS
 extern "C" {
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
@@ -33,6 +33,7 @@ extern "C" {
 #include "sai.h"
 #include "drivers/i2c.h"
 #include "drivers/wm8731.h"
+#include "avrProgrammer.h"
 #include "pcm3060.h"
 #include "memchecker.h"
 #include "speedtest_logexp.h"
@@ -50,6 +51,7 @@ extern "C" {
 #include "drivers/usb.h"
 #include "usb/usb_cdc.h"
 #include "usb/usb_dfu.h"
+#include "gen/version.h"
 }
 #include "pipicofx/picofxCore.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
@@ -65,8 +67,13 @@ volatile uint8_t context;
 
 extern CommBufferType usbCommBuffer;
 extern CommBufferType btCommBuffer;
-extern uint32_t FLASH_SYNC_NUMBER; 
-extern uint32_t QSPI_SYNC_NUMBER;
+//extern uint32_t FLASH_SYNC_NUMBER; 
+//extern uint32_t QSPI_SYNC_NUMBER;
+//extern uint32_t AVR_SYNC_NUMBER;
+extern uint32_t _binary___mic_stomp_expansion_board_mic_stomp_bin_start;
+extern uint32_t _binary___mic_stomp_expansion_board_mic_stomp_bin_end;
+
+
 
 float inputSampleScaled;
 volatile float avgOutOld=0,avgInOld=0;
@@ -146,6 +153,19 @@ int main(void)
     initDelayMemoryHandler();
     initQspi();
     initUSB();
+
+
+    #ifdef EXTENSION_BOARD
+    initAvrProgrammer();
+    int8_t firmwareMatch = matchAvrFirmwareVersion(AVR_SYNC_NUMBER);
+    if (firmwareMatch == 0)
+    {
+        clearAvrFlash();
+        uploadAvrFirmware((uint16_t*)&_binary___mic_stomp_expansion_board_mic_stomp_bin_start,((uint32_t)&_binary___mic_stomp_expansion_board_mic_stomp_bin_end-(uint32_t)&_binary___mic_stomp_expansion_board_mic_stomp_bin_start)>>1 );
+        disableAvrProgrammingMode();
+        waitSysticks(10);
+    }
+    #endif
 
 	initAdc();
     initTimer();

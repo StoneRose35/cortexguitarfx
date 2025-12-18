@@ -10,6 +10,7 @@ MAIN_VERSION=0
 SUB_VERSION=8
 MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
 FLASH_QSPI_SYNC_NUMBER:=$(shell awk 'BEGIN{srand();print int(rand()*(4294967296))};')
+AVR_SYNC_NUMBER:=$(shell date -r mic_stomp_expansion_board/src/main.c.i +%s)
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
 MCU_BOARD=Daisy Seed
@@ -28,6 +29,7 @@ CPYARGS=-Obinary  --remove-section=.qspi* --remove-section=.dtcm*
 CPYARGS_QSPIBIN=-Obinary  --only-section=.qspi* --only-section=.dtcm* 
 DEBUGGER_UART=/dev/ttyACM0
 
+export AVR_SYNC_NUMBER
 all: out/$(PROJECT).dfu
 	@rm out/*.o
 
@@ -142,6 +144,10 @@ tools/qspi_uart_uploader:
 tools/bins2dfu:
 	gcc -O1 -I Inc -g tools/bins2dfu_src/bin2dfu.cpp -o tools/bins2dfu
 
+# AVR Firmware
+mic_stomp_expansion_board/mic_stomp.bin:
+	$(MAKE) -C mic_stomp_expansion_board
+
 Inc/gen/version.h: Inc/gen
 #REV=`expr %REV% / 60`
 	@echo "#ifndef _PI_PICO_VERSION_H_\r\n#define _PI_PICO_VERSION_H_\r\n" > Inc/gen/version.h 
@@ -150,12 +156,15 @@ Inc/gen/version.h: Inc/gen
 	@echo "const char PI_PICO_FX_MCU_BOARD[]=\"$(MCU_BOARD)\";\r\n" >> Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_BUILD_DATE[]=\"$(BUILD_DATE)\";\r\n" >> Inc/gen/version.h 
 	@echo "const char PI_PICO_FX_BUILD_TIME[]=\"$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
+	@echo "#ifdef SYNC_NUMBERS" >> Inc/gen/version.h 
 	@echo "__attribute__ ((section (\".sync_number_flash\"))) uint32_t FLASH_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
 	@echo "__attribute__ ((section (\".sync_number_qspi\"))) uint32_t QSPI_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
+	@echo "#endif" >> Inc/gen/version.h
+	@echo "const uint32_t AVR_SYNC_NUMBER=$(AVR_SYNC_NUMBER);\r\n" >> Inc/gen/version.h
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # main linking and generating flashable content
-out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_common_cpp all_audio all_audio_cpp all_graphics all_math all_usb 
+out/$(PROJECT).elf: out/stm32h750_startup.o out/helpers.o all_stm32h750  all_common all_common_cpp all_audio all_audio_cpp all_graphics all_math all_usb mic_stomp_expansion_board/mic_stomp.bin
 	$(CPP) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
 
@@ -213,4 +222,4 @@ testout/%.o: Src/mock/%.c
 testout/%.o: Tests/%.c
 	$(CC_TEST) -o $@ -c $^
 
-.PHONY: Inc/gen/version.h
+.PHONY: Inc/gen/version.h mic_stomp_expansion_board/mic_stomp.bin

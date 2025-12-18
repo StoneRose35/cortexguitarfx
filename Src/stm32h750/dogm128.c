@@ -137,7 +137,7 @@ void initDisplay()
 
     gpio_cs->BSRR = (1 << ((DISPLAY_CS & 0xF))); // chip select high
 
-    config_spi_pin(DISPLAY_MISO,5);
+    //config_spi_pin(DISPLAY_MISO,5);
     config_spi_pin(DISPLAY_MOSI,5);
     config_spi_pin(DISPLAY_SCK,5);
 
@@ -161,6 +161,7 @@ void initDisplay()
     SPI1->CR1 = regbfr;
 
     regbfr = SPI1->CFG1;
+    RCC->D2CFGR = (4 << RCC_D2CFGR_D2PPRE2_Pos) | (4 << RCC_D2CFGR_D2PPRE1_Pos); // D2PPRRE1 =2, D2PPRE2=16
     regbfr |= (5 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos) | (1 << SPI_CFG1_TXDMAEN_Pos); // 8 bits, 120MHz/16 as SPI clock, DMA enable for TX
     SPI1->CFG1 = regbfr;
     SPI1->CFG2 |= (1 << SPI_CFG2_MASTER_Pos) | (1 << SPI_CFG2_SSM_Pos);
@@ -404,6 +405,13 @@ void DisplayWriteFramebufferAsync(uint8_t * fb)
         currentFrameBuffer=fb;
         DisplayWriteNextLine();
     }
+}
+
+uint8_t IsDisplayUpdateOngoing()
+{
+    return !(DMA1_Stream3->NDTR == 0 &&
+         (SPI1->SR & (1 << SPI_SR_TXC_Pos))==0 &&
+          currentDmaRow == DOGM128_DISPLAY_N_COLUMNS);
 }
 
 #endif

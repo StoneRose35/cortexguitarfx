@@ -22,7 +22,7 @@ void sendStompSwitchesState(void);
 void startDebounceTimer(void);
 
 __attribute__((section(".firmwaresig")))
-const volatile uint32_t firmwareVersion=1765780548;
+const volatile uint32_t firmwareVersion=<FIRMWARE_VERSION>;
 void startDebounceTimer(void)
 {
 	TCNT0 = 0;
