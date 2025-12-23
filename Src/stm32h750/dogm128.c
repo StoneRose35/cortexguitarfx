@@ -162,7 +162,7 @@ void initDisplay()
 
     regbfr = SPI1->CFG1;
     RCC->D2CFGR = (4 << RCC_D2CFGR_D2PPRE2_Pos) | (4 << RCC_D2CFGR_D2PPRE1_Pos); // D2PPRRE1 =2, D2PPRE2=16
-    regbfr |= (5 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos) | (1 << SPI_CFG1_TXDMAEN_Pos); // 8 bits, 120MHz/16 as SPI clock, DMA enable for TX
+    regbfr |= (1 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos) | (1 << SPI_CFG1_TXDMAEN_Pos); // 8 bits, 25/4 as SPI clock, DMA enable for TX
     SPI1->CFG1 = regbfr;
     SPI1->CFG2 |= (1 << SPI_CFG2_MASTER_Pos) | (1 << SPI_CFG2_SSM_Pos);
     SPI1->CR1 |= (1 << SPI_CR1_SPE_Pos);
@@ -410,8 +410,8 @@ void DisplayWriteFramebufferAsync(uint8_t * fb)
 uint8_t IsDisplayUpdateOngoing()
 {
     return !(DMA1_Stream3->NDTR == 0 &&
-         (SPI1->SR & (1 << SPI_SR_TXC_Pos))==0 &&
-          currentDmaRow == DOGM128_DISPLAY_N_COLUMNS);
+         (SPI1->SR & (1 << SPI_SR_TXC_Pos))!=0 &&
+          currentDmaRow == DOGM128_N_PAGES);
 }
 
 #endif

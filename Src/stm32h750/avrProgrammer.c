@@ -5,8 +5,8 @@
 #include "drivers/display128x64.h"
 #include "drivers/systick.h"
 
-#define SPI1_TXDR_BYTE  *((uint8_t*)&SPI1->TXDR) 
-#define SPI1_RXDR_BYTE  *((uint8_t*)&SPI1->RXDR) 
+#define SPI1_TXDR_BYTE  *((volatile uint8_t*)&SPI1->TXDR) 
+#define SPI1_RXDR_BYTE  *((volatile uint8_t*)&SPI1->RXDR) 
 static volatile uint8_t programmerState;
 
 
@@ -40,6 +40,7 @@ void initAvrProgrammer()
     uint32_t regbfr;
     GPIO_TypeDef * gpio_reset;
     GPIO_TypeDef * gpio_cs;
+    //RCC->D2CFGR = (7 << RCC_D2CFGR_D2PPRE2_Pos) | (4 << RCC_D2CFGR_D2PPRE1_Pos); // D2PPRRE1 =2, D2PPRE2=16
     RCC->APB2ENR |= (1 << RCC_APB2ENR_SPI1EN_Pos);
 
 
@@ -91,10 +92,10 @@ void initAvrProgrammer()
     regbfr |= (1 << SPI_CR1_SSI_Pos); // software slave select
     SPI1->CR1 = regbfr;
 
-    regbfr = SPI1->CFG1;
 
-    RCC->D2CFGR = (7 << RCC_D2CFGR_D2PPRE2_Pos) | (4 << RCC_D2CFGR_D2PPRE1_Pos); // D2PPRRE1 =2, D2PPRE2=16
-    regbfr |= (6 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos); // 8 bits, 240MHz/16/128 as SPI clock,
+    regbfr = SPI1->CFG1;
+    regbfr |= (7 << SPI_CFG1_MBR_Pos) | ((8-1) << SPI_CFG1_DSIZE_Pos) | (0 << SPI_CFG1_FTHLV_Pos); // 8 bits, 25MHz/256 as SPI clock,
+    SPI1->CFG1 = regbfr;
     SPI1->CFG2 |= (1 << SPI_CFG2_MASTER_Pos) | (1 << SPI_CFG2_SSM_Pos);
     SPI1->CR1 |= (1 << SPI_CR1_SPE_Pos);
     SPI1->CR1 |= (1 << SPI_CR1_CSTART_Pos);
@@ -287,43 +288,81 @@ uint8_t uploadAvrFirmware(uint16_t *  data,uint16_t size)
 uint16_t readAvrProgramMemoryHalfword(uint16_t address)
 {
     uint16_t progmemHalfword;
-
+    uint8_t echoedBytes[16];
+    uint8_t echoCount = 0;
     // flush receive fifo
-    while((SPI1->SR & (3 << SPI_SR_RXPLVL_Pos))!=0)
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
     {
-        (void)SPI1_RXDR_BYTE;
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
     }
 
     SPI1_TXDR_BYTE = AVR_PROG_CMD_READ_PROGMEM_B1; //command, low byte
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE = 0x1F&(address >> 8); // address msb
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE =  0xFF&(address); // address lsb
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE =0;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    progmemHalfword = SPI1_RXDR_BYTE & 0xFF;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
+    progmemHalfword = echoedBytes[echoCount-1];
     SPI1_TXDR_BYTE = AVR_PROG_CMD_READ_PROGMEM_B1 | 0x8; //command, high byte
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE = 0x1F&(address >> 8); // address msb
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE = 0xFF&(address); // address lsb
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE =0;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    progmemHalfword |= (SPI1_RXDR_BYTE & 0xFF) << 8;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
+    progmemHalfword |= (echoedBytes[echoCount-1] & 0xFF) << 8;
     return progmemHalfword;
 }
 
 uint8_t enableAvrProgrammingMode()
 {
     GPIO_TypeDef * gpio_reset;
+    uint8_t echoedBytes[16];
+    uint8_t echoCount = 0;
     uint32_t port = AVRPROG_RESET >> 4;
     gpio_reset=(GPIO_TypeDef*)(GPIOA_BASE + port*0x400);
     while (IsDisplayUpdateOngoing()) waitSysticks(1);
@@ -335,24 +374,37 @@ uint8_t enableAvrProgrammingMode()
     waitSysticks(2); // wait 20ms
 
     // flush receive fifo
-    while((SPI1->SR & (3 << SPI_SR_RXPLVL_Pos))!=0)
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
     {
-        (void)SPI1_RXDR_BYTE;
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
     }
 
     // send enable programming
     SPI1_TXDR_BYTE = AVR_PROG_CMD_ENABLE_PROG_B1; 
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE = AVR_PROG_CMD_ENABLE_PROG_B2;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
-    SPI1_TXDR_BYTE = 0x00;
-    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    uint32_t echoedByte = SPI1_TXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++]= SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE = 0x0;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    if ((echoedByte & 0xFF) != AVR_PROG_CMD_ENABLE_PROG_B2)
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
+    SPI1_TXDR_BYTE = 0x0;
+    while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
+    if ((echoedBytes[echoCount-1] & 0xFF) != AVR_PROG_CMD_ENABLE_PROG_B2)
     {
         return 0x1;
     }
@@ -372,6 +424,8 @@ uint8_t disableAvrProgrammingMode()
 
 uint8_t waitUntilReady()
 {
+    uint8_t echoedBytes[16];
+    uint8_t echoCount = 0;
     uint8_t notReadyCnt=0;
     uint8_t notReady = 1;
     if (enableAvrProgrammingMode() != 0)
@@ -380,37 +434,71 @@ uint8_t waitUntilReady()
     }
 
     // flush receive fifo
-    while((SPI1->SR & (3 << SPI_SR_RXPLVL_Pos))!=0)
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
     {
-        (void)SPI1_RXDR_BYTE;
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
     }
 
     SPI1_TXDR_BYTE = AVR_PROG_CMD_POLL_RDY_B1;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE = 0;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE = 0;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    (void)SPI1_RXDR_BYTE;
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
     SPI1_TXDR_BYTE = 0;
     while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-    notReady = (uint8_t)(SPI1_RXDR_BYTE & 0x01);
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+    {
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+    }
+    notReady = (uint8_t)(echoedBytes[echoCount-1] & 0x01);
     while (notReady)
     { 
         SPI1_TXDR_BYTE = AVR_PROG_CMD_POLL_RDY_B1;
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-        (void)SPI1_RXDR_BYTE;
+        echoCount = 0;
+        while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+        {
+            echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+        }
         SPI1_TXDR_BYTE = 0;
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-        (void)SPI1_RXDR_BYTE;
+        echoCount = 0;
+        while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+        {
+            echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+        }
         SPI1_TXDR_BYTE = 0;
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-        (void)SPI1_RXDR_BYTE;
+        echoCount = 0;
+        while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+        {
+            echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+        }
         SPI1_TXDR_BYTE = 0;
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-        notReady = (uint8_t)(SPI1_RXDR_BYTE & 0x01);
+        echoCount = 0;
+        while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+        {
+            echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+        }
+        notReady = (uint8_t)(echoedBytes[echoCount-1] & 0x01);
         notReadyCnt++;
     }
     return notReadyCnt;
@@ -418,14 +506,17 @@ uint8_t waitUntilReady()
 
 uint8_t readSignatureBytes(uint8_t * data)
 {
+    uint8_t echoedBytes[16];
+    uint8_t echoCount = 0;
     if (enableAvrProgrammingMode() != 0)
     {
         return 0x1;
     }
     // flush receive fifo
-    while((SPI1->SR & (3 << SPI_SR_RXPLVL_Pos))!=0)
+    echoCount = 0;
+    while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
     {
-        (void)SPI1_RXDR_BYTE;
+        echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
     }
 
 
@@ -433,16 +524,33 @@ uint8_t readSignatureBytes(uint8_t * data)
     {
         SPI1_TXDR_BYTE = AVR_PROG_CMD_READ_SIG_B1;
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-        (void)SPI1_RXDR_BYTE;
+        echoCount = 0;
+        while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+        {
+            echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+        }
         SPI1_TXDR_BYTE = 0;
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-        (void)SPI1_RXDR_BYTE;
+        echoCount = 0;
+        while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+        {
+            echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+        }
         SPI1_TXDR_BYTE = c;
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-        (void)SPI1_RXDR_BYTE;
+        echoCount = 0;
+        while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+        {
+            echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+        }
         SPI1_TXDR_BYTE = 0;
         while ((SPI1->SR & (1 << SPI_SR_TXC_Pos))==0); 
-        *(data+c) = SPI1_RXDR_BYTE & 0xFF;
+        echoCount = 0;
+        while((SPI1->SR & (1 << SPI_SR_RXP_Pos))!=0)
+        {
+            echoedBytes[echoCount++] = SPI1_RXDR_BYTE;
+        }
+        *(data+c) = echoedBytes[echoCount-1];
     }
     return 0x0;
 }

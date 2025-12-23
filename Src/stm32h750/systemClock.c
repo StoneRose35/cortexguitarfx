@@ -95,8 +95,8 @@ void setupClock()
     // select pll2, r divider from the FMC
     RCC->D1CCIPR = (2 << RCC_D1CCIPR_FMCSEL_Pos);
 
-    // select pll3 for the sai 1
-    RCC->D2CCIP1R = (2 << RCC_D2CCIP1R_SAI1SEL_Pos);
+    // select pll3 for the sai 1, peripheral clock for SPI1
+    RCC->D2CCIP1R = (2 << RCC_D2CCIP1R_SAI1SEL_Pos) | (1 << RCC_D2CCIP1R_SPI123SEL_Pos);
 
 
 }
