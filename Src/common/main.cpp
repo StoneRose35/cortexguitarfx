@@ -156,6 +156,7 @@ int main(void)
 
 
     #ifdef EXTENSION_BOARD
+    #ifdef AVR_FLASHER
     initAvrProgrammer();
     int8_t firmwareMatch = matchAvrFirmwareVersion(AVR_SYNC_NUMBER);
     if (firmwareMatch == 0)
@@ -165,6 +166,7 @@ int main(void)
         disableAvrProgrammingMode();
         waitSysticks(10);
     }
+    #endif
     #endif
 
 	initAdc();

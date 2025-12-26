@@ -20,9 +20,11 @@
 #undef USB_DBG
 #undef  I2C_DBG
 
-//#define DFU_SIM
+//#define DFU_SIM simulate flashing using DFU (device firmware update)
 //#define FORCE_TEST_MODE
-//#define ENCODER_TUNE
+//#define ENCODER_TUNE enable debug output to tune the encoder acceleration
+
+//#define AVR_FLASHER // enables the flasher for the avr (board version 0.3.0 or higher)
 
 // --------------------------
 // derived preprocessor directives
