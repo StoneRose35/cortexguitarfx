@@ -25,19 +25,19 @@ static void create(PiPicoFxUiType*data)
     drawText(4,20,"Looper",imgBuffer,font);
     if (looper.looperState == LOOPER_STATE_PLAYING)
     {
-        setStompswitchColor(0,COLOR_LOOPER_PLAYING); // should be green
+        setStompswitchColorRaw(COLOR_LOOPER_PLAYING); // should be green
     }
     else if (looper.looperState == LOOPER_STATE_OVERDUBBING)
     {
-        setStompswitchColor(0,COLOR_LOOPER_OVERDUBBING); // should be orange
+        setStompswitchColorRaw(COLOR_LOOPER_OVERDUBBING); // should be orange
     }
     else if (looper.looperState == LOOPER_STATE_RECORDING)
     {
-        setStompswitchColor(0,COLOR_LOOPER_RECORDING); // should be red
+        setStompswitchColorRaw(COLOR_LOOPER_RECORDING); // should be red
     }
     else
     {
-        setStompswitchColor(0,COLOR_LOOPER_OFF);
+        setStompswitchColorRaw(COLOR_LOOPER_OFF);
     }
 
     if (looper.indexEnd != LOOPER_INDEX_NULL)
