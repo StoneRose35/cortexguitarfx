@@ -158,16 +158,16 @@ static void exitCallback(PiPicoFxUiType*data)
         switch (paramSelected)
         {
             case 0:
-                clearHorizontal(18-1,14-1,27+1,img);
-                clearHorizontal(46+1,14-1,27+1,img);
-                clearVertical(14-1,18-1,46+1,img);
-                clearVertical(27+1,18-1,46+1,img);
+                clearHorizontal(22-1,14-1,27+1,img);
+                clearHorizontal(50+1,14-1,27+1,img);
+                clearVertical(14-1,22-1,50+1,img);
+                clearVertical(27+1,22-1,50+1,img);
                 break;
             case 1:
-                clearHorizontal(18-1,45-1,45+13+1,img);
-                clearHorizontal(46+1,45-1,45+13+1,img);
-                clearVertical(45-1,18-1,46+1,img);
-                clearVertical(45+13+1,18-1,46+1,img);
+                clearHorizontal(22-1,45-1,45+13+1,img);
+                clearHorizontal(50+1,45-1,45+13+1,img);
+                clearVertical(45-1,22-1,50+1,img);
+                clearVertical(45+13+1,22-1,50+1,img);
                 break;
             case 2:
                 clearHorizontal(21-1,89-1,111+1,img);
@@ -197,16 +197,16 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         switch (paramSelected)
         {
             case 0:
-                clearHorizontal(18,14,27,img);
-                clearHorizontal(46,14,27,img);
-                clearVertical(14,18,46,img);
-                clearVertical(27,18,46,img);
+                clearHorizontal(22,14,27,img);
+                clearHorizontal(50,14,27,img);
+                clearVertical(14,22,50,img);
+                clearVertical(27,22,50,img);
                 break;
             case 1:
-                clearHorizontal(18,45,45+13,img);
-                clearHorizontal(46,45,45+13,img);
-                clearVertical(45,18,46,img);
-                clearVertical(45+13,18,46,img);
+                clearHorizontal(22,45,45+13,img);
+                clearHorizontal(50,45,45+13,img);
+                clearVertical(45,22,50,img);
+                clearVertical(45+13,22,50,img);
                 break;
             case 2:
                 clearHorizontal(21,89,111,img);
@@ -234,16 +234,16 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         switch (paramSelected)
         {
             case 0:
-                drawHorizontal(18,14,27,img);
-                drawHorizontal(46,14,27,img);
-                drawVertical(14,18,46,img);
-                drawVertical(27,18,46,img);
+                drawHorizontal(22,14,27,img);
+                drawHorizontal(50,14,27,img);
+                drawVertical(14,22,50,img);
+                drawVertical(27,22,50,img);
                 break;
             case 1:
-                drawHorizontal(18,45,45+13,img);
-                drawHorizontal(46,45,45+13,img);
-                drawVertical(45,18,46,img);
-                drawVertical(45+13,18,46,img);
+                drawHorizontal(22,45,45+13,img);
+                drawHorizontal(50,45,45+13,img);
+                drawVertical(45,22,50,img);
+                drawVertical(45+13,22,50,img);
                 break;
             case 2:
                 drawHorizontal(21,89,111,img);
@@ -322,7 +322,16 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 currentVolume = pcm3060GetOutputVolume();
                 #endif
                 currentVolume &= 0xFF;
+                if (encoderDelta  < -4)
+                {
+                    encoderDelta = -4;
+                }
+                else if (encoderDelta > 4)
+                {
+                    encoderDelta = 4;
+                }
                 currentVolume += encoderDelta;
+
                 if (encoderDelta > 0)
                 {
                     if (currentVolume > 0xFF)
