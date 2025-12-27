@@ -29,6 +29,9 @@
 
 // comment in to flash a test program useful for hardware integrity check
 //#define FORCE_TEST_MODE
+
+//#define AVR_FLASHER // enables the flasher for the avr (board version 0.3.0 or higher)
+
 //------------------------------------------
 // derived definitions
 #ifdef WAVESHARE_64X128_DISPLAY
