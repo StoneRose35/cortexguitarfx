@@ -82,5 +82,6 @@
         "pcm3060.h": "c"
     },
     "cmake.configureOnOpen": false,
-    "cortex-debug.variableUseNaturalFormat": false
+    "cortex-debug.variableUseNaturalFormat": false,
+    "idf.currentSetup": "/home/philipp/esp/esp-idf"
 }

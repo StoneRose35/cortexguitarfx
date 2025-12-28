@@ -28,16 +28,8 @@ int16_t inputSample, outputSample;
 
 #define AVERAGING_LOWPASS_CUTOFF 10
 
-extern volatile uint8_t sendState;
-extern volatile uint32_t task;
-extern uint32_t ticStart,ticEnd;
-extern uint16_t bufferCnt;
 volatile int16_t avgOut=0,avgIn=0;
-extern volatile int16_t avgOutOld;
-extern volatile int16_t avgInOld;
-extern uint32_t cpuLoad;
-extern volatile uint8_t programChangeState;
-extern PiPicoFxUiType piPicoUiController;
+
 static volatile uint32_t * audioStatePtr;
 int16_t fadeCounter;
 volatile uint32_t spurious_irq_cntr=0;
@@ -65,119 +57,8 @@ extern "C" {
 __attribute__ ((section (".ramfunc"))) 
 void isr_c0_dma_irq0_irq11()
 {
-	if ((*DMA_INTS0 & (1<<1))==(1 << 1) ) // from channel 1: usb uart transmission done, handled by core0
-	{
-		*DMA_INTS0 = (1<<1);
-		*DMA_CH1_CTRL_TRIG &= ~(1 << DMA_CH1_CTRL_TRIG_EN_LSB); // disable dma channel 1
-		task |= (1 << TASK_USB_CONSOLE_TX);
-	}
-	else if ((*DMA_INTS0 & (1<<3))==(1 << 3) ) // from channel 3: toogle audio input buffer, handled by core0
-	{
-		*DMA_INTS0 = (1<<3);
-		// disable other dma interrupts when processing audio
-		*NVIC_ICER = (1 << 11);
-		toggleAudioBuffer();	
-		toggleAudioInputBuffer();
-
-
-		if ((task & (1 << TASK_PROCESS_AUDIO_INPUT)) == 0)
-		{
-			*getAudioStatePtr() &= ~(1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
-		}
-		else
-		{
-			*getAudioStatePtr()  |= (1 << AUDIO_STATE_INPUT_BUFFER_OVERRUN);
-		}
-
-		ticStart = getTimeLW();
-		task |= (1 << TASK_PROCESS_AUDIO_INPUT);
-
-		audioBufferPtr = getEditableAudioBuffer();
-		#ifndef I2S_INPUT
-		audioBufferInputPtr = getReadableAudioBuffer();
-		#else
-		audioBufferInputPtr = getInputAudioBuffer();
-		#endif
-
-		for (uint8_t c=0;c<AUDIO_BUFFER_SIZE;c++) // count in frame of 4 bytes or two  16bit samples
-		{
-			// convert raw input to signed 16 bit
-			#ifndef I2S_INPUT
-			inputSample = (*(audioBufferInputPtr + c) << 4) - 0x7FFF;
-			#else
-			inputSample= clip_input(*(audioBufferInputPtr + c*2 + 1) + *(audioBufferInputPtr + c*2),audioStatePtr); 
-			#endif
-
-			if (inputSample < 0)
-			{
-				avgIn = -inputSample;
-			}
-			else
-			{
-				avgIn = inputSample;
-			}
-			avgInOld = ((AVERAGING_LOWPASS_CUTOFF*avgIn) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgInOld) >> 15);
-
-			if (programChangeState != 3) // processing
-			{
-				outputSample = piPicoUiController.currentProgram->processSample(inputSample); //getNextSineValue();  
-			}
-			else
-			{
-				outputSample = inputSample;
-			}
-			if (programChangeState == 2)// fadeout
-			{
-				outputSample = ((32767 - fadeCounter)*inputSample >> 15) + ((fadeCounter*outputSample) >> 15);
-				fadeCounter -= 256;
-				if (fadeCounter < 0)
-				{
-					fadeCounter = 0;
-					programChangeState=3;
-				}
-			}
-			else if (programChangeState==4) // fadein
-			{
-				outputSample = ((32767 - fadeCounter)*inputSample >> 15) + ((fadeCounter*outputSample) >> 15);
-				fadeCounter += 256;
-				if (fadeCounter < 0) // overrun
-				{
-					programChangeState = 0;
-				}
-			}
-			if (programChangeState == 1)
-			{
-				fadeCounter = 32767;
-				programChangeState = 2;
-			}
-
-			if (outputSample < 0)
-			{
-				avgOut = -outputSample;
-			}
-			else
-			{
-				avgOut = outputSample;
-			}
-			avgOutOld = ((AVERAGING_LOWPASS_CUTOFF*avgOut) >> 15) + (((32767-AVERAGING_LOWPASS_CUTOFF)*avgOutOld) >> 15);
-
-			*((uint32_t*)audioBufferPtr+c) = ((uint16_t)outputSample << 16) | (0xFFFF & (uint16_t)outputSample); 
-
-		}
-		task &= ~((1 << TASK_PROCESS_AUDIO_INPUT)); 
-		bufferCnt++;
-
-
-		ticEnd = getTimeLW();
-		if(ticEnd > ticStart)
-		{
-			cpuLoad = ticEnd-ticStart;
-			cpuLoad = cpuLoad*196; //*256*256*F_SAMPLING/AUDIO_BUFFER_SIZE/1000000;
-			cpuLoad = cpuLoad >> 8;
-		}
-		// re-enable dma interrupts
-		*NVIC_ISER = (1 << 11);
-	}
+	// re-enable dma interrupts
+	*NVIC_ISER = (1 << 11);
 	return;
 }
 

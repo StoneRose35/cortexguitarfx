@@ -4,15 +4,27 @@
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
+#include "ledBlink.h"
 
 volatile static uint32_t ticks=0;
 volatile static uint32_t ticks_c1=0;
 extern volatile uint32_t encoderSpeed;
 extern volatile int32_t encoderVal;
 volatile int32_t encoderValOldSpeedMesurement=0;
+LedBlinkType led1=
+{
+    .nRepetitions=0xFF,
+    .state = LED_BLINK_STATE_STOPPED,
+    .repetitionsCnt = 0,
+    .sysTicksCnt = 0,
+    .sysTicksOn = 20,
+    .sysTicksOff = 20
+};
+
 void isr_c0_systick()
 {
     ticks++;
+    processLedBlinkProgram(&led1);
 }
 
 void isr_c1_systick()

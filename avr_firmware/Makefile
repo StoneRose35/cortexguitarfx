@@ -1,6 +1,6 @@
-PROJECTNAME=mic_stomp
+PROJECTNAME=three_led_lamp
 CC=avr-gcc
-CARGS=-Wall -Og -DF_CPU=4000000UL -mmcu=atmega88p -Wl,-T./avr.ld
+CARGS=-Wall -Og -DF_CPU=4000000UL -mmcu=atmega8 -Wl,-T./avr.ld
 OBJCOPY=avr-objcopy
 OCARGS=-j .text -j .data -O ihex 
 OCARGS_BIN=-j .text -j .data -j .firmwaresig -O binary 
@@ -24,7 +24,7 @@ $(PROJECTNAME).elf: $(OBJS)
 	$(CC) $(CARGS) -o $(PROJECTNAME).elf out/*.o
 
 size: $(PROJECTNAME).elf
-	avr-size --mcu=atmega88 -C $(PROJECTNAME).elf
+	avr-size --mcu=atmega8 -C $(PROJECTNAME).elf
 
 $(PROJECTNAME).hex: $(PROJECTNAME).elf
 	$(OBJCOPY) $(OCARGS) $(PROJECTNAME).elf $(PROJECTNAME).hex

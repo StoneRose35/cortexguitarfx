@@ -31,47 +31,11 @@ extern "C" {
 #include "pipicofx/FxProgramLoader.hpp"
 
 extern "C" {
-extern volatile uint32_t task;
-extern volatile int16_t avgOutOld;
-extern volatile int16_t avgInOld;
-extern volatile uint8_t fxProgramIdx;
-extern volatile uint32_t cpuLoad;
-extern volatile uint8_t programsActivated;
-extern volatile uint8_t programChangeState;
-extern volatile uint8_t programToInitialize;
-extern FxPresetType presets[3];
-extern uint8_t currentPreset;
-extern const uint8_t stompswitch_progs[];
-extern PiPicoFxUiType piPicoUiController;
-int16_t avgOldOutBfr;
-int16_t avgOldInBfr;
-uint8_t cpuLoadBfr;
-int16_t encoderDelta;
-RotaryEncoderIncrementType rotaryEncoderInfo;
-uint8_t switchVals[2]={0,0};
-//PiPicoFxUiType uiControllerData;
-uint16_t adcChannelOld0=0,adcChannel0=0;
-uint16_t adcChannelOld1=0,adcChannel1=0;
-uint16_t adcChannelOld2=0,adcChannel2=0;
-uint16_t adcChannel=0;
-uint8_t stompSwitchState;
-FxPresetType preset1, preset2;
-
-extern uint32_t  _binary___mic_stomp_expansion_board_mic_stomp_bin_start;
-extern uint32_t  _binary___mic_stomp_expansion_board_mic_stomp_bin_end;
-
-
-static volatile uint32_t * audioStatePtr;
-#define UI_DMIN 1
-#define ADC_LOWPASS 2
-#define ROTARY_ENCODER_MAX_INCR 512
-#define ROTARY_ENCODER_SPEED_FACTOR 32
-const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
-
 
 
 void core1Main()
 {
+    /*
     initSystickTimer();
     
     audioStatePtr = getAudioStatePtr();
@@ -94,11 +58,7 @@ void core1Main()
 
     initDisplay();
 
-	/*
-     *
-     * Initialize Background Services
-     *
-	 */
+     //Initialize Background Services
 
 	
 	piPicoFxUiSetup(&piPicoUiController);
@@ -217,11 +177,11 @@ void core1Main()
             task &= ~(1 << TASK_I2C_DATA_RECEIVED);
         }
         
-        /*
-         *
-         * UI Switches Callback
-         * 
-        */
+        
+         
+         // UI Switches Callback
+          
+        
 
         
         switchVals[0] = getSwitchValue(0);
@@ -305,11 +265,8 @@ void core1Main()
         }
             
 
-       /*
-        *
-        * Stomp Switches Callback
-        * 
-       */
+
+        // Stomp Switches Callback
 
         
         #ifdef EXTENSION_BOARD
@@ -375,7 +332,7 @@ void core1Main()
         }
         #endif
         
-    }
+    }*/
 }
 
 }

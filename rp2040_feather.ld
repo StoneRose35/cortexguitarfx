@@ -1,6 +1,6 @@
 
 TARGET(binary)
-INPUT (./mic_stomp_expansion_board/mic_stomp.bin)
+INPUT (./avr_firmware/three_led_lamp.bin)
 
 OUTPUT_FORMAT("elf32-littlearm")
 

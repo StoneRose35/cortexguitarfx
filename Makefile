@@ -9,7 +9,7 @@ MAIN_VERSION=0
 SUB_VERSION=7
 MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
 FLASH_QSPI_SYNC_NUMBER:=$(shell awk 'BEGIN{srand();print int(rand()*(4294967296))};')
-AVR_SYNC_NUMBER:=$(shell date -r mic_stomp_expansion_board/src/main.c.i +%s)
+AVR_SYNC_NUMBER:=$(shell date -r avr_firmware/src/main.c.i +%s)
 BUILD_DATE:=$(shell date +%Y-%m-%d -u)
 BUILD_TIME:=$(shell date +%H:%M:%S -u)
 MCU_BOARD=Raspberry Pi Pico
@@ -214,12 +214,12 @@ Inc/gen/version.h: Inc/gen
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # AVR Firmware
-mic_stomp_expansion_board/mic_stomp.bin:
-	$(MAKE) -C mic_stomp_expansion_board
+avr_firmware/three_led_lamp.bin:
+	$(MAKE) -C avr_firmware
 
 
 # main linking and generating flashable content
-$(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common all_common_cpp  all_audio all_audio_cpp all_graphics all_math $(ASSET_IMAGES) mic_stomp_expansion_board/mic_stomp.bin
+$(PROJECT).elf: bootstage2.o pico_startup2.o all_rp2040 all_common all_common_cpp  all_audio all_audio_cpp all_graphics all_math $(ASSET_IMAGES) avr_firmware/three_led_lamp.bin
 	$(CPP) $(LARGS) -o ./out/$(PROJECT).elf ./out/*.o 
 
 
@@ -230,7 +230,7 @@ $(PROJECT).uf2: tools/elf2uf2 $(PROJECT).elf
 	$(ELF2UF2) ./out/$(PROJECT).elf ./out/$(PROJECT).uf2
 	@rm -rf ./out/*.o
 
-.PHONY: mic_stomp_expansion_board/mic_stomp.bin
+.PHONY: avr_firmware/three_led_lamp.bin
 
 
 # *************************************************************
