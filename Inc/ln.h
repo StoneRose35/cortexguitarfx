@@ -4,4 +4,5 @@
 float toLn(float x);
 float toDb(float x);
 float toLin(float y);
+float toExp(float y);
 #endif

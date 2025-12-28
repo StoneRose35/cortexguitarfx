@@ -1,7 +1,9 @@
 extern "C" {
 #include <stdint.h>
 
+#ifdef HARDWARE
 #include "drivers/24lc128.h"
+#endif
 #include "stringFunctions.h"
 }
 #include "pipicofx/picofxCore.hpp"

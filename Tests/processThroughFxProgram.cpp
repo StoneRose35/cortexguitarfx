@@ -1,13 +1,15 @@
 #include "pipicofx/FxProgramLoader.hpp"
+#include "pipicofx/FxProgram.hpp"
 extern "C" {
 #include "inc/wavReader.h"
+#include "audio/audiotools.h"
 #include "pipicofx/delayMemoryHandler.h"
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
 #include "math.h"
 }
-
+using namespace PiPicoFX;
 #define SELECTED_FX_PROGRAM 1
 #define FX_PROGRAM_PARAM1_VAL 200 // amp model 2: gain 
 #define FX_PROGRAM_PARAM2_VAL 3800 // 

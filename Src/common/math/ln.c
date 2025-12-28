@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "memoryRegions.h"
-#define TOL 0.000001f
+#define TOL 0.00001f
 // taken from https://gist.github.com/LingDong-/7e4c4cae5cbbc44400a05fba65f06f23
 __ITCM_CODE
 float toLn(float x) {
@@ -52,6 +52,49 @@ float toLin(float y)
     else
     {
       x2 = xnew;
+    }
+  }
+  return x1;
+}
+
+__ITCM_CODE
+// computes exp(y) using the bisection algorithm
+float toExp(float y)
+{
+  float x1=0.000001f, x2=1.0f;
+  float xnew,ynew;
+  float diff;
+  if (y<-120.0f)
+  {
+    return 0.f;
+  }
+  while (toLn(x2)-y < 0.0f)
+  {
+    x2 += 1.0f;
+  }
+
+  diff = x2-x1;
+  if (diff < 0.0f)
+  {
+    diff = -diff;
+  }
+  while (diff > TOL)
+  {
+    xnew = (x1 + x2)*0.5f;
+    ynew = toLn(xnew)-y;
+    if (ynew < 0 )
+    {
+      x1 = xnew;
+    }
+    else
+    {
+      x2 = xnew;
+    }
+
+    diff = x2-x1;
+    if (diff < 0.0f)
+    {
+      diff = -diff;
     }
   }
   return x1;

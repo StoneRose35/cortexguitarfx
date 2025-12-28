@@ -18,6 +18,7 @@
 #include "pipicofx/015_ShimmerVerb.hpp"
 #include "pipicofx/016_Tremolo.hpp"
 #include "pipicofx/017_FreeVerb.hpp"
+#include "pipicofx/018_MultimodeFilter.hpp"
 #include <new>
 namespace PiPicoFX {
     __QSPI_CODE
@@ -76,6 +77,9 @@ namespace PiPicoFX {
                 break;
             case 16:
                 res = new(std::nothrow) PiPicoFX::FreeVerb::FreeVerb();
+                break;
+            case 17:
+                res = new(std::nothrow) PiPicoFX::MultimodeFilter::MultimodeFilter();
                 break;
             default:
                 break;
