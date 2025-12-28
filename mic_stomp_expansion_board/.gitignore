@@ -2,4 +2,4 @@
 *.elf
 *.bin
 src/main.c
-out/*.out
+out/*.o

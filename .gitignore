@@ -23,6 +23,7 @@
 /Tests/generateUnitPulseWav
 /Tests/pipicouitest
 /Tests/compressorTest
+/Tests/*Tests
 /Tests/decimaltostringtest
 /Tests/audiosamples/*_proc*
 /Tests/audiosamples/unitPulse.wav
