@@ -142,8 +142,8 @@ uint8_t clearAvrFlash()
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     *SSPDR = 0;
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
-
-    return waitUntilReady();
+    waitSysticks(2);
+    return 0;
 }
 
 // upload a new avr Firmware onto the atmega88(p)
@@ -200,7 +200,7 @@ uint8_t uploadAvrFirmware(uint16_t *  data,uint16_t size)
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
             *SSPDR = 0;
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
-            *SSPDR = cnt & 0x3F;
+            *SSPDR = cnt & 0x1F;
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
             *SSPDR = *(data + cnt) & 0xFF;
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
@@ -208,7 +208,7 @@ uint8_t uploadAvrFirmware(uint16_t *  data,uint16_t size)
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
             *SSPDR = 0;
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
-            *SSPDR = cnt & 0x3F;
+            *SSPDR = cnt & 0x1F;
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
             *SSPDR = (*(data + cnt) >> 8) & 0xFF;
             while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
@@ -222,7 +222,7 @@ uint8_t uploadAvrFirmware(uint16_t *  data,uint16_t size)
         while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
         *SSPDR = 0;
         while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
-        waitUntilReady();
+        waitSysticks(1);
     }
     return 0;
 }
@@ -241,7 +241,7 @@ uint16_t readAvrProgramMemoryHalfword(uint16_t address)
     *SSPDR = AVR_PROG_CMD_READ_PROGMEM_B1; //command, low byte
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     (void)*SSPDR; 
-    *SSPDR = 0x1F&(address >> 8); // address msb
+    *SSPDR = 0xF&(address >> 8); // address msb
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     (void)*SSPDR; 
     *SSPDR = 0xFF&(address); // address lsb
@@ -253,7 +253,7 @@ uint16_t readAvrProgramMemoryHalfword(uint16_t address)
     *SSPDR = AVR_PROG_CMD_READ_PROGMEM_B1 | 0x8; //command, high byte
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     (void)*SSPDR; 
-    *SSPDR = 0x1F&(address >> 8); // address msb
+    *SSPDR = 0xF&(address >> 8); // address msb
     while ((*SSPSR & (1 << SPI_SSPSR_BSY_LSB))==(1 << SPI_SSPSR_BSY_LSB) ); 
     (void)*SSPDR; 
     *SSPDR = 0xFF&(address); // address lsb

@@ -24,7 +24,7 @@ static volatile uint8_t switchPins[8];
 static volatile uint8_t switchVals[8]; // bit 0: sticky bit set when button is pressed (chage from 0 to 1), bit 1: sticky bit set when button is released, bit 2: momentary value
 static volatile uint32_t oldTickSwitches[8];
 static volatile uint8_t lastTrigger;
-void isr_c1_io_irq_bank0_irq13()
+void isr_c0_io_irq_bank0_irq13()
 {
     uint32_t* switchIntAddress;
     if ((*ENCODER_1_INTR & (1 << ENCODER_1_EDGE_HIGH)) == (1 << ENCODER_1_EDGE_HIGH))
@@ -154,7 +154,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         *switchRegisterAddress = 5;
 
         // enable edge triggers 
-        switchInteAddress = (uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*pins[c]) & 0xFFE0) >> 3));
+        switchInteAddress = (uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC0_INTE0_OFFSET + (((4*pins[c]) & 0xFFE0) >> 3));
         *switchInteAddress |= (1 << (((4*pins[c]) & 0x1F)+2)) | (1 << (((4*pins[c]) & 0x1F)+3)); // (1 << SWITCH_EDGE_HIGH) | (1 << SWITCH_EDGE_LOW);
         switchPins[c]=pins[c];
     }

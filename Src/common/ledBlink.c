@@ -18,16 +18,17 @@ void processLedBlinkProgram(LedBlinkType*program)
     }
 
     
-    if (program->sysTicksCnt > program->sysTicksOn)
+    if (program->sysTicksCnt > program->sysTicksOn && program->sysTicksCnt < program->sysTicksOn + program->sysTicksOff)
     {
         setPin(CLIPPING_LED_INPUT,CLIPPING_LED_POLARITY); // off
     }
-    else if (program->sysTicksCnt > program->sysTicksOn + program->sysTicksOff)
+    if (program->sysTicksCnt > program->sysTicksOn + program->sysTicksOff)
     {
         program->repetitionsCnt++;
         if (program->nRepetitions == 0xFF || program->repetitionsCnt < program->nRepetitions)
         {
             setPin(CLIPPING_LED_INPUT,CLIPPING_LED_POLARITY ^ 1); // on
+            program->sysTicksCnt = 0;
         }
         else
         {
