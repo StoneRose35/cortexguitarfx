@@ -58,44 +58,26 @@ float toLin(float y)
 }
 
 __ITCM_CODE
-// computes exp(y) using the bisection algorithm
-float toExp(float y)
+// computes exp(y) by calculating 2 ^ (x * log2(e)) and placing exponent and matissa directly
+float toExp(float x)
 {
-  float x1=0.000001f, x2=1.0f;
-  float xnew,ynew;
-  float diff;
-  if (y<-120.0f)
+  float nr;
+  int32_t exponentInteger;
+  float * nrPtr= &nr;
+  *((uint32_t*)nrPtr)=0;  
+  x = x*1.4426950f; // x = x*log2(e)
+  if (x < 0)
   {
-    return 0.f;
+    exponentInteger = ((int32_t)x) -1;
   }
-  while (toLn(x2)-y < 0.0f)
+  else
   {
-    x2 += 1.0f;
+    exponentInteger = (int32_t)x;
   }
+  *((uint32_t*)nrPtr)= (exponentInteger+127) << 23;
+  float exponentFraction = x - (float)exponentInteger;
+  float twoFractionalPower = (0.00247606f + 0.65104678f*exponentFraction + 0.34400111f*exponentFraction*exponentFraction);
+  *((uint32_t*)nrPtr) |= (uint32_t)(twoFractionalPower*8388607.0f);
+  return *nrPtr;
 
-  diff = x2-x1;
-  if (diff < 0.0f)
-  {
-    diff = -diff;
-  }
-  while (diff > TOL)
-  {
-    xnew = (x1 + x2)*0.5f;
-    ynew = toLn(xnew)-y;
-    if (ynew < 0 )
-    {
-      x1 = xnew;
-    }
-    else
-    {
-      x2 = xnew;
-    }
-
-    diff = x2-x1;
-    if (diff < 0.0f)
-    {
-      diff = -diff;
-    }
-  }
-  return x1;
 }

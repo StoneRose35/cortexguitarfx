@@ -6,6 +6,7 @@ extern "C" {
 #include "audio/multimodefilter.h"
 #include "ln.h"
 #include "memoryRegions.h"
+#include "globalConfig.h"
 }
 
 
@@ -15,6 +16,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float MultimodeFilter::MultimodeFilter::processSample(float sampleIn)
 {
+    
+    if ( this->interpCnt < UI_LATENCY_IN_SAMPLES)
+    {
+        uint16_t interpValue = (((this->newCutoff - this->getParameter(0)->rawValue)*interpCnt)>>12) + this->getParameter(0)->rawValue;
+        MMFilterSetCutoff(0.001f*toExp((float)(interpValue)*0.0016868f),&this->mmfilter);
+        this->interpCnt++;
+        if (this->interpCnt == UI_LATENCY_IN_SAMPLES)
+        {
+            this->getParameter(0)->rawValue = this->newCutoff;
+        }
+    }
+    
     sampleIn = MMFilterProcessSample(sampleIn,&this->mmfilter);
     return gainStageProcessSample(sampleIn,&this->presetVolume);
 }
@@ -34,8 +47,11 @@ MultimodeFilter::MultimodeFilter::~MultimodeFilter()
 
 void MultimodeFilter::Param1::parameterCallback(uint16_t val)
 {
-    MMFilterSetCutoff(0.01f*toExp((float)val*0.0011245f),&this->pData->mmfilter);
-    this->rawValue = val;
+    if (val != this->rawValue && this->pData->interpCnt == 4096)
+    {
+        this->pData->newCutoff =val;
+        this->pData->interpCnt = 0;
+    }
 }
 
 void MultimodeFilter::Param1::parameterDisplay(char*res)

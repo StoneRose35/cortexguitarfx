@@ -33,8 +33,12 @@ namespace PiPicoFX {
                     .gain=1.0f,
                     .offset=0.0f
                 };
+                uint16_t newCutoff;
+                uint16_t newResonance;
+                uint16_t interpCnt=0;
             private:
                 void setup();
+
         };
 
         class Param1:  public FxProgramParameter

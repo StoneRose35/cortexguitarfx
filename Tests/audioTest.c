@@ -177,13 +177,13 @@ void logAndInverseTest2()
 
 void toExpTest()
 {
-    float xval=0.0f;
+    float xval=-16.0;
     float yval;
-    while (xval < 4096.0f)
+    while (xval < 16.0f)
     {    
-        yval=0.01f*toExp(xval*0.0011245f);
-        printf("x: %f, 0.01*exp(x*0.0011245): %f\r\n",xval,yval);
-        xval += 8.0f;
+        yval=toExp(xval);
+        printf("x: %f, exp(x): %f\r\n",xval,yval);
+        xval += 0.1f;
     }
 
 }

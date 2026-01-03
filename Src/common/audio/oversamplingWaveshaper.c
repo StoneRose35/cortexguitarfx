@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "sai.h"
 #include "memoryRegions.h"
+#include "globalConfig.h"
 
 
 // oversampling factor as power of two

@@ -26,6 +26,18 @@
 
 //#define AVR_FLASHER // enables the flasher for the avr (board version 0.3.0 or higher)
 
+
+// audio ui is updated every UI_UPDATE_IN_SAMPLE_BUFFER buffers
+#define UI_UPDATE_IN_SAMPLE_BUFFERS 256 
+
+// sampling frequency in Hz
+#define F_SAMPLING 48000
+
+// the size of and audio buffer, effectively defines latency as F_SAMPLING/AUDIO_BUFFER_SIZE
+#define AUDIO_BUFFER_SIZE 16 // in stereo 16bit samples, thus size of one audio buffer in bytes is this value*4
+
+// 
+#define UI_LATENCY_IN_SAMPLES (UI_UPDATE_IN_SAMPLE_BUFFERS*AUDIO_BUFFER_SIZE)
 // --------------------------
 // derived preprocessor directives
 

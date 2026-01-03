@@ -4,7 +4,7 @@ extern "C" {
 #include "pipicofx/delayMemoryHandler.h"
 
 #include "stm32h750/helpers.h"
-#include "pipicofx/fxPrograms.h"
+#include "pipicofx/001_AmpModel.hpp"
 }
 
 #include "pipicofx/FxProgramLoader.hpp"

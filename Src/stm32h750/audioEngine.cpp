@@ -12,7 +12,7 @@ extern "C" {
 #include "pipicofx/pipicofxui.h"
 
 #define AVERAGING_LOWPASS_CUTOFF 0.000305f // 10/32768
-#define UI_UPDATE_IN_SAMPLE_BUFFERS 256
+
 
 volatile int16_t fadeCounter;
 volatile uint16_t bufferCnt;
