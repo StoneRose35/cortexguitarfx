@@ -7,6 +7,8 @@
 #define LOOPER_STATE_OVERDUBBING 3
 #define LOOPER_INDEX_NULL 0xFFFFFFFF
 
+#define LOOPER_FUNCTION_RETRIGGER 0
+#define LOOPER_FUNCTION_EXIT 1
 typedef struct {
     float * memoryPointer;
     float playVolume;
@@ -15,6 +17,7 @@ typedef struct {
     uint32_t indexEnd;
     uint32_t currentPosition;
     uint8_t looperState;
+    uint8_t looperFunction;
 } LooperDataType;
 
 

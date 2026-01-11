@@ -39,6 +39,8 @@ typedef struct
 
 typedef void(*uiEnterFct)(PiPicoFxUiType*);
 
+
+const uiEnterFct*  getEnterFunctions();
 void registerEnterButtonPressedCallback(void(*cb)(PiPicoFxUiType*));
 void registerEnterButtonReleasedCallback(void(*cb)(PiPicoFxUiType*));
 void registerExitButtonPressedCallback(void(*cb)(PiPicoFxUiType*));

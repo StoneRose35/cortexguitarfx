@@ -13,6 +13,7 @@ void LooperInit(LooperDataType* data)
     data->playVolume = 1.0f;
     data->recordingVolume = 1.0f;
     data->currentPosition = 0;
+    data->looperFunction = LOOPER_FUNCTION_RETRIGGER;
 
 }
 

@@ -50,6 +50,11 @@ BwImageType * getImageBuffer()
     return &img;
 }
 
+const uiEnterFct*  getEnterFunctions()
+{
+    return uiEnterFunctions;
+}
+
 
 /*
  registration functions, used to attach a certain functionality to a

@@ -23,6 +23,15 @@ static void create(PiPicoFxUiType*data)
     clearImage(imgBuffer);
     const GFXfont * font = getGFXFont(FREEMONO12PT7B);
     drawText(4,20,"Looper",imgBuffer,font);
+    if (looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
+    {
+        drawText(6,32,"middle: retrigger",imgBuffer,(void*)0);
+    }
+    else if (looper.looperFunction == LOOPER_FUNCTION_EXIT)
+    {
+        drawText(6,32,"middle: exit",imgBuffer,(void*)0);
+    }
+    
     if (looper.looperState == LOOPER_STATE_PLAYING)
     {
         setStompswitchColorRaw(COLOR_LOOPER_PLAYING); // should be green
@@ -50,10 +59,10 @@ static void create(PiPicoFxUiType*data)
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
 {
-    
+    BwImageType* imgBuffer = getImageBuffer();   
     if (looper.indexEnd != LOOPER_INDEX_NULL)
     {
-        BwImageType* imgBuffer = getImageBuffer();
+        
         drawSquareInt(0,LOOP_SQUARE_CENTER-5,128,LOOP_SQUARE_CENTER+5,imgBuffer);
         clearSquareInt(1,LOOP_SQUARE_CENTER-4,127,LOOP_SQUARE_CENTER+4,imgBuffer);
         
@@ -66,8 +75,16 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
                 screenIndex = 126;
             }
             drawSquareInt(1,LOOP_SQUARE_CENTER-4,1+(uint8_t)screenIndex,LOOP_SQUARE_CENTER+4,imgBuffer);
-        }
-            
+        }       
+    }
+    clearSquareInt(6,32-7,127,32,imgBuffer);
+    if (looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
+    {
+        drawText(6,32,"middle: retrigger",imgBuffer,(void*)0);
+    }
+    else if (looper.looperFunction == LOOPER_FUNCTION_EXIT)
+    {
+        drawText(6,32,"middle: exit",imgBuffer,(void*)0);
     }
 }
 
@@ -92,12 +109,19 @@ static void enterCallback(PiPicoFxUiType*data)
 static void exitCallback(PiPicoFxUiType*data)
 {
 }
-
+*/
 static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 {
-
+    if (looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
+    {
+        looper.looperFunction = LOOPER_FUNCTION_EXIT;
+    }
+    else
+    {
+        looper.looperFunction = LOOPER_FUNCTION_RETRIGGER;
+    }
 }
-*/
+
 
 // toggles record and overdub, start playing if content present and stopped
 static void stompswitch1Callback(PiPicoFxUiType* data)
@@ -132,10 +156,17 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
 // do more funky stuff such as retrigger, reverse, slow down, cut etc.
 static void stompswitch2Callback(PiPicoFxUiType* data)
 {
-    // so far retrigger
-    if (looper.looperState == LOOPER_STATE_PLAYING || looper.looperState == LOOPER_STATE_OVERDUBBING)
+    // retrigger
+    if ((looper.looperState == LOOPER_STATE_PLAYING || looper.looperState == LOOPER_STATE_OVERDUBBING) && looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
     {
         looper.currentPosition = looper.indexStart;
+    }
+    else if (looper.looperFunction == LOOPER_FUNCTION_EXIT) // exit to last screen
+    {
+        if(uiStackCurrent(data) != 0xFF)
+        {
+            getEnterFunctions()[uiStackPop(data)](data);
+        }
     }
 }
 
@@ -167,6 +198,7 @@ void enterLevel8(PiPicoFxUiType*data)
     registerStompswitch1PressedCallback(&stompswitch1Callback);
     registerStompswitch2PressedCallback(&stompswitch2Callback);
     registerStompswitch3PressedCallback(&stompswitch3Callback);
+    registerRotaryCallback(&rotaryCallback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
     create(data);

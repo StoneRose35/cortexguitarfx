@@ -18,6 +18,7 @@ extern "C" {
 #include "drivers/stompswitches.h"
 #include "gen/version.h"
 #include "bootloader_activation.h"
+#include "systick.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
 
@@ -37,6 +38,8 @@ static uint16_t pot1Val=0;
 static uint16_t pot2Val=0;
 static uint16_t pot3Val=0;
 static uint8_t previewBankNr=0xFF;
+static uint32_t longPressTickStart = 0;
+static uint8_t handleReleaseEvent = 0;
 
 static void handleBankChange(uint8_t, PiPicoFxUiType*);
 static void handlePresetChange(uint8_t , PiPicoFxUiType*);
@@ -56,6 +59,7 @@ static void limitPreviewBankRange(uint8_t increase);
 #define OVERLAY_NR_FWUPDATE 4
 #define OVERLAY_NR_ABOUT_SHOWING 8
 
+#define LONGPRESS_DURATION_SYSTICKS 130
 
 static void create(PiPicoFxUiType*data)
 {
@@ -194,6 +198,13 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
         yval = 62;
     }
     drawSquareInt(122-2*6,yval-1,124-2*6,yval+1,imgBuffer);
+
+    if (longPressTickStart != 0 and getTickValue() - longPressTickStart > LONGPRESS_DURATION_SYSTICKS)
+    {
+        longPressTickStart = 0;
+        uiStackPush(data, 3);
+        enterLevel8(data);
+    }
 }
 
 static void enterCallback(PiPicoFxUiType*data) 
@@ -322,6 +333,11 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 static void stompswitch1Callback(PiPicoFxUiType* data)
 {
     uint8_t nbStompSwitch;
+    if (handleReleaseEvent == 0)
+    {
+        return;
+    }
+    longPressTickStart = 0;
     if (bankChanged == 0)
     {
         nbStompSwitch=getStompSwitchState(1);
@@ -353,6 +369,11 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
 static void stompswitch2Callback(PiPicoFxUiType* data)
 {
     uint8_t nbStompSwitch1, nbStompSwitch3;
+    if (handleReleaseEvent == 0)
+    {
+        return;
+    }
+    longPressTickStart = 0;
     if (bankChanged == 0)
     {
         nbStompSwitch1=getStompSwitchState(0);
@@ -388,6 +409,11 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
 static void stompswitch3Callback(PiPicoFxUiType* data)
 {
     uint8_t nbStompSwitch;
+    if (handleReleaseEvent == 0)
+    {
+        return;
+    }
+    longPressTickStart = 0;
     if (bankChanged == 0)
     {
         nbStompSwitch=getStompSwitchState(1);
@@ -412,6 +438,33 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
     else
     {
         bankChanged = 0;
+    }
+}
+
+static void stompSwitch1PressedCallback(PiPicoFxUiType* data)
+{
+    handleReleaseEvent = 1;
+    if (currentPreset == 0)
+    {
+        longPressTickStart = getTickValue();
+    }
+}
+
+static void stompSwitch2PressedCallback(PiPicoFxUiType* data)
+{
+    handleReleaseEvent = 1;
+    if (currentPreset == 1)
+    {
+        longPressTickStart = getTickValue();
+    }
+}
+
+static void stompSwitch3PressedCallback(PiPicoFxUiType* data)
+{
+    handleReleaseEvent = 1;
+    if (currentPreset == 2)
+    {
+        longPressTickStart = getTickValue();
     }
 }
 
@@ -452,6 +505,9 @@ void enterLevel3(PiPicoFxUiType*data)
     registerStompswitch1ReleasedCallback(&stompswitch1Callback);
     registerStompswitch2ReleasedCallback(&stompswitch2Callback);
     registerStompswitch3ReleasedCallback(&stompswitch3Callback);
+    registerStompswitch1PressedCallback(&stompSwitch1PressedCallback);
+    registerStompswitch2PressedCallback(&stompSwitch2PressedCallback);
+    registerStompswitch3PressedCallback(&stompSwitch3PressedCallback);
     registerKnob0Callback(&knob0Callback);
     registerKnob1Callback(&knob1Callback);
     registerKnob2Callback(&knob2Callback);
@@ -459,6 +515,7 @@ void enterLevel3(PiPicoFxUiType*data)
     registerOnCreateCallback(&create);
     create(data);
     overlayNr=0xFF;
+    handleReleaseEvent = 0;
     if (data->currentProgramIdx != presets[currentPreset].programNr)
     {
         data->currentProgramIdx = presets[currentPreset].programNr;
