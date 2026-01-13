@@ -1,9 +1,11 @@
-#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 #include "stdio.h"
 #include "audio/secondOrderIirFilter.h"
 #include "audio/waveShaper.h"
 #include "audio/sineChorus.h"
 #include "math.h"
+#include "matrixMath.h"
 #include "ln.h"
 #include "fastExpLog.h"
 
@@ -185,7 +187,47 @@ void toExpTest()
         printf("x: %f, exp(x): %f\r\n",xval,yval);
         xval += 0.1f;
     }
+}
 
+void matrixInverseTest()
+{
+    Mat4x4Type a;
+    Mat4x4Type b;
+    Mat4x4Type res;
+    uint8_t failure=0;
+    srand(34352);
+    for (uint8_t c=0;c<4;c++)
+    {
+        for (uint8_t cc=0;cc<4;cc++)
+        {
+            a.mat[cc][c] = ((float)rand())/(float)RAND_MAX*4.0f;
+        }
+    }
+    minv(&a,&b);
+    mmult(&a,&b,&res);
+    for (uint8_t q=0;q<4;q++)
+    {
+        if ((res.mat[q][q] -1.0f) > 0.00001f || (res.mat[q][q] -1.0f) < -0.00001f)
+        {
+            failure = 1;
+            printf("diagonal element %i is %f instead of 1.0f\r\n",q,res.mat[q][q]);
+        }
+    }
+    for (uint8_t c=0;c<4;c++)
+    {
+        for (uint8_t cc=0;cc<4;cc++)
+        {
+            if (cc != c && ( res.mat[cc][c] > 0.00001f || res.mat[cc][c] < -0.00001f))
+            {
+                failure = 1;
+                printf("element [%i][%i] is %f instead of 0.0f\r\n",cc,c,res.mat[cc][c]);
+            }
+        }
+    }
+    if (!failure)
+    {
+        printf("Matrix inversion Test OK\r\n");
+    }
 }
 
 int main()
@@ -197,5 +239,6 @@ int main()
     //logComparisonTest();
     //linComparisonTest();
     //logAndInverseTest2();
-    toExpTest();
+    //toExpTest();
+    matrixInverseTest();
 }
