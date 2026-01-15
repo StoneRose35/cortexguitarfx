@@ -4,6 +4,7 @@
 #include "audio/secondOrderIirFilter.h"
 #include "audio/waveShaper.h"
 #include "audio/sineChorus.h"
+#include "audio/genericDistortion.h"
 #include "math.h"
 #include "matrixMath.h"
 #include "ln.h"
@@ -230,6 +231,39 @@ void matrixInverseTest()
     }
 }
 
+void genericDistortionTest()
+{
+    GenericDistortionType dist;
+    float point[2];
+    point[0]=0.1f;
+    point[1] = 0.04f;
+    gdSetPoint(GD_POINT_A,point,&dist);
+
+    point[0] = 0.13f;
+    point[1] = 0.05f;
+    gdSetPoint(GD_POINT_B,point,&dist);
+
+    point[0] = 0.46f;
+    point[1]= 0.9f;
+    gdSetPoint(GD_POINT_C,point,&dist);
+
+    point[0] = 0.13f;
+    point[1] = 0.05f;
+    gdSetPoint(GD_POINT_B,point,&dist);
+
+    point[0] = 0.47f;
+    point[1]= 0.91f;
+    gdSetPoint(GD_POINT_D,point,&dist);
+
+    float xval, yval;
+    for (uint8_t c=0;c<64;c++)
+    {
+        xval = ((float)c)/63.0f;
+        yval = gdGetValue(xval,&dist);
+        printf("%f,%f\r\n",xval,yval);
+    }
+}
+
 int main()
 {
     //impulseTest();
@@ -240,5 +274,6 @@ int main()
     //linComparisonTest();
     //logAndInverseTest2();
     //toExpTest();
-    matrixInverseTest();
+    //matrixInverseTest();
+    genericDistortionTest();
 }
