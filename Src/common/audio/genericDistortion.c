@@ -1,15 +1,42 @@
 #include "audio/genericDistortion.h"
 #include "matrixMath.h"
+#include "memoryRegions.h"
 
+
+__ITCM_CODE
 float gdGetValue(float x,GenericDistortionType*data)
 {
-    if (x < 0.0f)
-    {
-        return 0.0f;
-    }
     if (x > 1.0f)
     {
         return 1.0f;
+    }
+    if (x < -1.0f)
+    {
+        return -1.0f;
+    }
+    if (x < 0.0f)
+    {
+        float xi = -x;
+        if (xi < data->endA)
+        {
+            return -data->slopeA*xi;
+        }
+        else if (xi < data->endB)
+        {
+            return -(data->coeffsB[0] + data->coeffsB[1]*xi + data->coeffsB[2]*xi*xi + data->coeffsB[3]*xi*xi*xi);
+        }
+        else if ( xi < data->endC)
+        {
+            return -((xi - data->endB)*data->slopeC + data->offsetC);
+        }
+        else if ( xi < data->endD)
+        {
+            return -(data->coeffsD[0] + data->coeffsD[1]*xi + data->coeffsD[2]*xi*xi + data->coeffsD[3]*xi*xi*xi);
+        }
+        else
+        {
+            return -((xi - data->endD)*(1.0f - data->offsetE)/(1.0f - data->endD) + data->offsetE);
+        }
     }
     if (x < data->endA)
     {
@@ -86,16 +113,21 @@ uint8_t gdSetPoint(uint8_t pointIdx,float*point,GenericDistortionType*data)
     }
     return 0;
 }
-uint8_t gdSetAllPoints(float**points,GenericDistortionType*data)
+/*
+sets all points at once, should be called when initializing the distortion curve
+points is a matrix, first index is the point number, second index is coords as x, y
+so points[2][1] is the y coordinate of the third point
+*/
+uint8_t gdSetAllPoints(float*points,GenericDistortionType*data)
 {
-    data->slopeA = points[0][1]/points[0][0];
-    data->endA = points[0][0];
-    data->endB = points[1][0];
-    data->offsetC = points[1][1];
-    data->endC = points[2][0];
-    data->offsetE = points[3][1];
-    data->endD = points[3][0];
-    data->slopeC = (points[2][1] - data->offsetC)/(data->endC-data->endB);
+    data->slopeA = points[1]/points[0];
+    data->endA = points[0];
+    data->endB = points[2];
+    data->offsetC = points[3];
+    data->endC = points[4];
+    data->offsetE = points[7];
+    data->endD = points[6];
+    data->slopeC = (points[5] - data->offsetC)/(data->endC-data->endB);
     return gdCalculateSplines(data);
 }
 uint8_t gdCalculateSplines(GenericDistortionType*data)
@@ -181,4 +213,5 @@ uint8_t gdCheckData(GenericDistortionType*data)
     {
         res |= (1 << GD_MONOTONICALLY_POS);
     }
+    return res;
 }

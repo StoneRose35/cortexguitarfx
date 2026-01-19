@@ -50,5 +50,5 @@ void dateTimeToString(char * bfr,uint16_t year,uint8_t month,uint8_t day,uint8_t
 uint16_t copyToString(char * dest,const char * src);
 uint16_t appendToString(char * appendee,const char *  appender);
 uint16_t appendToStringUntil(char * appendee,const char *  appender,uint8_t maxLen);
-
+uint8_t stringEquals(const char * a,const char * b); // return 1 if the strings are equal, 0 otherwise
 #endif /* STRINGFUNCTIONS_H_ */

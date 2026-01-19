@@ -59,7 +59,7 @@ typedef struct
 
 void gdGetPoint(uint8_t pointIdx,float*res,GenericDistortionType*data);
 uint8_t gdSetPoint(uint8_t pointIdx,float*point,GenericDistortionType*data); // point[0] is x coordinate, point[1] y coordinate
-uint8_t gdSetAllPoints(float**points,GenericDistortionType*data);// points[0] is point a, points[1] point b etc.
+uint8_t gdSetAllPoints(float*points,GenericDistortionType*data);// points[0] is point a_x, points[1] is a_y, points[2] point b_x etc.
 
 float gdGetValue(float x,GenericDistortionType*data);
 uint8_t gdCalculateSplines(GenericDistortionType*data); // used to calculate the spline coefficients when slopes, offset or ends change

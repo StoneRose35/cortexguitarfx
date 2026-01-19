@@ -19,6 +19,7 @@
 #include "pipicofx/016_Tremolo.hpp"
 #include "pipicofx/017_FreeVerb.hpp"
 #include "pipicofx/018_MultimodeFilter.hpp"
+#include "pipicofx/019_XAmp.hpp"
 #include <new>
 namespace PiPicoFX {
     __QSPI_CODE
@@ -80,6 +81,9 @@ namespace PiPicoFX {
                 break;
             case 17:
                 res = new(std::nothrow) PiPicoFX::MultimodeFilter::MultimodeFilter();
+                break;
+            case 18:
+                res = new(std::nothrow) PiPicoFX::XAmp::XAmp();
                 break;
             default:
                 break;

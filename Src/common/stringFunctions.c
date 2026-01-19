@@ -975,3 +975,18 @@ uint16_t appendToStringUntil(char * appendee,const char *  appender,uint8_t maxL
 	*(appendee + c) = 0;
 	return c;
 }
+
+__QSPI_CODE
+uint8_t stringEquals(const char * a,const char * b)
+{
+	uint16_t cntr = 0;
+	while(*(a+cntr) != 0 && *(b+cntr) !=0)
+	{
+		if (*(a+cntr) != *(b+cntr))
+		{
+			return 0;
+		}
+		cntr++;
+	}
+	return 1;
+}

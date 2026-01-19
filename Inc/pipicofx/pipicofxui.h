@@ -95,4 +95,5 @@ void enterLevel5(PiPicoFxUiType*data);
 void enterLevel6(PiPicoFxUiType*data);
 void enterLevel7(PiPicoFxUiType*data);
 void enterLevel8(PiPicoFxUiType*data);
+void enterLevel9(PiPicoFxUiType*data);
 #endif
