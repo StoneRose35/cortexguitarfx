@@ -52,6 +52,7 @@ extern "C" {
 #include "usb/usb_cdc.h"
 #include "usb/usb_dfu.h"
 #include "gen/version.h"
+#include "flash.h"
 }
 #include "pipicofx/picofxCore.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
@@ -191,9 +192,21 @@ int main(void)
     uint8_t currentSwitchVal = getMomentarySwitchValue(0);
     if ((currentSwitchVal & 0x01)==1 || FLASH_SYNC_NUMBER != QSPI_SYNC_NUMBER)
     {
-        while ((task & (1 << TASK_FLASH_QSPI)) == 0);    
-        flashingTask();
-        task &= ~(1 << TASK_FLASH_QSPI);
+        uint8_t lockStartup= 1;
+        while(lockStartup ==1)
+        {   
+            if ((task & (1 << TASK_FLASH_QSPI)) != 0)
+            {
+                flashingTask();
+                task &= ~(1 << TASK_FLASH_QSPI);
+                lockStartup = 0;
+            }
+            if ((task & (1 << TASK_PREPARE_FOR_DFU))!=0)
+            {
+                prepareSystemForDFU();
+                task &= ~(1 << TASK_PREPARE_FOR_DFU);
+            }
+        }
     }
 
     // start memchecker if exit is pressed during startup
@@ -252,12 +265,9 @@ int main(void)
     initSAI();
     enableAudioEngine();
     
-    
     audioStatePtr = getAudioStatePtr();
     BwImageType * imgBfr = getImageBuffer();
     fb = imgBfr->data;
-
-
 
     #if defined USB_DBG || defined ENCODER_TUNE
     initUart(115200);

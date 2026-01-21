@@ -31,7 +31,7 @@ uint8_t qspiWritten = 0;
 uint8_t flashWordCntr = 0;
 uint16_t flashWordsWritten=0;
 uint32_t bytesWritten = 0;
-uint8_t qspiBuffer[256];
+uint8_t pageBuffer[256];
 uint16_t qspiBufferBytesFetched = 0;
 uint32_t qspiBytesWritten=0;
 uint16_t qspiPageCnt=0;
@@ -272,13 +272,9 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
 {
     #ifdef DFU_SIM
     char chrbfr[32]; 
-
+   
     #else
-    uint8_t flashWordBfr[] = {  0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                                };
+    uint8_t flashWriteReturnValue;
     #endif
     if (firmwareSize > 0)
     {
@@ -322,7 +318,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
             while (c < dataSize && bytesWritten < flashSize)
             {
                 #ifndef DFU_SIM
-                flashWordBfr[flashWordCntr++]=*(((uint8_t*)data) + c);
+                pageBuffer[flashWordCntr++]=*(((uint8_t*)data) + c);
                 #else
                 flashWordCntr++;
                 #endif
@@ -336,7 +332,12 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    writeFlashWord(flashWordBfr,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                    flashWriteReturnValue = writeFlashWord(pageBuffer,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                    if (flashWriteReturnValue != 0)
+                    {
+                        usbDfuState = USB_DFU_ERROR;
+                        setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_ERR_FIRMWARE,0xFF,10);
+                    }
                     #endif
                     flashWordsWritten++;
                     flashWordCntr=0;
@@ -354,7 +355,12 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 sendStringBlocking(chrbfr);
                 sendStringBlocking("\r\n");
                 #else
-                writeFlashWord(flashWordBfr,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                flashWriteReturnValue = writeFlashWord(pageBuffer,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                if (flashWriteReturnValue != 0)
+                {
+                    usbDfuState = USB_DFU_ERROR;
+                    setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_ERR_FIRMWARE,0xFF,10);
+                }
                 #endif
                 flashWordsWritten++;
                 flashWordCntr=0;
@@ -397,7 +403,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 while ( c < dataSize)
                 {
                     // write qspi data
-                    qspiBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
+                    pageBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
                     qspiBytesWritten++;
                     c++;
                     if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
@@ -408,7 +414,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                         sendStringBlocking(chrbfr);
                         sendStringBlocking("\r\n");
                         #else
-                        QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                        QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                         #endif
                         qspiPageCnt++;
                         qspiBufferBytesFetched = 0;
@@ -426,7 +432,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -443,7 +449,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
             while (c<dataSize && bytesWritten < flashSize)
             {
                 #ifndef DFU_SIM
-                flashWordBfr[flashWordCntr++]=*(((uint8_t*)data) + c);
+                pageBuffer[flashWordCntr++]=*(((uint8_t*)data) + c);
                 #else
                 flashWordCntr++;
                 #endif
@@ -457,7 +463,12 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    writeFlashWord(flashWordBfr,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                    flashWriteReturnValue = writeFlashWord(pageBuffer,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                    if (flashWriteReturnValue != 0)
+                    {
+                        usbDfuState = USB_DFU_ERROR;
+                        setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_ERR_FIRMWARE,0xFF,10);
+                    }
                     #endif
                     flashWordsWritten++;
                     flashWordCntr=0;
@@ -475,7 +486,12 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 sendStringBlocking(chrbfr);
                 sendStringBlocking("\r\n");
                 #else
-                writeFlashWord(flashWordBfr,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                flashWriteReturnValue = writeFlashWord(pageBuffer,flashTargetAddress-0x08000000 + (flashWordsWritten << 5));
+                if (flashWriteReturnValue != 0)
+                {
+                    usbDfuState = USB_DFU_ERROR;
+                    setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_ERR_FIRMWARE,0xFF,10);
+                }
                 #endif
                 flashWordsWritten++;
                 flashWordCntr=0;
@@ -517,7 +533,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 while ( c < dataSize)
                 {
                     // write qspi data
-                    qspiBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
+                    pageBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
                     qspiBytesWritten++;
                     c++;
                     if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
@@ -528,7 +544,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                         sendStringBlocking(chrbfr);
                         sendStringBlocking("\r\n");
                         #else
-                        QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                        QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                         #endif
                         qspiPageCnt++;
                         qspiBufferBytesFetched = 0;
@@ -546,7 +562,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -594,7 +610,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
             while ( c < dataSize)
             {
                 // write qspi data
-                qspiBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
+                pageBuffer[qspiBufferBytesFetched++] = *((uint8_t*)data + c);
                 qspiBytesWritten++;
                 c++;
                 if ((qspiBufferBytesFetched == 256 || qspiBytesWritten == qspiSize) && qspiWritten == 0)
@@ -605,7 +621,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -623,7 +639,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 sendStringBlocking(chrbfr);
                 sendStringBlocking("\r\n");
                 #else
-                QspiProgramPage(qspiPageCnt << 8, qspiBuffer);
+                QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                 #endif
                 qspiPageCnt++;
                 qspiBufferBytesFetched = 0;

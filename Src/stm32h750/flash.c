@@ -54,15 +54,15 @@ uint8_t writeFlashWord(uint8_t*data,uint32_t address)
     {
         return 2;
     }
-    if ((FLASH->CR1  & (1 << FLASH_CR_LOCK_Pos))!= 0)
+    if ((FLASH->CR1  & (1 << FLASH_CR_LOCK_Pos))!= 0 || ((FLASH->CR1 & (1 << FLASH_CR_PG_Pos))==0))
     {
         res = unlockFlash();
         if (res != 0)
         {
             return res;
         }
+        FLASH->CR1 |= (1 << FLASH_CR_PG_Pos);       
     }
-    FLASH->CR1 |= (1 << FLASH_CR_PG_Pos);
     while ((FLASH->SR1 & (1 << FLASH_SR_BSY_Pos))!= 0);
     for (uint8_t c=0;c<32;c++)
     {
