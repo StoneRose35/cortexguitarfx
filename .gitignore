@@ -7,6 +7,7 @@
 /out/*
 /testout/*
 /tools/elf2uf2
+/tools/*2dfu
 /tools/pioasm
 /tools/pioasm_src/gen/*
 /tools/*.c
