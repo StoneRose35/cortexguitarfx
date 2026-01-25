@@ -198,11 +198,6 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         }
         programToInitialize=data->currentProgramIdx;
         programChangeState=1;
-        if (programToInitialize == 18) // ugly hack to jump to program 9 when loading the generic distortion based program
-        {
-            uiStackPush(data, 0);
-            enterLevel9(data);
-        }
     }
 }
 

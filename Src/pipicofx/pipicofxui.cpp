@@ -28,8 +28,7 @@ const uiEnterFct uiEnterFunctions[]={
     &enterLevel5,
     &enterLevel6,
     &enterLevel7,
-    &enterLevel8,
-    &enterLevel9};
+    &enterLevel8};
 /*
 Callback function pointers
 */

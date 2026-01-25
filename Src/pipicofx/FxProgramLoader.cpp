@@ -82,9 +82,6 @@ namespace PiPicoFX {
             case 17:
                 res = new(std::nothrow) PiPicoFX::MultimodeFilter::MultimodeFilter();
                 break;
-            case 18:
-                res = new(std::nothrow) PiPicoFX::XAmp::XAmp();
-                break;
             default:
                 break;
 
