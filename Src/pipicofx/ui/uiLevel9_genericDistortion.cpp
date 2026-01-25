@@ -67,9 +67,9 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
         float fx = ((float)ix)/62.0f;
         float fy = gdGetValue(fx,distortion)*62.0f;
         uint8_t iy = (uint8_t)fy;
-        for (uint8_t c=oldy;c<=iy;c++)
+        if (ix > 0)
         {
-            setPixel(ix+OFFSET_DISTORTION_GRAPH,62-c,imgBuffer);
+            drawLine(ix-1,ix,oldy,iy,imgBuffer);
         }
         oldy = iy;
     }

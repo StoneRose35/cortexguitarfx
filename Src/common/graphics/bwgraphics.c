@@ -258,13 +258,13 @@ void changeLine(float spx,float spy,float epx, float epy,uint8_t draw,BwImageTyp
 }
 
 __QSPI_CODE
-void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
+void drawLineFloat(float spx,float spy,float epx, float epy,BwImageType* img)
 {
 	changeLine(spx,spy,epx,epy,1,img);
 }
 
 __QSPI_CODE
-void clearLine(float spx,float spy,float epx, float epy,BwImageType* img)
+void clearLineFloat(float spx,float spy,float epx, float epy,BwImageType* img)
 {
 	changeLine(spx,spy,epx,epy,0,img);
 }
@@ -342,6 +342,117 @@ void clearVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 		{
 			clearPixel(xval,c,img);
 		}
+	}
+}
+
+__QSPI_CODE
+void setLineSmallSlope(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,uint8_t doDraw,BwImageType*img)
+{
+	if (xend < xstart)
+	{
+		uint8_t swap;
+		swap = xend;
+		xend = xstart;
+		xstart = swap;
+	}
+	int8_t dx = xend - xstart;
+	int8_t dy = yend - ystart;
+	int8_t yIncrement = 1;
+	int16_t D;
+	if (dy < 0 )
+	{
+		yIncrement = -1;
+		dy = -dy;
+	}
+	D = (dy << 1) - dx;
+	uint8_t y = ystart;
+	for (uint8_t x=xstart;x<=xend;x++)
+	{
+		if (doDraw)
+		{
+			setPixel(x,y,img);
+		}
+		else
+		{
+			clearPixel(x,y,img);
+		}
+		if (D > 0)
+		{
+			y += yIncrement;
+			D += (dy-dx) << 1;
+		}
+		else
+		{
+			D += 2*dy;
+		}
+	}
+}
+
+__QSPI_CODE
+void setLineLargeSlope(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,uint8_t doDraw,BwImageType*img)
+{
+	if (yend < ystart)
+	{
+		uint8_t swap;
+		swap = yend;
+		yend = ystart;
+		ystart = swap;
+	}
+	int8_t dx = xend - xstart;
+	int8_t dy = yend - ystart;
+	int8_t xIncrement = 1;
+	int16_t D;
+	if (dx < 0 )
+	{
+		xIncrement = -1;
+		dx = -dx;
+	}
+	D = (dx << 1) - dy;
+	uint8_t x = xstart;
+	for (uint8_t y=ystart;y<=yend;y++)
+	{
+		if (doDraw)
+		{
+			setPixel(x,y,img);
+		}
+		else
+		{
+			clearPixel(x,y,img);
+		}
+		if (D > 0)
+		{
+			x += xIncrement;
+			D += (dx-dy) << 1;
+		}
+		else
+		{
+			D += 2*dx;
+		}
+	}
+}
+
+__QSPI_CODE
+void drawLine(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,BwImageType*img)
+{
+	if (abs(yend-ystart) < abs(xend-xstart))
+	{
+		setLineSmallSlope(xstart,xend,ystart,yend,1,img);
+	}
+	else
+	{
+		setLineLargeSlope(xstart,xend,ystart,yend,1,img);
+	}
+}
+
+void clearLine(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,BwImageType*img)
+{
+	if (abs(yend-ystart) < abs(xend-xstart))
+	{
+		setLineSmallSlope(xstart,xend,ystart,yend,0,img);
+	}
+	else
+	{
+		setLineLargeSlope(xstart,xend,ystart,yend,0,img);
 	}
 }
 
