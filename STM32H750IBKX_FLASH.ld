@@ -84,6 +84,7 @@ _siqspicode = LOADADDR(.qspi_code);
 		PROVIDE(__qspi_code_start = _sqspi_code);
     *(.text.*PiPicoFX*)
     *(.text.*PiPicoFxUi*)
+    *(.text.enterLevel*)
 		*(.qspi_code)
 		*(.qspi_code*)
     *(.qspi_fast_data)
