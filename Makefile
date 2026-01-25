@@ -5,9 +5,9 @@
 #
 # **********************************
 
-PROJECT=microsys_audio
-MAIN_VERSION=0
-SUB_VERSION=8
+PROJECT=ppfx_daisyseed
+MAIN_VERSION=3
+SUB_VERSION=0
 MINUTES_SINCE_INCUBATION:=$(shell expr `date +%s` \/ 60 - `date -d "20220319" +%s` \/ 60)
 FLASH_QSPI_SYNC_NUMBER:=$(shell awk 'BEGIN{srand();print int(rand()*(4294967296))};')
 AVR_SYNC_NUMBER:=$(shell date -r mic_stomp_expansion_board/src/main.c.i +%s)
@@ -18,7 +18,7 @@ CC=arm-none-eabi-gcc
 CPP=arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
-OPT=-Og
+OPT=-O3
 DEFINES=-DDEBUG -DHARDWARE -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc -I./Inc/gen
 CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -Wall -Wno-error=narrowing -I./Inc -I./Inc/gen

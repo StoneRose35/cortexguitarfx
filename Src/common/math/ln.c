@@ -61,7 +61,7 @@ __ITCM_CODE
 // computes exp(y) by calculating 2 ^ (x * log2(e)) and placing exponent and matissa directly
 float toExp(float x)
 {
-  float nr;
+  float nr=0.0f;
   int32_t exponentInteger;
   float * nrPtr= &nr;
   *((uint32_t*)nrPtr)=0;  
