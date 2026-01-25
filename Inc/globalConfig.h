@@ -14,8 +14,11 @@
 #define PCM3060_CODEC_EXTERNAL
 
 
-#define USB_VENDOR_ID 0x4A37
-#define USB_PRODUCT_ID 0x35D2
+#define USB_VENDOR_ID 0x4A37 // usb vendor id in normal mode
+#define USB_PRODUCT_ID 0x35D2 // usb product id in normal mode
+
+#define USB_VENDOR_ID_BOOTMODE 0x0483 // usb vendor id when in rescue mode (boot pressed while reset is toggled)
+#define USB_PRODUCT_ID_BOOTMODE 0xdf11 // usb product id when in rescue mode (boot pressed while reset is toggled)
 // debug swiches (return information over UART@115200 8-n-1 when enabled)
 #undef USB_DBG
 #undef  I2C_DBG

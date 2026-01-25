@@ -144,6 +144,9 @@ tools/qspi_uart_uploader:
 tools/bins2dfu:
 	gcc -O1 -I Inc -g tools/bins2dfu_src/bin2dfu.cpp -o tools/bins2dfu
 
+tools/flash2dfu:
+	gcc -O1 -I Inc -g tools/flash2dfu_src/flash2dfu.cpp -o tools/flash2dfu
+
 # AVR Firmware
 mic_stomp_expansion_board/mic_stomp.bin:
 	$(MAKE) -C mic_stomp_expansion_board
@@ -175,8 +178,9 @@ out/$(PROJECT).bin: out/$(PROJECT).elf
 out/$(PROJECT)_qspi.bin: out/$(PROJECT).elf 
 	@$(OBJCPY) $(CPYARGS_QSPIBIN) ./out/$(PROJECT).elf ./out/$(PROJECT)_qspi.bin
 
-out/$(PROJECT).dfu: tools/bins2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin
+out/$(PROJECT).dfu: tools/bins2dfu tools/flash2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin
 	tools/bins2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin -o out/$(PROJECT).dfu
+	tools/flash2dfu out/$(PROJECT).bin -o out/$(PROJECT)_firstTime.dfu
 
 program_qspi: out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)

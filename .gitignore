@@ -8,8 +8,7 @@
 /testout/*
 /tools/elf2uf2
 /tools/pioasm
-/tools/bin2dfu
-/tools/bins2dfu
+/tools/*2dfu
 /tools/pioasm_src/gen/*
 /Inc/gen/*.h
 /Doc/gen/*
