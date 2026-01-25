@@ -387,6 +387,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
+                startQpiMode();
                 #endif
 
 
@@ -396,7 +397,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 nblocks++;
                 for (uint32_t c=0;c<nblocks;c++)
                 {
-                    QspiEraseBlock64(blockaddress);
+                    QspiEraseBlock64Qpi(blockaddress);
                     blockaddress += 0x10000;
                 }
                 #endif
@@ -414,7 +415,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                         sendStringBlocking(chrbfr);
                         sendStringBlocking("\r\n");
                         #else
-                        QspiProgramPage(qspiPageCnt << 8, pageBuffer);
+                        QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
                         #endif
                         qspiPageCnt++;
                         qspiBufferBytesFetched = 0;
@@ -432,7 +433,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
+                    QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -544,7 +545,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                         sendStringBlocking(chrbfr);
                         sendStringBlocking("\r\n");
                         #else
-                        QspiProgramPage(qspiPageCnt << 8, pageBuffer);
+                        QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
                         #endif
                         qspiPageCnt++;
                         qspiBufferBytesFetched = 0;
@@ -562,7 +563,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
+                    QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -621,7 +622,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
+                    QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -639,7 +640,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 sendStringBlocking(chrbfr);
                 sendStringBlocking("\r\n");
                 #else
-                QspiProgramPage(qspiPageCnt << 8, pageBuffer);
+                QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
                 #endif
                 qspiPageCnt++;
                 qspiBufferBytesFetched = 0;
