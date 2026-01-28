@@ -224,6 +224,9 @@ void waitForStatus(uint32_t maskr,uint32_t matchr)
                 | READ_STATUS_REG_CMD;
     while((QUADSPI->SR & (1 << QUADSPI_SR_SMF_Pos)) ==0);
     QUADSPI->FCR = (1 << QUADSPI_FCR_CSMF_Pos);
+    QUADSPI->CR |= (1 << QUADSPI_CR_ABORT_Pos);
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->CR |= (1 << QUADSPI_CR_APMS_Pos);
 }
 
 __RAMFUNC
@@ -438,6 +441,7 @@ void QspiEraseBlock32(uint32_t address)
 }
 
 // erases a block of 64 kbytes
+__RAMFUNC
 void QspiEraseBlock64Qpi(uint32_t address)
 {
     writeEnableQpi();
@@ -487,13 +491,17 @@ void QspiEraseChip()
 void QspiRead(uint32_t address,uint32_t nBytes,uint8_t * data)
 {
     while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    while((QUADSPI->SR & (QUADSPI_SR_FLEVEL_Msk))!=0)
+    {
+        (void)QUADSPI_DR_BYTE;
+    }
     QUADSPI->DLR = nBytes;
-    QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
-            | (SECTOR_ERASE_QPI_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
-            | (3 << QUADSPI_CCR_DMODE_Pos) // data mode: data on four lines
+    QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) // instruction on single data line
+            | (FAST_READ_QPI_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
+            | (1 << QUADSPI_CCR_DMODE_Pos) // data mode: data on single data line
             | (8 << QUADSPI_CCR_DCYC_Pos) // 8 dummy cycles
             | (2 << QUADSPI_CCR_ADSIZE_Pos) // 24 bit address
-            | (3 << QUADSPI_CCR_ADMODE_Pos) // address over 4 data lines
+            | (1 << QUADSPI_CCR_ADMODE_Pos) // address over single data line
             | (1 << QUADSPI_CCR_FMODE_Pos); // indirect read
     QUADSPI->AR = address;
     for(uint32_t c=0;c<nBytes;c++)
@@ -503,6 +511,29 @@ void QspiRead(uint32_t address,uint32_t nBytes,uint8_t * data)
     }
 }
 
+
+void QspiReadQpi(uint32_t address,uint32_t nBytes,uint8_t * data)
+{
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    while((QUADSPI->SR & (QUADSPI_SR_FLEVEL_Msk))!=0)
+    {
+        (void)QUADSPI_DR_BYTE;
+    }
+    QUADSPI->DLR = nBytes-1;
+    QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
+            | (FAST_READ_QPI_CMD << QUADSPI_CCR_INSTRUCTION_Pos)
+            | (3 << QUADSPI_CCR_DMODE_Pos) // data mode: data on four lines
+            | (6 << QUADSPI_CCR_DCYC_Pos) // 6 dummy cycles
+            | (2 << QUADSPI_CCR_ADSIZE_Pos) // 24 bit address
+            | (3 << QUADSPI_CCR_ADMODE_Pos) // address over 4 data lines
+            | (1 << QUADSPI_CCR_FMODE_Pos); // indirect read
+    QUADSPI->AR = address;
+    for(uint32_t c=0;c<nBytes;c++)
+    {
+        while((QUADSPI->SR & (1 << QUADSPI_SR_FTF_Pos))==0);
+        *(data+c) = *QUADSPI_DR_BYTE;
+    }
+}
 void setMemoryMappedMode()
 {
     // disable qpi mode
@@ -532,6 +563,7 @@ void endMemoryMappedMode()
     QUADSPI->CCR= (1 << QUADSPI_CCR_IMODE_Pos); // send nop
 }
 
+__RAMFUNC
 void startQpiMode()
 {
     while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);

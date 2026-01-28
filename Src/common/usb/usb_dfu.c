@@ -12,6 +12,7 @@
 #include "flash.h"
 #include "stringFunctions.h"
 #include "globalConfig.h"
+#include "gen/version.h"
 
 extern volatile uint32_t task;
 extern volatile uint8_t programChangeState;
@@ -168,7 +169,7 @@ uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet)
             if (packet->wLength > 0)
             {
                 usbDfuState = USB_DFU_DNLOAD_SYNC;
-                setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,USB_DFU_DNBUSY,10);
+                setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,USB_DFU_DNBUSY,20);
                 currentFirmwareBlockNr = packet->wValue+1;
                 prepareEP0Rception();
             }
@@ -177,7 +178,7 @@ uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet)
                 prepareUSBTransfer(0,0,0);
                 usbDfuState = USB_DFU_MANIFEST_SYNC;
                 task |= (1 << TASK_MANIFEST_DFU);
-                setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,USB_DFU_MANIFEST,10);
+                setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,USB_DFU_MANIFEST,20);
             }
         }
         
@@ -387,7 +388,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
-                startQpiMode();
+                //startQpiMode();
                 #endif
 
 
@@ -397,7 +398,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 nblocks++;
                 for (uint32_t c=0;c<nblocks;c++)
                 {
-                    QspiEraseBlock64Qpi(blockaddress);
+                    QspiEraseBlock64(blockaddress);
                     blockaddress += 0x10000;
                 }
                 #endif
@@ -415,7 +416,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                         sendStringBlocking(chrbfr);
                         sendStringBlocking("\r\n");
                         #else
-                        QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
+                        QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                         #endif
                         qspiPageCnt++;
                         qspiBufferBytesFetched = 0;
@@ -433,7 +434,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
+                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -519,7 +520,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
-                startQpiMode();
+                //startQpiMode();
                 #endif
 
                 #ifndef DFU_SIM
@@ -528,7 +529,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 nblocks++;
                 for (uint32_t c=0;c<nblocks;c++)
                 {
-                    QspiEraseBlock64(blockaddress);
+                    QspiEraseBlock64(blockaddress); // CALLED
                     blockaddress += 0x10000;
                 }
                 #endif
@@ -546,7 +547,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                         sendStringBlocking(chrbfr);
                         sendStringBlocking("\r\n");
                         #else
-                        QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
+                        QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                         #endif
                         qspiPageCnt++;
                         qspiBufferBytesFetched = 0;
@@ -564,7 +565,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
+                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -595,7 +596,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
-                startQpiMode();
+                //startQpiMode();
                 #endif
 
                 #ifndef DFU_SIM
@@ -624,7 +625,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     sendStringBlocking(chrbfr);
                     sendStringBlocking("\r\n");
                     #else
-                    QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
+                    QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                     #endif
                     qspiPageCnt++;
                     qspiBufferBytesFetched = 0;
@@ -642,7 +643,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 sendStringBlocking(chrbfr);
                 sendStringBlocking("\r\n");
                 #else
-                QspiProgramPageQpi(qspiPageCnt << 8, pageBuffer);
+                QspiProgramPage(qspiPageCnt << 8, pageBuffer);
                 #endif
                 qspiPageCnt++;
                 qspiBufferBytesFetched = 0;
@@ -663,13 +664,15 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
         prepareEP0Rception();
     }
 
-    setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,0xFF,10);
+    setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,0xFF,20);
 }
 
 __RAMFUNC
 void usbDfuEndManifestation()
 {
-    if (qspiBytesWritten == qspiSize && bytesWritten == flashSize)
+    uint8_t data[256];
+    QspiRead(0,256,data);
+    if (qspiBytesWritten == qspiSize && bytesWritten == flashSize && *((uint32_t*)data)==FLASH_QSPI_SYNC_NUMBER)
     {
         usbDfuState = USB_DFU_MANIFEST_WAIT_RESET;
     }
