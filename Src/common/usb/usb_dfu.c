@@ -519,6 +519,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
+                startQpiMode();
                 #endif
 
                 #ifndef DFU_SIM
@@ -594,6 +595,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                 #else
                 setQspiStatus(2);
                 endMemoryMappedMode();
+                startQpiMode();
                 #endif
 
                 #ifndef DFU_SIM

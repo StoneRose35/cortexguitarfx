@@ -233,15 +233,17 @@ void waitForStatusQpi(uint32_t maskr,uint32_t matchr)
         // read status register until flag SR_WIP is cleared 
     QUADSPI->PSMKR = maskr;
     QUADSPI->PSMAR = matchr;
-    QUADSPI->PIR = 0x10;
+    QUADSPI->PIR = 0x8;
     QUADSPI->DLR = 1-1; // one byte of data
     QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) // instruction on four lines
                 | (2 << QUADSPI_CCR_FMODE_Pos) // automatic status polling  
                 | (3 << QUADSPI_CCR_DMODE_Pos) // data on four lines
                 | READ_STATUS_REG_CMD;
-    while((QUADSPI->SR & (1 << QUADSPI_SR_SMF_Pos)) ==0);
+    while((QUADSPI->SR & (1 << QUADSPI_SR_SMF_Pos))==0);
     QUADSPI->FCR = (1 << QUADSPI_FCR_CSMF_Pos);
-
+    QUADSPI->CR |= (1 << QUADSPI_CR_ABORT_Pos);
+    while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
+    QUADSPI->CR |= (1 << QUADSPI_CR_APMS_Pos);
 }
 
 
@@ -273,6 +275,7 @@ void writeEnableQpi()
 {
     while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     QUADSPI->CCR = (3 << QUADSPI_CCR_IMODE_Pos) | WRITE_ENABLE_CMD;
+    QUADSPI->FCR = (1 << QUADSPI_FCR_CTCF_Pos);
 }
 
 void readManufacturerId(uint8_t * data)

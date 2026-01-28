@@ -11,7 +11,7 @@
         },
         {
             "cwd": "${workspaceFolder}",
-            "executable": "./out/microsys_audio.elf",
+            "executable": "./out/ppfx_daisyseed.elf",
             "name": "Program&Debug with ST-Util",
             "request": "attach",
             "interface": "swd",
@@ -24,7 +24,7 @@
         },
         {
             "cwd": "${workspaceFolder}",
-            "executable": "./out/microsys_audio.elf",
+            "executable": "./out/ppfx_daisyseed.elf",
             "name": "Debug with ST-Link",
             "request": "attach",
             "interface": "swd",

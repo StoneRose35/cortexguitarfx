@@ -187,6 +187,7 @@ int main(void)
 
     initRotaryEncoder(switchesPins,2);
 
+
     // wait for flashing when button 0 (Enter switch) is pressed during startup 
     // allows flashing the QSPI from a corrupted state
     uint8_t currentSwitchVal = getMomentarySwitchValue(0);
