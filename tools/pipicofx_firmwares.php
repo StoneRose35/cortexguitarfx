@@ -1,5 +1,5 @@
 <?php 
-$dir = './ppfx_firmwares/';
+$dir = './../out/';
 $dfu_files = array();
 
 if ($dh = opendir($dir)) {
@@ -7,8 +7,21 @@ if ($dh = opendir($dir)) {
         if (str_ends_with($file,".dfu"))
         {
             $filetime = filectime($dir.$file);
-            $dfu_entry = array("fname" => $file,"createdDate" => date("d-m-Y H:i:s",$filetime),"timestamp" => $filetime  );
-            $dfu_files[] = $dfu_entry;
+            // read first part of file and check whether it either contains "DfuSe" or the magic number (0x4168b18f) in the first 5 or 4 bytes
+            $dfu_file = fopen($dir.$file,"rb");
+            $firstfiveBytes = fread($dfu_file,5);
+            if ($firstfiveBytes === "DfuSe"){
+                $dfutype="firstTime";
+            }
+            else if (substr_compare($firstfiveBytes,0x4168b18f,0,4,true)){
+                $dfutype= "regular";
+            }
+            if (isset($dfutype))
+            {
+                $dfu_entry = array("fname" => $file,"createdDate" => date("d-m-Y H:i:s",$filetime),"timestamp" => $filetime,"type" => $dfutype  );
+                $dfu_files[] = $dfu_entry;  
+            }
+            fclose($dfu_file);
         }
 
     }
