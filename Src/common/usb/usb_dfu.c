@@ -14,6 +14,7 @@
 #include "globalConfig.h"
 #include "gen/version.h"
 
+
 extern volatile uint32_t task;
 extern volatile uint8_t programChangeState;
 volatile uint8_t usbDfuState=USB_DFU_APP_IDLE;
@@ -110,7 +111,7 @@ volatile UsbDfuStatusType usbDfuStatus;
 UsbStringDescriptorType stringDescriptorsDfu[] = {
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((12-1)*2)+2, .bString = "StoneRose35"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((9-1)*2)+2, .bString = "PiPicoFX"},
-    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((11-1)*2)+2, .bString = "3457456234"},
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((sizeof(PI_PICO_FX_VNR)-1)*2)+2, .bString = PI_PICO_FX_VNR},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((31-1)*2)+2, .bString = "QSPI DFU Programming Interface"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((18-1)*2)+2, .bString = "@Flash 0x08000000"},
 };

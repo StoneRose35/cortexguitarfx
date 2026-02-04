@@ -8,6 +8,7 @@
 #include "systick.h"
 #include "globalConfig.h"
 #include "memoryRegions.h"
+#include "gen/versionDef.h"
 
 static const uint8_t usbDeviceDescriptorFull[] = {
     0x12, // bLength
@@ -162,7 +163,7 @@ static const uint16_t usbConfigurationDescriptorFullSize = sizeof(usbConfigurati
 static UsbStringDescriptorType stringDescriptors[] = {
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (11*2)+2, .bString = "StoneRose35"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (8*2)+2, .bString = "PiPicoFX"},
-    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (10*2)+2, .bString = "3457456234"},
+    {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = ((sizeof(PI_PICO_FX_VNR)-1)*2)+2, .bString = PI_PICO_FX_VNR},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (17*2)+2, .bString = "Control Interface"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (14*2)+2, .bString = "Data Interface"},
     {.bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bLength = (25*2)+2, .bString = "DFU Programming Interface"},

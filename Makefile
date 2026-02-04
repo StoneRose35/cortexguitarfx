@@ -30,7 +30,7 @@ CPYARGS_QSPIBIN=-Obinary  --only-section=.qspi* --only-section=.dtcm*
 DEBUGGER_UART=/dev/ttyACM0
 
 export AVR_SYNC_NUMBER
-all: out/$(PROJECT).dfu
+all: out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).dfu
 	@rm out/*.o
 
 STM32H750_OBJS := $(patsubst Src/stm32h750/%.c,out/%.o,$(wildcard Src/stm32h750/*.c))
@@ -64,6 +64,7 @@ all_math: $(MATH_OBJS)
 clean_objs:
 	@rm -f ./out/*
 	@rm -f ./Inc/gen/*
+	@rmdir ./out
 
 clean: clean_objs
 
@@ -71,7 +72,7 @@ clean: clean_objs
 Inc/gen:
 	mkdir ./Inc/gen
 
-out:
+out: Inc/gen/versionDef.h
 	mkdir ./out
 
 # generate the startup file
@@ -150,15 +151,20 @@ tools/flash2dfu:
 # AVR Firmware
 mic_stomp_expansion_board/mic_stomp.bin:
 	$(MAKE) -C mic_stomp_expansion_board
+Inc/gen/versionDef.h: Inc/gen
+	@echo "#ifndef _PI_PICO_VERSION_DEF_H_\r\n#define _PI_PICO_VERSION_DEF_H_\r\n" > Inc/gen/versionDef.h 
+	@echo "#define PI_PICO_FX_VNR \"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION)\"" >>  Inc/gen/versionDef.h 
+	@echo "#endif\r\n" >> Inc/gen/versionDef.h 
 
-Inc/gen/version.h: Inc/gen
+Inc/gen/version.h: Inc/gen Inc/gen/versionDef.h
 #REV=`expr %REV% / 60`
 	@echo "#ifndef _PI_PICO_VERSION_H_\r\n#define _PI_PICO_VERSION_H_\r\n" > Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_FULL_VERSION[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION) for $(MCU_BOARD) built $(BUILD_DATE)T$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_VERSION_NR[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION)\";\r\n" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_MCU_BOARD[]=\"$(MCU_BOARD)\";\r\n" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_BUILD_DATE[]=\"$(BUILD_DATE)\";\r\n" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_BUILD_TIME[]=\"$(BUILD_TIME)\";\r\n" >> Inc/gen/version.h 
+	@echo "#include \"versionDef.h\"" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_FULL_VERSION[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION) for $(MCU_BOARD) built $(BUILD_DATE)T$(BUILD_TIME)\";" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_VERSION_NR[]=PI_PICO_FX_VNR;" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_MCU_BOARD[]=\"$(MCU_BOARD)\";" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_BUILD_DATE[]=\"$(BUILD_DATE)\";" >> Inc/gen/version.h 
+	@echo "const char PI_PICO_FX_BUILD_TIME[]=\"$(BUILD_TIME)\";" >> Inc/gen/version.h 
 	@echo "#ifdef SYNC_NUMBERS" >> Inc/gen/version.h 
 	@echo "__attribute__ ((section (\".sync_number_flash\"))) uint32_t FLASH_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
 	@echo "__attribute__ ((section (\".sync_number_qspi\"))) uint32_t QSPI_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
@@ -179,19 +185,19 @@ out/$(PROJECT).bin: out/$(PROJECT).elf
 out/$(PROJECT)_qspi.bin: out/$(PROJECT).elf 
 	@$(OBJCPY) $(CPYARGS_QSPIBIN) ./out/$(PROJECT).elf ./out/$(PROJECT)_qspi.bin
 
-out/$(PROJECT).dfu: tools/bins2dfu tools/flash2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin
-	tools/bins2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin -o out/$(PROJECT).dfu
-	tools/flash2dfu out/$(PROJECT).bin -o out/$(PROJECT)_firstTime.dfu
+out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).dfu: tools/bins2dfu tools/flash2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin
+	tools/bins2dfu out/$(PROJECT).bin out/$(PROJECT)_qspi.bin -o out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).dfu
+	tools/flash2dfu out/$(PROJECT).bin -o out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION)_firstTime.dfu
 
 program_qspi: out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
 	rm out/*.o
 
-program_flash: out/$(PROJECT).bin
+program_flash: out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).bin
 	st-flash --connect-under-reset write out/$(PROJECT).bin 0x8000000
 	rm out/*.o
 
-program_all: out/$(PROJECT).dfu tools/qspi_uart_uploader
+program_all: out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).dfu tools/qspi_uart_uploader
 	st-flash --connect-under-reset --reset write out/$(PROJECT).bin 0x8000000
 	sleep 1
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
