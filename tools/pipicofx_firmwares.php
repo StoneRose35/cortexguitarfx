@@ -1,5 +1,5 @@
 <?php 
-$dir = './../out/';
+$dir = './ppfx_firmwares/';
 $dfu_files = array();
 
 if ($dh = opendir($dir)) {

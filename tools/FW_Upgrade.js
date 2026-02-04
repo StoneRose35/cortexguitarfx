@@ -29,7 +29,7 @@ const DESCRIPTOR_DFU_INTERFACE = 33;
 function populateFirmwaresCombobox(filterfct)
 {
     document.getElementById("selectFirmware").innerHTML = "";
-    firmwares_json.sort((a,b) => a["timestamp"] - b["timestamp"]);
+    firmwares_json.sort((a,b) => b["timestamp"] - a["timestamp"]);
     firmwares_json.forEach((el) => {
         var filterres = filterfct(el["type"]);
         if(filterres)
