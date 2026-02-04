@@ -79,3 +79,22 @@
 			flex-direction: column;
 			background-color: rgb(20,124,72);
 		}
+
+		.fwu-msgbox {
+			position:absolute;
+			display:flex;
+			flex-direction: column;
+			max-width: 380px;
+			max-height: 450px;
+			height:fit-content;
+			width: 100%;
+			background-color:rgb(72, 72, 177);
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%,-50%);
+			border: 3px;
+			border-style: solid;
+			border-color:rgb(31, 31, 71);
+			border-radius: 3px;
+			visibility:hidden;
+		}
