@@ -11,6 +11,9 @@ float fcos(float x);
 float fsin(float x);
 #endif
 
+#ifndef __QSPI_CODE
+#define __QSPI_CODE
+#endif
 #define BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES 0
 #define BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES 1
 

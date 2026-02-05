@@ -3,6 +3,7 @@
 #include "stdlib.h"
 #include "math.h"
 #include "memoryRegions.h"
+
 float fsqrt(float a)
 {
     return sqrtf(a);
@@ -346,7 +347,7 @@ void clearVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 }
 
 __QSPI_CODE
-void setLineSmallSlope(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,uint8_t doDraw,BwImageType*img)
+void setLineSmallSlope(uint8_t xstart,uint8_t ystart, uint8_t xend, uint8_t yend,uint8_t doDraw,BwImageType*img)
 {
 	if (xend < xstart)
 	{
@@ -354,6 +355,10 @@ void setLineSmallSlope(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend
 		swap = xend;
 		xend = xstart;
 		xstart = swap;
+
+		swap = yend;
+		yend = ystart;
+		ystart = swap;
 	}
 	int8_t dx = xend - xstart;
 	int8_t dy = yend - ystart;
@@ -389,7 +394,7 @@ void setLineSmallSlope(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend
 }
 
 __QSPI_CODE
-void setLineLargeSlope(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,uint8_t doDraw,BwImageType*img)
+void setLineLargeSlope(uint8_t xstart, uint8_t ystart,uint8_t xend, uint8_t yend,uint8_t doDraw,BwImageType*img)
 {
 	if (yend < ystart)
 	{
@@ -397,6 +402,10 @@ void setLineLargeSlope(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend
 		swap = yend;
 		yend = ystart;
 		ystart = swap;
+
+		swap = xend;
+		xend = xstart;
+		xstart = swap;
 	}
 	int8_t dx = xend - xstart;
 	int8_t dy = yend - ystart;
@@ -432,27 +441,28 @@ void setLineLargeSlope(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend
 }
 
 __QSPI_CODE
-void drawLine(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,BwImageType*img)
+void drawLine(uint8_t xstart,uint8_t ystart,uint8_t xend, uint8_t yend,BwImageType*img)
 {
 	if (abs(yend-ystart) < abs(xend-xstart))
 	{
-		setLineSmallSlope(xstart,xend,ystart,yend,1,img);
+		setLineSmallSlope(xstart,ystart,xend,yend,1,img);
 	}
 	else
 	{
-		setLineLargeSlope(xstart,xend,ystart,yend,1,img);
+		setLineLargeSlope(xstart,ystart,xend,yend,1,img);
 	}
 }
 
-void clearLine(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,BwImageType*img)
+__QSPI_CODE
+void clearLine(uint8_t xstart,uint8_t ystart,uint8_t xend, uint8_t yend,BwImageType*img)
 {
 	if (abs(yend-ystart) < abs(xend-xstart))
 	{
-		setLineSmallSlope(xstart,xend,ystart,yend,0,img);
+		setLineSmallSlope(xstart,ystart,xend,yend,0,img);
 	}
 	else
 	{
-		setLineLargeSlope(xstart,xend,ystart,yend,0,img);
+		setLineLargeSlope(xstart,ystart,xend,yend,0,img);
 	}
 }
 

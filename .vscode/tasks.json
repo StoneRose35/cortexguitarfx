@@ -104,6 +104,7 @@
                 "-I./Tests/inc",
                 "-fdiagnostics-color=always",
                 "-DFLOAT_AUDIO",
+                "-DMEMORY_REGIONS_H",
                 "-g",
                 "./Tests/pipicouitest.c",
                 "./Src/common/graphics/bwgraphics.c",
