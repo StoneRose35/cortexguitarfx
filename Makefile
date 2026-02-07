@@ -169,7 +169,7 @@ Inc/gen/version.h: Inc/gen Inc/gen/versionDef.h
 	@echo "__attribute__ ((section (\".sync_number_flash\"))) uint32_t FLASH_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
 	@echo "__attribute__ ((section (\".sync_number_qspi\"))) uint32_t QSPI_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
 	@echo "#endif" >> Inc/gen/version.h
-	@echo "#define FLASH_QSPI_SYNC_NUMBER $(FLASH_QSPI_SYNC_NUMBER)" >> Inc/gen/version.h
+	@echo "#define FLASH_QSPI_SYNC_NUMBER $(FLASH_QSPI_SYNC_NUMBER)UL" >> Inc/gen/version.h
 	@echo "const uint32_t AVR_SYNC_NUMBER=$(AVR_SYNC_NUMBER);\r\n" >> Inc/gen/version.h
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 

@@ -410,7 +410,16 @@ int main(int argc,char ** argv)
     fseek(inputFileBinFlash,0,SEEK_END);
     wordBfr = (uint32_t)ftell(inputFileBinFlash);
     fseek(inputFileBinFlash,0,SEEK_SET);
+    uint8_t flashStuffBits=0;
+    // check it the header of the next section is right at a 64byte boundary, if so, stuff to place
+    // the header of the next section into a whole 64byte block
+    if (((wordBfr+12)&0x3F) > 55 )
+    {
+        flashStuffBits = 64 - ((wordBfr+12)&0x3F);
+    }
+    wordBfr += flashStuffBits;
     fwrite(&wordBfr,4,1,outputFile);
+
     for (uint32_t c=0;c<((wordBfr/CHUNK_SIZE)+1);c++)
     {
         uint32_t bytesRemaining = wordBfr - c*CHUNK_SIZE;
@@ -433,6 +442,11 @@ int main(int argc,char ** argv)
             }
         }
         fwrite(bytesBfr,bytesToTransfer,1,outputFile);
+    }
+    bytesBfr[0]=0xFF;
+    for (uint8_t c=0;c<flashStuffBits;c++)
+    {
+        fwrite(bytesBfr,1,1,outputFile);
     }
     wordBfr=0;
     fwrite(&wordBfr,4,1,outputFile);
