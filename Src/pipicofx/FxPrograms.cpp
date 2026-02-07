@@ -7,7 +7,6 @@ extern "C" {
 #include "stringFunctions.h"
 }
 #include "pipicofx/picofxCore.hpp"
-//#include "pipicofx/fxPrograms.h"
 #include "pipicofx/FxProgram.hpp"
 #include "pipicofx/fxProgramParameter.hpp"
 #include "pipicofx/FxProgramLoader.hpp"

@@ -52,7 +52,7 @@ XAmp::XAmp::~XAmp()
 
 void XAmp::Param1::parameterCallback(uint16_t val)
 {
-    pData->gain.gain = ((float)val)/256.0f; // 0.0f up to 16.0f
+    pData->gain.gain = 1.0f + ((float)val)/64.0f; // 1.0f up to 64.0f
     rawValue = val;
 }
 

@@ -256,9 +256,9 @@ void genericDistortionTest()
     gdSetPoint(GD_POINT_D,point,&dist);
 
     float xval, yval;
-    for (uint8_t c=0;c<64;c++)
+    for (uint8_t c=0;c<127;c++)
     {
-        xval = ((float)c)/63.0f;
+        xval = ((float)c)/127.0f;
         yval = gdGetValue(xval,&dist);
         printf("%f,%f\r\n",xval,yval);
     }

@@ -62,7 +62,7 @@ void drawHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img);
 void clearHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img);
 void drawVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img);
 void clearVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img);
-void drawLine(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,BwImageType*img);
+void drawLine(uint8_t xstart, uint8_t ystart,uint8_t xend, uint8_t yend,BwImageType*img);
 void clearLine(uint8_t xstart,uint8_t xend, uint8_t ystart, uint8_t yend,BwImageType*img);
 uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageType* img,const void* font);
 uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GFXfont* font);

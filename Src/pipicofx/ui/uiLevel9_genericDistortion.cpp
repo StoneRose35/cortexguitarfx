@@ -8,6 +8,7 @@ extern "C" {
 #include "audio/genericDistortion.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
+#include "ln.h"
 }
 
 #define OFFSET_DISTORTION_GRAPH 60
@@ -25,7 +26,7 @@ extern "C" {
 #define OD_MODE_SELECTING 0 
 #define OD_MODE_EDITING 1
 
-#define ENCODER_DELTA_SCALE 0.003f
+#define ENCODER_DELTA_SCALE 0.001f
 static  GenericDistortionType * distortion=(GenericDistortionType*)0;
 static volatile uint8_t editType = OD_EDIT_POINT01_POS_X;
 static volatile uint8_t selectionMode = OD_MODE_SELECTING;
@@ -64,13 +65,14 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     // the curve itself
     for (uint8_t ix=0;ix<63;ix++)
     {
-        float fx = ((float)ix)/62.0f;
+        float fx = 0.0001f*toExp(((float)ix)*0.146195879f);
         float fy = gdGetValue(fx,distortion)*62.0f;
         uint8_t iy = (uint8_t)fy;
         if (ix > 0)
         {
-            drawLine(ix-1,ix,oldy,iy,imgBuffer);
+            drawLine(ix-1+OFFSET_DISTORTION_GRAPH,62-oldy,ix+OFFSET_DISTORTION_GRAPH,62-iy,imgBuffer);
         }
+
         oldy = iy;
     }
 
