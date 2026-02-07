@@ -208,7 +208,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tools/bins2dfu",
-            "args": ["./out/microsys_audio.bin", "./out/microsys_audio_qspi.bin","-o","./out/microsys_audio.dfu"],
+            "args": ["./out/ppfx_daisyseed.bin", "./out/ppfx_daisyseed_qspi.bin","-o","./out/microsys_audio.dfu"],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "environment": [],
