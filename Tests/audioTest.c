@@ -5,6 +5,7 @@
 #include "audio/waveShaper.h"
 #include "audio/sineChorus.h"
 #include "audio/genericDistortion.h"
+#include "audio/genericDistortionSimple.h"
 #include "math.h"
 #include "matrixMath.h"
 #include "ln.h"
@@ -264,6 +265,28 @@ void genericDistortionTest()
     }
 }
 
+void genericDistortionSimpleTest()
+{
+    GenericDistortionSimpleType dist;
+    float points[4];
+    points[0] = 0.01f;
+    points[1] = 0.01f;
+
+    points[2] = 0.6f;
+    points[3] = 0.93f;
+
+    gdsSetAllPoints(points,&dist);
+
+
+    float xval, yval;
+    for (uint8_t c=0;c<127;c++)
+    {
+        xval = ((float)c)/127.0f;
+        yval = gdsGetValue(xval,&dist);
+        printf("%f,%f\r\n",xval,yval);
+    }
+}
+
 int main()
 {
     //impulseTest();
@@ -275,5 +298,5 @@ int main()
     //logAndInverseTest2();
     //toExpTest();
     //matrixInverseTest();
-    genericDistortionTest();
+    genericDistortionSimpleTest();
 }
