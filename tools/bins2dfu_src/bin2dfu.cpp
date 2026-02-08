@@ -419,7 +419,7 @@ int main(int argc,char ** argv)
     }
     wordBfr += flashStuffBits;
     fwrite(&wordBfr,4,1,outputFile);
-
+    wordBfr -= flashStuffBits;
     for (uint32_t c=0;c<((wordBfr/CHUNK_SIZE)+1);c++)
     {
         uint32_t bytesRemaining = wordBfr - c*CHUNK_SIZE;

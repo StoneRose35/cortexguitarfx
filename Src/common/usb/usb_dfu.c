@@ -371,7 +371,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     flashWritten = 1;
                 }
             }
-            if (bytesWritten == flashSize)
+            if (bytesWritten == flashSize && c < dataSize-8)
             {
                 qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
                 c+=4;
@@ -503,7 +503,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
                     flashWritten = 1;
                 }
             }
-            if (bytesWritten == flashSize)
+            if (bytesWritten == flashSize && c < dataSize-8)
             {
                 qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
                 c+=4;
