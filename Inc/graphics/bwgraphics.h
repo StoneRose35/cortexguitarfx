@@ -26,6 +26,7 @@ typedef struct BwImageStruct
 	uint8_t sy; // size in pixels
 	uint8_t type; // either WIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES if bytes run along the vertical axis, or 
 	              // BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES
+	uint16_t byteSize; //size in bytes as calculated by sx*sy/8, used to avoid writing outside the buffer
 } BwImageType;
 
 typedef struct BwImageStructConst

@@ -740,13 +740,19 @@ if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
-	*(img->data + pageIdx) |= (1 << (bitindex));
+	if (pageIdx < img->byteSize)
+	{
+		*(img->data + pageIdx) |= (1 << (bitindex));
+	}
 }
 else
 {
 	int32_t bitindex = px & 0x7;
 	int32_t pageIdx =  (px >> 3)*(img->sy) + py;
-	*(img->data + pageIdx) |= (1 << (bitindex));
+	if (pageIdx < img->byteSize)
+	{
+		*(img->data + pageIdx) |= (1 << (bitindex));
+	}
 }
 }
 
@@ -757,13 +763,19 @@ if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
-	*(img->data + pageIdx) &= ~(1 << (bitindex));
+	if (pageIdx < img->byteSize)
+	{
+		*(img->data + pageIdx) &= ~(1 << (bitindex));
+	}
 }
 else
 {
 	int32_t bitindex = px & 0x7;
 	int32_t pageIdx =  (px >> 3)*(img->sy) + py;
-	*(img->data + pageIdx) &= ~(1 << (bitindex));
+	if (pageIdx < img->byteSize)
+	{
+		*(img->data + pageIdx) &= ~(1 << (bitindex));
+	}
 }
 }
 
