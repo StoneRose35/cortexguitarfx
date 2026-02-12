@@ -279,7 +279,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef PCM3060_CODEC_EXTERNAL
                     pcm3060SetInputState(PCM3060_CHANNEL_LEFT,0);
                     #endif
-                    drawImage(16,20,&toggleswitch_off_streamimg,img);
+                    drawImage(16,24,&toggleswitch_off_streamimg,img);
                 }
                 else if ((regbfr & 0x1) == 0 && encoderDelta > 0) // switch on, was off
                 {
@@ -292,7 +292,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef PCM3060_CODEC_EXTERNAL
                     pcm3060SetInputState(PCM3060_CHANNEL_LEFT,1);
                     #endif
-                    drawImage(16,20,&toggleswitch_on_streamimg,img);
+                    drawImage(16,24,&toggleswitch_on_streamimg,img);
                 }
                 break;
             case 1:
@@ -316,7 +316,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef PCM3060_CODEC_EXTERNAL
                     pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,0);
                     #endif
-                    drawImage(47,20,&toggleswitch_off_streamimg,img);
+                    drawImage(47,24,&toggleswitch_off_streamimg,img);
                 }
                 else if ((regbfr & 0x2) == 0 && encoderDelta > 0) // switch on, was off
                 {
@@ -329,7 +329,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                     #ifdef PCM3060_CODEC_EXTERNAL
                     pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,1);
                     #endif
-                    drawImage(47,20,&toggleswitch_on_streamimg,img);
+                    drawImage(47,24,&toggleswitch_on_streamimg,img);
                 }
                 break;
             case 2:

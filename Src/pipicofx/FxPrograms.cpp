@@ -56,6 +56,20 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
 }
 
 __QSPI_CODE
+void clearPreset(uint16_t presetPos)
+{
+    uint32_t address;
+
+    address = presetPos*sizeof(FxPresetType);
+    uint8_t presetArray[sizeof(FxPresetType)];
+    for (uint8_t c=0;c<sizeof(FxPresetType);c++)
+    {
+        presetArray[c]=0xFF;
+    }
+    eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArray);
+}
+
+__QSPI_CODE
 void applyPreset(FxPresetType* preset,PiPicoFX::FxProgram * program)
 {
     uint8_t nParams;

@@ -1,9 +1,10 @@
 #include "graphics/gfxfont.h"
 #include "graphics/bwgraphics.h"
+#include "stdint.h"
 #include "stdlib.h"
 #include "math.h"
 #include "memoryRegions.h"
-
+#include "graphics/bwgraphics.h"
 float fsqrt(float a)
 {
     return sqrtf(a);
@@ -466,6 +467,24 @@ void clearLine(uint8_t xstart,uint8_t ystart,uint8_t xend, uint8_t yend,BwImageT
 	}
 }
 
+__QSPI_CODE
+void drawRectFrame(uint8_t xstart,uint8_t ystart,uint8_t xend,uint8_t yend,BwImageType*img)
+{
+	drawHorizontal(ystart,xstart,xend,img);
+	drawHorizontal(yend,xstart,xend,img);
+	drawVertical(xstart,ystart,yend,img);
+	drawVertical(xend,ystart,yend,img);
+}
+
+
+__QSPI_CODE
+void clearRectFrame(uint8_t xstart,uint8_t ystart,uint8_t xend,uint8_t yend,BwImageType*img)
+{
+	clearHorizontal(ystart,xstart,xend,img);
+	clearHorizontal(yend,xstart,xend,img);
+	clearVertical(xstart,ystart,yend,img);
+	clearVertical(xend,ystart,yend,img);
+}
 __QSPI_CODE
 void drawOval(float ax,float ay,float cx,float cy,BwImageType*img)
 {

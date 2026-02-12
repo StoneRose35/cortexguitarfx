@@ -47,6 +47,7 @@ typedef struct __attribute__((__packed__)) {
 extern "C" {
 void savePreset(FxPresetType* preset,uint16_t presetPos);
 uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos);
+void clearPreset(uint16_t presetPos);
 void applyPreset(FxPresetType* preset,FxProgram * program);
 void parametersToPreset(FxPresetType* preset,FxProgram * programs);
 void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos);

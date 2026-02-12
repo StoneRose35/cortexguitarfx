@@ -52,10 +52,12 @@ static void (*onCreateCallback)(PiPicoFxUiType*)=0;
 __QSPI_CODE
 BwImageType * getImageBuffer()
 {
+    /*
     img.data = imgBuffer.data;
     img.sx = imgBuffer.sx;
     img.sy = imgBuffer.sy;
     img.type = imgBuffer.type;
+    */
     return &img;
 }
 
@@ -352,6 +354,12 @@ void piPicoFxUiSetup(PiPicoFxUiType* piPicoUiController)
     }
     imgBuffer.sx=128;
     imgBuffer.sy=64;
+    img.byteSize = (imgBuffer.sx*imgBuffer.sy)>>3;
+    img.data = imgBuffer.data;
+    img.sx = imgBuffer.sx;
+    img.sy = imgBuffer.sy;
+    img.type = imgBuffer.type;
+
     #ifdef HORIZONTAL_DISPLAY
     imgBuffer.type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     #endif
