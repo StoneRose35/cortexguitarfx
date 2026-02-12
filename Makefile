@@ -18,7 +18,7 @@ CC=arm-none-eabi-gcc
 CPP=arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
-OPT=-O3
+OPT=-O1
 DEFINES=-DDEBUG -DHARDWARE -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc -I./Inc/gen
 CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -Wall -Wno-error=narrowing -I./Inc -I./Inc/gen
@@ -202,6 +202,11 @@ program_all: out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).dfu tools/qspi_uart_uplo
 	sleep 1
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
 	rm out/*.o
+
+program_dfu: out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).dfu
+	dfu-util -D out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).dfu
+	rm out/*.o
+
 
 # *************************************************************
 #

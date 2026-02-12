@@ -14,7 +14,7 @@
         {
             "label": "Build and program using make",
             "type": "shell",
-            "command": "make clean_objs; make -j16 program_all",
+            "command": "make clean_objs; make -j16 program_dfu",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

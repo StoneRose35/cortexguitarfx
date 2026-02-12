@@ -671,9 +671,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
 __RAMFUNC
 void usbDfuEndManifestation()
 {
-    uint8_t data[256];
-    QspiRead(0,256,data);
-    if (qspiBytesWritten == qspiSize && bytesWritten == flashSize && *((uint32_t*)data)==FLASH_QSPI_SYNC_NUMBER)
+    if (qspiBytesWritten == qspiSize && bytesWritten == flashSize )
     {
         usbDfuState = USB_DFU_MANIFEST_WAIT_RESET;
     }
