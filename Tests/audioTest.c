@@ -287,6 +287,28 @@ void genericDistortionSimpleTest()
     }
 }
 
+
+void pointerDifferenceTest()
+{
+    uint16_t ptr1=122;
+    uint16_t ptr2= 115;
+    for(uint8_t c=0;c <12;c++)
+    {
+        printf("ptr1:%d,ptr2:%d, diff:%d\r\n",ptr1,ptr2, (ptr1-ptr2)&0x7F);
+        ptr1++;
+        ptr1 &= (127);
+        ptr2++;
+        ptr2 &= (127);
+    }
+}
+
+void shiftRightTest()
+{
+    int16_t val = -12;
+    val >>= 1;
+    printf("excepting %d to be -6",val);
+}
+
 int main()
 {
     //impulseTest();
@@ -298,5 +320,7 @@ int main()
     //logAndInverseTest2();
     //toExpTest();
     //matrixInverseTest();
-    genericDistortionSimpleTest();
+    //genericDistortionSimpleTest();
+    //pointerDifferenceTest();
+    shiftRightTest();
 }
