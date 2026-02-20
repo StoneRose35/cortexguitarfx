@@ -9,6 +9,7 @@ extern "C" {
 #include "audio/delay.h"
 #include "picofxCore.hpp"
 }
+#define FXPROGRAM_DELAY_DELAY_TIME_LOWPASS_T 2
 
 namespace PiPicoFX {
     namespace Delay {
@@ -20,15 +21,29 @@ namespace PiPicoFX {
                 };
                 float processSample(float);
                 DelayDataType delay={
-                    .feedbackFunction=0
+                    .delayLine=0,
+                    .delayLinePtr=0,
+                    .delayInSamples=10,
+                    .feedback=0.0f,
+                    .delayBufferLength=0xff,
+                    .mix=0.0f,
+                    .feedbackFunction=0,
+                    .feebackData=0,
+                    .frozen = 0
                 };
                 GainStageDataType presetVolume={
                     .gain=1.0f,
                     .offset=0.0f
                 };
                 ~Delay();
+                void freeze();
+                void unfreeze();
+                int32_t delayInSamplesTargetValue;
+                uint16_t interpCnt;
             private:
                 void setup();
+                
+               
         };
 
         class Param1:  public FxProgramParameter

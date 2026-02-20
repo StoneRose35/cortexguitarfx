@@ -35,6 +35,7 @@ void initReverb3(Reverb3Type*data,float*delayMemoryPtr)
     data->delay.feedback = 0.5f;
     data->delay.feedbackFunction = 0;
     data->delay.mix = 1.0f;
+    data->delay.frozen = 0;
     data->delayModulationDepth = 128;
     data->delayModulationTime = 2048;
     data->modulation=0;
@@ -51,18 +52,17 @@ float reverb3processSample(float sampleIn,Reverb3Type*data)
 {
     float sampleOut=0,diffusorTaps[3];
     float diffuserChannels[4];
-    volatile uint32_t * audioState =  getAudioStatePtr();
     diffuserChannels[0]=sampleIn;
     diffuserChannels[1]=sampleIn;
     diffuserChannels[2]=sampleIn;
     diffuserChannels[3]=sampleIn;
-    hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[0],audioState);
+    hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[0]);
     diffusorTaps[0] = diffuserChannels[0];
-    hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[1],audioState);
+    hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[1]);
     diffusorTaps[1] = diffuserChannels[3];
-    hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[2],audioState);
+    hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[2]);
     diffusorTaps[2] = diffuserChannels[1];
-    hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[3],audioState);
+    hadamardDiffuserProcessArray(diffuserChannels,&data->diffusers[3]);
     sampleOut = diffuserChannels[2];
     sampleOut = 
         delayLineProcessSample(sampleOut,&data->delay) + 

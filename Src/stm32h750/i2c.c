@@ -123,7 +123,9 @@ static void config_i2c_pin(uint8_t pinnr)
 }
 
 void dummy_read(volatile uint32_t reg)
-{}
+{
+    (void)reg;
+}
 
 void initI2c(uint8_t slaveAddressInt,uint8_t slaveAddressExt)
 {

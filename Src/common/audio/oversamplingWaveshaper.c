@@ -20,7 +20,7 @@ void initOversamplingWaveshaper(OversamplingWaveshaperDataType*data)
 //uint16_t oversampledBuffer[AUDIO_BUFFER_SIZE*2*(1 << OVERSAMPLING_FACTOR)];
 
 __ITCM_CODE
-void  applyOversamplingDistortion(float*data,OversamplingWaveshaperDataType* waveshaper)
+void  applyOversamplingDistortion(float*data)
 {
     float oversample;
     for (uint16_t c=0;c<AUDIO_BUFFER_SIZE*2*(1 << OVERSAMPLING_FACTOR);c++)

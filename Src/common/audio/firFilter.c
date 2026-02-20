@@ -10,18 +10,6 @@ void addSample(float sampleIn,FirFilterType*data)
     *(data->delayBuffer + data->delayPointer)=sampleIn;
 }
 
-float processFirstHalf(FirFilterType*data)
-{
-    //convolve(data->coefficients,data->delayBuffer,data->delayPointer);
-    return 0.0f;
-}
-
-float processSecondHalf(FirFilterType*data)
-{
-    //convolve(data->coefficients,data->delayBuffer,(data->delayPointer + (data->filterLength >> 1)) & (data->filterLength-1));
-    return 0.0f;
-}
-
 __ITCM_CODE
 float firFilterProcessSample(float sampleIn,FirFilterType*data)
 {

@@ -14,9 +14,9 @@ int32_t convolvetest()
 {
     float coefficients[64];
     float data[64];
-    volatile float convolveres;
-    volatile int32_t failures = 0;
-    volatile uint32_t cntr;
+    float convolveres;
+    int32_t failures = 0;
+    uint32_t cntr;
     for (uint8_t c=0;c<64;c++)
     {
         *(data+c)=((float)c);
@@ -39,8 +39,8 @@ uint32_t firfiltertest()
 {
     
     AmpModel::AmpModel * p1 = (AmpModel::AmpModel*)loadProgram(0);
-    volatile float fout;
-    volatile uint32_t failures=0;
+    float fout;
+    uint32_t failures=0;
     for (uint8_t c=0;c<64;c++)
     {
         if (c==0)

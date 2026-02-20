@@ -4,7 +4,7 @@
 #include "stm32h750/stm32h750xx.h"
 #include "memoryRegions.h"
 
-volatile static uint32_t ticks=0;
+static volatile uint32_t ticks=0;
 volatile int32_t encoderValOldSpeedMesurement=0;
 extern volatile uint32_t encoderSpeed;
 #define AHB_CLOCK 480000000
@@ -12,7 +12,7 @@ extern volatile uint32_t encoderSpeed;
 __ITCM_CODE_FLASH
 void SysTick_Handler()
 {
-    uint32_t currentCnt = TIM3->CNT;
+    int32_t currentCnt = (int32_t)TIM3->CNT;
     ticks++;
     if (currentCnt > encoderValOldSpeedMesurement)
     {

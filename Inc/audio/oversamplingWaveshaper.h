@@ -13,7 +13,7 @@ typedef struct {
 } OversamplingWaveshaperDataType;
 
 void initOversamplingWaveshaper(OversamplingWaveshaperDataType*data);
-void  applyOversamplingDistortion(float*data,OversamplingWaveshaperDataType*waveshaper);
+void  applyOversamplingDistortion(float*data);
 float  OversamplingDistortionProcessSample(float sample,OversamplingWaveshaperDataType* waveshaper);
 void oversamplingWaveshaperReset(OversamplingWaveshaperDataType*data);
 #endif

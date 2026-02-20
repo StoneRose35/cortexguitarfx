@@ -1041,7 +1041,7 @@ int16_t phaseDistortedSineSquareNextSample(PhaseDistortedSineSquareType*data)
     }
     data->currentPhase &= 0xFFFF;
     return (sinetable[data->currentPhase>>6] * (0xFF - data->squareRatio) - (((data->currentPhase & 0x8000)-0x4000) << 1)*data->squareRatio) >> 8;
-};
+}
 
 void phaseDistortedSineSquarePulseWidth(int16_t value,PhaseDistortedSineSquareType*data)
 {
@@ -1065,7 +1065,7 @@ void phaseDistortedSineSquarePulseWidth(int16_t value,PhaseDistortedSineSquareTy
         data->phaseIncrementCorrection2 = swap;
     }
     data->pulseWidth = value;
-};
+}
 
 
 void phaseDistortedSineSquareSetFrequency(float f,PhaseDistortedSineSquareType*data)

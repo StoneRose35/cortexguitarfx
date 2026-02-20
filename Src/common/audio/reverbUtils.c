@@ -4,7 +4,7 @@
 #include "memoryRegions.h"
 
 __ITCM_CODE
-float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t*audioStatePtr)
+float  allpassProcessSample(float sampleIn,AllpassType*allpass)
 {
     float sampleInterm;
     sampleInterm= allpass->coefficient*sampleIn + *(allpass->delayLineIn + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))
@@ -12,6 +12,7 @@ float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t
     *(allpass->delayLineOut + ((allpass->delayPtr - allpass->delayInSamples) & allpass->bufferSize))*allpass->coefficient;
     *(allpass->delayLineIn + allpass->delayPtr)=sampleIn;
     *(allpass->delayLineOut + allpass->delayPtr)=sampleInterm;
+    
     allpass->delayPtr++;
     allpass->delayPtr &= allpass->bufferSize;
     return sampleInterm; 
@@ -19,14 +20,16 @@ float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t
 }
 
 __ITCM_CODE
-void hadamardDiffuserProcessArray(float * channels,HadamardDiffuserType*data,volatile uint32_t * audioStatePtr)
+void hadamardDiffuserProcessArray(float * channels,HadamardDiffuserType*data)
 {
     float sum_first, sum_second;
     float diff_first, diff_second;
-        for(uint8_t c=0;c<4;c++)
+
+    for(uint8_t c=0;c<4;c++)
     {
         data->delayPointers[c][data->delayPointer] = channels[c];
     }
+    
 
     sum_first = (data->delayPointers[0][(data->delayPointer - data->delayTimes[0]) & (data->diffusorSize -1)] ) +
                 (data->delayPointers[1][(data->delayPointer - data->delayTimes[1]) & (data->diffusorSize -1)] ); 

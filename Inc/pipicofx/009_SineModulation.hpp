@@ -20,11 +20,18 @@ namespace PiPicoFX {
                 ~SineModulation();
                 float processSample(float);
                 SineChorusType sineChorus= {
+                    .delayBuffer=0,
                     .frequency = 500,
                     .depth = 10,
                     .mix = 0.5f,
                     .offset = 49,
-                    .feedback = 0.0f
+                    .feedback = 0.0f,
+                    .lfoVal=0,
+                    .lfoValOld=0,
+                    .lfoPhaseinc=0,
+                    .lfoPhase=0,
+                    .delayInputPtr=0,
+                    .lfoUpdateCnt=0
                 };
                 GainStageDataType presetVolume={
                     .gain=1.0f,

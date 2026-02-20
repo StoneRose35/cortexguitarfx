@@ -39,7 +39,11 @@
 // the size of and audio buffer, effectively defines latency as F_SAMPLING/AUDIO_BUFFER_SIZE
 #define AUDIO_BUFFER_SIZE 16 // in stereo 16bit samples, thus size of one audio buffer in bytes is this value*4
 
-// 
+// the minimal duration of a long press in 10ms, a value of 100 would result in 1s duration
+#define LONGPRESS_DURATION_SYSTICKS 130
+
+
+
 #define UI_LATENCY_IN_SAMPLES (UI_UPDATE_IN_SAMPLE_BUFFERS*AUDIO_BUFFER_SIZE)
 // --------------------------
 // derived preprocessor directives

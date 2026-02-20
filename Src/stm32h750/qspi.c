@@ -169,7 +169,7 @@ void initQspi()
     while((QUADSPI->SR & (1 << QUADSPI_SR_BUSY_Pos))!=0);
     QUADSPI->DLR = 1-1;
     QUADSPI->CCR = (1 << QUADSPI_CCR_IMODE_Pos) | (1 << QUADSPI_CCR_DMODE_Pos) | SET_READ_PARAM_REG_CMD;
-    *QUADSPI_DR_BYTE = (uint8_t)0b11110000;
+    *QUADSPI_DR_BYTE = (uint8_t)240;
     
     // -------------------------
     // Enable Quad Mode on chip
@@ -553,6 +553,10 @@ void setMemoryMappedMode()
             | (1 << QUADSPI_CCR_SIOO_Pos) // instruction only during first command
             | (3 << QUADSPI_CCR_ABMODE_Pos);
     qspiStatus = 0;
+    while((QUADSPI->SR & (QUADSPI_SR_FLEVEL_Msk))!=0)
+    {
+        (void)QUADSPI_DR_BYTE;
+    }
 }
 
 __RAMFUNC

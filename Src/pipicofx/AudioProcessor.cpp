@@ -4,5 +4,5 @@ using namespace PiPicoFX;
 __QSPI_CODE
 float AudioProcessor::processSample(float sampleIn)
 {
-    return 0.0f;
+    return sampleIn*0.0f;
 }

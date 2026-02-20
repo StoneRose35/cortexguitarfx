@@ -1,5 +1,7 @@
 #include "audio/multimodefilter.h"
+#include "memoryRegions.h"
 
+__ITCM_CODE
 float MMFilterProcessSample(float sampleIn,MultimodeFilterType*data)
 {
     data->interm0 += data->cutoff*(sampleIn - data->interm0 + data->feedback*(data->interm0 - data->interm1));

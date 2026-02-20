@@ -8,8 +8,9 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#include "globalConfig.h"
 #ifdef JOYIT_128X64_DISPLAY
+#include "globalConfig.h"
+
 
 #include "drivers/oled_display.h"
 #include "drivers/display128x64.h"

@@ -9,7 +9,7 @@ extern "C" {
 #include "audio/delay.h"
 #include "audio/reverbUtils.h"
 #include "picofxCore.hpp"
-float freeVerbLowpass(float sampleIn,void * filterData,volatile uint32_t * audioStatePtr);
+float freeVerbLowpass(float sampleIn,void * filterData);
 }
 
 namespace PiPicoFX {
@@ -23,14 +23,14 @@ namespace PiPicoFX {
                 ~FreeVerb();
                 float processSample(float);
                 DelayDataType delays[8]= {
-                    {.delayInSamples = 1695,.delayBufferLength=2048,.feedbackFunction=freeVerbLowpass},
-                    {.delayInSamples = 1760,.delayBufferLength=2048,.feedbackFunction=freeVerbLowpass},
-                    {.delayInSamples = 1623,.delayBufferLength=2048,.feedbackFunction=freeVerbLowpass},
-                    {.delayInSamples = 1548,.delayBufferLength=2048,.feedbackFunction=freeVerbLowpass},
-                    {.delayInSamples = 1390,.delayBufferLength=2048,.feedbackFunction=freeVerbLowpass},
-                    {.delayInSamples = 1476,.delayBufferLength=2048,.feedbackFunction=freeVerbLowpass},
-                    {.delayInSamples = 1293,.delayBufferLength=2048,.feedbackFunction=freeVerbLowpass},
-                    {.delayInSamples = 1215,.delayBufferLength=2048,.feedbackFunction=freeVerbLowpass}
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1695,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1760,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1623,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1548,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1390,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1476,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1293,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1215,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0}
                 };
                 FirstOrderIirType feedbackFilters[8]={
                     {
@@ -59,14 +59,10 @@ namespace PiPicoFX {
                     }
                 };
                 AllpassType allpasses[4]={
-                    {.coefficient=0.5f,.delayInSamples=245,
-                        .bufferSize=1023},
-                    {.coefficient=0.5f,.delayInSamples = 605,
-                        .bufferSize=1023},
-                    {.coefficient=0.5f,.delayInSamples = 480,
-                        .bufferSize=1023},
-                    {.coefficient=0.5f,.delayInSamples = 371,
-                        .bufferSize=1023}
+                    {.coefficient=0.5f,.delayPtr=0,.delayInSamples=245,  .oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0},
+                    {.coefficient=0.5f,.delayPtr=0,.delayInSamples = 605,.oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0},
+                    {.coefficient=0.5f,.delayPtr=0,.delayInSamples = 480,.oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0},
+                    {.coefficient=0.5f,.delayPtr=0,.delayInSamples = 371,.oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0}
                 };
                 float mix=0.0f;
                 GainStageDataType presetVolume={

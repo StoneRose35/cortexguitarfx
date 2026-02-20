@@ -20,7 +20,13 @@ namespace PiPicoFX {
                 ~Reverb();
                 float processSample(float);
                 ReverbType reverb={
-                    .paramNr = 0
+                    .allpasses={},
+                    .delayPointer=0,
+                    .feedbackValues={},
+                    .delayPointers={},
+                    .mix=0.0f,
+                    .paramNr = 0,
+                    .frozen=0
                 };
                 float reverbTime=300;
                 GainStageDataType presetVolume={
@@ -28,6 +34,8 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
+                void freeze() override;
+                void unfreeze() override;
                 void setup();
         };
 

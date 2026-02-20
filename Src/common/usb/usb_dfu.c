@@ -119,6 +119,7 @@ UsbStringDescriptorType stringDescriptorsDfu[] = {
 __RAMFUNC
 uint8_t setUsbConfigurationDfu(uint16_t confNr)
 {
+    (void)confNr;
     setupEndpoint(0,EP_DIRECTION_OUT,0x40);
     setEndpointOutHandler(&endPoint0DfuHandler,0);
     return 0;
@@ -373,9 +374,9 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
             }
             if (bytesWritten == flashSize && c < dataSize-8)
             {
-                qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
+                qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)((uint8_t*)data + c))->v);
                 c+=4;
-                qspiSize = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
+                qspiSize = (((const struct T_UINT32_READ *)(const void *)((uint8_t*)data + c))->v);
                 c+=4;
                 flashWritten = 1;
                 #ifdef DFU_SIM
@@ -505,9 +506,9 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
             }
             if (bytesWritten == flashSize && c < dataSize-8)
             {
-                qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
+                qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)((uint8_t*)data + c))->v);
                 c+=4;
-                qspiSize = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
+                qspiSize = (((const struct T_UINT32_READ *)(const void *)((uint8_t*)data + c))->v);
                 c+=4;
                 flashWritten = 1;
                 #ifdef DFU_SIM
@@ -582,9 +583,9 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
             uint16_t c=0;
             if (qspiTargetAddress == 0xFFFFFFFF)
             {
-                qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
+                qspiTargetAddress = (((const struct T_UINT32_READ *)(const void *)((uint8_t*)data + c))->v);
                 c+=4;
-                qspiSize = (((const struct T_UINT32_READ *)(const void *)(data + c))->v);
+                qspiSize = (((const struct T_UINT32_READ *)(const void *)((uint8_t*)data + c))->v);
                 c+=4;
                 #ifdef DFU_SIM
                 sendStringBlocking("Qspi Target Address: ");

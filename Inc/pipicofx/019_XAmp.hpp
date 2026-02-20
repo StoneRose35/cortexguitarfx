@@ -6,7 +6,7 @@ extern "C" {
 #include "audio/gainstage.h"
 #include "audio/multimodefilter.h"
 #include "audio/delay.h"
-#include "audio/genericDistortion.h"
+#include "audio/genericDistortionSimple.h"
 #include "picofxCore.hpp"
 }
 
@@ -27,7 +27,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
 
-                GenericDistortionType distortion;
+                GenericDistortionSimpleType distortion;
 
                 MultimodeFilterType lowpass = {
                     .interm0 = 0.0f,
@@ -37,7 +37,7 @@ namespace PiPicoFX {
                     .feedback = 0.0f,
                     .type = MM_FILTER_LOWPASS
                 };
-                DelayDataType delay={.feedbackFunction=0};
+                DelayDataType delay={.delayLine=0,.delayLinePtr=0,.delayInSamples=0,.feedback=0.0f,.delayBufferLength=0,.mix=0.0f,.feedbackFunction=0,.feebackData=0,.frozen=0};
                 GainStageDataType presetVolume={
                     .gain=1.0f,
                     .offset=0.0f

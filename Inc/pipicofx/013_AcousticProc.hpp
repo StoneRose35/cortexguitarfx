@@ -23,6 +23,9 @@ namespace PiPicoFX {
                 float processSample(float);
                 float reverbTime;
                 ThreeBandEQType eq={
+                    .lowShelf=0,
+                    .midBand=0,
+                    .highShelf=0,
                     .lowFactor = 0.0f,
                     .midFactor = 0.0f,
                     .highFactor = 0.0f,
@@ -33,16 +36,25 @@ namespace PiPicoFX {
                         .gainReduction = 2.0f
                     },
                     .avgLowpass = {
+                        .oldVal=0.0f,
+                        .oldXVal=0.0f,
                         .alphaRising = 15.0f/32768.0f,
                         .alphaFalling = 32765.0f/32768.0f,
-                    }
+                    },
+                    .currentAvg=0.0f
                 };
                 GainStageDataType postGain={
-                    .gain = 1.0f
+                    .gain = 1.0f,
+                    .offset=0.0f
                 };
                 ReverbType reverb={
+                    .allpasses={},
+                    .delayPointer=0,
+                    .feedbackValues={},
+                    .delayPointers={},
                     .mix = 0.0f,
-                    .paramNr = 1
+                    .paramNr = 1,
+                    .frozen=0
                 };
                 GainStageDataType presetVolume={
                     .gain=1.0f,

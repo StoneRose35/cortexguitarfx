@@ -97,10 +97,6 @@ void initUart(uint32_t baudrate)
     GPIOB->AFR[1] = regbfr; // define alternate funtion 7 for pin 14 and 15
 }
 
-void initBTUart(uint16_t baudrate)
-{
-
-}
 
 /**
  * @brief send's one or multiple characters from out output buffer 

@@ -21,7 +21,7 @@ typedef struct
     uint16_t diffusorSize;
 } HadamardDiffuserType;
 
-float  allpassProcessSample(float sampleIn,AllpassType*allpass,volatile uint32_t*);
-void hadamardDiffuserProcessArray(float * channels,HadamardDiffuserType*data,volatile uint32_t * audioStatePtr);
+float  allpassProcessSample(float sampleIn,AllpassType*allpass);
+void hadamardDiffuserProcessArray(float * channels,HadamardDiffuserType*data);
 
 #endif

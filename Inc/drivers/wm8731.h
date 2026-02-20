@@ -79,6 +79,11 @@
 
 #define WM8731_CHANNEL_A (0) 
 #define WM8731_CHANNEL_B (1)
+
+#define WM8731_CHANNEL_L 0
+#define WM8731_CHANNEL_R 1
+#define WM8731_CHANNEL_BOTH 2
+
 /**
  * @brief low-level register write function
  * 

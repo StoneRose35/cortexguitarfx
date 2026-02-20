@@ -52,34 +52,33 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
 {
     float sampleOut;
     float reverbSignal=0;
-    volatile uint32_t * audioStatePtr = getAudioStatePtr();
     float processSignal = sampleIn*0.5f + (reverbData->decay*reverbData->outs[3]);
-    processSignal = allpassProcessSample(processSignal,&reverbData->aps[0],audioStatePtr);
-    processSignal = allpassProcessSample(processSignal,&reverbData->aps[1],audioStatePtr);
+    processSignal = allpassProcessSample(processSignal,&reverbData->aps[0]);
+    processSignal = allpassProcessSample(processSignal,&reverbData->aps[1]);
     //processSignal = firstOrderIirLowpassProcessSample(processSignal, &reverbData->lowpass);
     addSampleToDelayline(processSignal,reverbData->delaylines+0);
     reverbData->outs[0] = getDelayedSample(reverbData->delaylines+0);
     reverbSignal +=  reverbData->outs[0]*0.5f;
 
     processSignal = sampleIn*0.5f + (reverbData->decay*reverbData->outs[0]);
-    processSignal = allpassProcessSample(processSignal,&reverbData->aps[2],audioStatePtr);
-    processSignal = allpassProcessSample(processSignal,&reverbData->aps[3],audioStatePtr);
+    processSignal = allpassProcessSample(processSignal,&reverbData->aps[2]);
+    processSignal = allpassProcessSample(processSignal,&reverbData->aps[3]);
     //processSignal = firstOrderIirLowpassProcessSample(processSignal, &reverbData->lowpass);
     addSampleToDelayline(processSignal,reverbData->delaylines+1);
     reverbData->outs[1] = getDelayedSample(reverbData->delaylines+1);
     reverbSignal += reverbData->outs[1]*0.5f;
 
     processSignal = sampleIn*0.5 + (reverbData->decay*reverbData->outs[1]);
-    processSignal = allpassProcessSample(processSignal,&reverbData->aps[4],audioStatePtr);
-    processSignal = allpassProcessSample(processSignal,&reverbData->aps[5],audioStatePtr);
+    processSignal = allpassProcessSample(processSignal,&reverbData->aps[4]);
+    processSignal = allpassProcessSample(processSignal,&reverbData->aps[5]);
     //processSignal = firstOrderIirLowpassProcessSample(processSignal, &reverbData->lowpass);
     addSampleToDelayline(processSignal,reverbData->delaylines+2);
     reverbData->outs[2] = getDelayedSample(reverbData->delaylines+2);
     reverbSignal += reverbData->outs[2]*0.5f;
 
     processSignal = sampleIn*0.5f + (reverbData->decay*reverbData->outs[2]);
-    processSignal = allpassProcessSample(processSignal,&reverbData->aps[6],audioStatePtr);
-    processSignal = allpassProcessSample(processSignal,&reverbData->aps[7],audioStatePtr);
+    processSignal = allpassProcessSample(processSignal,&reverbData->aps[6]);
+    processSignal = allpassProcessSample(processSignal,&reverbData->aps[7]);
     processSignal = firstOrderIirLowpassProcessSample(processSignal, &reverbData->lowpass);
     addSampleToDelayline(processSignal,reverbData->delaylines+3);
     reverbData->outs[3] = getDelayedSample(reverbData->delaylines+3);

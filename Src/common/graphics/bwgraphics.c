@@ -526,9 +526,9 @@ void clearOval(float ax,float ay,float cx,float cy,BwImageType*img)
 __QSPI_CODE
 void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 {
-	uint32_t dx,dy;
-	dx=(uint32_t)float2int(epx-spx);
-	dy=(uint32_t)float2int(epy-spy);
+	int32_t dx,dy;
+	dx=(int32_t)float2int(epx-spx);
+	dy=(int32_t)float2int(epy-spy);
 	int32_t px,py;
 	px=float2int(spx);
 	py=float2int(spy);
@@ -544,9 +544,9 @@ void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 __QSPI_CODE
 void clearSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageType* img)
 {
-	uint32_t dx,dy;
-	dx=(uint32_t)(epx-spx);
-	dy=(uint32_t)(epy-spy);
+	int32_t dx,dy;
+	dx=(int32_t)(epx-spx);
+	dy=(int32_t)(epy-spy);
 
 	for (int32_t cx = 0;cx<dx;cx++)
 	{
@@ -578,9 +578,9 @@ void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 __QSPI_CODE
 void drawSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageType* img)
 {
-	uint32_t dx,dy;
-	dx=(uint32_t)(epx-spx);
-	dy=(uint32_t)(epy-spy);
+	int32_t dx,dy;
+	dx=(int32_t)(epx-spx);
+	dy=(int32_t)(epy-spy);
 
 	for (int32_t cx = 0;cx<dx;cx++)
 	{

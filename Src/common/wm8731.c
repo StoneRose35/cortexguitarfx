@@ -2,6 +2,8 @@
 #include "drivers/wm8731.h"
 #include "drivers/i2c.h"
 
+volatile uint8_t wm8731volumeL=23;
+volatile uint8_t wm8731volumeR=23;
 volatile uint16_t wm8731Volumes = (23 << (3 + 8)) | (23 << 3);
 volatile uint8_t wm8731States = 3; // bit 0: left, bit 1: right, 0 is off, 1 is on
 
@@ -78,7 +80,16 @@ uint16_t wm8731GetOutputVolume(void)
 
 void wm8731SetOutputVolume(uint8_t channels,uint8_t volume)
 {
-    wm8731Volumes =  (volume << 8) | (volume & 0xFF) ;
+    if (channels == WM8731_CHANNEL_L || channels == WM8731_CHANNEL_BOTH)
+    {
+        wm8731Volumes &= 0x00FF;
+        wm8731Volumes |= (volume << 8);
+    }
+    else if (channels == WM8731_CHANNEL_L || channels == WM8731_CHANNEL_BOTH)
+    {
+        wm8731Volumes &= 0xFF00;
+        wm8731Volumes |= (volume);
+    }
     uint16_t rData = (WM8731_R0 | (((~wm8731States) & 0x1) << LIN_MUTE_LSB ) | ((wm8731Volumes >> 3) & 0x1F)); 
     wm8731_write(rData);
     rData = (WM8731_R1 | (((~(wm8731States>> 1)) & 0x1) << RIN_MUTE_LSB ) | ((wm8731Volumes >> 3) & 0x1F)); 

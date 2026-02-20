@@ -39,12 +39,17 @@ __RAMFUNC
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
 
     uint8_t requestType = (packet->bmRequestType & 0x60) >> 5;
+    uint16_t data;
+    uint16_t endpointNr = packet->wIndex;
+    uint8_t* dataPtr=0;
+    uint16_t descrLength=0;
+    uint8_t getDescriptorStalled=0;
+    uint16_t effLength;
+    uint8_t recipient = packet->bmRequestType & 0x1F;
     if (requestType == SETUP_PACKET_REQTYPE_STD) 
     {
         switch (packet->bRequest) {
             case 0x00: // GET_STATUS
-                uint16_t data;
-                uint8_t recipient = packet->bmRequestType & 0x1F;
                 switch (recipient)
                 {
                     case REQUEST_TYPE_RECIPIENT_DEVICE:
@@ -62,7 +67,6 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                         prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength);
                         break;
                     case REQUEST_TYPE_RECIPIENT_ENDPOINT:
-                        uint16_t endpointNr = packet->wIndex;
                         if ((endpointNr & 0x80)== 0x80) // OUT endpoints
                         {
                             #ifdef USB_DBG
@@ -116,10 +120,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                 }
                 break;
             case 0x06: // GET_DESCRIPTOR
-                uint8_t* dataPtr=0;
-                uint16_t descrLength=0;
-                uint8_t getDescriptorStalled=0;
-                uint16_t effLength;
+
                 if ((packet->wValue >> 8)==0x01) {
                 //case 0x01: // DEVICE  
                     #ifdef USB_DBG

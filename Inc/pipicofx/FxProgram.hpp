@@ -3,6 +3,7 @@
 #include "stdint.h"
 #include "fxProgramParameter.hpp"
 #include "AudioProcessor.hpp"
+#define IS_FREEZABLE_POS 2
 namespace PiPicoFX {
 class FxProgram : public AudioProcessor
 {
@@ -17,7 +18,17 @@ class FxProgram : public AudioProcessor
         const char * getName();
         uint32_t getDelayMemoryUseage(); // returns the amount of delay memory required in bytes
         void * data;
+        void setFreezable(uint8_t);
+        uint8_t isFreezable();
+        virtual void freeze();
+        virtual void unfreeze();
+        void switchOn();
+        void switchOff();
+        uint8_t isOn();
+        uint8_t isFrozen();
+        uint8_t toggleOn();
     private:
+        uint8_t settingsState=0; //bit 0-1: state, 0: bypassed/off, 1: on, 2: frozen, bit 2: freezable
         uint8_t nParameters;
         uint8_t paramCnt;
         const char * programName;

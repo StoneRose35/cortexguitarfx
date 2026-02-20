@@ -197,7 +197,7 @@ volatile uint16_t receivedDataLevel=0;
 uint8_t usbCdcSetConfiguration(uint16_t confNr)
 {
     
-    
+    (void)confNr;
     USB_OTG_INEndpointTypeDef * inEndpoint;
     USB_OTG_OUTEndpointTypeDef * outEndpoint;
 
@@ -366,6 +366,8 @@ void UsbCdcDataReceived(void* dataPtr,uint16_t len)
 
 void UsbCdcEp0OutHandler(void* dataPtr,uint16_t len)
 {
+    (void)dataPtr;
+    (void)len;
     prepareUSBReception(0,64);
 }
 
@@ -387,5 +389,5 @@ uint16_t readUsbCdcData(uint8_t * data)
 
 void handleVendorSetupRequest(const UsbSetupPacketType* packet)
 {
-
+    (void)packet;
 }

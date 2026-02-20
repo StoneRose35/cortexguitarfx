@@ -17,7 +17,7 @@ typedef struct
     FirstOrderIirType glitterTamer;
 } UnicornGlitterDataType;
 
-float unicornGlitter(float sampleIn,void*data,volatile uint32_t * audioState);
+float unicornGlitter(float sampleIn,void*data);
 }
 
 namespace PiPicoFX {
@@ -32,9 +32,14 @@ namespace PiPicoFX {
                 float processSample(float);
                 UnicornGlitterDataType unicornGlitterData = {
                     .pitchShifter={
+                        .delayMemoryPtr=0,
+                        .delayPointer1=0,
+                        .delayPointer2=0,
                         .currentDelayPosition = 0,
                         .delayIncrement = 8,
                         .buffersizePowerTwo = 12,
+                        .buffersize=0,
+                        .crossFadeWidth=0,
                         .crossFadeWidthPwr2 = 10
                     },
                     .glitterTamer={

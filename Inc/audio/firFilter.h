@@ -12,8 +12,6 @@ typedef struct
 
 void initfirFilter(FirFilterType*data);
 void addSample(float sampleIn,FirFilterType*data);
-float processFirstHalf(FirFilterType*data); 
-float processSecondHalf(FirFilterType*data);
 
 float firFilterProcessSample(float sampleIn,FirFilterType*data);
 void firFilterReset(FirFilterType*data);
