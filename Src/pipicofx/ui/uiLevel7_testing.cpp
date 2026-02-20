@@ -10,110 +10,114 @@ extern "C"
 #include "images/testing.h"
 #include "drivers/debugLed.h"
 }
+extern PiPicoFXUiType ui;
 
-static void create(PiPicoFxUiType*data)
+static void create()
 {
     BwImageType* imgBuffer = getImageBuffer();
     clearImage(imgBuffer);
-    data->data = malloc(3);
-    *((uint8_t*)data->data)=0; // stomp leds and clipping leds  state
-    *((uint8_t*)data->data+1)=63; // encoder value
-    *((uint8_t*)data->data+2) = 10; // horizontal position of the test image, goes from 2 to 115 
-    uiStackPush(data,0xFF); // prohibiting to enter another level
-    drawSquareInt(0,24,*((uint8_t*)data->data+1),32-3,imgBuffer);
+    ui.data = malloc(3);
+    *((uint8_t*)ui.data)=0; // stomp leds and clipping leds  state
+    *((int8_t*)ui.data+1)=63; // encoder value
+    *((uint8_t*)ui.data+2) = 10; // horizontal position of the test image, goes from 2 to 115 
+    uiStackPush(0xFF); // prohibiting to enter another level
+    drawSquareInt(0,24,*((uint8_t*)ui.data+1),32-3,imgBuffer);
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
+static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
+    (void)avgInput;
+    (void)avgOutput;
+    (void)cpuLoad;
     BwImageType* imgBuffer = getImageBuffer();
     clearSquareInt(0,32,128,64,imgBuffer);
-    *((uint8_t*)data->data+2) += 1;
-    if (*((uint8_t*)data->data+2)>115)
+    *((uint8_t*)ui.data+2) += 1;
+    if (*((uint8_t*)ui.data+2)>115)
     {
-        *((uint8_t*)data->data+2) = 2;
+        *((uint8_t*)ui.data+2) = 2;
     }
-    drawImage(*((uint8_t*)data->data+2),40,&testing_streamimg,imgBuffer);
+    drawImage(*((uint8_t*)ui.data+2),40,&testing_streamimg,imgBuffer);
 }
 
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterCallback() 
 {
-    uint8_t * ledState = ((uint8_t*)data->data);
+    uint8_t * ledState = ((uint8_t*)(&ui)->data);
     setPin(CLIPPING_LED_INPUT,*ledState & 0x1);
     *ledState ^= 0x1;
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback()
 {
-    uint8_t * ledState = ((uint8_t*)data->data);
+    uint8_t * ledState = ((uint8_t*)ui.data);
     setPin(CLIPPING_LED_OUTPUT,(*ledState & 0x2) >> 1);
     *ledState ^= 0x2;
 }
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
     BwImageType* imgBuffer = getImageBuffer();
-    *((uint8_t*)data->data+1) += encoderDelta;
-    if (*((uint8_t*)data->data+1) < 0 && encoderDelta < 0)
+    *((uint8_t*)ui.data+1) += encoderDelta;
+    if (*((int8_t*)ui.data+1) < 0 && encoderDelta < 0)
     {
-        *((uint8_t*)data->data+1) = 0x0;
+        *((int8_t*)ui.data+1) = 0x0;
     }
-    else if (*((uint8_t*)data->data+1) < 0 && encoderDelta > 0)
+    else if (*((int8_t*)ui.data+1) < 0 && encoderDelta > 0)
     {
-        *((uint8_t*)data->data+1) = 0x7f;
+        *((int8_t*)ui.data+1) = 0x7f;
     }
     clearSquareInt(0,24,127,32-3,imgBuffer);
-    drawSquareInt(0,24,*((uint8_t*)data->data+1),32-3,imgBuffer);
+    drawSquareInt(0,24,*((uint8_t*)ui.data+1),32-3,imgBuffer);
 }
 
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob0Callback(uint16_t val)
 {
     BwImageType* imgBuffer = getImageBuffer();
     clearSquareInt((val >> 5)+1,0,128,8-3,imgBuffer);
     drawSquareInt(0,0,val >> 5,8-3,imgBuffer);
 }
 
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob1Callback(uint16_t val)
 {
     BwImageType* imgBuffer = getImageBuffer();
     clearSquareInt((val >> 5)+1,8,128,16-3,imgBuffer);
     drawSquareInt(0,8,val >> 5,16-3,imgBuffer);
 }
 
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob2Callback(uint16_t val)
 {
     BwImageType* imgBuffer = getImageBuffer();
     clearSquareInt((val >> 5)+1,16,128,24-3,imgBuffer);
     drawSquareInt(0,16,val >> 5,24-3,imgBuffer);
 }
 
-static void stompswitch1Callback(PiPicoFxUiType* data)
+static void stompswitch1Callback()
 {
-    uint8_t * ledColor = (uint8_t*)data->data;
+    uint8_t * ledColor = (uint8_t*)ui.data;
     uint8_t changedBits = ((((*ledColor >> 2)&0x3) + 1)&0x3) << 2;
     *ledColor &= ~(0x3 << 2);
     *ledColor |= changedBits; 
     setStompswitchColorRaw(*ledColor >> 2);
 }
 
-static void stompswitch2Callback(PiPicoFxUiType* data)
+static void stompswitch2Callback()
 {
-    uint8_t * ledColor = (uint8_t*)data->data;
+    uint8_t * ledColor = (uint8_t*)ui.data;
     uint8_t changedBits = ((((*ledColor >> 4)&0x3) + 1)&0x3) << 4; 
     *ledColor &= ~(0x3 << 4);
     *ledColor |= changedBits; 
     setStompswitchColorRaw(*ledColor >> 2);
 }
 
-static void stompswitch3Callback(PiPicoFxUiType* data)
+static void stompswitch3Callback(void)
 {
-    uint8_t * ledColor = (uint8_t*)data->data;
+    uint8_t * ledColor = (uint8_t*)ui.data;
     uint8_t changedBits = ((((*ledColor >> 6)&0x3) + 1)&0x3) << 6; 
     *ledColor &= ~(0x3 << 6);
     *ledColor |= changedBits; 
     setStompswitchColorRaw(*ledColor >> 2);
 }
 
-void enterLevel7(PiPicoFxUiType*data)
+void enterLevel7()
 {
     clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
@@ -127,5 +131,5 @@ void enterLevel7(PiPicoFxUiType*data)
     registerStompswitch3PressedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
 }

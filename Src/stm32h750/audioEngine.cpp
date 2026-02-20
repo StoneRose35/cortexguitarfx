@@ -15,7 +15,7 @@ extern "C" {
 
 
 volatile int16_t fadeCounter;
-volatile uint16_t bufferCnt;
+uint16_t bufferCnt;
 
 __ITCM_CODE
 void processAudioBuffers(void)
@@ -32,7 +32,7 @@ void processAudioBuffers(void)
     extern volatile uint32_t cpuLoad;
     extern float avgInOld,avgOutOld;
     extern uint32_t task;
-    extern PiPicoFxUiType piPicoUiController;
+    extern PiPicoFXUiType ui;
     extern LooperDataType looper;
     ticStart = getTimeLW();
     audioBufferPtr = getEditableAudioBufferHiRes();
@@ -74,11 +74,11 @@ void processAudioBuffers(void)
 
         if (programChangeState != 3) // processing
         {
-            outputSample = piPicoUiController.currentProgram->processSample(inputSample);
+            outputSample = ui.currentProgram->processSample(inputSample);
         }
         else
         {
-            outputSample = 0.0f;
+            outputSample = inputSample;
         }
 
         outputSample = LooperProcessSample(outputSample,&looper);

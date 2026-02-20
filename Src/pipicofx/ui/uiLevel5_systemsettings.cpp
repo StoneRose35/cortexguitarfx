@@ -17,10 +17,11 @@ extern "C" {
 }
 
 
-static volatile uint8_t paramSelected=0;
-static volatile uint8_t subLevel;
+static uint8_t paramSelected=0;
+static uint8_t subLevel;
+extern PiPicoFXUiType ui;
 
-static void create(PiPicoFxUiType*data)
+static void create()
 {
     char strbfr[16];
     uint8_t regbfr;
@@ -119,12 +120,12 @@ static void create(PiPicoFxUiType*data)
 }
 
 
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterCallback() 
 {
     BwImageType* img = getImageBuffer();
     if(subLevel==0)
     {
-        uiStackPush(data,0xFF);
+        uiStackPush(0xFF);
         subLevel++;
         switch (paramSelected)
         {
@@ -150,7 +151,7 @@ static void enterCallback(PiPicoFxUiType*data)
     }
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback()
 {
     BwImageType* img = getImageBuffer();
     if (subLevel==1)
@@ -180,14 +181,14 @@ static void exitCallback(PiPicoFxUiType*data)
     }
     else
     {
-        if(uiStackCurrent(data)==0xFF)
+        if(uiStackCurrent()==0xFF)
         {
-            uiStackPop(data);
+            uiStackPop();
         }
     }
 }
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
     uint8_t regbfr;
     uint16_t currentVolume;
@@ -394,13 +395,13 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 }
 
 
-void enterLevel5(PiPicoFxUiType*data)
+void enterLevel5(void)
 {
     clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
 }
 

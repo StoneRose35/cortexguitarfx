@@ -24,15 +24,15 @@ extern "C" {
 #include "systick.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
-
+extern PiPicoFXUiType ui;
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
-static volatile uint8_t overlayNr=0xFF;
-static volatile uint8_t bankChanged=0; // flag indicating that the bank has been changed upon stomp switch release
-static volatile uint8_t editOverlayMode=0;
-static volatile uint8_t copySwapBank;
-static volatile uint8_t copySwapPreset;
+static uint8_t overlayNr=0xFF;
+static uint8_t bankChanged=0; // flag indicating that the bank has been changed upon stomp switch release
+static uint8_t editOverlayMode=0;
+static uint8_t copySwapBank;
+static uint8_t copySwapPreset;
                                        
 static const BwImageTypeConst* overlays[]={
     &looperOverlay_streamimg,
@@ -45,6 +45,7 @@ static const BwImageTypeConst* overlays[]={
     &fwUpgradeOverlay_streamimg};
 extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
+extern volatile uint8_t consumeEnterReleased;
 
 static uint8_t presetChangeLock = 0; // used to prohibit action when the second stomp switch is released
 static uint16_t pot1Val=0;
@@ -53,11 +54,11 @@ static uint16_t pot3Val=0;
 static uint8_t previewBankNr=0xFF;
 static uint32_t longPressTickStart = 0;
 static uint8_t handleReleaseEvent = 0;
-
-static void handleBankChange(uint8_t, PiPicoFxUiType*);
-static void handlePresetChange(uint8_t , PiPicoFxUiType*);
-static void setPresetNr(uint8_t,PiPicoFxUiType*);
-static void setPreset(PiPicoFxUiType*);
+static volatile uint8_t enterState=0;
+static void handleBankChange(uint8_t);
+static void handlePresetChange(uint8_t);
+static void setPresetNr(uint8_t,PiPicoFXUiType*);
+static void setPreset(PiPicoFXUiType*);
 static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img);
 static void limitPreviewBankRange(uint8_t increase);
 static void createPresetSelector(BwImageType*imgBuffer);
@@ -91,15 +92,15 @@ static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk);
 
 #define BANK_LIMIT 32
 
-#define LONGPRESS_DURATION_SYSTICKS 130
 
-static void create(PiPicoFxUiType*data)
+
+static void create()
 {
     BwImageType* imgBuffer = getImageBuffer();
     // display preset Name and Bank Number
     clearImage(imgBuffer);
     drawBankAndPreset(imgBuffer);
-    drawParameterDisplay(data->currentProgram,imgBuffer);
+    drawParameterDisplay(ui.currentProgram,imgBuffer);
 
     pot1Val = getChannel0Value();
     pot2Val = getChannel1Value();
@@ -108,9 +109,10 @@ static void create(PiPicoFxUiType*data)
     
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
+static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {    
     uint16_t yval; 
+    (void)cpuLoad;
     if (editOverlayMode != EOM_NONE)
     {
         return;
@@ -163,13 +165,25 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     if (longPressTickStart != 0 and getTickValue() - longPressTickStart > LONGPRESS_DURATION_SYSTICKS)
     {
         longPressTickStart = 0;
-        uiStackPush(data, 3);
-        enterLevel8(data);
+        uiStackPush(3);
+        enterLevel8();
     }
 }
 
-static void enterCallback(PiPicoFxUiType*data) 
+
+static void enterPressedCallback()
 {
+    enterState = 1;
+}
+
+static void enterReleasedCallback(void) 
+{
+    enterState=0;
+    if (consumeEnterReleased == 1)
+    {
+        consumeEnterReleased = 0;
+        return;
+    }
     BwImageType* imgBuffer = getImageBuffer();
     char strbfr[24];
     // show overlay menu (if not there)
@@ -179,29 +193,29 @@ static void enterCallback(PiPicoFxUiType*data)
             editOverlayMode = EOM_OVERLAYS;
             overlayNr = OVERLAY_NR_LOOPER;
             drawImage(41,0,&looperOverlay_streamimg,imgBuffer);
-            uiStackPush(data,0xFF);
+            uiStackPush(0xFF);
             break;
         case EOM_OVERLAYS:
             if (overlayNr == OVERLAY_NR_LOOPER)
             {
                 editOverlayMode = EOM_NONE;
-                uiStackPop(data);
-                uiStackPush(data, 3);   
-                enterLevel8(data);
+                uiStackPop();
+                uiStackPush( 3);   
+                enterLevel8();
             }
             else if (overlayNr == OVERLAY_NR_EDIT)
             {
                 editOverlayMode = EOM_NONE;
-                uiStackPop(data);
-                uiStackPush(data, 3);   
-                enterLevel4(data);
+                uiStackPop();
+                uiStackPush(3);   
+                enterLevel4();
             }
             else if (overlayNr == OVERLAY_NR_SYSTEMSETTINGS)
             {
                 editOverlayMode = EOM_NONE;
-                uiStackPop(data);
-                uiStackPush(data, 3);   
-                enterLevel5(data);
+                uiStackPop();
+                uiStackPush(3);   
+                enterLevel5();
             }
             else if (overlayNr == OVERLAY_NR_ABOUT)
             {
@@ -324,7 +338,7 @@ static void enterCallback(PiPicoFxUiType*data)
                 generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
             }
             reloadPresetsFromEeprom(presets,currentBank);
-            setPreset(data);
+            setPreset(&ui);
             // jump back to normal display
             clearSquareInt(41,0,41+47,43,imgBuffer);
             drawBankAndPreset(imgBuffer);
@@ -334,19 +348,19 @@ static void enterCallback(PiPicoFxUiType*data)
         case EOM_DELETE_COMMIT:
             clearPreset(currentBank*3+currentPreset);
             generateEmptyPreset(presets + currentPreset,currentBank,currentPreset);
-            setPreset(data);
+            setPreset(&ui);
             break;
     }
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback()
 {
     BwImageType* imgBuffer = getImageBuffer();
     // remove overlay menu (if there)
     switch (editOverlayMode)
     {
         case EOM_NONE:
-            uiStackPop(data);
+            //uiStackPop(data);
             break;
         case EOM_OVERLAYS:
         case EOM_COPY_COMMIT:
@@ -363,15 +377,21 @@ static void exitCallback(PiPicoFxUiType*data)
             clearSquareInt(0,0,112,64,imgBuffer);
             drawBankAndPreset(imgBuffer);
             drawImage(41,0,overlays[overlayNr],imgBuffer);
-            drawParameterDisplay(data->currentProgram,imgBuffer);
+            drawParameterDisplay(ui.currentProgram,imgBuffer);
             break;
     }
 }
 
 
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
+    if (enterState==1)
+    {
+        consumeEnterReleased = 1;
+        enterLevel0();
+        return;
+    }
     BwImageType* imgBuffer = getImageBuffer();
     // change overlay icon (if there)
     switch (editOverlayMode)
@@ -399,11 +419,11 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         case EOM_NONE:
             if (encoderDelta > 0 && currentPreset < 2)
             {
-                handlePresetChange(BANK_PRESET_CHANGE_INCREASE,data);
+                handlePresetChange(BANK_PRESET_CHANGE_INCREASE);
             }
             else if (encoderDelta < 0 && currentPreset > 0)
             {
-                handlePresetChange(BANK_PRESET_CHANGE_DECREASE,data);
+                handlePresetChange(BANK_PRESET_CHANGE_DECREASE);
             }
             break;
         case EOM_COPY:
@@ -447,7 +467,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 
 }
 
-static void stompswitch1Callback(PiPicoFxUiType* data)
+static void stompswitch1Callback(void)
 {
     uint8_t nbStompSwitch;
     if (handleReleaseEvent == 0)
@@ -460,12 +480,12 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
         nbStompSwitch=getStompSwitchState(1);
         if ((nbStompSwitch & 0x1) == 0x1)
         {
-            handleBankChange(BANK_PRESET_CHANGE_DECREASE,data);
+            handleBankChange(BANK_PRESET_CHANGE_DECREASE);
         }
         else if ((currentPreset != 0 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
-            setPresetNr(0,data);
-            create(data);
+            setPresetNr(0,&ui);
+            create();
         }
         else if (presetChangeLock == 1)
         {
@@ -473,7 +493,7 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
         }
         else
         {
-            create(data);
+            create();
         }
         
     }
@@ -483,7 +503,7 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
     }
 }
 
-static void stompswitch2Callback(PiPicoFxUiType* data)
+static void stompswitch2Callback(void)
 {
     uint8_t nbStompSwitch1, nbStompSwitch3;
     if (handleReleaseEvent == 0)
@@ -497,16 +517,16 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
         nbStompSwitch3=getStompSwitchState(2);
         if (((nbStompSwitch1 & 0x1) == 0x1) && ((nbStompSwitch3 & 0x1) == 0x0))
         {
-            handleBankChange(BANK_PRESET_CHANGE_DECREASE,data);
+            handleBankChange(BANK_PRESET_CHANGE_DECREASE);
         }
         else if (((nbStompSwitch1 & 0x1) == 0x0) && ((nbStompSwitch3 & 0x1) == 0x1))
         {
-            handleBankChange(BANK_PRESET_CHANGE_INCREASE,data);
+            handleBankChange(BANK_PRESET_CHANGE_INCREASE);
         }
         else if ((currentPreset != 1 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
-            setPresetNr(1,data);
-            create(data);
+            setPresetNr(1,&ui);
+            create();
         }
         else if (presetChangeLock == 1)
         {
@@ -514,7 +534,7 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
         }
         else
         {
-            create(data);
+            create();
         }
     }
     else
@@ -523,7 +543,7 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
     }
 }
 
-static void stompswitch3Callback(PiPicoFxUiType* data)
+static void stompswitch3Callback(void)
 {
     uint8_t nbStompSwitch;
     if (handleReleaseEvent == 0)
@@ -536,12 +556,12 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
         nbStompSwitch=getStompSwitchState(1);
         if ((nbStompSwitch & 0x1) == 0x1)
         {
-            handleBankChange(BANK_PRESET_CHANGE_INCREASE,data);
+            handleBankChange(BANK_PRESET_CHANGE_INCREASE);
         }
         else if ((currentPreset != 2 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
-            setPresetNr(2,data);
-            create(data);
+            setPresetNr(2,&ui);
+            create();
         }
         else if (presetChangeLock == 1)
         {
@@ -549,7 +569,7 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
         }
         else
         {
-            create(data);
+            create();
         }
     }
     else
@@ -558,7 +578,7 @@ static void stompswitch3Callback(PiPicoFxUiType* data)
     }
 }
 
-static void stompSwitch1PressedCallback(PiPicoFxUiType* data)
+static void stompSwitch1PressedCallback()
 {
     handleReleaseEvent = 1;
     if (currentPreset == 0)
@@ -567,7 +587,7 @@ static void stompSwitch1PressedCallback(PiPicoFxUiType* data)
     }
 }
 
-static void stompSwitch2PressedCallback(PiPicoFxUiType* data)
+static void stompSwitch2PressedCallback()
 {
     handleReleaseEvent = 1;
     if (currentPreset == 1)
@@ -576,7 +596,7 @@ static void stompSwitch2PressedCallback(PiPicoFxUiType* data)
     }
 }
 
-static void stompSwitch3PressedCallback(PiPicoFxUiType* data)
+static void stompSwitch3PressedCallback(void)
 {
     handleReleaseEvent = 1;
     if (currentPreset == 2)
@@ -585,27 +605,28 @@ static void stompSwitch3PressedCallback(PiPicoFxUiType* data)
     }
 }
 
-static void knob0Callback(uint16_t val, PiPicoFxUiType*data)
+static void knob0Callback(uint16_t val)
 {
     pot1Val = val;
 }
 
-static void knob1Callback(uint16_t val, PiPicoFxUiType*data)
+static void knob1Callback(uint16_t val)
 {
     pot2Val = val;
 }
 
-static void knob2Callback(uint16_t val, PiPicoFxUiType*data)
+static void knob2Callback(uint16_t val)
 {
     pot3Val = val;
 }
 
-void enterLevel3(PiPicoFxUiType*data)
+void enterLevel3()
 {
     reloadPresetsFromEeprom(presets,currentBank);
-    data->editViaRotary = 1;
+    ui.editViaRotary = 1;
     clearCallbackAssignments();
-    registerEnterButtonPressedCallback(&enterCallback);
+    registerEnterButtonReleasedCallback(&enterReleasedCallback);
+    registerEnterButtonPressedCallback(&enterPressedCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
     registerStompswitch1ReleasedCallback(&stompswitch1Callback);
@@ -619,19 +640,20 @@ void enterLevel3(PiPicoFxUiType*data)
     registerKnob2Callback(&knob2Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
     overlayNr=0xFF;
     handleReleaseEvent = 0;
-    if (data->currentProgramIdx != presets[currentPreset].programNr)
-    {
-        data->currentProgramIdx = presets[currentPreset].programNr;
-        programToInitialize=data->currentProgramIdx;
-        programChangeState = 1;
-    }
+    enterState = 0;
+    ui.defaultOn=1;
+
+    ui.currentProgramIdx = presets[currentPreset].programNr;
+    programToInitialize=ui.currentProgramIdx;
+    programChangeState = 1;
+
     setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
 }
 
-static void handleBankChange(uint8_t increase, PiPicoFxUiType* data)
+static void handleBankChange(uint8_t increase)
 {
     // display preset overlay if not there already
     if (previewBankNr == 0xFF)
@@ -659,12 +681,12 @@ static void handleBankChange(uint8_t increase, PiPicoFxUiType* data)
     }
     BwImageType previewImage=
     {
+        .data=(uint8_t*)malloc(96*48/8),
         .sx=96,
         .sy=48,
-        .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES
+        .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
+        .byteSize=96*48/8
     };
-    previewImage.data = (uint8_t*)malloc(96*48/8);
-    previewImage.byteSize = 96*48/8;
     createBankPreviewOverlay(previewBankNr,&previewImage);
     BwImageType* imgBuffer = getImageBuffer();
     drawImage(2,2,(BwImageTypeConst*)&previewImage,imgBuffer);
@@ -675,7 +697,7 @@ static void handleBankChange(uint8_t increase, PiPicoFxUiType* data)
     //data->currentProgramIdx = 0xff;
 }
 
-static void handlePresetChange(uint8_t increase, PiPicoFxUiType*data)
+static void handlePresetChange(uint8_t increase)
 {
     if (increase==1)
     {
@@ -685,10 +707,10 @@ static void handlePresetChange(uint8_t increase, PiPicoFxUiType*data)
     {
         currentPreset--;
     }
-    setPreset(data);
+    setPreset(&ui);
 }
 
-static void setPresetNr(uint8_t nr,PiPicoFxUiType* data)
+static void setPresetNr(uint8_t nr,PiPicoFXUiType* data)
 {
     if (previewBankNr != currentBank && previewBankNr != 0xFF)
     {
@@ -700,7 +722,7 @@ static void setPresetNr(uint8_t nr,PiPicoFxUiType* data)
     setPreset(data);
 }
 
-static void setPreset(PiPicoFxUiType*data)
+static void setPreset(PiPicoFXUiType*data)
 {
     if (data->currentProgramIdx != presets[currentPreset].programNr)
     {
@@ -713,7 +735,7 @@ static void setPreset(PiPicoFxUiType*data)
         applyPreset(presets + currentPreset,data->currentProgram);
     }
     setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
-    create(data);
+    create();
 }
 
 
@@ -736,6 +758,7 @@ static void createPresetSelector(BwImageType*imgBuffer)
         .data=textLineData,
         .sx=90,
         .sy=8,
+        .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
         .byteSize=90
     };
 

@@ -68,3 +68,79 @@ const char * FxProgram::getName()
 {
     return programName;
 }
+
+__QSPI_CODE
+void FxProgram::setFreezable(uint8_t val)
+{
+    this->settingsState &= ~(1 << IS_FREEZABLE_POS);
+    this->settingsState |= (val &1) << IS_FREEZABLE_POS;
+}
+
+__QSPI_CODE
+uint8_t FxProgram::isFreezable()
+{
+    return (settingsState >> 2) & 1;
+}
+
+__QSPI_CODE
+void FxProgram::freeze()
+{
+    if (this->isFreezable())
+    {
+        this->settingsState &= ~(0x3);
+        this->settingsState |= 0x2;
+    }
+}
+
+__QSPI_CODE
+void FxProgram::unfreeze()
+{
+    if (this->isFreezable())
+    {
+        this->settingsState &= ~(0x3);
+        this->settingsState |= 0x1;
+    }
+}
+
+__QSPI_CODE
+uint8_t FxProgram::isOn()
+{
+    return this->settingsState & 1;
+}
+
+__QSPI_CODE
+void FxProgram::switchOn()
+{
+    this->settingsState &= ~(0x3);
+    this->settingsState |= 0x1;
+    this->unfreeze();
+}
+
+__QSPI_CODE
+uint8_t FxProgram::isFrozen()
+{
+    return (this->settingsState >> 1) & 1;
+}
+
+__QSPI_CODE
+uint8_t FxProgram::toggleOn()
+{
+    if (this->isFrozen())
+    {
+        this->switchOn();
+        return 1;
+    }
+    if (this->isOn())
+    {
+        this->switchOff();
+        return 0;
+    }
+    this->switchOn();
+    return 1;
+}
+
+__QSPI_CODE
+void FxProgram::switchOff()
+{
+    this->settingsState &= ~(0x3);
+}

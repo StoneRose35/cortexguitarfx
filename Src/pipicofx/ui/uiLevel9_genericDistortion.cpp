@@ -5,7 +5,7 @@ extern "C" {
 #include "pipicofx/pipicofxui.h"
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/019_XAmp.hpp"
-#include "audio/genericDistortion.h"
+#include "audio/genericDistortionSimple.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
 #include "ln.h"
@@ -27,27 +27,33 @@ extern "C" {
 #define OD_MODE_EDITING 1
 
 #define ENCODER_DELTA_SCALE 0.001f
-static  GenericDistortionType * distortion=(GenericDistortionType*)0;
+
+extern PiPicoFXUiType ui;
+
+static  GenericDistortionSimpleType * distortion=(GenericDistortionSimpleType*)0;
 static volatile uint8_t editType = OD_EDIT_POINT01_POS_X;
 static volatile uint8_t selectionMode = OD_MODE_SELECTING;
 
-static void create(PiPicoFxUiType*data)
+static void create()
 {
     BwImageType* imgBuffer = getImageBuffer();
-    if (stringEquals(data->currentProgram->getName(),"XAmp")==1)
+    if (stringEquals(ui.currentProgram->getName(),"XAmp")==1)
     {
-        PiPicoFX::XAmp::XAmp *xamp = static_cast<PiPicoFX::XAmp::XAmp*>(data->currentProgram);
+        PiPicoFX::XAmp::XAmp *xamp = static_cast<PiPicoFX::XAmp::XAmp*>(ui.currentProgram);
         distortion = &xamp->distortion;
     }
     clearImage(imgBuffer);
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
+static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
+    (void)avgInput;
+    (void)avgOutput;
+    (void)cpuLoad;
     BwImageType* imgBuffer = getImageBuffer();
     uint8_t oldy=0;
     clearSquareInt(0,0,128,64,imgBuffer);
-    if (distortion==(GenericDistortionType*)0)
+    if (distortion==(GenericDistortionSimpleType*)0)
     {
         drawText(4,32,"NPE: distortion",imgBuffer,(void*)0);
         return;
@@ -66,7 +72,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     for (uint8_t ix=0;ix<63;ix++)
     {
         float fx = 0.0001f*toExp(((float)ix)*0.146195879f);
-        float fy = gdGetValue(fx,distortion)*62.0f;
+        float fy = gdsGetValue(fx,distortion)*62.0f;
         uint8_t iy = (uint8_t)fy;
         if (ix > 0)
         {
@@ -220,31 +226,28 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
 }
 
 
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob0Callback(uint16_t val)
 {
-    data->currentProgram->getParameter(0)->parameterCallback(val);
+    ui.currentProgram->getParameter(0)->parameterCallback(val);
 }
 
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob1Callback(uint16_t val)
 {
-    data->currentProgram->getParameter(1)->parameterCallback(val);
+    ui.currentProgram->getParameter(1)->parameterCallback(val);
 }
 
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob2Callback(uint16_t val)
 {
-    data->currentProgram->getParameter(2)->parameterCallback(val);
+    ui.currentProgram->getParameter(2)->parameterCallback(val);
 }
 
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterCallback() 
 {
     selectionMode ^=1;
 }
 
-static void exitCallback(PiPicoFxUiType*data)
-{
-}
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
     uint8_t edtType;
     float points[8];
@@ -265,80 +268,71 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
     }
     else
     {
+        /*
         gdGetPoint(0,points,distortion);
         gdGetPoint(1,points+2,distortion);
         gdGetPoint(2,points+4,distortion);
         gdGetPoint(3,points+6,distortion);
+        */
 
+        gdsGetPoint(0,points,distortion);
+        gdsGetPoint(1,points+2,distortion);
         switch (editType)
         {
             case OD_EDIT_POINT01_POS_X:
                 points[0] += ((float)encoderDelta)*ENCODER_DELTA_SCALE;
-                points[2] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE;
+                //points[2] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE;
                 break;
             case OD_EDIT_POINT01_POS_Y:
                 points[1] += ((float)encoderDelta)*ENCODER_DELTA_SCALE;
-                points[3] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE;
+                //points[3] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE;
                 break;
             case OD_EDIT_POINT01_SPREAD_X:
-                points[0] -= ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
-                points[2] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
+                //points[0] -= ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
+                //points[2] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
                 break;
             case OD_EDIT_POINT01_SPREAD_Y:
-                points[1] -= ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
-                points[3] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
+                //points[1] -= ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
+                //points[3] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
                 break;
 
             case OD_EDIT_POINT23_POS_X:
-                points[4] += ((float)encoderDelta)*ENCODER_DELTA_SCALE;
-                points[6] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE;
+                //points[4] += ((float)encoderDelta)*ENCODER_DELTA_SCALE;
+                //points[6] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE;
+                points[2] += ((float)encoderDelta)*ENCODER_DELTA_SCALE;
                 break;
             case OD_EDIT_POINT23_POS_Y:
-                points[5] += ((float)encoderDelta)*ENCODER_DELTA_SCALE;
-                points[7] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE;
+                //points[5] += ((float)encoderDelta)*ENCODER_DELTA_SCALE;
+                //points[7] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE;
+                points[3] += ((float)encoderDelta)*ENCODER_DELTA_SCALE;
                 break;
             case OD_EDIT_POINT23_SPREAD_X:
-                points[4] -= ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
-                points[6] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
+                //points[4] -= ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
+                //points[6] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
                 break;
             case OD_EDIT_POINT23_SPREAD_Y:
-                points[5] -= ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
-                points[7] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
+                //points[5] -= ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
+                //points[7] +=  ((float)encoderDelta)*ENCODER_DELTA_SCALE*0.5f;
                 break;
             default:
                 break;
         }
         
-        gdSetAllPoints(points,distortion);
+        gdsSetAllPoints(points,distortion);
     }
 }
 
-static void stompswitch1Callback(PiPicoFxUiType* data)
-{
-}
 
-static void stompswitch2Callback(PiPicoFxUiType* data)
-{
-}
-
-static void stompswitch3Callback(PiPicoFxUiType* data)
-{
-}
-
-void enterLevel9(PiPicoFxUiType*data)
+void enterLevel9()
 {
     clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
-    registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
     registerKnob0Callback(&knob0Callback);
     registerKnob1Callback(&knob1Callback);
     registerKnob2Callback(&knob2Callback);
-    registerStompswitch1PressedCallback(&stompswitch1Callback);
-    registerStompswitch2PressedCallback(&stompswitch2Callback);
-    registerStompswitch3PressedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
 }
 

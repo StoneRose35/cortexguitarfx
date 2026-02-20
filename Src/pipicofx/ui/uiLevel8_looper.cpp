@@ -16,8 +16,8 @@ extern "C" {
 
 #define LOOP_SQUARE_CENTER 40
 extern LooperDataType looper;
-
-static void create(PiPicoFxUiType*data)
+extern PiPicoFXUiType ui;
+static void create()
 {
     BwImageType* imgBuffer = getImageBuffer();
     clearImage(imgBuffer);
@@ -57,8 +57,11 @@ static void create(PiPicoFxUiType*data)
 
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
+static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
+    (void)avgInput;
+    (void)avgOutput;
+    (void)cpuLoad;
     BwImageType* imgBuffer = getImageBuffer();   
     if (looper.indexEnd != LOOPER_INDEX_NULL)
     {
@@ -90,28 +93,29 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
 
 // no happy knobbing here so far
 /*
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob0Callback(uint16_t val,PiPicoFXUiType*data)
 {
 }
 
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob1Callback(uint16_t val,PiPicoFXUiType*data)
 {
 }
 
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob2Callback(uint16_t val,PiPicoFXUiType*data)
 {
 }
 
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterCallback(PiPicoFXUiType*data) 
 {
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback(PiPicoFXUiType*data)
 {
 }
 */
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
+    (void)encoderDelta;
     if (looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
     {
         looper.looperFunction = LOOPER_FUNCTION_EXIT;
@@ -124,7 +128,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 
 
 // toggles record and overdub, start playing if content present and stopped
-static void stompswitch1Callback(PiPicoFxUiType* data)
+static void stompswitch1Callback()
 {
     if (looper.indexEnd == LOOPER_INDEX_NULL && looper.looperState != LOOPER_STATE_RECORDING)
     {
@@ -154,7 +158,7 @@ static void stompswitch1Callback(PiPicoFxUiType* data)
 }
 
 // do more funky stuff such as retrigger, reverse, slow down, cut etc.
-static void stompswitch2Callback(PiPicoFxUiType* data)
+static void stompswitch2Callback()
 {
     // retrigger
     if ((looper.looperState == LOOPER_STATE_PLAYING || looper.looperState == LOOPER_STATE_OVERDUBBING) && looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
@@ -163,15 +167,15 @@ static void stompswitch2Callback(PiPicoFxUiType* data)
     }
     else if (looper.looperFunction == LOOPER_FUNCTION_EXIT) // exit to last screen
     {
-        if(uiStackCurrent(data) != 0xFF)
+        if(uiStackCurrent() != 0xFF)
         {
-            getEnterFunctions()[uiStackPop(data)](data);
+            getEnterFunctions()[uiStackPop()]();
         }
     }
 }
 
 // stop and clear/delete (if stopped and recorded material present)
-static void stompswitch3Callback(PiPicoFxUiType* data)
+static void stompswitch3Callback(void)
 {
     if (looper.looperState != LOOPER_STATE_STOPPED)
     {
@@ -192,7 +196,7 @@ register exit, rotary, knobs and stompswitch callbacks
 remove enter callback
 register onUpdate, on Create
 */
-void enterLevel8(PiPicoFxUiType*data)
+void enterLevel8()
 {
     clearCallbackAssignments();
     registerStompswitch1PressedCallback(&stompswitch1Callback);
@@ -201,5 +205,5 @@ void enterLevel8(PiPicoFxUiType*data)
     registerRotaryCallback(&rotaryCallback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
 }

@@ -10,52 +10,59 @@ extern "C" {
 #include "stringFunctions.h"
 }
 
-static void create(PiPicoFxUiType*data)
+static void create()
 {
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
+static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
+    (void)avgInput;
+    (void)avgOutput;
+    (void)cpuLoad;
 }
 
 
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob0Callback(uint16_t val)
+{
+    (void)val;
+}
+
+static void knob1Callback(uint16_t val)
+{
+    (void)val;
+}
+
+static void knob2Callback(uint16_t val)
+{
+    (void)val;
+}
+
+static void enterCallback() 
 {
 }
 
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data)
+static void exitCallback()
 {
 }
 
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
+{
+    (void)encoderDelta;
+}
+
+static void stompswitch1Callback()
 {
 }
 
-static void enterCallback(PiPicoFxUiType*data) 
+static void stompswitch2Callback()
 {
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void stompswitch3Callback()
 {
 }
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
-{
-}
-
-static void stompswitch1Callback(PiPicoFxUiType* data)
-{
-}
-
-static void stompswitch2Callback(PiPicoFxUiType* data)
-{
-}
-
-static void stompswitch3Callback(PiPicoFxUiType* data)
-{
-}
-
-void enterLevel99(PiPicoFxUiType*data)
+void enterLevel99()
 {
     clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
@@ -69,6 +76,6 @@ void enterLevel99(PiPicoFxUiType*data)
     registerStompswitch3PressedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
 }
 

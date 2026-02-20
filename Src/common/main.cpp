@@ -80,7 +80,7 @@ float inputSampleScaled;
 volatile float avgOutOld=0,avgInOld=0;
 volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t cpuLoad=0;
-PiPicoFxUiType piPicoUiController;
+PiPicoFXUiType ui;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define ADC_LOWPASS 60
@@ -108,6 +108,7 @@ LooperDataType looper;
 // 4: fade in
 volatile uint8_t programChangeState=0;
 volatile uint8_t stompSwitchState;
+volatile uint8_t consumeEnterReleased=0;
 #define ROTARY_ENCODER_MAX_INCR 512
 #define ROTARY_ENCODER_SPEED_FACTOR 32
 #endif
@@ -249,10 +250,10 @@ int main(void)
     #endif
 	context |= (1 << CONTEXT_USB);
 	
-    piPicoFxUiSetup(&piPicoUiController);
+    piPicoFxUiSetup();
 	ClearDisplay();
 	#ifndef FORCE_TEST_MODE
-		enterLevel0(&piPicoUiController);
+		enterLevel0();
 	#else
 	    // switch on program "off"
 		//piPicoUiController.currentProgramIdx = 2;
@@ -270,6 +271,7 @@ int main(void)
     BwImageType * imgBfr = getImageBuffer();
     fb = imgBfr->data;
 
+    clearReleasedStickyBit(0);
     #if defined USB_DBG || defined ENCODER_TUNE
     initUart(115200);
     #endif
@@ -292,7 +294,7 @@ int main(void)
             avgOldInBfr = (int32_t)(avgInOld*128.0f);
             avgOldOutBfr = (int32_t)(avgOutOld*128.0f);
             cpuLoadBfr = cpuLoad >> 1;
-            onUpdate(avgOldInBfr,avgOldOutBfr,cpuLoadBfr,&piPicoUiController);
+            onUpdate(avgOldInBfr,avgOldOutBfr,cpuLoadBfr);
             DisplayWriteFramebufferAsync(fb);
             if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
             {
@@ -321,12 +323,12 @@ int main(void)
                 adcChannel0 = adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
                 if ((adcChannel0 > adcChannelOld0) && (adcChannel0-adcChannelOld0) > UI_DMIN )
                 {
-                    onKnob0(adcChannel0,&piPicoUiController);
+                    onKnob0(adcChannel0);
                     adcChannelOld0=adcChannel0;
                 }
                 else if ((adcChannel0 < adcChannelOld0) && (adcChannelOld0-adcChannel0) > UI_DMIN )
                 {
-                    onKnob0(adcChannel0,&piPicoUiController);
+                    onKnob0(adcChannel0);
                     adcChannelOld0=adcChannel0;
                 }
     
@@ -334,12 +336,12 @@ int main(void)
                 adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
                 if ((adcChannel1 > adcChannelOld1) && (adcChannel1-adcChannelOld1) > UI_DMIN )
                 {
-                    onKnob1(adcChannel1,&piPicoUiController);
+                    onKnob1(adcChannel1);
                     adcChannelOld1=adcChannel1;
                 }
                 else if ((adcChannel1 < adcChannelOld1) && (adcChannelOld1-adcChannel1) > UI_DMIN )
                 {
-                    onKnob1(adcChannel1,&piPicoUiController);
+                    onKnob1(adcChannel1);
                     adcChannelOld1=adcChannel1;
                 }
     
@@ -347,12 +349,12 @@ int main(void)
                 adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
                 if ((adcChannel2 > adcChannelOld2) && (adcChannel2-adcChannelOld2) > UI_DMIN )
                 {
-                    onKnob2(adcChannel2,&piPicoUiController);
+                    onKnob2(adcChannel2);
                     adcChannelOld2=adcChannel2;
                 }
                 else if ((adcChannel2 < adcChannelOld2) && (adcChannelOld2-adcChannel) > UI_DMIN )
                 {
-                    onKnob2(adcChannel2,&piPicoUiController);
+                    onKnob2(adcChannel2);
                     adcChannelOld2=adcChannel;
                 }
                 task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
@@ -373,24 +375,24 @@ int main(void)
         switchVals[0] = getSwitchValue(0);
         if ((switchVals[0] & 1) > 0)
         {
-            onEnterPressed(&piPicoUiController);
+            onEnterPressed();
             clearPressedStickyBit(0);
         }
         if ((switchVals[0] & 2) > 0)
         {
-            onEnterReleased(&piPicoUiController);
+            onEnterReleased();
             clearReleasedStickyBit(0);
         }
 
         switchVals[1] = getSwitchValue(1);
         if ((switchVals[1] & 1) > 0)
         {
-            onExitPressed(&piPicoUiController);
+            onExitPressed();
             clearPressedStickyBit(1);
         }
         if ((switchVals[1] & 2) > 0)
         {
-            onExitReleased(&piPicoUiController);
+            onExitReleased();
             clearReleasedStickyBit(1);
         }
        getStickyIncrementAndSpeed(&rotaryEncoderInfo);
@@ -445,7 +447,7 @@ int main(void)
             chrbfr[2]=0;
             printf(chrbfr);
             #endif
-            onRotaryChange(encoderDelta,&piPicoUiController);
+            onRotaryChange(encoderDelta);
             clearStickyIncrementDelta();
         }
 
@@ -459,53 +461,62 @@ int main(void)
       if ((stompSwitchState & (1 << 1)) != 0) 
       {
           clearStompSwitchStickyPressed(0);
-          onStompSwitch1Pressed(&piPicoUiController);
+          onStompSwitch1Pressed();
       }
       if ((stompSwitchState & (1 << 2)) != 0)
       {
           clearStompSwitchStickyReleased(0);
-          onStompSwitch1Released(&piPicoUiController);
+          onStompSwitch1Released();
       }
       stompSwitchState = getStompSwitchState(1);
       if ((stompSwitchState & (1 << 1)) != 0) 
       {
           clearStompSwitchStickyPressed(1);
-          onStompSwitch2Pressed(&piPicoUiController);
+          onStompSwitch2Pressed();
       }
       if ((stompSwitchState & (1 << 2)) != 0)
       {
           clearStompSwitchStickyReleased(1);
-          onStompSwitch2Released(&piPicoUiController);
+          onStompSwitch2Released();
       }
       stompSwitchState = getStompSwitchState(2);
       if ((stompSwitchState & (1 << 1)) != 0) 
       {
           clearStompSwitchStickyPressed(2);
-          onStompSwitch3Pressed(&piPicoUiController);
+          onStompSwitch3Pressed();
       }
       if ((stompSwitchState & (1 << 2)) != 0)
       {
           clearStompSwitchStickyReleased(2);
-          onStompSwitch3Released(&piPicoUiController);
+          onStompSwitch3Released();
       }
 
         if (programChangeState == 3)
         {            
             if (programToInitialize != 0xFF)
             {
-                delete piPicoUiController.currentProgram;
-                piPicoUiController.currentProgram = loadProgram(programToInitialize);
-                piPicoUiController.currentParameterIdx = 0;
-                piPicoUiController.currentParameter = piPicoUiController.currentProgram->getParameter(piPicoUiController.currentParameterIdx);
-                if (piPicoUiController.currentProgram != nullptr)
+                delete ui.currentProgram;
+                ui.currentProgram = loadProgram(programToInitialize);
+                if (ui.defaultOn)
+                {
+                    ui.currentProgram->switchOn();
+                }
+                else
+                {
+                    ui.currentProgram->switchOff();
+                }
+                
+                ui.currentParameterIdx = 0;
+                ui.currentParameter = ui.currentProgram->getParameter(ui.currentParameterIdx);
+                if (ui.currentProgram != nullptr)
                 {
                     if (currentPreset != 0xFF)
                     {
-                        applyPreset(presets+currentPreset,piPicoUiController.currentProgram);
+                        applyPreset(presets+currentPreset,ui.currentProgram);
                     }
                     programChangeState = 4;
                 }
-                onCreate(&piPicoUiController);
+                onCreate();
             }
             else
             {
