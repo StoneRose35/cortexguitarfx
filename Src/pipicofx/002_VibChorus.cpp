@@ -10,8 +10,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float VibChorus::VibChorus::processSample(float sampleIn)
 {
-    sampleIn = simpleChorusProcessSample(sampleIn,&chorusData);
-    return gainStageProcessSample(sampleIn,&presetVolume);
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = simpleChorusProcessSample(newIn,&chorusData);
+    newIn =  gainStageProcessSample(newIn,&presetVolume);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void VibChorus::Param1::parameterCallback(uint16_t val) // frequency
@@ -88,50 +98,3 @@ VibChorus::VibChorus::~VibChorus()
     freeDelayMemory(this->chorusData.delayBuffer);
 }
 
-/*
-FxProgram2DataType fxProgram2data = {
-    .chorusData = {
-        .mix = 0.5f,
-        .frequency = 500,
-        .depth = 10
-    }
-};
-
-FxProgramType fxProgram2 = {
-    .name = "Vibrato/Chorus",
-    .nParameters=3,
-    .processSample = &fxProgram2processSample,
-    .parameters = {
-        {
-            .name = "Frequency      ",
-            .control=0,
-            .increment = 32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgram2Param1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram2Param1Callback
-        },
-        {
-            .name = "Depth          ",
-            .control=1,
-            .increment = 32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgram2Param2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram2Param2Callback
-        },
-        {
-            .name = "Mix            ",
-            .control=2,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgram2Param3Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram2Param3Callback
-        }
-    },
-    .setup = &fxProgram2Setup,
-    .reset=0,
-    .data = (void*)&fxProgram2data
-};
-*/

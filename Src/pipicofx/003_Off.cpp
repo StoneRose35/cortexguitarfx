@@ -9,7 +9,17 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float Off::Off::processSample(float sampleIn)
 {
-    return gainStageProcessSample(sampleIn,&presetVolume);
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&presetVolume);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 

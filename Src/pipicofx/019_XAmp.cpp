@@ -7,7 +7,7 @@ extern "C" {
 #include "audio/gainstage.h"
 #include "audio/multimodefilter.h"
 #include "audio/delay.h"
-#include "audio/genericDistortion.h"
+#include "audio/genericDistortionSimple.h"
 #include "pipicofx/delayMemoryHandler.h"
 #include "memoryRegions.h"
 #include "globalConfig.h"
@@ -18,15 +18,25 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float XAmp::XAmp::processSample(float sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&gain);
-    sampleIn = gdGetValue(sampleIn,&distortion)*0.5f;
-    sampleIn = MMFilterProcessSample(sampleIn,&lowpass);
-    sampleIn = delayLineProcessSample(sampleIn,&delay);
-    return sampleIn;
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&gain);
+    newIn = gdsGetValue(newIn,&distortion)*0.5f;
+    newIn = MMFilterProcessSample(newIn,&lowpass);
+    newIn = delayLineProcessSample(newIn,&delay);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void XAmp::XAmp::setup()
 {
+    /*
     float  points[8];
     points[0]=0.1f;
     points[1]=0.1f;
@@ -36,9 +46,15 @@ void XAmp::XAmp::setup()
     points[5]=0.6f;
     points[6]=0.7f;
     points[7]=0.7f;
+    */
+    float  points[4];
+    points[0]=0.1f;
+    points[1]=0.1f;
+    points[2]=0.6f;
+    points[3]=0.93f;
     initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 2),MAX_DELAY_SINGLEBUFFER);
-    MMFilterSetResonance(0.7f,&this->lowpass);
-    gdSetAllPoints(points,&distortion);
+    MMFilterSetResonance(0.3f,&this->lowpass);
+    gdsSetAllPoints(points,&distortion);
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));

@@ -10,7 +10,7 @@ extern "C" {
 #include "math.h"
 
 __ITCM_CODE
-float unicornGlitter(float sampleIn,void*data,volatile uint32_t * audioState)
+float unicornGlitter(float sampleIn,void*data)
 {
     UnicornGlitterDataType* pData=(UnicornGlitterDataType*)data;
     sampleIn = pitchShifter2ProcessSample(sampleIn,&pData->pitchShifter);
@@ -22,19 +22,28 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float ShimmerVerb::ShimmerVerb::processSample(float sampleIn)
 {
-    float sampleProc = gainStageProcessSample(sampleIn,&this->presetVolume);
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    float sampleProc = gainStageProcessSample(newIn,&this->presetVolume);
     
     float summedDelay=0;
-    volatile uint32_t * audioStatePtr = getAudioStatePtr();
     summedDelay += delayLineProcessSample(sampleProc,this->delays);
     summedDelay += delayLineProcessSample(sampleProc,this->delays+1);
     summedDelay += delayLineProcessSample(sampleProc,this->delays+2);
     sampleProc = summedDelay;
-    sampleProc = allpassProcessSample(sampleProc,this->allpasses,audioStatePtr);
-    sampleProc = allpassProcessSample(sampleProc,this->allpasses+1,audioStatePtr);
+    sampleProc = allpassProcessSample(sampleProc,this->allpasses);
+    sampleProc = allpassProcessSample(sampleProc,this->allpasses+1);
     sampleProc = delayLineProcessSample(sampleProc,this->delays+3);
     this->oldVal = sampleProc;
-    return (1.0f - this->mix)*sampleIn  + this->mix*sampleProc;
+    newIn = (1.0f - this->mix)*newIn  + this->mix*sampleProc;
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void ShimmerVerb::ShimmerVerb::setup()
@@ -46,20 +55,23 @@ void ShimmerVerb::ShimmerVerb::setup()
     this->delays[0].delayInSamples = 149;
     this->delays[0].mix = 0.997f;
     this->delays[0].feedbackFunction=0;
+    this->delays[0].frozen=0;
     initDelay(this->delays+1,delayMemoryPointer+256,512);
     this->delays[1].delayInSamples = 337;
     this->delays[1].mix = 0.997f;
     this->delays[1].feedbackFunction=0;
+    this->delays[1].frozen=0;
     initDelay(this->delays+2,delayMemoryPointer+512+256,2048);
     this->delays[2].delayInSamples = 1597;
     this->delays[2].mix = 0.997f;
     this->delays[2].feedbackFunction=0;
+    this->delays[2].frozen=0;
     initDelay(this->delays+3,delayMemoryPointer+2048+512+256,4096);
     this->delays[3].delayInSamples = 3989;
     this->delays[3].mix = 0.997f;
     this->delays[3].feedbackFunction = (AudioProcessorFunc)unicornGlitter;
     this->delays[3].feebackData = &this->unicornGlitterData;
-
+    this->delays[3].frozen=0;
     this->allpasses[0].delayLineIn = delayMemoryPointer + 4096+2048+512+256;
     this->allpasses[0].delayLineOut = delayMemoryPointer + 1024+4096+2048+512+256;
     this->allpasses[0].coefficient = 22936.0f/32768.0f;

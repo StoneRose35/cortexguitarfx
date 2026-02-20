@@ -14,9 +14,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float PitchShifter::PitchShifter::processSample(float sampleIn)
 {
-    float processedSample = pitchShifter2ProcessSample(sampleIn,&this->pitchShifter);
-    float sampleOut= (sampleIn*(1.0f - this->mix)) + (processedSample*this->mix);
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    float processedSample = pitchShifter2ProcessSample(newIn,&this->pitchShifter);
+    float sampleOut= (newIn*(1.0f - this->mix)) + (processedSample*this->mix);
     sampleOut = gainStageProcessSample(sampleOut,&this->presetVolume);
+    if (!this->isOn())
+    {
+        return (sampleIn + sampleOut);
+    }
     return sampleOut;
 }
 
@@ -123,58 +132,3 @@ PitchShifter::PitchShifter::~PitchShifter()
 {
     freeDelayMemory(this->pitchShifter.delayMemoryPtr);
 }
-
-/*
-__QSPI_CODE
-void fxProgramReset(void*data)
-{
-    FxProgram16DataType* pData= (FxProgram16DataType*)data;
-    initPitchshifter(&pData->pitchShifter,getDelayMemoryPointer(DELAY_LINE_TYPE_SDRAM));  
-}
-*/
-
-/*
-FxProgram16DataType fxProgram16data=
-{
-    .pitchShifter.currentDelayPosition=0,
-    .pitchShifter.delayIncrement=0x4
-};
-
-FxProgramType fxProgram16 = {
-    .name = "Pitchshifter",
-    .nParameters=3,
-    .parameters = {
-        {
-            .name = "ShiftAmt",
-            .control=0,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam1Callback
-        },
-        {
-            .name = "Mix",
-            .control=1,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam2Callback
-        },
-        {
-            .name = "AvgDelay",
-            .control=2,
-            .increment=512,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam3Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam3Callback
-        }
-    },
-    .processSample = &fxProgramProcessSample,
-    .setup = &fxProgramSetup,
-    .reset = &fxProgramReset,
-    .data = (void*)&fxProgram16data
-};
-*/

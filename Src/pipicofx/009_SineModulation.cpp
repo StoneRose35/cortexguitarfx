@@ -11,8 +11,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float SineModulation::SineModulation::processSample(float sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return sineChorusInterpolatedProcessSample(sampleIn,&this->sineChorus);
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = sineChorusInterpolatedProcessSample(newIn,&this->sineChorus);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void SineModulation::Param1::parameterCallback(uint16_t val) // frequency
@@ -113,71 +123,3 @@ SineModulation::SineModulation::~SineModulation()
 {
     freeDelayMemory(this->sineChorus.delayBuffer);
 }
-
-/*
-FxProgram11DataType fxProgram11data = {
-    .sineChorus = {
-        .mix = 0.5f,
-        .frequency = 500,
-        .depth = 10,
-        .feedback = 0.0f,
-        .offset = 49
-    }
-};
-
-FxProgramType fxProgram11 = {
-    .name = "Sine Chorus",
-    .nParameters=5,
-    .processSample = &fxProgramprocessSample,
-    .parameters = {
-        {
-            .name = "Frequency      ",
-            .control=0,
-            .increment = 32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam1Callback
-        },
-        {
-            .name = "Depth          ",
-            .control=1,
-            .increment = 32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam2Callback
-        },
-        {
-            .name = "Blend         ",
-            .control=2,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam3Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam3Callback
-        },
-        {
-            .name = "Offset         ",
-            .control=0xFF,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam4Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam4Callback
-        },
-        {
-            .name = "Feedback       ",
-            .control=0xFF,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam5Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam5Callback
-        }
-    },
-    .setup = &fxProgramSetup,
-    .reset = 0,
-    .data = (void*)&fxProgram11data
-};
-*/

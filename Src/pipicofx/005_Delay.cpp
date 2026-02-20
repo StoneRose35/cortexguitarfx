@@ -5,24 +5,50 @@ extern "C" {
 #include "audio/gainstage.h"
 #include "pipicofx/delayMemoryHandler.h"
 #include "memoryRegions.h"
+#include "globalConfig.h"
 }
 using namespace PiPicoFX;
 __ITCM_CODE
 float Delay::Delay::processSample(float sampleIn)
 {
-    sampleIn = delayLineProcessSample(sampleIn, &this->delay);
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return sampleIn;
+    float newIn=0.0f;
+    if (isOn())
+    {
+        newIn = sampleIn;
+    }
+    if (this->interpCnt < UI_LATENCY_IN_SAMPLES)
+    {
+        int32_t interpValue = ((((this->delayInSamplesTargetValue<< 4) - (this->getParameter(0)->rawValue << 4))*interpCnt) >> 12) + (this->getParameter(0)->rawValue << 4);
+        this->delay.delayInSamples = interpValue;
+        this->interpCnt++;
+        if (this->interpCnt >= UI_LATENCY_IN_SAMPLES)
+        {
+            this->getParameter(0)->rawValue = this->delayInSamplesTargetValue;
+        }
+    }
+    //this->delay.delayInSamples = this->delay.delayInSamples + ((FXPROGRAM_DELAY_DELAY_TIME_LOWPASS_T*(delayInSamplesTargetValue - this->delay.delayInSamples)) >> 8);
+    newIn = delayLineProcessSample(newIn, &this->delay);
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    if (!isOn())
+    {
+        return sampleIn + newIn;
+    }
+    return newIn;
 }
 
 void Delay::Param1::parameterCallback(uint16_t val) // Delay Time
 {
 
-    int32_t wVal;
-    wVal = val;
-    wVal <<= 4;
-    pData->delay.delayInSamples = wVal; //pData->delay->delayInSamples + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(wVal - pData->delay->delayInSamples)) >> 8);
-    rawValue = val;
+    //int32_t wVal;
+    if (val != this->rawValue && this->pData->interpCnt>=UI_LATENCY_IN_SAMPLES)
+    {
+        this->pData->delayInSamplesTargetValue = val;
+        this->pData->interpCnt=0;
+    }
+    //wVal = val;
+    //wVal <<= 4;
+    //pData->delay.delayInSamples = wVal; //pData->delay->delayInSamples + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(wVal - pData->delay->delayInSamples)) >> 8);
+    //rawValue = val;
 }
 
 void Delay::Param1::parameterDisplay(char*res)
@@ -100,10 +126,12 @@ void Delay::Param4::parameterDisplay(char*res)
 void Delay::Delay::setup()
 {
     initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<2),MAX_DELAY_SINGLEBUFFER);
+    this->interpCnt = 0;
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
+    this->setFreezable(1);
 
 }
 
@@ -112,45 +140,14 @@ Delay::Delay::~Delay()
     freeDelayMemory(this->delay.delayLine);
 }
 
-/*
-FxProgram6DataType fxProgram6data;
+void Delay::Delay::freeze()
+{
+    FxProgram::freeze();
+    this->delay.frozen = 1;
+}
 
-FxProgramType fxProgram6 = {
-    .name = "Delay                ",
-    .nParameters=3,
-    .parameters = {
-        {
-            .name = "Time           ",
-            .control=0,
-            .increment=64,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgram6Param1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram6Param1Callback
-        },
-        {
-            .name = "Feedback       ",
-            .control=1,
-            .increment=64,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgram6Param2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram6Param2Callback
-        },
-        {
-            .name = "Mix            ",
-            .control=2,
-            .increment=64,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgram6Param3Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram6Param3Callback
-        }
-    },
-    .processSample = &fxProgram6processSample,
-    .setup = &fxProgram6Setup,
-    .reset = 0,
-    .data = (void*)&fxProgram6data
-};
-
-*/
+void Delay::Delay::unfreeze()
+{
+    FxProgram::unfreeze();
+    this->delay.frozen=0;
+}

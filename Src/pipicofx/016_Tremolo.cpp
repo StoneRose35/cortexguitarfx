@@ -10,8 +10,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float Tremolo::Tremolo::processSample(float sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return tremoloProcessSample(sampleIn,&this->tremolo);
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = tremoloProcessSample(newIn,&this->tremolo);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Tremolo::Tremolo::setup()

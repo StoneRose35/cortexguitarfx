@@ -11,8 +11,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
  float Reverb::Reverb::processSample(float sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return reverbProcessSample(sampleIn,&this->reverb);
+    float newIn=0.0f;;
+    if (this->isOn())
+    {
+        newIn=sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn =  reverbProcessSample(newIn,&this->reverb);
+    if(!this->isOn())
+    {
+        return sampleIn + newIn;
+    }
+    return newIn;
 }
 
  void Reverb::Param1::parameterCallback(uint16_t val) // reverb time
@@ -78,6 +88,7 @@ void Reverb::Param4::parameterDisplay(char*res)
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
+    this->setFreezable(1);
 }
 
 Reverb::Reverb::~Reverb()
@@ -85,51 +96,14 @@ Reverb::Reverb::~Reverb()
     freeDelayMemory(this->reverb.delayPointers[0]);
 }
 
-
-/*
-FxProgram10DataType fxProgram10data=
+void Reverb::Reverb::freeze()
 {
-    .reverbTime=0.3f,
-    .reverb.paramNr=0
-};
+    FxProgram::freeze();
+    reverb.frozen = 1;
+}
 
-
-FxProgramType fxProgram10 = {
-    .name = "Reverb",
-    .nParameters=3,
-    .parameters = {
-        {
-            .name = "Time           ",
-            .control=0,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam1Callback
-        },
-        {
-            .name = "Mix            ",
-            .control=1,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam2Callback
-        },
-        {
-            .name = "ParameterSet   ",
-            .control=2,
-            .increment=1024,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam3Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam3Callback
-        }
-    },
-    .processSample = &fxProgramprocessSample,
-    .setup = &fxProgramSetup,
-    .reset = 0,
-    .data = (void*)&fxProgram10data
-};
-
-*/
+void Reverb::Reverb::unfreeze()
+{
+    FxProgram::unfreeze();
+    reverb.frozen = 0;
+}

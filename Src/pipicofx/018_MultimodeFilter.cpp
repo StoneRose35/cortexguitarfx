@@ -16,7 +16,11 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float MultimodeFilter::MultimodeFilter::processSample(float sampleIn)
 {
-    
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
     if ( this->interpCnt < UI_LATENCY_IN_SAMPLES)
     {
         uint16_t interpValue = (((this->newCutoff - this->getParameter(0)->rawValue)*interpCnt)>>12) + this->getParameter(0)->rawValue;
@@ -28,8 +32,13 @@ float MultimodeFilter::MultimodeFilter::processSample(float sampleIn)
         }
     }
     
-    sampleIn = MMFilterProcessSample(sampleIn,&this->mmfilter);
-    return gainStageProcessSample(sampleIn,&this->presetVolume);
+    newIn = MMFilterProcessSample(newIn,&this->mmfilter);
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void MultimodeFilter::MultimodeFilter::setup()

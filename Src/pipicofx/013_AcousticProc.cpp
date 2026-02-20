@@ -11,11 +11,21 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float AcousticProc::AcousticProc::processSample(float sampleIn)
 {
-    sampleIn = compressor2ProcessSample(sampleIn,&this->comp);
-    sampleIn = gainStageProcessSample(sampleIn,&this->postGain);
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    sampleIn = reverbProcessSample(sampleIn,&this->reverb);
-    return sampleIn;
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = threeBandEqProcessSample(newIn,&this->eq);
+    newIn = compressor2ProcessSample(newIn,&this->comp);
+    newIn = gainStageProcessSample(newIn,&this->postGain);
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = reverbProcessSample(newIn,&this->reverb);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void AcousticProc::AcousticProc::setup()
@@ -36,14 +46,6 @@ AcousticProc::AcousticProc::~AcousticProc()
     freeDelayMemory(this->reverb.delayPointers[0]);
 }
 
-/*
-__QSPI_CODE
-void fxProgramReset(void*data)
-{
-    FxProgram15DataType* pData= (FxProgram15DataType*)data;
-    threeBandEqReset(&pData->eq);   
-}
-*/
 
 void AcousticProc::Param1::parameterCallback(uint16_t val) // low
 {
@@ -137,86 +139,3 @@ void AcousticProc::Param7::parameterDisplay(char*res)
     decimalUInt16ToChar(dVal,res,2);
     appendToString(res,"%");
 }
-
-/*
-
-FxProgram15DataType fxProgram15data=
-{
-    .comp.gainFunction.gainReduction=2.0f,
-    .comp.gainFunction.threshhold=1.0f,
-    .comp.avgLowpass.alphaFalling = 32765.0f/32768.0f,
-    .comp.avgLowpass.alphaRising = 15.0f/32768.0f,
-    .eq.highFactor = 0.0f,
-    .eq.midFactor = 0.0f,
-    .eq.lowFactor = 0.0f,
-    .reverb.mix = 0.0f,
-    .reverb.paramNr = 1,
-    .postGain.gain = 1.0f
-};
-
-FxProgramType fxProgram15 = {
-    .name = "Acoustic Proc",
-    .nParameters=6,
-    .parameters = {
-        {
-            .name = "EQ Low",
-            .control=0,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam1Callback
-        },
-        {
-            .name = "EQ Mid",
-            .control=1,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam2Callback
-        },
-        {
-            .name = "EQ High",
-            .control=2,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam3Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam3Callback
-        },
-        {
-            .name = "Compressor Int.",
-            .control=0xFF,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam4Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam4Callback            
-        },
-        {
-            .name = "Reverb Time    ",
-            .control=0xFF,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam5Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam5Callback            
-        },
-        {
-            .name = "Reverb Mix     ",
-            .control=0xFF,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam6Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam6Callback            
-        }
-    },
-    .processSample = &fxProgramProcessSample,
-    .setup = &fxProgramSetup,
-    .reset = &fxProgramReset,
-    .data = (void*)&fxProgram15data
-};
-
-*/

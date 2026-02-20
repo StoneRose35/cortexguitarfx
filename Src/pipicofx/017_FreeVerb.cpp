@@ -12,7 +12,7 @@ extern "C" {
 #include "math.h"
 
 __ITCM_CODE
-float freeVerbLowpass(float sampleIn,void * filterData,volatile uint32_t * audioStatePtr)
+float freeVerbLowpass(float sampleIn,void * filterData)
 {
     return firstOrderIirLowpassProcessSample(sampleIn,(FirstOrderIirType*)filterData);
 }
@@ -23,20 +23,29 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float FreeVerb::FreeVerb::processSample(float sampleIn)
 {
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
     float sampleOut;
-    volatile uint32_t * audioStatePtr = getAudioStatePtr();
     float delaySum=0.0f;
     for (uint8_t c=0;c<8;c++)
     {
-        delaySum += delayLineWetProcessSample(sampleIn,this->delays+c);
+        delaySum += delayLineWetProcessSample(newIn,this->delays+c);
     }
     sampleOut = delaySum;
     for (uint8_t c=0;c<4;c++)
     {
-        sampleOut = allpassProcessSample(sampleOut,this->allpasses+c,audioStatePtr);
+        sampleOut = allpassProcessSample(sampleOut,this->allpasses+c);
     }
-    sampleOut = (1.0f - this->mix)*sampleIn + this->mix*sampleOut;
-    return gainStageProcessSample(sampleOut,&this->presetVolume);
+    sampleOut = (1.0f - this->mix)*newIn + this->mix*sampleOut;
+    sampleOut = gainStageProcessSample(sampleOut,&this->presetVolume);
+    if (!this->isOn())
+    {
+        return (sampleIn + sampleOut);
+    }
+    return sampleOut;
 }
 
 void FreeVerb::FreeVerb::setup()

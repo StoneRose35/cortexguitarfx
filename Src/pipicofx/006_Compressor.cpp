@@ -12,20 +12,29 @@ __ITCM_CODE
  float Compressor::Compressor::processSample(float sampleIn)
 {
 
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
     switch (this->compressorType)
     {
         case 0:
-            sampleIn = compressorProcessSample(sampleIn,&this->compressor);
+            newIn = compressorProcessSample(newIn,&this->compressor);
             break;
         case 1:
-            sampleIn = compressor2ProcessSample(sampleIn,&this->compressor);
+            newIn = compressor2ProcessSample(newIn,&this->compressor);
             break;
         case 2:
-            sampleIn = compressor3ProcessSample(sampleIn,&this->compressor);
+            newIn = compressor3ProcessSample(newIn,&this->compressor);
             break;
     }
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return sampleIn;
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
  void Compressor::Param1::parameterCallback(uint16_t val) 
@@ -188,86 +197,3 @@ void Compressor::Compressor::setup()
     this->addParameter(new Param6(this));
 
 }
-
-/*
-FxProgram8DataType fxProgram8Data =
-{
-    .compressor.avgLowpass.alphaFalling = 10.0f/32768.0f,
-    .compressor.avgLowpass.alphaRising = 10.0f/32768.0f,
-    .compressor.avgLowpass.oldVal = 0.0f,
-    .compressor.avgLowpass.oldXVal = 0.0f,
-    .compressor.currentAvg = 0.0f,
-    .compressor.gainFunction.gainReduction = 2.0f,
-    .compressor.gainFunction.threshhold = 1.0f,
-    .makeupGain.gain = 1.0f,
-    .makeupGain.offset = 0.0f,
-    .compressorType = 0
-};
-
-__QSPI_CODE
- void fxProgramReset(void*data)
-{
-    FxProgram8DataType * pData=(FxProgram8DataType*)data;
-    compressorReset(&pData->compressor);
-} 
-
-
-FxProgramType fxProgram8 = {
-    .data = (void*)&fxProgram8Data,
-    .name = "Compressor",
-    .nParameters=6,
-    .parameters = {
-        {
-            .name="Threshhold     ",
-            .control=0x0,
-            .getParameterDisplay=&fxProgramP4Display,
-            .setParameter=&fxProgramP4Callback,
-            .increment=32,
-            .rawValue=0
-        },
-        {
-            .name="Ratio          ",
-            .control=1,
-            .getParameterDisplay=&fxProgramP3Display,
-            .setParameter=&fxProgramP3Callback,
-            .increment=512,
-            .rawValue=0
-        },
-        {
-            .name="Makeup Gain    ",
-            .control=2,
-            .getParameterDisplay=&fxProgramP5Display,
-            .setParameter=&fxProgramP5Callback,
-            .increment=32,
-            .rawValue=0,
-        },
-        {
-            .name="Attack         ",
-            .control=0xff,
-            .getParameterDisplay=&fxProgramP1Display,
-            .setParameter=&fxProgramP1Callback,
-            .increment=32,
-            .rawValue=0,
-        },
-        {
-            .name="Release        ",
-            .control=0xff,
-            .getParameterDisplay=&fxProgramP2Display,
-            .setParameter=&fxProgramP2Callback,
-            .increment=32,
-            .rawValue=0,
-        },
-        {
-            .name="Flavor        ",
-            .control=0xff,
-            .getParameterDisplay=&fxProgramP6Display,
-            .setParameter=&fxProgramP6Callback,
-            .increment=1024,
-            .rawValue=0
-        }
-    },
-    .processSample=&fxProgramProcessSample,
-    .reset=&fxProgramReset,
-    .setup=0
-};
-*/

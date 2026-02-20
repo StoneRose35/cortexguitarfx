@@ -10,9 +10,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float MonsterCrusher::MonsterCrusher::processSample(float sampleIn)
 {
-    sampleIn = bitCrusherProcessSample(sampleIn,&this->bitcrusher);
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return sampleIn;
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = bitCrusherProcessSample(newIn,&this->bitcrusher);
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void MonsterCrusher::Param1::parameterCallback(uint16_t val) // set bit mask
@@ -58,31 +67,3 @@ void MonsterCrusher::MonsterCrusher::setup()
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
 }
-
-/*
-FxProgram5DataType fxProgram5data = {
-    .bitcrusher = {
-        .bitmask = 0x800000
-    }
-};
-
-FxProgramType fxProgram5 = {
-    .name = "Monstercrusher       ",
-    .nParameters=1,
-    .parameters = {
-        {
-            .name = "Bit Reduction  ",
-            .control=0,
-            .increment=64,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgram5Param1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgram5Param1Callback
-        }
-    },
-    .processSample = &fxProgram5processSample,
-    .setup = &fxProgram5Setup,
-    .reset = 0,
-    .data = (void*)&fxProgram5data
-};
-*/

@@ -11,8 +11,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float Reverb2::Reverb2::processSample(float sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return reverb2ProcessSample(sampleIn,&this->reverb);
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = reverb2ProcessSample(newIn,&this->reverb);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Reverb2::Param1::parameterCallback(uint16_t val) // reverb time
@@ -64,35 +74,3 @@ Reverb2::Reverb2::~Reverb2()
 {
     freeDelayMemory(this->reverb.aps[0].delayLineIn);
 }
-/*
-FxProgram12DataType fxProgram12data;
-
-FxProgramType fxProgram12 = {
-    .name = "Allpass Reverb",
-    .nParameters=2,
-    .parameters = {
-        {
-            .name = "Decay          ",
-            .control=0,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam1Callback
-        },
-        {
-            .name = "Mix            ",
-            .control=1,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam2Callback
-        }
-    },
-    .processSample = &fxProgramprocessSample,
-    .setup = &fxProgramSetup,
-    .reset = 0,
-    .data = (void*)&fxProgram12data
-};
-*/

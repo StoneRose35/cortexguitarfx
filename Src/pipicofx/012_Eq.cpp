@@ -10,8 +10,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float Eq::Eq::processSample(float sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return threeBandEqProcessSample(sampleIn,&this->eq);
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = threeBandEqProcessSample(newIn,&this->eq);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Eq::Eq::setup()
@@ -77,44 +87,3 @@ void Eq::Param4::parameterDisplay(char*res)
     decimalUInt16ToChar(dVal,res,2);
     appendToString(res,"%");
 }
-/*
-FxProgram14DataType fxProgram14data;
-
-FxProgramType fxProgram14 = {
-    .name = "3-Band Equalizer",
-    .nParameters=3,
-    .parameters = {
-        {
-            .name = "Low           ",
-            .control=0,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam1Callback
-        },
-        {
-            .name = "Mid            ",
-            .control=1,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam2Callback
-        },
-        {
-            .name = "High           ",
-            .control=2,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam3Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam3Callback
-        }
-    },
-    .processSample = &fxProgramProcessSample,
-    .setup = &fxProgramSetup,
-    .reset = &fxProgramReset,
-    .data = (void*)&fxProgram14data
-};
-*/

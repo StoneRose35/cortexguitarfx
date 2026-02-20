@@ -12,10 +12,20 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float Reverb3::Reverb3::processSample(float sampleIn)
 {
+    float newIn=0.0f;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
     float reverberatedSample;
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    reverberatedSample = reverb3processSample(sampleIn,&this->reverb);
-    return ((1.0f - this->mix)*sampleIn) + (this->mix*reverberatedSample);
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    reverberatedSample = reverb3processSample(newIn,&this->reverb);
+    newIn = ((1.0f - this->mix)*newIn) + (this->mix*reverberatedSample);
+    if (!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Reverb3::Param1::parameterCallback(uint16_t val) // decay / delay feedback
@@ -86,36 +96,3 @@ Reverb3::Reverb3::~Reverb3()
 {
     freeDelayMemory(this->reverb.diffusers[0].delayPointers[0]);
 }
-
-/*
-FxProgram13DataType fxProgram13data;
-
-FxProgramType fxProgram13 = {
-    .name = "Hadamard Reverb",
-    .nParameters=2,
-    .parameters = {
-        {
-            .name = "Decay          ",
-            .control=0,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam1Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam1Callback
-        },
-        {
-            .name = "Mix            ",
-            .control=1,
-            .increment=32,
-            .rawValue=0,
-            .getParameterDisplay=&fxProgramParam2Display,
-            .getParameterValue=0,
-            .setParameter=&fxProgramParam2Callback
-        }
-    },
-    .processSample = &fxProgramprocessSample,
-    .setup = &fxProgramSetup,
-    .reset = 0,
-    .data = (void*)&fxProgram13data
-};
-*/
