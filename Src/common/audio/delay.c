@@ -4,7 +4,7 @@
 
 
 
-__QSPI_CODE
+
 void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
 {
     data->delayLine = memoryPointer;
@@ -16,54 +16,66 @@ void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
     data->delayLinePtr=0;
 }
 
-__ITCM_CODE
+
 float delayLineProcessSample(float sampleIn,DelayDataType*data)
 {
     uint32_t delayIdx;
     float sampleOut;
     float sampleFedBack;
-    volatile uint32_t * audioStatePtr = getAudioStatePtr();
+
+
     delayIdx = (data->delayLinePtr - data->delayInSamples) & (data->delayBufferLength -1);
 
     sampleOut = *(data->delayLine +delayIdx)*data->mix + sampleIn*(1.0f - data->mix);
-    sampleFedBack = *(data->delayLine +delayIdx);
-    if (data->feedbackFunction != 0)
+    if (!data->frozen)
     {
-        sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData,audioStatePtr);
+        sampleFedBack = *(data->delayLine +delayIdx);
+        if (data->feedbackFunction != 0)
+        {
+            sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData);
+        }
+        sampleFedBack=data->feedback*sampleFedBack;
+            *(data->delayLine + data->delayLinePtr) = sampleIn + sampleFedBack;
     }
-    sampleFedBack=data->feedback*sampleFedBack;
-
-    *(data->delayLine + data->delayLinePtr) = sampleIn + sampleFedBack;
+    else // frozen: 100% feedback, no more input
+    {
+        *(data->delayLine + data->delayLinePtr) = *(data->delayLine +delayIdx);
+    }
     data->delayLinePtr++;
     data->delayLinePtr &= (data->delayBufferLength -1UL);
+
+
     return sampleOut;
 }
 
-__ITCM_CODE
+
 float delayLineWetProcessSample(float sampleIn,DelayDataType*data)
 {
     uint32_t delayIdx;
     float sampleOut;
     float sampleFedBack;
-    volatile uint32_t * audioStatePtr = getAudioStatePtr();
     delayIdx = (data->delayLinePtr - data->delayInSamples) & (data->delayBufferLength -1);
 
     sampleOut = *(data->delayLine +delayIdx);
-    sampleFedBack = *(data->delayLine +delayIdx); //sampleOut;
-
-    if (data->feedbackFunction != 0)
+    if (!data->frozen)
     {
-        sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData,audioStatePtr);
-    }
-    sampleFedBack *= data->feedback;
+        sampleFedBack = *(data->delayLine +delayIdx); //sampleOut;
 
-    *(data->delayLine + data->delayLinePtr) = sampleIn + sampleFedBack;
+        if (data->feedbackFunction != 0)
+        {
+            sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData);
+        }
+        sampleFedBack *= data->feedback;
+
+        *(data->delayLine + data->delayLinePtr) = sampleIn + sampleFedBack;
+    }
     data->delayLinePtr++;
     data->delayLinePtr &= (data->delayBufferLength -1);
     return sampleOut;
 }
 
-__ITCM_CODE
+
+
 float getDelayedSample(DelayDataType*data)
 {
     uint32_t delayIdx;
@@ -77,7 +89,7 @@ float getDelayedSample(DelayDataType*data)
 
 
 
-__ITCM_CODE
+
 void addSampleToDelayline(float sampleIn,DelayDataType*data)
 {
     *(data->delayLine + data->delayLinePtr) = sampleIn;

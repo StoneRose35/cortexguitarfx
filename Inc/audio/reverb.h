@@ -11,6 +11,7 @@ typedef struct
     float * delayPointers[4];
     float mix;
     uint8_t paramNr;
+    uint8_t frozen;
 
 } ReverbType;
 

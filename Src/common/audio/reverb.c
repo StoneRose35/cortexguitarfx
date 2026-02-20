@@ -151,7 +151,6 @@ float reverbProcessSample(float sampleIn,ReverbType*reverbData)
     float sampleOut;
     float reverbSignal;
     float sampleInterm;
-    volatile uint32_t *  audioStatePtr = getAudioStatePtr();
 
 
     reverbSignal = 0.0f;
@@ -159,9 +158,16 @@ float reverbProcessSample(float sampleIn,ReverbType*reverbData)
     
     for (uint8_t rc=0;rc<4;rc++)
     {
-        sampleInterm = sampleIn + ((reverbData->delayPointers[rc][((reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]) & 0xFFF)]+
-        reverbData->delayPointers[rc][(reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]-1) & 0xFFF] )*0.5f)*reverbData->feedbackValues[rc];
-        reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF]=sampleInterm;
+        if (!reverbData->frozen)
+        {
+            sampleInterm = sampleIn + ((reverbData->delayPointers[rc][((reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]) & 0xFFF)]+
+            reverbData->delayPointers[rc][(reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]-1) & 0xFFF] )*0.5f)*reverbData->feedbackValues[rc];
+            reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF]=sampleInterm;
+        }
+        else
+        {
+            reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF] = reverbData->delayPointers[rc][(reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]-1) & 0xFFF];
+        }
     }
     
 
@@ -174,7 +180,7 @@ float reverbProcessSample(float sampleIn,ReverbType*reverbData)
 
     for (uint8_t c=0;c<4;c++)
     {
-        reverbSignal = allpassProcessSample(reverbSignal,reverbData->allpasses+c,audioStatePtr);
+        reverbSignal = allpassProcessSample(reverbSignal,reverbData->allpasses+c);
     }
 
     sampleOut = (1.0f-reverbData->mix)*sampleIn + reverbData->mix*reverbSignal;

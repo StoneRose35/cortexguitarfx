@@ -125,6 +125,7 @@ uint32_t byteCnt=0;
         }
 
     }
+    currentProgram->switchOn();
     if(currentProgram->getParameterCount() > 0)
     {
         jsonStringPtr -=4;
