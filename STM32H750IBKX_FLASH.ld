@@ -82,9 +82,14 @@ _siqspicode = LOADADDR(.qspi_code);
 		_sqspi_code = .;
 
 		PROVIDE(__qspi_code_start = _sqspi_code);
+    *uiLevel*(*.text*)
+    *uiLevel*(*.text.*)
+    *pipicofxui*(*.text*)
+    *pipicofxui*(*.text.*)
     *(.text.*PiPicoFX*)
     *(.text.*PiPicoFxUi*)
-    *(.text.enterLevel*)
+    *(.ARM.extab*PiPicoFX*)
+    *(.ARM.exidx*PiPicoFX*)
 		*(.qspi_code)
 		*(.qspi_code*)
     *(.qspi_fast_data)
@@ -94,6 +99,100 @@ _siqspicode = LOADADDR(.qspi_code);
 
 		PROVIDE(__qspi_code_end = _eqspi_code);
   } > RAM_D2 AT> QSPIFLASH
+
+
+  .qspi_data : 
+  {
+    . = ALIGN(4);
+		_sqspi_data = .;
+
+		PROVIDE(__qspi_data_start_start = _sqspi_data);
+		*(.qspi_data)
+		*(.qspi_data*)
+    *(.rodata.*PiPicoFX*)
+    *uiLevel*(.rodata*)
+    *uiLevel*(.rodata.*)
+		. = ALIGN(4);
+		_eqspi_data = .;
+
+		PROVIDE(__qspi_data_end = _eqspi_data);
+  } > QSPIFLASH
+  . = ALIGN(4);
+
+
+    . = ALIGN(4);
+  _sidtcmdata = LOADADDR(.dtcm_data);
+.dtcm_data : 
+{
+		. = ALIGN(4);
+    _sdtcm_data = .;
+    *(.dtcm_data)
+    *(.dtcm_data*)
+    . = ALIGN(4);
+    _edtcm_data = .;
+} > DTCMRAM AT> QSPIFLASH
+
+  .qspi_slow_code :
+  {
+    . = ALIGN(4);
+		_sqspi_slow_code = .;
+
+		PROVIDE(__qspi_slow_code_start = _sqspi_slow_code);
+		*(.qspi_slow_code)
+		*(.qspi_slow_code*)
+		. = ALIGN(4);
+		_eqspi_slow_code = .;
+
+		PROVIDE(__qspi_slow_code_end = _eqspi_slow_code);
+  } > QSPIFLASH
+
+  _siitcmcode = LOADADDR(.qspi_itcm_code);
+
+  .qspi_itcm_code :
+  {
+    . = ALIGN(4);
+    _sitcm_code = .;
+    PROVIDE(__itcm_code_start = _sitcm_code);
+    *(.qspi_itcm_code)
+    *(.qspi_itcm_code*)
+
+    .  = ALIGN(4);
+    _eitcm_code = .;
+    PROVIDE(__itcm_code_end = _eitcm_code);
+  } > ITCMRAM AT>QSPIFLASH
+
+
+    . = ALIGN(4);
+  _siflash_itcm_code = LOADADDR(.flash_itcm_code);
+  .flash_itcm_code :
+  {
+    . = ALIGN(4);
+    _sitcm_flash_code = .;
+    PROVIDE(__itcm_flash_code_start = _sitcm_flash_code);
+    *(.flash_itcm_code)
+    *(.flash_itcm_code*)
+    *lib*.o(.text*)
+    *lib*.o(.text*)
+    *arm*.o(.text*)
+    *arm*.o(.text*)
+    .  = ALIGN(4);
+    _eitcm_flash_code = .;
+    PROVIDE(__itcm_flash_code_end = _eitcm_flash_code);
+  } > ITCMRAM AT>FLASH
+
+   . = ALIGN(4);
+  _siflash_dtcm_data = LOADADDR(.flash_dtcm_data);
+  .flash_dtcm_data :
+  {
+    . = ALIGN(4);
+    _sdtcm_flash_data = .;
+    PROVIDE(__dtcm_flash_data_start = _sdtcm_flash_data);
+    *libm*.o(.rodata)
+    *libm*.o(.rodata*)
+    . = ALIGN(4);
+    _edtcm_flash_data = .;
+    PROVIDE(__dtcm_flash_data_end = _edtcm_flash_data);
+  } > DTCMRAM AT>FLASH
 
   /* The program code and other data goes into FLASH */
   .text :
@@ -171,21 +270,6 @@ _siqspicode = LOADADDR(.qspi_code);
     _edata = .;        /* define a global symbol at data end */
   } >RAM_D1 AT> FLASH
 
-    . = ALIGN(4);
-  _siflash_itcm_code = LOADADDR(.flash_itcm_code);
-
-  .flash_itcm_code :
-  {
-    . = ALIGN(4);
-    _sitcm_flash_code = .;
-    PROVIDE(__itcm_flash_code_start = _sitcm_flash_code);
-    *(.flash_itcm_code)
-    *(.flash_itcm_code*)
-    .  = ALIGN(4);
-    _eitcm_flash_code = .;
-    PROVIDE(__itcm_flash_code_end = _eitcm_flash_code);
-  } > ITCMRAM AT>FLASH
-
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
@@ -227,64 +311,7 @@ _siqspicode = LOADADDR(.qspi_code);
     _edtcm_bss = .;
 } > DTCMRAM
 
-  . = ALIGN(4);
-  _sidtcmdata = LOADADDR(.dtcm_data);
-.dtcm_data : 
-{
-		. = ALIGN(4);
-    _sdtcm_data = .;
-    *(.dtcm_data)
-    *(.dtcm_data*)
-    . = ALIGN(4);
-    _edtcm_data = .;
-} > DTCMRAM AT> QSPIFLASH
 
-  .qspi_data : 
-  {
-    . = ALIGN(4);
-		_sqspi_data = .;
-
-		PROVIDE(__qspi_data_start_start = _sqspi_data);
-		*(.qspi_data)
-		*(.qspi_data*)
-		. = ALIGN(4);
-		_eqspi_data = .;
-
-		PROVIDE(__qspi_data_end = _eqspi_data);
-  } > QSPIFLASH
-  . = ALIGN(4);
-
-
-
-
-  .qspi_slow_code :
-  {
-    . = ALIGN(4);
-		_sqspi_slow_code = .;
-
-		PROVIDE(__qspi_slow_code_start = _sqspi_slow_code);
-		*(.qspi_slow_code)
-		*(.qspi_slow_code*)
-		. = ALIGN(4);
-		_eqspi_slow_code = .;
-
-		PROVIDE(__qspi_slow_code_end = _eqspi_slow_code);
-  } > QSPIFLASH
-
-  _siitcmcode = LOADADDR(.qspi_itcm_code);
-
-  .qspi_itcm_code :
-  {
-    . = ALIGN(4);
-    _sitcm_code = .;
-    PROVIDE(__itcm_code_start = _sitcm_code);
-    *(.qspi_itcm_code)
-    *(.qspi_itcm_code*)
-
-    .  = ALIGN(4);
-    _eitcm_code = .;
-    PROVIDE(__itcm_code_end = _eitcm_code);
-  } > ITCMRAM AT>QSPIFLASH
 
 
 

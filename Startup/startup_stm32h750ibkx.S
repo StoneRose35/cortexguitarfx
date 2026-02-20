@@ -104,6 +104,23 @@ LoopCopyDataItcmInit:
   cmp r4, r1
   bcc LoopCopyDataItcm
 
+/* Copy the data to DTCM RAM from flash */
+ldr r0, =_sdtcm_flash_data
+ldr r1, =_edtcm_flash_data
+ldr r2, =_siflash_dtcm_data
+movs r3, #0
+b LoopCoyDataDtcmFlashInit
+
+LoopCopyDataDtcmFlash:
+  ldr r4, [r2,r3]
+  str r4, [r0,r3]
+  adds r3, r3, #4
+
+LoopCoyDataDtcmFlashInit:
+  add r4,r0,r3
+  cmp r4,r1
+  bcc LoopCopyDataDtcmFlash
+
 /* Zero fill the bss segment. */
   ldr r2, =_sbss
   ldr r4, =_ebss

@@ -18,10 +18,10 @@ CC=arm-none-eabi-gcc
 CPP=arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
-OPT=-O1
+OPT=-O2
 DEFINES=-DDEBUG -DHARDWARE -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
-CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc -I./Inc/gen
-CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -Wall -Wno-error=narrowing -I./Inc -I./Inc/gen
+CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -Wpedantic -Wextra -I./Inc -I./Inc/gen
+CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=c++20 -Wall -Wpedantic -Wextra  -Wno-error=narrowing -I./Inc -I./Inc/gen
 LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lstdc++ -lm -Wl,--end-group
 #LARGS_QSPI=-g -nostdlib -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT)_qspi.map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lc -lm -Wl,--end-group
 #LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
@@ -70,10 +70,10 @@ clean: clean_objs
 
 
 Inc/gen:
-	mkdir ./Inc/gen
+	mkdir -p ./Inc/gen
 
 out: Inc/gen/versionDef.h
-	mkdir ./out
+	mkdir -p ./out
 
 # generate the startup file
 out/stm32h750_startup.o: Startup/startup_stm32h750ibkx.S out 
@@ -193,11 +193,11 @@ program_qspi: out/$(PROJECT)_qspi.bin tools/qspi_uart_uploader
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
 	rm out/*.o
 
-program_flash: out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).bin
+program_flash: out/$(PROJECT).bin
 	st-flash --connect-under-reset write out/$(PROJECT).bin 0x8000000
 	rm out/*.o
 
-program_all: out/$(PROJECT)_$(MINUTES_SINCE_INCUBATION).dfu tools/qspi_uart_uploader
+program_all: out/$(PROJECT).dfu out/$(PROJECT)_qspi.dfu tools/qspi_uart_uploader
 	st-flash --connect-under-reset --reset write out/$(PROJECT).bin 0x8000000
 	sleep 1
 	tools/qspi_uart_uploader out/$(PROJECT)_qspi.bin $(DEBUGGER_UART)
