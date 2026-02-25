@@ -26,6 +26,11 @@ float Delay::Delay::processSample(float sampleIn)
             this->getParameter(0)->rawValue = this->delayInSamplesTargetValue;
         }
     }
+    FxProgram::processSample(sampleIn);
+    if (this->getFreezeState()==FXP_FREEZE_STATE_FREEZING || this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
+    {
+        this->delay.feedback = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedFeedbackValue;
+    }
     //this->delay.delayInSamples = this->delay.delayInSamples + ((FXPROGRAM_DELAY_DELAY_TIME_LOWPASS_T*(delayInSamplesTargetValue - this->delay.delayInSamples)) >> 8);
     newIn = delayLineProcessSample(newIn, &this->delay);
     newIn = gainStageProcessSample(newIn,&this->presetVolume);
@@ -39,16 +44,11 @@ float Delay::Delay::processSample(float sampleIn)
 void Delay::Param1::parameterCallback(uint16_t val) // Delay Time
 {
 
-    //int32_t wVal;
     if (val != this->rawValue && this->pData->interpCnt>=UI_LATENCY_IN_SAMPLES)
     {
         this->pData->delayInSamplesTargetValue = val;
         this->pData->interpCnt=0;
     }
-    //wVal = val;
-    //wVal <<= 4;
-    //pData->delay.delayInSamples = wVal; //pData->delay->delayInSamples + ((FXPROGRAM6_DELAY_TIME_LOWPASS_T*(wVal - pData->delay->delayInSamples)) >> 8);
-    //rawValue = val;
 }
 
 void Delay::Param1::parameterDisplay(char*res)
@@ -70,8 +70,11 @@ void Delay::Param1::parameterDisplay(char*res)
 
 void Delay::Param2::parameterCallback(uint16_t val) // Feedback
 {
-    rawValue = val;
-    pData->delay.feedback=((float)val)/4096.0f;
+    if (this->pData->getFreezeState() == FXP_FREEZE_STATE_MELTED)
+    {
+        rawValue = val;
+        pData->delay.feedback=((float)val)/4096.0f;
+    }
 }
 
 
@@ -143,11 +146,21 @@ Delay::Delay::~Delay()
 void Delay::Delay::freeze()
 {
     FxProgram::freeze();
-    this->delay.frozen = 1;
+    this->meltedFeedbackValue = this->delay.feedback;
+    this->freezeCnt=0;
 }
 
 void Delay::Delay::unfreeze()
 {
     FxProgram::unfreeze();
-    this->delay.frozen=0;
+}
+
+void Delay::Delay::onFreeze()
+{
+    this->delay.frozen = 1;
+}
+
+void Delay::Delay::onMelt()
+{
+    this->delay.frozen = 0;
 }

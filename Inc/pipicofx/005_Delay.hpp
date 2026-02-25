@@ -38,10 +38,13 @@ namespace PiPicoFX {
                 ~Delay();
                 void freeze();
                 void unfreeze();
+                void onFreeze() override;
+                void onMelt() override;
                 int32_t delayInSamplesTargetValue;
                 uint16_t interpCnt;
             private:
                 void setup();
+                float meltedFeedbackValue;
                 
                
         };

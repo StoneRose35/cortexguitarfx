@@ -3,7 +3,17 @@
 #include "stdint.h"
 #include "fxProgramParameter.hpp"
 #include "AudioProcessor.hpp"
-#define IS_FREEZABLE_POS 2
+#define FXP_IS_FREEZABLE_POS 1
+#define FXP_STATE_OFF 0
+#define FXP_STATE_ON 1
+#define FPX_STATE_POS 0
+#define FPX_IS_FREEZABLE (1 << FXP_IS_FREEZABLE_POS)
+#define FXP_FREEZE_STATE_POS 2
+#define FXP_FREEZE_STATE_MELTED (0 << FXP_FREEZE_STATE_POS)
+#define FXP_FREEZE_STATE_FREEZING (1 << FXP_FREEZE_STATE_POS)
+#define FXP_FREEZE_STATE_FROZEN (2 << FXP_FREEZE_STATE_POS)
+#define FXP_FREEZE_STATE_MELTING (3 << FXP_FREEZE_STATE_POS)
+#define FXP_FREEZE_DURATION_IN_SAMPLES 32
 namespace PiPicoFX {
 class FxProgram : public AudioProcessor
 {
@@ -22,18 +32,25 @@ class FxProgram : public AudioProcessor
         uint8_t isFreezable();
         virtual void freeze();
         virtual void unfreeze();
+        uint8_t getFreezeState();
+        void setFreezeState(uint8_t);
+        virtual void onFreeze();
+        virtual void onMelt();
         void switchOn();
         void switchOff();
         uint8_t isOn();
         uint8_t isFrozen();
         uint8_t toggleOn();
     private:
-        uint8_t settingsState=0; //bit 0-1: state, 0: bypassed/off, 1: on, 2: frozen, bit 2: freezable
+        uint8_t settingsState=0; //bit 0: state, 0: bypassed/off, 1: on, bit 1: freezable
+                                 //  bit 2-3: freeze state, 0: melted, 1: freezing, 2: frozen, 3: melting 
         uint8_t nParameters;
         uint8_t paramCnt;
         const char * programName;
         uint32_t memoryUseage;
         FxProgramParameter ** parameters;
+    protected:
+        uint32_t freezeCnt;
 };
 
 

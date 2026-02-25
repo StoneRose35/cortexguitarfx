@@ -36,7 +36,10 @@ namespace PiPicoFX {
             private:
                 void freeze() override;
                 void unfreeze() override;
+                void onFreeze() override;
+                void onMelt() override;
                 void setup();
+                float meltedTaus[4];
         };
 
         class Param1:  public FxProgramParameter

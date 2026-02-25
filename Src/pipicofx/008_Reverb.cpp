@@ -11,10 +11,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
  float Reverb::Reverb::processSample(float sampleIn)
 {
+    FxProgram::processSample(sampleIn);
     float newIn=0.0f;;
     if (this->isOn())
     {
         newIn=sampleIn;
+    }
+    if (this->getFreezeState()==FXP_FREEZE_STATE_FREEZING || this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
+    {
+        this->reverb.feedbackValues[0] = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedTaus[0];
+        this->reverb.feedbackValues[1] = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedTaus[1];
+        this->reverb.feedbackValues[2] = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedTaus[2];
+        this->reverb.feedbackValues[3] = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedTaus[3];
     }
     newIn = gainStageProcessSample(newIn,&this->presetVolume);
     newIn =  reverbProcessSample(newIn,&this->reverb);
@@ -27,9 +35,12 @@ __ITCM_CODE
 
  void Reverb::Param1::parameterCallback(uint16_t val) // reverb time
 {
-    pData->reverbTime = ((float)val)/4095.0f*(2.0f-0.1f) + 0.1f;
-    setReverbTime(pData->reverbTime,&pData->reverb);
-    rawValue = val;
+    if (this->pData->getFreezeState() == FXP_FREEZE_STATE_MELTED)
+    {
+        pData->reverbTime = ((float)val)/4095.0f*(2.0f-0.1f) + 0.1f;
+        setReverbTime(pData->reverbTime,&pData->reverb);
+        rawValue = val;
+    }
 }
 
  void Reverb::Param1::parameterDisplay(char*res)
@@ -99,7 +110,21 @@ Reverb::Reverb::~Reverb()
 void Reverb::Reverb::freeze()
 {
     FxProgram::freeze();
-    reverb.frozen = 1;
+    this->meltedTaus[0] = this->reverb.feedbackValues[0];
+    this->meltedTaus[1] = this->reverb.feedbackValues[1];
+    this->meltedTaus[2] = this->reverb.feedbackValues[2];
+    this->meltedTaus[3] = this->reverb.feedbackValues[3];
+    this->freezeCnt = 0;
+}
+
+void Reverb::Reverb::onFreeze()
+{
+    this->reverb.frozen = 1;
+}
+
+void Reverb::Reverb::onMelt()
+{
+    this->reverb.frozen = 0;
 }
 
 void Reverb::Reverb::unfreeze()

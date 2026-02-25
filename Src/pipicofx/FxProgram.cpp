@@ -54,6 +54,25 @@ FxProgramParameter* FxProgram::getParameter(uint8_t pos){
 __QSPI_CODE
 float FxProgram::processSample(float sampleIn)
 {
+    if (this->getFreezeState() == FXP_FREEZE_STATE_FREEZING)
+    {
+        freezeCnt++;
+        if (freezeCnt >= FXP_FREEZE_DURATION_IN_SAMPLES)
+        {
+            this->freezeCnt = FXP_FREEZE_DURATION_IN_SAMPLES -1;
+            this->setFreezeState(FXP_FREEZE_STATE_FROZEN);
+            this->onFreeze();
+        }
+    }
+    else if (this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
+    {
+        freezeCnt--;
+        if (freezeCnt >= FXP_FREEZE_DURATION_IN_SAMPLES)
+        {
+            this->freezeCnt = 0;
+            this->setFreezeState(FXP_FREEZE_STATE_MELTED);
+        }
+    }          
     return sampleIn;
 }
 
@@ -72,14 +91,14 @@ const char * FxProgram::getName()
 __QSPI_CODE
 void FxProgram::setFreezable(uint8_t val)
 {
-    this->settingsState &= ~(1 << IS_FREEZABLE_POS);
-    this->settingsState |= (val &1) << IS_FREEZABLE_POS;
+    this->settingsState &= ~(1 << FXP_IS_FREEZABLE_POS);
+    this->settingsState |= ((val &1) << FXP_IS_FREEZABLE_POS);
 }
 
 __QSPI_CODE
 uint8_t FxProgram::isFreezable()
 {
-    return (settingsState >> 2) & 1;
+    return (settingsState & (1 << FXP_IS_FREEZABLE_POS)) >> FXP_IS_FREEZABLE_POS;
 }
 
 __QSPI_CODE
@@ -87,8 +106,11 @@ void FxProgram::freeze()
 {
     if (this->isFreezable())
     {
-        this->settingsState &= ~(0x3);
-        this->settingsState |= 0x2;
+        if (((this->settingsState & (0x3 << FXP_FREEZE_STATE_POS))) == FXP_FREEZE_STATE_MELTED || ((this->settingsState & (0x3 << FXP_FREEZE_STATE_POS))) == FXP_FREEZE_STATE_MELTING)
+        {
+            this->settingsState &= ~(0x3 << FXP_FREEZE_STATE_POS);
+            this->settingsState |= FXP_FREEZE_STATE_FREEZING;
+        }
     }
 }
 
@@ -97,29 +119,45 @@ void FxProgram::unfreeze()
 {
     if (this->isFreezable())
     {
-        this->settingsState &= ~(0x3);
-        this->settingsState |= 0x1;
+        if (((this->settingsState & (0x3 << FXP_FREEZE_STATE_POS))) == FXP_FREEZE_STATE_FROZEN || ((this->settingsState & (0x3 << FXP_FREEZE_STATE_POS))) == FXP_FREEZE_STATE_FREEZING)
+        {
+            this->onMelt();
+            this->settingsState &= ~(0x3 << FXP_FREEZE_STATE_POS);
+            this->settingsState |= FXP_FREEZE_STATE_MELTING;
+        }
     }
 }
 
 __QSPI_CODE
 uint8_t FxProgram::isOn()
 {
-    return this->settingsState & 1;
+    return this->settingsState & (1 << FPX_STATE_POS);
 }
 
 __QSPI_CODE
 void FxProgram::switchOn()
 {
-    this->settingsState &= ~(0x3);
-    this->settingsState |= 0x1;
+    this->settingsState |= (1 << FPX_STATE_POS);
     this->unfreeze();
 }
 
 __QSPI_CODE
 uint8_t FxProgram::isFrozen()
 {
-    return (this->settingsState >> 1) & 1;
+    return ((this->settingsState >> FXP_FREEZE_STATE_POS) & 0x3) > 0;
+}
+
+__QSPI_CODE
+uint8_t FxProgram::getFreezeState()
+{
+    return this->settingsState & (0x3 << FXP_FREEZE_STATE_POS);
+}
+
+__QSPI_CODE
+void FxProgram::setFreezeState(uint8_t freezeState)
+{
+    this->settingsState &= ~(0x3 << FXP_FREEZE_STATE_POS);
+    this->settingsState |= freezeState ;
 }
 
 __QSPI_CODE
@@ -142,5 +180,18 @@ uint8_t FxProgram::toggleOn()
 __QSPI_CODE
 void FxProgram::switchOff()
 {
-    this->settingsState &= ~(0x3);
+    this->settingsState &= ~(1 << FPX_STATE_POS);
+}
+
+
+__QSPI_CODE
+void FxProgram::onFreeze()
+{
+
+}
+
+__QSPI_CODE
+void FxProgram::onMelt()
+{
+    
 }

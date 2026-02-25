@@ -251,7 +251,7 @@
         },
         {
             "type": "cppbuild",
-            "label": "compile offline audio processor",
+            "label": "compile active c++ file with fx programs",
             "command": "g++",
             "args": [
                 "-I./Inc",
@@ -264,9 +264,9 @@
                 "./Src/pipicofx/0*.cpp",
                 "./Src/pipicofx/*AudioProcessor.cpp",
                 "out/*.o",
-                "./Tests/processThroughFxProgram.cpp",
+                "${file}",
                 "-o",
-                "./Tests/processThroughFxProgram",
+                "./Tests/out/${fileBasenameNoExtension}",
                 "-lm"
             ],
             "options": {
@@ -280,7 +280,7 @@
                 "isDefault": true
             },
             "dependsOn": "compile c part for c++ test",
-            "detail": "Function to run a given wavefile through a predefined fx program."
+            "detail": "Compiles the current c++ file with the audio libs, "
         }
     ]
 }
