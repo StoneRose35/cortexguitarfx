@@ -81,8 +81,6 @@ void processAudioBuffers(void)
             outputSample = inputSample;
         }
 
-        outputSample = LooperProcessSample(outputSample,&looper);
-
         if (programChangeState == 2)// fadeout
         {
             outputSample = (((float)(32767 - fadeCounter)*inputSample) + (((float)fadeCounter*outputSample)))/32767.0f;
@@ -102,6 +100,9 @@ void processAudioBuffers(void)
                 programChangeState = 0;
             }
         }
+
+        outputSample = LooperProcessSample(outputSample,&looper);
+
         if (programChangeState == 1)
         {
             fadeCounter = 32767;
