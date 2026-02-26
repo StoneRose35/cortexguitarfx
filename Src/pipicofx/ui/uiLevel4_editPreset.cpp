@@ -26,7 +26,6 @@ extern "C" {
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
-extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
 extern PiPicoFXUiType ui;
 
@@ -144,7 +143,6 @@ static void exitCallback()
         }
         if (ui.currentProgramIdx != presets[currentPreset].programNr)
         {
-            programsToInitialize[0] = presets[currentPreset].programNr;
             programChangeState = 1;
         }
         exitState =  EXIT_PRESSED_FIRST_TIME;   

@@ -94,7 +94,6 @@ char displayData[128];
 uint16_t adcVal;
 volatile uint8_t programsActivated=0;
 const uint8_t stompswitch_progs[]={8,7,1};
-volatile uint8_t programsToInitialize[3];
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0xFF;
