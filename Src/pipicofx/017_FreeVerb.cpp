@@ -21,20 +21,30 @@ using namespace PiPicoFX;
 int16_t FreeVerb::FreeVerb::processSample(int16_t sampleIn)
 {
     int32_t sampleOut;
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
     volatile uint32_t * audioStatePtr = getAudioStatePtr();
     int32_t delaySum=0;
     
     for (uint8_t c=0;c<8;c++)
     {
-        delaySum += delayLineWetProcessSample(sampleIn,this->delays+c);
+        delaySum += delayLineWetProcessSample(newIn,this->delays+c);
     }
     sampleOut = delaySum >> 3;
     for (uint8_t c=0;c<4;c++)
     {
         sampleOut = allpassProcessSample(sampleOut,this->allpasses+c,audioStatePtr);
     }
-    sampleOut = clip(((((1 << 15) - this->mix)*sampleIn) >> 15) + ((this->mix*sampleOut) >> 15),audioStatePtr);
-    return gainStageProcessSample(sampleOut,&this->presetVolume);
+    sampleOut = clip(((((1 << 15) - this->mix)*newIn) >> 15) + ((this->mix*sampleOut) >> 15),audioStatePtr);
+    newIn = gainStageProcessSample(sampleOut,&this->presetVolume);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void FreeVerb::FreeVerb::setup()

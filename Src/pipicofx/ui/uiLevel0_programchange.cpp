@@ -6,154 +6,170 @@ extern "C" {
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
 #include "images/pipicofx_param_1_scaled.h"
-#include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
+#include "drivers/systick.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
 
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data);
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data);
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data);
-
-
+static void knob0Callback(uint16_t val);
+static void knob1Callback(uint16_t val);
+static void knob2Callback(uint16_t val);
+extern PiPicoFXUiType ui;
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
-BwImageType lock;
+BwImageTypeConst lock=
+{
+    .data = locksymbol,
+    .sx=5,
+    .sy=8,
+    .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES
+};
 extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
+extern volatile uint8_t consumeEnterReleased;
 extern const uint8_t stompswitch_progs[];
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
-
-static void create(PiPicoFxUiType*data)
+static volatile uint32_t longPressCnt=0;
+static volatile uint8_t enterState=0;
+static void create()
 {
     char lineBuffer[24];
     BwImageType* imgBuffer = getImageBuffer();
     lock.data =locksymbol;
-    lock.sx=5;
-    lock.sy=8;
-    lock.type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     clearImage(imgBuffer);
-    drawText(0,1*8,data->currentProgram->getName(),imgBuffer,0);
-    if (data->locked != 0)
+    const GFXfont * font =  getGFXFont(FREESANS9PT7B);
+    drawText(0,1*14,ui.currentProgram->getName(),imgBuffer,font);
+    if (ui.locked != 0)
     {
         drawImage(122,0,&lock,imgBuffer);
     }
 
-    for (uint8_t c=0;c<data->currentProgram->getParameterCount();c++)
+    for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
     {
-        if (data->currentProgram->getParameter(c)->getControl() == 0)
+        if (ui.currentProgram->getParameter(c)->getControl() == 0)
         {
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P1:");
-            appendToString(lineBuffer,data->currentProgram->getParameter(c)->getParameterName());
+            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
             drawText(0,5*8,lineBuffer,imgBuffer,0);
         }
-        if (data->currentProgram->getParameter(c)->getControl() == 1)
+        if (ui.currentProgram->getParameter(c)->getControl() == 1)
         {
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P2:");
-            appendToString(lineBuffer,data->currentProgram->getParameter(c)->getParameterName());
+            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
             drawText(0,6*8,lineBuffer,imgBuffer,0);
         }
-        if (data->currentProgram->getParameter(c)->getControl() == 2)
+        if (ui.currentProgram->getParameter(c)->getControl() == 2)
         {
             lineBuffer[0]=0;
             appendToString(lineBuffer,"P3:");
-            appendToString(lineBuffer,data->currentProgram->getParameter(c)->getParameterName());
+            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
             drawText(0,7*8,lineBuffer,imgBuffer,0);
         }                
     }
-
-    data->currentParameterIdx=0;
-    data->currentParameter = data->currentProgram->getParameter(0);
-    // set all parameters controlled by the pots to the current value
-    uint16_t knobVal;
-    for(uint8_t c=0; c < data->currentProgram->getParameterCount(); c++)
+    for (uint8_t c=0;c < ui.currentProgram->getParameterCount();c++)
     {
-        switch (data->currentProgram->getParameter(c)->getControl())
+        if (ui.currentProgram->getParameter(c)->getControl()==0)
         {
-            case 0:
-                knobVal = getChannel0Value();
-                knob0Callback(knobVal,data);
-                break;
-            case 1:
-                knobVal = getChannel1Value();
-                knob1Callback(knobVal,data);
-                break;
-            case 2:
-                knobVal = getChannel2Value();
-                knob2Callback(knobVal,data);
-                break;
-            default:
-                break;
+            ui.currentProgram->getParameter(c)->parameterCallback(getChannel0Value());
+        }
+        else if (ui.currentProgram->getParameter(c)->getControl()==1)
+        {
+            ui.currentProgram->getParameter(c)->parameterCallback(getChannel1Value());
+        }
+        else if (ui.currentProgram->getParameter(c)->getControl()==2)
+        {
+            ui.currentProgram->getParameter(c)->parameterCallback(getChannel2Value());
         }
     }
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
+static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
-    BwImageType bargraph;
-    BwImageType* imgBuffer = getImageBuffer();
     uint8_t bargraphBuffer[128];
+    BwImageType bargraph={
+        .data = bargraphBuffer,
+        .sx = 128,
+        .sy = 4,
+        .type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
+        .byteSize = 128
+    };
+    BwImageType* imgBuffer = getImageBuffer();
+    
     bargraph.data = bargraphBuffer;
-    bargraph.sx=128;
-    bargraph.sy = 8;
-    bargraph.type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES;
     // show basic display
     for (uint8_t c=0;c<128;c++)
     {
+        clearPixel(c,0,&bargraph);
+        clearPixel(c,3,&bargraph);
         if (c<=avgInput)
         {
-            bargraphBuffer[c] = 126;
+            setPixel(c,1,&bargraph);
+            setPixel(c,2,&bargraph);
         }
         else
         {
-            bargraphBuffer[c] = 0;
+            clearPixel(c,1,&bargraph);
+            clearPixel(c,2,&bargraph);
         }
     }
-    drawImage(0,1*8,&bargraph,imgBuffer);
+    drawImage(0,32-3*4,(BwImageTypeConst*)&bargraph,imgBuffer);
 
     for (uint8_t c=0;c<128;c++)
     {
+        clearPixel(c,0,&bargraph);
+        clearPixel(c,3,&bargraph);
         if (c<=avgOutput)
         {
-            bargraphBuffer[c] = 126;
+            setPixel(c,1,&bargraph);
+            setPixel(c,2,&bargraph);
         }
         else
         {
-            bargraphBuffer[c] = 0;
+            clearPixel(c,1,&bargraph);
+            clearPixel(c,2,&bargraph);
         }
     }
-    drawImage(0,2*8,&bargraph,imgBuffer);
+    drawImage(0,32-2*4,(BwImageTypeConst*)&bargraph,imgBuffer);
+
 
     for (uint8_t c=0;c<128;c++)
     {
+        clearPixel(c,0,&bargraph);
+        clearPixel(c,3,&bargraph);
         if (c<=cpuLoad)
         {
-            bargraphBuffer[c] = 126;
+            setPixel(c,1,&bargraph);
+            setPixel(c,2,&bargraph);
         }
         else
         {
-            bargraphBuffer[c] = 0;
+            clearPixel(c,1,&bargraph);
+            clearPixel(c,2,&bargraph);
         }
     }
-    drawImage(0,3*8,&bargraph,imgBuffer);
-
-    DisplayWriteFramebufferAsync(imgBuffer->data);
+    drawImage(0,32-1*4,(BwImageTypeConst*)&bargraph,imgBuffer);
+    if (longPressCnt > 0 && getTickValue() - longPressCnt > LONGPRESS_DURATION_SYSTICKS && ui.currentProgram->isFreezable() && ui.currentProgram->isOn())
+    {
+        ui.currentProgram->freeze();
+        longPressCnt=0;
+        setStompswitchColorRaw(1 << 2);
+    }
 }
 
-static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)
+static inline void knobCallback(uint16_t val,uint8_t control)
 {
-    if (data->locked == 0)
+    if (ui.locked == 0)
     {
-        for (uint8_t c=0;c<data->currentProgram->getParameterCount();c++)
+        for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
         {
-            if (data->currentProgram->getParameter(c)->getControl()==control)
+            if (ui.currentProgram->getParameter(c)->getControl()==control)
             {
-                data->currentProgram->getParameter(c)->parameterCallback(val);
+                ui.currentProgram->getParameter(c)->parameterCallback(val);
             }
         }  
     } 
@@ -161,84 +177,153 @@ static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control
 
 
 
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob0Callback(uint16_t val)
 {
-    knobCallback(val,data,0);
+    knobCallback(val,0);
 }
 
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob1Callback(uint16_t val)
 {
-    knobCallback(val,data,1);
+    knobCallback(val,1);
 }
 
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob2Callback(uint16_t val)
 {
-    knobCallback(val,data,2);
+    knobCallback(val,2);
 }
 
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterPressedCallback()
 {
-    if (data->locked == 0)
+    enterState = 1;
+}
+
+static void enterReleasedCallback(void) 
+{
+    enterState=0;
+    if (consumeEnterReleased == 1)
     {
-        uiStackPush(data, 0);
-        enterLevel1(data);
+        consumeEnterReleased = 0;
+        return;
+    }
+    if (ui.locked == 0)
+    {
+        uiStackPush(0);
+        enterLevel1();
     }
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback()
 {
 
-    if (uiStackCurrent(data) == 0x0)
+    if (uiStackCurrent() == 0x0)
     {
-        data->locked ^=1;
+        ui.locked ^=1;
         return;
     }
     // apply current program to preset when coming from 4
-    if(uiStackCurrent(data)==4)
+    if(uiStackCurrent()==4)
     {
-        presets[currentPreset].programNr = data->currentProgramIdx;
+        presets[currentPreset].programNr = ui.currentProgramIdx;
     }
 }
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
-
-    if (encoderDelta != 0 && programChangeState == 0)
+    if (enterState==1)
     {
-        data->currentProgramIdx += encoderDelta;
-        if (data->currentProgramIdx >= N_FX_PROGRAMS && encoderDelta > 0)
+        if (currentPreset == 0xFF)
         {
-            data->currentProgramIdx = N_FX_PROGRAMS-1;
-        } 
-        else if (data->currentProgramIdx >= N_FX_PROGRAMS && encoderDelta < 0)
-        {
-            data->currentProgramIdx = 0;
+            currentPreset = 0;
         }
-        programToInitialize=data->currentProgramIdx;
+        enterState=0;
+        consumeEnterReleased = 1;
+        enterLevel3();
+        return;
+    }
+    if (encoderDelta != 0 && programChangeState==0)
+    {
+        if (encoderDelta > 0)
+        {
+            encoderDelta = 1;
+        }
+        else
+        {
+            encoderDelta = -1;
+        }
+        ui.currentProgramIdx += encoderDelta;
+        if (ui.currentProgramIdx >= N_FX_PROGRAMS && encoderDelta > 0)
+        {
+            ui.currentProgramIdx = N_FX_PROGRAMS-1;
+        } 
+        else if (ui.currentProgramIdx >= N_FX_PROGRAMS && encoderDelta < 0)
+        {
+            ui.currentProgramIdx = 0;
+        }
+        programToInitialize=ui.currentProgramIdx;
         programChangeState=1;
+        setStompswitchColorRaw(0);
     }
 }
 
-static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFxUiType* data)
+/*
+static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFXUiType* data)
 {
     currentPreset = switchNr;
     uiStackPush(data, 0);
     enterLevel3(data);
 }
+*/
 
-static void stompswitch1Callback(PiPicoFxUiType* data)
+static void stompswitch1Callback(void)
 {
-    genericStompSwitchCallback(0,data);
+
+    ui.currentProgramIdx--;
+    if (ui.currentProgramIdx >= N_FX_PROGRAMS)
+    {
+        ui.currentProgramIdx = 0;
+    }
+    programToInitialize=ui.currentProgramIdx;
+    programChangeState=1;
+    setStompswitchColorRaw(0);
+    //genericStompSwitchCallback(0,data);
 }
 
-static void stompswitch2Callback(PiPicoFxUiType* data)
+static void stompSwitch2Pressed()
 {
-    genericStompSwitchCallback(1,data);
+
+    longPressCnt = getTickValue();
 }
 
-static void stompswitch3Callback(PiPicoFxUiType* data)
+static void stompswitch2Callback(void)
 {
-    genericStompSwitchCallback(2,data);
+    if (longPressCnt != 0) // no freeze happened, toggle normally
+    {
+        uint8_t ret = ui.currentProgram->toggleOn();
+        if (ret) 
+        {
+            setStompswitchColorRaw(2 << 2);
+        }
+        else
+        {
+            setStompswitchColorRaw(0);
+        }
+    }
+    longPressCnt=0;
+    //genericStompSwitchCallback(1,data);
+}
+
+static void stompswitch3Callback(void)
+{
+
+    ui.currentProgramIdx++;
+    if (ui.currentProgramIdx >= N_FX_PROGRAMS )
+    {
+        ui.currentProgramIdx = N_FX_PROGRAMS-1;
+    } 
+    programToInitialize=ui.currentProgramIdx;
+    programChangeState=1;
+    setStompswitchColorRaw(0);
+    //genericStompSwitchCallback(2,data);
 }
 
 
@@ -247,19 +332,25 @@ register exit, rotary, knobs and stompswitch callbacks
 remove enter callback
 register onUpdate, on Create
 */
-void enterLevel0(PiPicoFxUiType*data)
+void enterLevel0()
 {
     clearCallbackAssignments();
-    registerEnterButtonPressedCallback(&enterCallback);
+    registerEnterButtonPressedCallback(&enterPressedCallback);
+    registerEnterButtonReleasedCallback(&enterReleasedCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
     registerKnob0Callback(&knob0Callback);
     registerKnob1Callback(&knob1Callback);
     registerKnob2Callback(&knob2Callback);
     registerStompswitch1ReleasedCallback(&stompswitch1Callback);
+    registerStompswitch2PressedCallback(&stompSwitch2Pressed);
     registerStompswitch2ReleasedCallback(&stompswitch2Callback);
     registerStompswitch3ReleasedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    setStompswitchColorRaw(0);
+    ui.defaultOn=0;
+    ui.currentProgram->switchOff();
+    enterState = 0;
+    create();
 }

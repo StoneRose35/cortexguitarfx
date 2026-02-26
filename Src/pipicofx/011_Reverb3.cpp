@@ -11,9 +11,20 @@ using namespace PiPicoFX;
 int16_t Reverb3::Reverb3::processSample(int16_t sampleIn)
 {
     int16_t reverberatedSample;
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    reverberatedSample = reverb3processSample(sampleIn,&this->reverb);
-    return (((0x7FFF - this->mix)*sampleIn) >> 15) + ((this->mix*reverberatedSample) >> 15);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    reverberatedSample = reverb3processSample(newIn,&this->reverb);
+    newIn = (((0x7FFF - this->mix)*newIn) >> 15) + ((this->mix*reverberatedSample) >> 15);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
+
 }
 
 void Reverb3::Reverb3::setup()

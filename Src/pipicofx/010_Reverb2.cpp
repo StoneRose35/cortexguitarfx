@@ -9,8 +9,18 @@ using namespace PiPicoFX;
 
 int16_t Reverb2::Reverb2::processSample(int16_t sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return reverb2ProcessSample(sampleIn,&this->reverb);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = reverb2ProcessSample(newIn,&this->reverb);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Reverb2::Reverb2::setup()

@@ -9,9 +9,18 @@ using namespace PiPicoFX;
 
 int16_t Delay::Delay::processSample(int16_t sampleIn)
 {
-    sampleIn = delayLineProcessSample(sampleIn, &this->delay);
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return sampleIn;
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = delayLineProcessSample(newIn, &this->delay);
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Delay::Delay::setup()

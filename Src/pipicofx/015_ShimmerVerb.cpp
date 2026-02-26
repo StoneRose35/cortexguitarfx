@@ -17,7 +17,12 @@ using namespace PiPicoFX;
 
 int16_t ShimmerVerb::ShimmerVerb::processSample(int16_t sampleIn)
 {
-    int32_t sampleProc = gainStageProcessSample(sampleIn,&this->presetVolume);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    int32_t sampleProc = gainStageProcessSample(newIn,&this->presetVolume);
     volatile uint32_t * audioStatePtr = getAudioStatePtr();
     int32_t summedDelay=0;
     
@@ -30,7 +35,12 @@ int16_t ShimmerVerb::ShimmerVerb::processSample(int16_t sampleIn)
     sampleProc = allpassProcessSample(sampleProc,this->allpasses+1,audioStatePtr);
     sampleProc = delayLineProcessSample(sampleProc,this->delays+3);
     this->oldVal = sampleProc;
-    return ((((1 << 15) - this->mix)*sampleIn) >> 15) + ((this->mix*sampleProc) >> 15);
+    sampleProc = ((((1 << 15) - this->mix)*newIn) >> 15) + ((this->mix*sampleProc) >> 15);
+    if(!this->isOn())
+    {
+        return (sampleIn + sampleProc);
+    }
+    return sampleProc;
 }
 
 void ShimmerVerb::ShimmerVerb::setup()

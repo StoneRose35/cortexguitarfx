@@ -8,9 +8,18 @@ using namespace PiPicoFX;
 
 int16_t MonsterCrusher::MonsterCrusher::processSample(int16_t sampleIn)
 {
-    sampleIn = bitCrusherProcessSample(sampleIn,&this->bitcrusher);
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return sampleIn;
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = bitCrusherProcessSample(newIn,&this->bitcrusher);
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void MonsterCrusher::MonsterCrusher::setup()

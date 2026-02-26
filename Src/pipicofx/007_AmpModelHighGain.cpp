@@ -10,8 +10,13 @@ using namespace PiPicoFX;
 int16_t AmpModelHighGain::AmpModelHighGain::processSample(int16_t sampleIn)
 {
     int16_t out;
-    this->highpass_out = (((((1 << 15) + this->highpassCutoff) >> 1)*(sampleIn - this->highpass_old_in))>>15) + ((this->highpassCutoff *this->highpass_old_out) >> 15);
-    this->highpass_old_in = sampleIn;
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    this->highpass_out = (((((1 << 15) + this->highpassCutoff) >> 1)*(newIn - this->highpass_old_in))>>15) + ((this->highpassCutoff *this->highpass_old_out) >> 15);
+    this->highpass_old_in = newIn;
     this->highpass_old_out = this->highpass_out;
 
     out = this->highpass_out;
@@ -74,6 +79,10 @@ int16_t AmpModelHighGain::AmpModelHighGain::processSample(int16_t sampleIn)
     else
     {
         out = reverbProcessSample(out,&this->reverb);
+    }
+    if(!this->isOn())
+    {
+        return (sampleIn + out);
     }
     return out;
 

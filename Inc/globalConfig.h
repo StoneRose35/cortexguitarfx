@@ -32,6 +32,10 @@
 
 //#define AVR_FLASHER // enables the flasher for the avr (board version 0.3.0 or higher)
 
+
+// the minimal duration of a long press in 10ms, a value of 100 would result in 1s duration
+#define LONGPRESS_DURATION_SYSTICKS 130
+
 //------------------------------------------
 // derived definitions
 #ifdef WAVESHARE_64X128_DISPLAY

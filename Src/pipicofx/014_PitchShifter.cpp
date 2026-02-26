@@ -11,9 +11,18 @@ using namespace PiPicoFX;
 
 int16_t PitchShifter::PitchShifter::processSample(int16_t sampleIn)
 {
-    int16_t processedSample = pitchShifter2ProcessSample(sampleIn,&this->pitchShifter,getAudioStatePtr());
-    int16_t sampleOut= ((sampleIn)*((1 << 15) - this->mix) >> 15) + ((processedSample)*this->mix >> 15);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    int16_t processedSample = pitchShifter2ProcessSample(newIn,&this->pitchShifter,getAudioStatePtr());
+    int16_t sampleOut= ((newIn)*((1 << 15) - this->mix) >> 15) + ((processedSample)*this->mix >> 15);
     sampleOut = gainStageProcessSample(sampleOut,&this->presetVolume);
+    if(!this->isOn())
+    {
+        return (sampleIn + sampleOut);    
+    }
     return sampleOut;
 }
 

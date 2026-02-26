@@ -25,7 +25,8 @@ typedef struct
     uint8_t currentParameterIdx;
     uint8_t locked : 1;
     uint8_t editViaRotary : 1;
-} PiPicoFxUiType;
+    uint8_t defaultOn : 1; // switches programs on when changing programs, off otherwise 
+} PiPicoFXUiType;
 
 #ifdef __cplusplus 
 extern "C" {
@@ -37,61 +38,63 @@ typedef struct
 } ButtonStateType;
 
 
-typedef void(*uiEnterFct)(PiPicoFxUiType*);
+typedef void(*uiEnterFct)(void);
 
-void registerEnterButtonPressedCallback(void(*cb)(PiPicoFxUiType*));
-void registerEnterButtonReleasedCallback(void(*cb)(PiPicoFxUiType*));
-void registerExitButtonPressedCallback(void(*cb)(PiPicoFxUiType*));
-void registerExitButtonReleasedCallback(void(*cb)(PiPicoFxUiType*));
-void registerStompswitch1PressedCallback(void(*cb)(PiPicoFxUiType*));
-void registerStompswitch1ReleasedCallback(void(*cb)(PiPicoFxUiType*));
-void registerStompswitch2PressedCallback(void(*cb)(PiPicoFxUiType*));
-void registerStompswitch2ReleasedCallback(void(*cb)(PiPicoFxUiType*));
-void registerStompswitch3PressedCallback(void(*cb)(PiPicoFxUiType*));
-void registerStompswitch3ReleasedCallback(void(*cb)(PiPicoFxUiType*));
-void registerRotaryCallback(void(*cb)(int16_t,PiPicoFxUiType*));
-void registerKnob0Callback(void(*cb)(uint16_t,PiPicoFxUiType*));
-void registerKnob1Callback(void(*cb)(uint16_t,PiPicoFxUiType*));
-void registerKnob2Callback(void(*cb)(uint16_t,PiPicoFxUiType*));
-void registerOnUpdateCallback(void(*cb)(int16_t,int16_t,uint8_t,PiPicoFxUiType*));
-void registerOnCreateCallback(void(*cb)(PiPicoFxUiType*));
+
+const uiEnterFct*  getEnterFunctions();
+void registerEnterButtonPressedCallback(void(*cb)(void));
+void registerEnterButtonReleasedCallback(void(*cb)(void));
+void registerExitButtonPressedCallback(void(*cb)(void));
+void registerExitButtonReleasedCallback(void(*cb)(void));
+void registerStompswitch1PressedCallback(void(*cb)(void));
+void registerStompswitch1ReleasedCallback(void(*cb)(void));
+void registerStompswitch2PressedCallback(void(*cb)(void));
+void registerStompswitch2ReleasedCallback(void(*cb)(void));
+void registerStompswitch3PressedCallback(void(*cb)(void));
+void registerStompswitch3ReleasedCallback(void(*cb)(void));
+void registerRotaryCallback(void(*cb)(int16_t));
+void registerKnob0Callback(void(*cb)(uint16_t));
+void registerKnob1Callback(void(*cb)(uint16_t));
+void registerKnob2Callback(void(*cb)(uint16_t));
+void registerOnUpdateCallback(void(*cb)(int16_t,int16_t,uint8_t));
+void registerOnCreateCallback(void(*cb)(void));
 void clearCallbackAssignments();
 
-void onEnterPressed(PiPicoFxUiType*data);
-void onEnterReleased(PiPicoFxUiType*data);
-void onExitPressed(PiPicoFxUiType*data);
-void onExitReleased(PiPicoFxUiType*data);
-void onRotaryChange(int16_t delta,PiPicoFxUiType*data);
-void onKnob0(uint16_t val,PiPicoFxUiType*data);
-void onKnob1(uint16_t val,PiPicoFxUiType*data);
-void onKnob2(uint16_t val,PiPicoFxUiType*data);
-void onStompSwitch1Pressed(PiPicoFxUiType*data);
-void onStompSwitch1Released(PiPicoFxUiType*data);
-void onStompSwitch2Pressed(PiPicoFxUiType*data);
-void onStompSwitch2Released(PiPicoFxUiType*data);
-void onStompSwitch3Pressed(PiPicoFxUiType*data);
-void onStompSwitch3Released(PiPicoFxUiType*data);
-void onUpdate(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data);
-void onCreate(PiPicoFxUiType*data);
+void onEnterPressed(void);
+void onEnterReleased(void);
+void onExitPressed(void);
+void onExitReleased(void);
+void onRotaryChange(int16_t delta);
+void onKnob0(uint16_t val);
+void onKnob1(uint16_t val);
+void onKnob2(uint16_t val);
+void onStompSwitch1Pressed(void);
+void onStompSwitch1Released(void);
+void onStompSwitch2Pressed(void);
+void onStompSwitch2Released(void);
+void onStompSwitch3Pressed(void);
+void onStompSwitch3Released(void);
+void onUpdate(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad);
+void onCreate(void);
 BwImageType * getImageBuffer();
 
 
-void piPicoFxUiSetup(PiPicoFxUiType*);
-
-
-uint8_t uiStackPush(PiPicoFxUiType* piPicoUiController,uint8_t val);
-uint8_t uiStackPop(PiPicoFxUiType* piPicoUiController);
-uint8_t uiStackCurrent(PiPicoFxUiType* piPicoUiController);
+uint8_t uiStackPush(uint8_t val);
+uint8_t uiStackPop();
+uint8_t uiStackCurrent();
 #ifdef __cplusplus
 }
 #endif
 
-void enterLevel0(PiPicoFxUiType*data);
-void enterLevel1(PiPicoFxUiType*data);
-void enterLevel2(PiPicoFxUiType*data);
-void enterLevel3(PiPicoFxUiType*data);
-void enterLevel4(PiPicoFxUiType*data);
-void enterLevel5(PiPicoFxUiType*data);
-void enterLevel6(PiPicoFxUiType*data);
-void enterLevel7(PiPicoFxUiType*data);
+void piPicoFxUiSetup(void);
+void enterLevel0(void);
+void enterLevel1(void);
+void enterLevel2(void);
+void enterLevel3(void);
+void enterLevel4(void);
+void enterLevel5(void);
+void enterLevel6(void);
+void enterLevel7(void);
+void enterLevel8(void);
+void enterLevel9(void);
 #endif

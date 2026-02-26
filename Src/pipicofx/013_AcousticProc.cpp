@@ -10,12 +10,21 @@ using namespace PiPicoFX;
 
 int16_t AcousticProc::AcousticProc::processSample(int16_t sampleIn)
 {
-    sampleIn = threeBandEqProcessSample(sampleIn,&this->eq);
-    sampleIn = compressor2ProcessSample(sampleIn,&this->comp);
-    sampleIn = gainStageProcessSample(sampleIn,&this->postGain);
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    sampleIn = reverbProcessSample(sampleIn,&this->reverb);
-    return sampleIn;
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = threeBandEqProcessSample(newIn,&this->eq);
+    newIn = compressor2ProcessSample(newIn,&this->comp);
+    newIn = gainStageProcessSample(newIn,&this->postGain);
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = reverbProcessSample(newIn,&this->reverb);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void AcousticProc::AcousticProc::setup()

@@ -15,8 +15,13 @@ using namespace PiPicoFX;
 int16_t AmpModel::AmpModel::processSample(int16_t sampleIn) 
 {
     int16_t out;
-    this->highpass_out = (((((1 << 15) + this->highpassCutoff) >> 1)*(sampleIn - highpass_old_in))>>15) + ((this->highpassCutoff *this->highpass_old_out) >> 15);
-    this->highpass_old_in = sampleIn;
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    this->highpass_out = (((((1 << 15) + this->highpassCutoff) >> 1)*(newIn - highpass_old_in))>>15) + ((this->highpassCutoff *this->highpass_old_out) >> 15);
+    this->highpass_old_in = newIn;
     this->highpass_old_out = highpass_out;
 
     out = highpass_out;
@@ -33,6 +38,10 @@ int16_t AmpModel::AmpModel::processSample(int16_t sampleIn)
     out >>= 2;
     out = firFilterProcessSample(out,&filter3);
     out = delayLineProcessSample(out, &delay);
+    if (!this->isOn())
+    {
+        return (sampleIn + out);
+    }
     return out;
 }
 

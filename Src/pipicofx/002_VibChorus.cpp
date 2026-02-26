@@ -8,9 +8,19 @@ using namespace PiPicoFX;
 
 int16_t VibChorus::VibChorus::processSample(int16_t sampleIn) 
 {
-    sampleIn >>= 1;
-    sampleIn = simpleChorusProcessSample(sampleIn,&chorusData);
-    return gainStageProcessSample(sampleIn,&presetVolume);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn >>= 1;
+    newIn = simpleChorusProcessSample(newIn,&chorusData);
+    return gainStageProcessSample(newIn,&presetVolume);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void VibChorus::Param1::parameterCallback(uint16_t val)

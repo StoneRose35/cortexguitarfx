@@ -6,20 +6,23 @@ extern "C" {
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
-#include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
-#include "drivers/pcm3060.h"
+#include "globalConfig.h"
 #include "drivers/cs4270_audio_codec.h"
+#include "drivers/pcm3060.h"
+#include "drivers/wm8731.h"
+#include "romfunc.h"
 #include "images/toggleswitch_on.h"
 #include "images/toggleswitch_off.h"
-#include "globalConfig.h"
 }
 
-static volatile uint8_t paramSelected=0;
-static volatile uint8_t subLevel;
 
-static void create(PiPicoFxUiType*data)
+static uint8_t paramSelected=0;
+static uint8_t subLevel;
+extern PiPicoFXUiType ui;
+
+static void create()
 {
     char strbfr[16];
     uint8_t regbfr;
@@ -32,8 +35,11 @@ static void create(PiPicoFxUiType*data)
     appendToString(strbfr,"Settings");
     drawText(2,14,strbfr,img,font);
 
-    #ifdef CS4270_AUDIO_CODEC
+    #ifdef CS4270_CODEC
     regbfr = cs4270GetInputState();
+    #endif
+    #ifdef WM8731_CODEC
+    regbfr = wm8731GetInputState();
     #endif
     #ifdef PCM3060_AUDIO_CODEC
     regbfr = pcm3060GetInputState();
@@ -68,8 +74,11 @@ static void create(PiPicoFxUiType*data)
     appendToString(strbfr,"Vol");
     drawText(94,60,strbfr,img,(void*)0);
 
-    #ifdef CS4270_AUDIO_CODEC
+    #ifdef CS4270_CODEC
     currentVolume = cs4270GetOutputVolume();
+    #endif
+    #ifdef WM8731_CODEC
+    currentVolume = wm8731GetOutputVolume();
     #endif
     #ifdef PCM3060_AUDIO_CODEC
     currentVolume = pcm3060GetOutputVolume();
@@ -111,19 +120,13 @@ static void create(PiPicoFxUiType*data)
 
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
-{
-    BwImageType* imgBuffer = getImageBuffer();
-    DisplayWriteFramebufferAsync(imgBuffer->data);
-}
 
-
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterCallback() 
 {
     BwImageType* img = getImageBuffer();
     if(subLevel==0)
     {
-        uiStackPush(data,0xFF);
+        uiStackPush(0xFF);
         subLevel++;
         switch (paramSelected)
         {
@@ -149,7 +152,7 @@ static void enterCallback(PiPicoFxUiType*data)
     }
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback()
 {
     BwImageType* img = getImageBuffer();
     if (subLevel==1)
@@ -179,14 +182,14 @@ static void exitCallback(PiPicoFxUiType*data)
     }
     else
     {
-        if(uiStackCurrent(data)==0xFF)
+        if(uiStackCurrent()==0xFF)
         {
-            uiStackPop(data);
+            uiStackPop();
         }
     }
 }
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
     uint8_t regbfr;
     uint16_t currentVolume;
@@ -258,65 +261,85 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
         switch (paramSelected)
         {
             case 0:
-
-                #ifdef CS4270_AUDIO_CODEC
+                #ifdef CS4270_CODEC
                 regbfr = cs4270GetInputState();
                 #endif
-                #ifdef PCM3060_AUDIO_CODEC
-                regbfr = pcm3060GetInputState();
-                #endif
-                if ((regbfr & 0x2) != 0 && encoderDelta < 0) // switch off, was on
-                {
-                    #ifdef CS4270_AUDIO_CODEC
-                    cs4270SetInputState(CS4270_CHANNEL_B,0);
-                    #endif
-                    #ifdef PCM3060_AUDIO_CODEC
-                    pcm3060SetInputState(PCM3060_CHANNEL_LEFT,0);
-                    #endif
-                    drawImage(16,20,&toggleswitch_off_streamimg,img);
-                }
-                else if ((regbfr & 0x2) == 0 && encoderDelta > 0) // switch on, was off
-                {
-                    #ifdef CS4270_AUDIO_CODEC
-                    cs4270SetInputState(CS4270_CHANNEL_B,1);
-                    #endif
-                    #ifdef PCM3060_AUDIO_CODEC
-                    pcm3060SetInputState(PCM3060_CHANNEL_LEFT,1);
-                    #endif
-                    drawImage(16,20,&toggleswitch_on_streamimg,img);
-                }
-                break;
-            case 1:
-                #ifdef CS4270_AUDIO_CODEC
-                regbfr = cs4270GetInputState();
+                #ifdef WM8731_CODEC
+                regbfr = wm8731GetInputState();
                 #endif
                 #ifdef PCM3060_AUDIO_CODEC
                 regbfr = pcm3060GetInputState();
                 #endif
                 if ((regbfr & 0x1) != 0 && encoderDelta < 0) // switch off, was on
                 {
-                    #ifdef CS4270_AUDIO_CODEC
+                    #ifdef CS4270_CODEC
+                    cs4270SetInputState(CS4270_CHANNEL_B,0);
+                    #endif
+                    #ifdef WM8731_CODEC
+                    wm8731SetInputState(WM8731_CHANNEL_B,0);
+                    #endif
+                    #ifdef PCM3060_AUDIO_CODEC
+                    pcm3060SetInputState(PCM3060_CHANNEL_LEFT,0);
+                    #endif
+                    drawImage(16,24,&toggleswitch_off_streamimg,img);
+                }
+                else if ((regbfr & 0x1) == 0 && encoderDelta > 0) // switch on, was off
+                {
+                    #ifdef CS4270_CODEC
+                    cs4270SetInputState(CS4270_CHANNEL_B,1);
+                    #endif
+                    #ifdef WM8731_CODEC
+                    wm8731SetInputState(WM8731_CHANNEL_B,1);
+                    #endif
+                    #ifdef PCM3060_AUDIO_CODEC
+                    pcm3060SetInputState(PCM3060_CHANNEL_LEFT,1);
+                    #endif
+                    drawImage(16,24,&toggleswitch_on_streamimg,img);
+                }
+                break;
+            case 1:
+                #ifdef CS4270_CODEC
+                regbfr = cs4270GetInputState();
+                #endif
+                #ifdef WM8731_CODEC
+                regbfr = wm8731GetInputState();
+                #endif
+                #ifdef PCM3060_AUDIO_CODEC
+                regbfr = pcm3060GetInputState();
+                #endif
+                if ((regbfr & 0x2) != 0 && encoderDelta < 0) // switch off, was on
+                {
+                    #ifdef CS4270_CODEC
                     cs4270SetInputState(CS4270_CHANNEL_A,0);
+                    #endif
+                    #ifdef WM8731_CODEC
+                    wm8731SetInputState(WM8731_CHANNEL_A,0);
                     #endif
                     #ifdef PCM3060_AUDIO_CODEC
                     pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,0);
                     #endif
-                    drawImage(47,20,&toggleswitch_off_streamimg,img);
+                    drawImage(47,24,&toggleswitch_off_streamimg,img);
                 }
-                else if ((regbfr & 0x1) == 0 && encoderDelta > 0) // switch on, was off
+                else if ((regbfr & 0x2) == 0 && encoderDelta > 0) // switch on, was off
                 {
-                    #ifdef CS4270_AUDIO_CODEC
+                    #ifdef CS4270_CODEC
                     cs4270SetInputState(CS4270_CHANNEL_A,1);
+                    #endif
+                    #ifdef WM8731_CODEC
+                    wm8731SetInputState(WM8731_CHANNEL_A,1);
                     #endif
                     #ifdef PCM3060_AUDIO_CODEC
                     pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,1);
                     #endif
-                    drawImage(47,20,&toggleswitch_on_streamimg,img);
+                    drawImage(47,24,&toggleswitch_on_streamimg,img);
                 }
                 break;
             case 2:
-                #ifdef CS4270_AUDIO_CODEC
+                #ifdef CS4270_CODEC
                 currentVolume = cs4270GetOutputVolume();
+                #endif
+                #ifdef WM8731_CODEC
+                currentVolume = wm8731GetOutputVolume();
                 #endif
                 #ifdef PCM3060_AUDIO_CODEC
                 currentVolume = pcm3060GetOutputVolume();
@@ -358,8 +381,11 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 cx = 100.0f;
                 cy = 32.0f;
                 drawLine(cx,cy,px,py,img);
-                #ifdef CS4270_AUDIO_CODEC
+                #ifdef CS4270_CODEC
                 cs4270SetOutputVolume(CS4270_CHANNEL_BOTH,(uint8_t)currentVolume);
+                #endif
+                #ifdef WM8731_CODEC
+                wm8731SetOutputVolume(CS4270_CHANNEL_BOTH,(uint8_t)currentVolume);
                 #endif
                 #ifdef PCM3060_AUDIO_CODEC
                 pcm3060SetOutputVolume(PCM3060_CHANNEL_BOTH,(uint8_t)currentVolume);
@@ -370,14 +396,13 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
 }
 
 
-void enterLevel5(PiPicoFxUiType*data)
+void enterLevel5(void)
 {
     clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
-    registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
 }
 

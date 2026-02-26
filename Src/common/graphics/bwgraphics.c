@@ -1,10 +1,9 @@
 #include "graphics/gfxfont.h"
-
 #include "graphics/bwgraphics.h"
+#include "stdint.h"
 #include "stdlib.h"
 #ifdef RP2040_FEATHER
 #include "romfunc.h"
-extern uint8_t oled_font_5x7[98][5];
 #else
 #include "math.h"
 float fsqrt(float a)
@@ -29,10 +28,9 @@ float fsin(float x)
 {
 	return sinf(x);
 }
-#include "fonts/oled_font_5x7.h"
 #endif
 
-
+extern const uint8_t oled_font_5x7[98][5];
 
 
 void changeLine(float spx,float spy,float epx, float epy,uint8_t draw,BwImageType* img)
@@ -262,15 +260,18 @@ void changeLine(float spx,float spy,float epx, float epy,uint8_t draw,BwImageTyp
 	}
 }
 
-void drawLine(float spx,float spy,float epx, float epy,BwImageType* img)
+
+void drawLineFloat(float spx,float spy,float epx, float epy,BwImageType* img)
 {
 	changeLine(spx,spy,epx,epy,1,img);
 }
 
-void clearLine(float spx,float spy,float epx, float epy,BwImageType* img)
+
+void clearLineFloat(float spx,float spy,float epx, float epy,BwImageType* img)
 {
 	changeLine(spx,spy,epx,epy,0,img);
 }
+
 
 void drawHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
 {
@@ -290,6 +291,7 @@ void drawHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
 	}
 }
 
+
 void drawVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 {
 	if (sy > ey)
@@ -307,6 +309,7 @@ void drawVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 		}
 	}
 }
+
 
 void clearHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
 {
@@ -326,6 +329,7 @@ void clearHorizontal(uint8_t yval,int8_t sx, int8_t ex, BwImageType*img)
 	}
 }
 
+
 void clearVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 {
 	if (sy > ey)
@@ -343,6 +347,146 @@ void clearVertical(uint8_t xval,int8_t sy, int8_t ey, BwImageType*img)
 		}
 	}
 }
+
+
+void setLineSmallSlope(uint8_t xstart,uint8_t ystart, uint8_t xend, uint8_t yend,uint8_t doDraw,BwImageType*img)
+{
+	if (xend < xstart)
+	{
+		uint8_t swap;
+		swap = xend;
+		xend = xstart;
+		xstart = swap;
+
+		swap = yend;
+		yend = ystart;
+		ystart = swap;
+	}
+	int8_t dx = xend - xstart;
+	int8_t dy = yend - ystart;
+	int8_t yIncrement = 1;
+	int16_t D;
+	if (dy < 0 )
+	{
+		yIncrement = -1;
+		dy = -dy;
+	}
+	D = (dy << 1) - dx;
+	uint8_t y = ystart;
+	for (uint8_t x=xstart;x<=xend;x++)
+	{
+		if (doDraw)
+		{
+			setPixel(x,y,img);
+		}
+		else
+		{
+			clearPixel(x,y,img);
+		}
+		if (D > 0)
+		{
+			y += yIncrement;
+			D += (dy-dx) << 1;
+		}
+		else
+		{
+			D += 2*dy;
+		}
+	}
+}
+
+
+void setLineLargeSlope(uint8_t xstart, uint8_t ystart,uint8_t xend, uint8_t yend,uint8_t doDraw,BwImageType*img)
+{
+	if (yend < ystart)
+	{
+		uint8_t swap;
+		swap = yend;
+		yend = ystart;
+		ystart = swap;
+
+		swap = xend;
+		xend = xstart;
+		xstart = swap;
+	}
+	int8_t dx = xend - xstart;
+	int8_t dy = yend - ystart;
+	int8_t xIncrement = 1;
+	int16_t D;
+	if (dx < 0 )
+	{
+		xIncrement = -1;
+		dx = -dx;
+	}
+	D = (dx << 1) - dy;
+	uint8_t x = xstart;
+	for (uint8_t y=ystart;y<=yend;y++)
+	{
+		if (doDraw)
+		{
+			setPixel(x,y,img);
+		}
+		else
+		{
+			clearPixel(x,y,img);
+		}
+		if (D > 0)
+		{
+			x += xIncrement;
+			D += (dx-dy) << 1;
+		}
+		else
+		{
+			D += 2*dx;
+		}
+	}
+}
+
+
+void drawLine(uint8_t xstart,uint8_t ystart,uint8_t xend, uint8_t yend,BwImageType*img)
+{
+	if (abs(yend-ystart) < abs(xend-xstart))
+	{
+		setLineSmallSlope(xstart,ystart,xend,yend,1,img);
+	}
+	else
+	{
+		setLineLargeSlope(xstart,ystart,xend,yend,1,img);
+	}
+}
+
+
+void clearLine(uint8_t xstart,uint8_t ystart,uint8_t xend, uint8_t yend,BwImageType*img)
+{
+	if (abs(yend-ystart) < abs(xend-xstart))
+	{
+		setLineSmallSlope(xstart,ystart,xend,yend,0,img);
+	}
+	else
+	{
+		setLineLargeSlope(xstart,ystart,xend,yend,0,img);
+	}
+}
+
+
+void drawRectFrame(uint8_t xstart,uint8_t ystart,uint8_t xend,uint8_t yend,BwImageType*img)
+{
+	drawHorizontal(ystart,xstart,xend,img);
+	drawHorizontal(yend,xstart,xend,img);
+	drawVertical(xstart,ystart,yend,img);
+	drawVertical(xend,ystart,yend,img);
+}
+
+
+
+void clearRectFrame(uint8_t xstart,uint8_t ystart,uint8_t xend,uint8_t yend,BwImageType*img)
+{
+	clearHorizontal(ystart,xstart,xend,img);
+	clearHorizontal(yend,xstart,xend,img);
+	clearVertical(xstart,ystart,yend,img);
+	clearVertical(xend,ystart,yend,img);
+}
+
 void drawOval(float ax,float ay,float cx,float cy,BwImageType*img)
 {
 	float fix,fiy,dr;
@@ -360,6 +504,7 @@ void drawOval(float ax,float ay,float cx,float cy,BwImageType*img)
 		}
 	}
 }
+
 
 void clearOval(float ax,float ay,float cx,float cy,BwImageType*img)
 {
@@ -379,11 +524,12 @@ void clearOval(float ax,float ay,float cx,float cy,BwImageType*img)
 	}
 }
 
+
 void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 {
-	uint32_t dx,dy;
-	dx=(uint32_t)float2int(epx-spx);
-	dy=(uint32_t)float2int(epy-spy);
+	int32_t dx,dy;
+	dx=(int32_t)float2int(epx-spx);
+	dy=(int32_t)float2int(epy-spy);
 	int32_t px,py;
 	px=float2int(spx);
 	py=float2int(spy);
@@ -396,11 +542,12 @@ void clearSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 	}
 }
 
+
 void clearSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageType* img)
 {
-	uint32_t dx,dy;
-	dx=(uint32_t)(epx-spx);
-	dy=(uint32_t)(epy-spy);
+	int32_t dx,dy;
+	dx=(int32_t)(epx-spx);
+	dy=(int32_t)(epy-spy);
 
 	for (int32_t cx = 0;cx<dx;cx++)
 	{
@@ -410,6 +557,7 @@ void clearSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageT
 		}
 	}
 }
+
 
 void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 {
@@ -428,11 +576,12 @@ void drawSquare(float spx, float spy,float epx, float epy,BwImageType* img)
 	}
 }
 
+
 void drawSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageType* img)
 {
-	uint32_t dx,dy;
-	dx=(uint32_t)(epx-spx);
-	dy=(uint32_t)(epy-spy);
+	int32_t dx,dy;
+	dx=(int32_t)(epx-spx);
+	dy=(int32_t)(epy-spy);
 
 	for (int32_t cx = 0;cx<dx;cx++)
 	{
@@ -442,6 +591,7 @@ void drawSquareInt(uint8_t spx, uint8_t spy,uint8_t  epx, uint8_t  epy,BwImageTy
 		}
 	}
 }
+
 
 uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageType* img,const void* font)
 {
@@ -454,6 +604,7 @@ uint8_t drawChar(uint8_t px, uint8_t py, char c,BwImageType* img,const void* fon
 		return drawCharGFXFont(px,py,c,img,(GFXfont*)font);
 	}
 }
+
 
 uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GFXfont* font)
 {
@@ -493,6 +644,7 @@ uint8_t drawCharGFXFont(uint8_t px, uint8_t py, char c,BwImageType* img,const GF
 	return glyph->xAdvance;
 }
 
+
 uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageType* img)
 {   
 	uint8_t bitarray; 
@@ -517,6 +669,7 @@ uint8_t drawCharOLedFont(uint8_t px, uint8_t py,char c, BwImageType* img)
 	}
 	return 6;
 }
+
 
 void drawText(uint8_t px, uint8_t py,const char * txt,BwImageType* img,const void* font)
 {
@@ -556,7 +709,8 @@ void drawText(uint8_t px, uint8_t py,const char * txt,BwImageType* img,const voi
 	}
 }
 
-void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgBuffer)
+
+void drawImage(uint8_t px, uint8_t py,const BwImageTypeConst * img, BwImageType* imgBuffer)
 {
 	uint8_t pixel;
 	uint8_t cxOut, cyOut;
@@ -582,7 +736,8 @@ void drawImage(uint8_t px, uint8_t py,const BwImageType * img, BwImageType* imgB
 	}
 }
 
-uint8_t getPixel(int32_t px,int32_t py,const BwImageType*img)
+
+uint8_t getPixel(int32_t px,int32_t py,const BwImageTypeConst*img)
 {
 if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
 {
@@ -597,6 +752,7 @@ else
 	return *(img->data + pageIdx) & (1 << (bitindex));
 }
 }
+
 
 void setPixel(int32_t px,int32_t py,BwImageType*img)
 {
@@ -604,15 +760,22 @@ if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
-	*(img->data + pageIdx) |= (1 << (bitindex));
+	if (pageIdx < img->byteSize)
+	{
+		*(img->data + pageIdx) |= (1 << (bitindex));
+	}
 }
 else
 {
 	int32_t bitindex = px & 0x7;
 	int32_t pageIdx =  (px >> 3)*(img->sy) + py;
-	*(img->data + pageIdx) |= (1 << (bitindex));
+	if (pageIdx < img->byteSize)
+	{
+		*(img->data + pageIdx) |= (1 << (bitindex));
+	}
 }
 }
+
 
 void clearPixel(int32_t px,int32_t py,BwImageType*img)
 {
@@ -620,13 +783,19 @@ if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
 {
 	int32_t bitindex = py & 0x7;
 	int32_t pageIdx =  (py >> 3)*(img->sx) + px;
-	*(img->data + pageIdx) &= ~(1 << (bitindex));
+	if (pageIdx < img->byteSize)
+	{
+		*(img->data + pageIdx) &= ~(1 << (bitindex));
+	}
 }
 else
 {
 	int32_t bitindex = px & 0x7;
 	int32_t pageIdx =  (px >> 3)*(img->sy) + py;
-	*(img->data + pageIdx) &= ~(1 << (bitindex));
+	if (pageIdx < img->byteSize)
+	{
+		*(img->data + pageIdx) &= ~(1 << (bitindex));
+	}
 }
 }
 

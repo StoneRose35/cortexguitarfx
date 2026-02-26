@@ -64,7 +64,7 @@ BufferedInputType bufferedInput;
 #endif
 
 
-PiPicoFxUiType piPicoUiController;
+PiPicoFXUiType ui;
 uint32_t core1Handshake;
 volatile int16_t avgOutOld=0,avgInOld=0;
 volatile uint16_t bufferCnt=0;

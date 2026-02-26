@@ -9,9 +9,19 @@ using namespace PiPicoFX;
 
 int16_t SineModulation::SineModulation::processSample(int16_t sampleIn)
 {
-    sampleIn >>= 1;
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return sineChorusInterpolatedProcessSample(sampleIn,&this->sineChorus);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn >>= 1;
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = sineChorusInterpolatedProcessSample(newIn,&this->sineChorus);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void SineModulation::SineModulation::setup()

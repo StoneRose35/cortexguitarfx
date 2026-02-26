@@ -9,8 +9,18 @@ using namespace PiPicoFX;
 
 int16_t Eq::Eq::processSample(int16_t sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return threeBandEqProcessSample(sampleIn,&this->eq);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = threeBandEqProcessSample(newIn,&this->eq);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Eq::Eq::setup()

@@ -6,14 +6,14 @@ extern "C" {
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
-#include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 }
+extern PiPicoFXUiType ui;
 
 static volatile uint8_t editPos=0;
 static volatile uint8_t editState=0;
-static volatile uint8_t maxStringLength=8;
+static uint8_t maxStringLength=8;
 static char * stringBkp;
 
 /*
@@ -29,10 +29,10 @@ static char * stringBkp;
 
 */
 
-static void create(PiPicoFxUiType*data)
+static void create()
 {
     BwImageType* imgBuffer = getImageBuffer();
-    char * stringBfr = (char*)data->data;
+    char * stringBfr = (char*)ui.data;
     const GFXfont * font = getGFXFont(FREEMONO9PT7B);
     clearImage(imgBuffer);
     drawText(2,2+11,stringBfr,imgBuffer,font);
@@ -70,14 +70,9 @@ static void create(PiPicoFxUiType*data)
     drawText(40,53,"Cancel",imgBuffer,font);
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
-{
-    BwImageType* imgBuffer = getImageBuffer();
-    DisplayWriteFramebufferAsync(imgBuffer->data);
-}
 
 
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterCallback() 
 {
     BwImageType* imgBuffer = getImageBuffer();
     const GFXfont * font = getGFXFont(FREEMONO9PT7B);
@@ -89,14 +84,14 @@ static void enterCallback(PiPicoFxUiType*data)
             drawLine(editPos*11,0,(editPos+1)*11,0,imgBuffer);
             drawLine(editPos*11,3+font->yAdvance,(editPos+1)*11,3+font->yAdvance,imgBuffer);
         }
-        if (uiStackCurrent(data) != 0xFF)
+        if (uiStackCurrent() != 0xFF)
         {
-            uiStackPush(data,0xFF);
+            uiStackPush(0xFF);
         }
     }
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback()
 {    
     BwImageType* imgBuffer = getImageBuffer();
     const GFXfont * font = getGFXFont(FREEMONO9PT7B);
@@ -113,22 +108,22 @@ static void exitCallback(PiPicoFxUiType*data)
     {
         if (editPos == 254) // OK
         {
-            uiStackPop(data);
+            uiStackPop();
             free(stringBkp);
         }
         else if (editPos == 255) // Cancel
         {
-            uiStackPop(data);
+            uiStackPop();
             for(uint8_t c=0;c<maxStringLength;c++)
             {
-                *((char*)data->data + c) = *(stringBkp+ c);
+                *((char*)ui.data + c) = *(stringBkp+ c);
             }
             free(stringBkp);
         }
     }
 }
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
     int16_t newPos;
     int8_t newChar;
@@ -207,7 +202,7 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
     {
         if(editPos < 254)
         {
-            newChar = *((char*)data->data + editPos) + encoderDelta;
+            newChar = *((char*)ui.data + editPos) + encoderDelta;
             if(newChar > 126)
             {
                 newChar=126;
@@ -221,27 +216,20 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 newChar = 32;
             }
             clearSquare(0,2,127,2+font->yAdvance,imgBuffer);
-            *((char*)data->data + editPos)=newChar;
-            drawText(2,2+11,(char*)data->data,imgBuffer,font);
+            *((char*)ui.data + editPos)=newChar;
+            drawText(2,2+11,(char*)ui.data,imgBuffer,font);
         }
     }
 }
 
 
-void enterLevel6(PiPicoFxUiType*data)
+void enterLevel6(void)
 {
     clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
-    //registerKnob0Callback(&knob0Callback);
-    //registerKnob1Callback(&knob1Callback);
-    //registerKnob2Callback(&knob2Callback);
-    //registerStompswitch1PressedCallback(&stompswitch1Callback);
-    //registerStompswitch2PressedCallback(&stompswitch2Callback);
-    //registerStompswitch3PressedCallback(&stompswitch3Callback);
-    registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
 }
 

@@ -193,7 +193,7 @@ out/%.o: Src/services/%.c $(ASSET_IMAGES) Inc/gen/pio0_pio.h Inc/gen/version.h o
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
 
 # image assets
-Inc/images/%.h: Assets/%.png
+Inc/images/%.h: Assets/%.png out
 	python3 ./tools/helper_scripts.py -convertBwImg $<
 
 
@@ -230,7 +230,7 @@ $(PROJECT).uf2: tools/elf2uf2 $(PROJECT).elf
 	$(ELF2UF2) ./out/$(PROJECT).elf ./out/$(PROJECT).uf2
 	@rm -rf ./out/*.o
 
-.PHONY: mic_stomp_expansion_board/mic_stomp.bin
+.PHONY: Inc/gen/version.h mic_stomp_expansion_board/mic_stomp.bin
 
 
 # *************************************************************

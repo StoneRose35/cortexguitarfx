@@ -7,7 +7,17 @@ using namespace PiPicoFX;
 
 int16_t Off::Off::processSample(int16_t sampleIn)
 {
-    return gainStageProcessSample(sampleIn,&presetVolume);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&presetVolume);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Off::Param1::parameterCallback(uint16_t val)

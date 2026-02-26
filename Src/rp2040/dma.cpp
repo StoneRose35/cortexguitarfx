@@ -37,7 +37,7 @@ extern volatile int16_t avgOutOld;
 extern volatile int16_t avgInOld;
 extern uint32_t cpuLoad;
 extern volatile uint8_t programChangeState;
-extern PiPicoFxUiType piPicoUiController;
+extern PiPicoFXUiType ui;
 static volatile uint32_t * audioStatePtr;
 int16_t fadeCounter;
 volatile uint32_t spurious_irq_cntr=0;
@@ -120,7 +120,7 @@ void isr_c0_dma_irq0_irq11()
 
 			if (programChangeState != 3) // processing
 			{
-				outputSample = piPicoUiController.currentProgram->processSample(inputSample); //getNextSineValue();  
+				outputSample = ui.currentProgram->processSample(inputSample); //getNextSineValue();  
 			}
 			else
 			{

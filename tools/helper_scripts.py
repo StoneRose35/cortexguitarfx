@@ -29,11 +29,11 @@ c_template_bw = """
 #define _{4}_H_
 #include "graphics/bwgraphics.h"
 
-static uint8_t {0}_bwdata[]= {{
+static const uint8_t {0}_bwdata[]= {{
 {1}
 }};
 
-static const struct BwImageStruct {0}_streamimg = {{
+static const struct BwImageStructConst {0}_streamimg = {{
     .data = {0}_bwdata,
     .sx = {2},
     .sy = {3},

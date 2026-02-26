@@ -1,11 +1,11 @@
 extern "C" {
 #include <stdint.h>
 
+
 #include "drivers/24lc128.h"
 #include "stringFunctions.h"
 }
 #include "pipicofx/picofxCore.hpp"
-//#include "pipicofx/fxPrograms.h"
 #include "pipicofx/FxProgram.hpp"
 #include "pipicofx/fxProgramParameter.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
@@ -22,7 +22,7 @@ void savePreset(FxPresetType* preset,uint16_t presetPos)
     }
     preset->magicNr = cs;
     address = presetPos*sizeof(FxPresetType);
-    #ifdef RP2040_FEATHER
+    #ifdef HARDWARE
     eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArrayPtr);
     #endif
 }
@@ -34,7 +34,7 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     uint8_t * presetArrayPtr;
     presetArrayPtr = (uint8_t*)preset;
     address = presetPos*sizeof(FxPresetType);
-    #ifdef RP2040_FEATHER
+    #ifdef HARDWARE
     eeprom24lc128ReadArray(address,sizeof(FxPresetType),presetArrayPtr);
     #endif
     for (uint8_t c=0;c<sizeof(FxPresetType)-2;c++)
@@ -50,6 +50,19 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
         return 0;
     }
     return 1;
+}
+
+void clearPreset(uint16_t presetPos)
+{
+    uint32_t address;
+
+    address = presetPos*sizeof(FxPresetType);
+    uint8_t presetArray[sizeof(FxPresetType)];
+    for (uint8_t c=0;c<sizeof(FxPresetType);c++)
+    {
+        presetArray[c]=0xFF;
+    }
+    eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArray);
 }
 
 void applyPreset(FxPresetType* preset,PiPicoFX::FxProgram * program)

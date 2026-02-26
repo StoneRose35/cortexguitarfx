@@ -1,5 +1,4 @@
-extern "C"
-{
+extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/display128x64.h"
@@ -7,24 +6,25 @@ extern "C"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
 #include "images/pipicofx_param_1_scaled.h"
-#include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
+#include "romfunc.h"
 #include "stringFunctions.h"
 }
 
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
+extern PiPicoFXUiType ui;
 
-static void create(PiPicoFxUiType*data)
+static void create()
 {
     BwImageType* imgBuffer = getImageBuffer();
     clearImage(imgBuffer);
-    drawText(0,8,data->currentProgram->getName(),imgBuffer,0);
-    drawText(0,16,data->currentParameter->getParameterName(),imgBuffer,0);
+    drawText(0,8,ui.currentProgram->getName(),imgBuffer,0);
+    drawText(0,16,ui.currentParameter->getParameterName(),imgBuffer,0);
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
+static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
     BwImageType * img=getImageBuffer();
     clearSquareInt(0,16,128,64,img);
@@ -36,7 +36,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     (void)cpuLoad;
 
 
-    fValue = int2float((int32_t)data->currentParameter->rawValue);
+    fValue = int2float((int32_t)ui.currentParameter->rawValue);
     fMaxValue = int2float((int32_t)(1 << 12));
     fMinValue = int2float((int32_t)0);
     fValue = 0.7853981633974483f + 4.71238898038469f*(fValue - fMinValue)/(fMaxValue-fMinValue); //fValue is now an angle in radians from 45° to 315°
@@ -47,56 +47,56 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUi
     cy = 40.0f;
     drawImage(13,16,&pipicofx_param_1_scaled_streamimg,img);
     drawLine(cx,cy,px,py,img);
-    data->currentParameter->parameterDisplay(paramValueBfr);
+    ui.currentParameter->parameterDisplay(paramValueBfr);
     drawText(0,64,paramValueBfr,img,0);
 }
 
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterCallback() 
 {
-    if (data->currentParameter->getControl() == 0xFF || data->editViaRotary != 0)
+    if (ui.currentParameter->getControl() == 0xFF || ui.editViaRotary != 0)
     {
-        uiStackPush(data, 1);
-        enterLevel2(data);
+        uiStackPush(1);
+        enterLevel2();
     }
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback()
 {
-    parametersToPreset(presets+currentPreset,data->currentProgram);
+    parametersToPreset(presets+currentPreset,ui.currentProgram);
 }
 
-static inline void knobCallback(uint16_t val,PiPicoFxUiType*data,uint8_t control)
+static inline void knobCallback(uint16_t val,uint8_t control)
 {
-    if (data->locked == 0)
+    if (ui.locked == 0)
     {
-        for (uint8_t c=0;c<data->currentProgram->getParameterCount();c++)
+        for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
         {
-            if (data->currentProgram->getParameter(c)->getControl()==control)
+            if (ui.currentProgram->getParameter(c)->getControl()==control)
             {
-                data->currentProgram->getParameter(c)->parameterCallback(val);
+                ui.currentProgram->getParameter(c)->parameterCallback(val);
             }
         }  
     } 
 }
 
 
-static void knob0Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob0Callback(uint16_t val)
 {
-    knobCallback(val,data,0);
+    knobCallback(val,0);
 }
 
-static void knob1Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob1Callback(uint16_t val)
 {
-    knobCallback(val,data,1);
+    knobCallback(val,1);
 }
 
-static void knob2Callback(uint16_t val,PiPicoFxUiType*data)
+static void knob2Callback(uint16_t val)
 {
-    knobCallback(val,data,2);
+    knobCallback(val,2);
 }
 
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
     if (encoderDelta > 1)
     {
@@ -106,22 +106,22 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
     {
         encoderDelta = -1;
     }
-    data->currentParameterIdx += encoderDelta;
-    if (data->currentParameterIdx >= data->currentProgram->getParameterCount() && encoderDelta > 0)
+    ui.currentParameterIdx += encoderDelta;
+    if (ui.currentParameterIdx >= ui.currentProgram->getParameterCount() && encoderDelta > 0)
     {
-        data->currentParameterIdx=data->currentProgram->getParameterCount()-1;
+        ui.currentParameterIdx=ui.currentProgram->getParameterCount()-1;
     }
-    else if (data->currentParameterIdx >= data->currentProgram->getParameterCount() && encoderDelta < 0)
+    else if (ui.currentParameterIdx >= ui.currentProgram->getParameterCount() && encoderDelta < 0)
     {
-        data->currentParameterIdx = 0;
+        ui.currentParameterIdx = 0;
     }
-    data->currentParameter = data->currentProgram->getParameter(data->currentParameterIdx);
-    create(data);
+    ui.currentParameter = ui.currentProgram->getParameter(ui.currentParameterIdx);
+    create();
 }
 
-void enterLevel1(PiPicoFxUiType*data)
+void enterLevel1()
 {
-    clearCallbackAssignments();
+    //clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
@@ -129,5 +129,5 @@ void enterLevel1(PiPicoFxUiType*data)
     registerKnob1Callback(&knob1Callback);
     registerKnob2Callback(&knob2Callback);
     registerOnUpdateCallback(&update);
-    create(data);
+    create();
 }

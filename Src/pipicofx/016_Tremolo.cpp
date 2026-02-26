@@ -9,8 +9,18 @@ using namespace PiPicoFX;
 
 int16_t Tremolo::Tremolo::processSample(int16_t sampleIn)
 {
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return tremoloProcessSample(sampleIn,&this->tremolo);
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    newIn = tremoloProcessSample(newIn,&this->tremolo);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Tremolo::Tremolo::setup()

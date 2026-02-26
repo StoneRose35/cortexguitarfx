@@ -10,20 +10,29 @@ using namespace PiPicoFX;
 
 int16_t Compressor::Compressor::processSample(int16_t sampleIn)
 {
+    int16_t newIn=0;
+    if (this->isOn())
+    {
+        newIn = sampleIn;
+    }
     switch(this->compressorType)
     {
         case 0:
-            sampleIn = compressorProcessSample(sampleIn,&this->compressor);
+            newIn = compressorProcessSample(newIn,&this->compressor);
             break;
         case 1:
-            sampleIn = compressor2ProcessSample(sampleIn,&this->compressor);
+            newIn = compressor2ProcessSample(newIn,&this->compressor);
             break;
         case 2:
-            sampleIn = compressor3ProcessSample(sampleIn,&this->compressor);
+            newIn = compressor3ProcessSample(newIn,&this->compressor);
             break;
     }
-    sampleIn = gainStageProcessSample(sampleIn,&this->presetVolume);
-    return sampleIn;
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
+    if(!this->isOn())
+    {
+        return (sampleIn + newIn);
+    }
+    return newIn;
 }
 
 void Compressor::Compressor::setup()

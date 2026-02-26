@@ -1,3 +1,4 @@
+
 extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "pipicofx/pipicofxui.h"
 #include "images/editOverlay.h"
 #include "images/settingsOverlay.h"
-#include "romfunc.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
@@ -26,15 +26,15 @@ extern "C" {
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
-extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
+extern PiPicoFXUiType ui;
 
-static volatile uint8_t editType; // 0: Program
+static uint8_t editType; // 0: Program
                                   // 1: Led Color
                                   // 2: Parameters 
 static volatile uint8_t exitState=0; // 0: Exit pressed the first time, 1: save and exit, 2: revert and exit
 
-static void create(PiPicoFxUiType*data)
+static void create()
 {
     char strbfr[8];
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
@@ -81,22 +81,16 @@ static void create(PiPicoFxUiType*data)
     }
 }
 
-static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad,PiPicoFxUiType*data)
-{
-    BwImageType* imgBuffer = getImageBuffer();
-    DisplayWriteFramebufferAsync(imgBuffer->data);
-}
 
-
-static void enterCallback(PiPicoFxUiType*data) 
+static void enterCallback() 
 {
     
     switch (editType)
     {
         case EDITLEVEL_PROGRAM:
-            uiStackPush(data,4);
-            data->locked = 0;
-            enterLevel0(data);
+            uiStackPush(4);
+            (&ui)->locked = 0;
+            enterLevel0();
             break;
         case EDITLEVEL_LEDCOLOR:
             presets[currentPreset].ledColor++;
@@ -108,55 +102,54 @@ static void enterCallback(PiPicoFxUiType*data)
             setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
             break;
         case EDITLEVEL_PARAMETERS:
-            uiStackPush(data,4);
-            data->locked = 1;
-            data->currentParameterIdx = 0;
-            data->currentParameter = data->currentProgram->getParameter(data->currentParameterIdx);
-            if (data->currentProgram->getParameterCount() > 0)
+            uiStackPush(4);
+            (&ui)->locked = 1;
+            (&ui)->currentParameterIdx = 0;
+            (&ui)->currentParameter = (&ui)->currentProgram->getParameter((&ui)->currentParameterIdx);
+            if ((&ui)->currentProgram->getParameterCount() > 0)
             {
-                enterLevel1(data);
+                enterLevel1();
             }
             break;
         case EDITLEVEL_NAME:
-            uiStackPush(data,4);
+            uiStackPush(4);
             presets[currentPreset].name[23]=0;
-            data->data = presets[currentPreset].name;
-            enterLevel6(data);
+            (&ui)->data = presets[currentPreset].name;
+            enterLevel6();
 
     }
 }
 
-static void exitCallback(PiPicoFxUiType*data)
+static void exitCallback()
 {
     if (exitState == EXIT_PRESSED_FIRST_TIME)
     {
-        uiStackPush(data,0xFF);
+        uiStackPush(0xFF);
         exitState=1;
-        create(data);
+        create();
     }
     else if (exitState == EXIT_PRESSED_SAVE)
     {
-        uiStackPop(data);
+        uiStackPop();
         savePreset(presets+currentPreset,currentBank*3 + currentPreset);
         exitState = 0;
     }
     else if (exitState == EXIT_PRESSED_REVERT)
     {
-        uiStackPop(data);
+        uiStackPop();
         if (loadPreset(presets+currentPreset,currentBank*3 + currentPreset)!=0)
         {
             generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
         }
-        if (data->currentProgramIdx != presets[currentPreset].programNr)
+        if (ui.currentProgramIdx != presets[currentPreset].programNr)
         {
-            programToInitialize = presets[currentPreset].programNr;
             programChangeState = 1;
         }
         exitState =  EXIT_PRESSED_FIRST_TIME;   
     }
 }
 
-static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
+static void rotaryCallback(int16_t encoderDelta)
 {
     if (exitState == EXIT_PRESSED_FIRST_TIME)
     {
@@ -176,34 +169,33 @@ static void rotaryCallback(int16_t encoderDelta,PiPicoFxUiType*data)
                 editType = 0;
             }
         }
-        create(data);
+        create();
     }
     else
     {
         if (encoderDelta > 0 && exitState == EXIT_PRESSED_SAVE)
         {
             exitState = EXIT_PRESSED_REVERT;
-            create(data);
+            create();
         }
         else if (encoderDelta < 0 && exitState == EXIT_PRESSED_REVERT)
         {
             exitState = EXIT_PRESSED_SAVE;
-            create(data);
+            create();
         }
     }
 }
 
 
 
-void enterLevel4(PiPicoFxUiType*data)
+void enterLevel4()
 {
     editType = 0;
     clearCallbackAssignments();
     registerEnterButtonPressedCallback(&enterCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerRotaryCallback(&rotaryCallback);
-    registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    create(data);
+    create();
 }
 
