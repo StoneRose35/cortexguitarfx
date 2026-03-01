@@ -12,6 +12,8 @@ static uint8_t ptrY=0;
 
 void initDisplayCommand(char * cmd,void* context)
 {
+    (void)cmd;
+    (void)context;
     printf("Initializing Display .. ");
     initDisplay(); 
     printf("Done \r\n");
@@ -19,6 +21,8 @@ void initDisplayCommand(char * cmd,void* context)
 
 void setBacklightCommand(char * cmd,void* context)
 {
+    (void)cmd;
+    (void)context;
     char bcontent[8];
     uint8_t brightnessval, errorflag = 0;
     getBracketContent(cmd,bcontent);
@@ -34,6 +38,8 @@ void setBacklightCommand(char * cmd,void* context)
 
 void setCursorCommand(char * cmd,void* context)
 {
+    (void)cmd;
+    (void)context;
     char bcontent[8];
     char nrbfr[4];
     uint8_t errorcodes=0;
@@ -70,6 +76,7 @@ void setCursorCommand(char * cmd,void* context)
 
 void writeStringCommand(char * cmd,void * context)
 {
+    (void)context;
     uint16_t cmdCnt=0,c2=0;
     uint8_t firstBracketPos=0;
     while(*(cmd + cmdCnt) != 0)

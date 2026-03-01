@@ -18,6 +18,8 @@ const char * ATCommandSetPinPrefix = "AT+PIN";
 
 uint8_t ATSendCommand(char * cmd,char * out)
 {
+	(void)cmd;
+	(void)out;
 	return 0;
 }
 
@@ -72,6 +74,7 @@ uint8_t ATSetName(char * name)
 
 uint8_t ATSetBaud(char * idx)
 {
+	(void)idx;
 	return 0;
 }
 

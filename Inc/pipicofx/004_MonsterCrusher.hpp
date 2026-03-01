@@ -20,7 +20,8 @@ namespace PiPicoFX {
                 int16_t processSample(int16_t);
 
                 BitCrusherDataType bitcrusher={
-                    .bitmask = 0x8000
+                    .bitmask = 0x8000,
+                    .halfvalue = 0x4000
                 };
                 uint8_t resolution;
                 GainStageDataType presetVolume={

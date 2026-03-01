@@ -18,28 +18,28 @@ volatile f_i2f_conv _i2f=0;
 void initFloatFunctions()
 {
     void * floatFunctionsTable = getRomData('S','F');
-    _fadd = (f_proc_fct)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x0));
-    _fsub = (f_proc_fct)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x4));
-    _fmul = (f_proc_fct)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x8));
-    _fdiv = (f_proc_fct)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0xc));
-    _fsqrt = (f_proc_single)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x18));
-    _fcos = (f_proc_single)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x3c));
-    _fsin = (f_proc_single)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x40));
-    _ftan = (f_proc_single)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x44));
-    _fexp = (f_proc_single)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x4c));
-    _fln = (f_proc_single)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x50));
-    _i2f = (f_i2f_conv)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x2c));
-    _f2i = (f_f2i_conv)(uint32_t)(*(uint16_t*)(floatFunctionsTable+0x1c));
+    _fadd = (f_proc_fct)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x0));
+    _fsub = (f_proc_fct)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x4));
+    _fmul = (f_proc_fct)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x8));
+    _fdiv = (f_proc_fct)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0xc));
+    _fsqrt = (f_proc_single)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x18));
+    _fcos = (f_proc_single)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x3c));
+    _fsin = (f_proc_single)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x40));
+    _ftan = (f_proc_single)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x44));
+    _fexp = (f_proc_single)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x4c));
+    _fln = (f_proc_single)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x50));
+    _i2f = (f_i2f_conv)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x2c));
+    _f2i = (f_f2i_conv)(uint32_t)(*(uint16_t*)((uint8_t*)floatFunctionsTable+0x1c));
 }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-void * getRomFunction(char c1,char c2)
+voidfctptr getRomFunction(char c1,char c2)
 {
-    void * fct;
+    voidfctptr fct;
     uint32_t code = c1 | (c2 << 8);
     //multicast (uint32_t -> void pointer -> function pointer/uint16_t pointer) here only to avoid compiler warnings
-    rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn)(void*)(uint32_t)(*((uint16_t*)0x18));
+    rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn)(void(*)(void))(uint32_t)(*((uint16_t*)0x18));
     fct = rom_table_lookup((uint16_t*)(void*)(uint32_t)*((uint16_t*)0x14),code);
     return fct;
 }
@@ -48,31 +48,31 @@ void * getRomFunction(char c1,char c2)
 
 void * getRomData(char c1,char c2)
 {
-    void * fct;
+    void* data;
     uint32_t code = c1 | (c2 << 8);
     //multicast (uint32_t -> void pointer -> function pointer/uint16_t pointer) here only to avoid compiler warnings
-    rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn)(void*)(uint32_t)(*((uint16_t*)0x18));
-    fct = rom_table_lookup((uint16_t*)(void*)(uint32_t)*((uint16_t*)0x16),code);
-    return fct;
+    rom_table_data_lookup_fn rom_table_data_lookup = (rom_table_data_lookup_fn)(void(*)(void))(uint32_t)(*((uint16_t*)0x18));
+    data = rom_table_data_lookup((uint16_t*)(void*)(uint32_t)*((uint16_t*)0x16),code);
+    return data;
 }
 #pragma GCC diagnostic pop
 
 
 void flash_range_erase(uint32_t addr, uint32_t count, uint32_t block_size, uint8_t block_cmd)
 {
-    flash_range_erase_fn flash_range_erase_ptr = getRomFunction('R','E');
+    flash_range_erase_fn flash_range_erase_ptr = (flash_range_erase_fn)getRomFunction('R','E');
     flash_range_erase_ptr(addr,count,block_size,block_cmd);
 }
 
 void flash_range_program(uint32_t addr,const uint8_t * data, uint32_t cnt)
 {
-    flash_range_program_fn flash_range_program_ptr = getRomFunction('R','P');
+    flash_range_program_fn flash_range_program_ptr = (flash_range_program_fn)getRomFunction('R','P');
     flash_range_program_ptr(addr,data,cnt);
 }
 
 void reset_usb_boot(uint32_t gpio_activity_mask,uint32_t disable_interface_mask)
 {
-    reset_usb_boot_fn reset_usb_boot_ptr = getRomFunction('U', 'B');
+    reset_usb_boot_fn reset_usb_boot_ptr = (reset_usb_boot_fn)getRomFunction('U', 'B');
     reset_usb_boot_ptr(gpio_activity_mask,disable_interface_mask);
 }
 
@@ -223,7 +223,7 @@ float int2float(int32_t a)
 
 float fatan2(float a, float b)
 {
-    return 0.0;
+    return a+b;
 }
 
 

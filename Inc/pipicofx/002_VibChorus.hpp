@@ -17,10 +17,18 @@ namespace PiPicoFX {
                     this->setup();
                 };
                 int16_t processSample(int16_t);
-                SimpleChorusType chorusData={        
+                SimpleChorusType chorusData={   
+                    .delayBuffer = 0,     
                     .frequency = 500,
                     .depth = 10,
-                    .mix = 128};
+                    .mix = 128,
+                    .lfoVal = 0,
+                    .lfoValOld = 0,
+                    .lfoQuadrant = 0,
+                    .lfoPhaseinc = 0,
+                    .delayInputPtr = 0,
+                    .lfoUpdateCnt = 0
+                };
                 GainStageDataType presetVolume={
                     .gain=0xff,
                     .offset=0

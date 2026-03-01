@@ -17,11 +17,11 @@ CC=arm-none-eabi-gcc
 CPP=arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
-OPT=-O3
+OPT=-O2
 PAD_CKECKSUM=./tools/pad_checksum
 DEFINES=-DRP2040_FEATHER -DI2S_INPUT 
-CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=gnu11 -Wall -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
-CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -Wall -Wno-error=narrowing -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
+CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=gnu11 -Wall -Wpedantic -Wextra -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
+CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m0plus -mthumb -ffunction-sections -fdata-sections -std=c++20 -Wall -Wpedantic -Wextra -Wno-error=narrowing -I./Inc/RpiPico -I./Inc -I./Inc/gen -I./Src/tusb
 LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -Wl,--wrap=__aeabi_idiv -T./rp2040_feather.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lm -lstdc++ -Wl,--end-group
 LARGS_BS2=-nostdlib -T ./bs2_default.ld -Xlinker -Map="./out/bs2_default.map"
 CPYARGS=-Obinary

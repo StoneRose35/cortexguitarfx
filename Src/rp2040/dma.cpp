@@ -40,7 +40,7 @@ extern volatile uint8_t programChangeState;
 extern PiPicoFXUiType ui;
 static volatile uint32_t * audioStatePtr;
 int16_t fadeCounter;
-volatile uint32_t spurious_irq_cntr=0;
+
 
 void initDMA()
 {
@@ -188,10 +188,6 @@ void isr_c1_dma_irq0_irq11()
 	{
 		*DMA_INTS0 = (1<<4);
 		DisplayWriteNextLine();
-	}
-	else 
-	{
-		spurious_irq_cntr++;
 	}
 	
 	return;

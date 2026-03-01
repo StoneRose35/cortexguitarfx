@@ -12,6 +12,7 @@ extern "C" {
 __attribute__ ((section (".ramfunc"))) 
 int16_t freeVerbLowpass(int16_t sampleIn,void * filterData,volatile uint32_t * audioStatePtr)
 {
+    (void)audioStatePtr;
     return firstOrderIirLowpassProcessSample(sampleIn,(FirstOrderIirType*)filterData);
 }
 

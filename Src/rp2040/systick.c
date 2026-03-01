@@ -5,8 +5,8 @@
 #include "hardware/regs/m0plus.h"
 #include "hardware/rp2040_registers.h"
 
-volatile static uint32_t ticks=0;
-volatile static uint32_t ticks_c1=0;
+static volatile uint32_t ticks=0;
+static volatile uint32_t ticks_c1=0;
 extern volatile uint32_t encoderSpeed;
 extern volatile int32_t encoderVal;
 volatile int32_t encoderValOldSpeedMesurement=0;
@@ -17,7 +17,7 @@ void isr_c0_systick()
 
 void isr_c1_systick()
 {
-    uint32_t currentCnt = encoderVal;
+    int32_t currentCnt = encoderVal;
     ticks_c1++;
     if (currentCnt > encoderValOldSpeedMesurement)
     {

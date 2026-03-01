@@ -19,7 +19,14 @@ namespace PiPicoFX {
                 };
                 int16_t processSample(int16_t);
                 DelayDataType delay={
-                    .feedbackFunction=0
+                    .delayLine = 0,
+                    .delayLinePtr = 0,
+                    .delayInSamples = 10,
+                    .feedback = 0,
+                    .delayBufferLength = 32,
+                    .mix = 0,
+                    .feedbackFunction=0,
+                    .feebackData = 0
                 };
                 GainStageDataType presetVolume={
                     .gain=0xff,

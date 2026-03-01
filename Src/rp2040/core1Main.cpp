@@ -57,7 +57,7 @@ uint16_t adcChannel=0;
 uint8_t stompSwitchState;
 volatile uint8_t consumeEnterReleased=0;
 FxPresetType preset1, preset2;
-
+uint8_t * fb;
 extern uint32_t  _binary___mic_stomp_expansion_board_mic_stomp_bin_start;
 extern uint32_t  _binary___mic_stomp_expansion_board_mic_stomp_bin_end;
 
@@ -93,6 +93,8 @@ void core1Main()
     #endif
     #endif
 
+    *DMA_INTE0 |= (1 << 4);
+
     initDisplay();
 
 	/*
@@ -104,7 +106,7 @@ void core1Main()
 	
 	piPicoFxUiSetup();
 	ClearDisplay();
-    *DMA_INTE0 |= (1 << 4);
+
 
 	#ifndef FORCE_TEST_MODE
 		enterLevel0();
@@ -129,6 +131,9 @@ void core1Main()
     initStompSwitchesInterface();
     setStompswitchColorRaw(0);
     #endif
+
+    BwImageType * imgBfr = getImageBuffer();
+    fb = imgBfr->data;
 
     *NVIC_ISER = (1 << 16) | (1 << 23) | (1 << 11); 
     // enable interrupt for sio: FIR filteraudio processing, i2c: stomp extension and dma: display update of proc1     
@@ -187,6 +192,7 @@ void core1Main()
             avgOldOutBfr = avgOutOld >> 8;
             cpuLoadBfr = (cpuLoad >> 1);
             onUpdate(avgOldInBfr,avgOldOutBfr,cpuLoadBfr);
+            DisplayWriteFramebufferAsync(fb);
             #ifndef FORCE_TEST_MODE
             if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
             {
@@ -375,7 +381,6 @@ void core1Main()
             }
         }
         #endif
-        
     }
 }
 

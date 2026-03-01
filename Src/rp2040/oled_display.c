@@ -9,6 +9,7 @@
  * 
  */
 #include "globalConfig.h"
+typedef void oled_display;
 #ifdef JOYIT_128X64_DISPLAY
 #include "drivers/display128x64.h"
 #include "drivers/systick.h"
@@ -27,7 +28,7 @@ static volatile uint8_t * currentFrameBuffer=0;
 
 void initDisplay()
 {
-    #ifndef EXTENSION_BOARD
+    #ifndef AVR_FLASHER
     // get spi out of reset
     *RESETS |= (1 << RESETS_RESET_SPI0_LSB); 
 	*RESETS &= ~(1 << RESETS_RESET_SPI0_LSB);

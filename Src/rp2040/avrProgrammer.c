@@ -10,6 +10,8 @@
 #include "drivers/systick.h"
 
 
+#ifdef AVR_FLASHER
+
 static volatile uint8_t programmerState;
 
 void initAvrProgrammer()
@@ -383,3 +385,5 @@ uint8_t readSignatureBytes(uint8_t * data)
     }
     return 0x0;
 }
+
+#endif

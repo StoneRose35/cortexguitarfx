@@ -10,10 +10,11 @@ typedef struct bootRomInfo
     uint8_t magic3;
     uint8_t version;
 } BootRomInfoType;
-
+typedef void(*voidfctptr)(void);
 void * getRomData(char c1,char c2);
 
-typedef void *(*rom_table_lookup_fn)(uint16_t *table, uint32_t code);
+typedef voidfctptr (*rom_table_lookup_fn)(uint16_t *table, uint32_t code);
+typedef void* (*rom_table_data_lookup_fn)(uint16_t *table, uint32_t code);
 typedef void (*flash_range_erase_fn)(uint32_t addr,uint32_t count,uint32_t block_size,uint8_t block_cmd);
 void flash_range_erase(uint32_t addr, uint32_t count, uint32_t block_size, uint8_t block_cmd);
 

@@ -24,9 +24,14 @@ namespace PiPicoFX {
                     .offset=0
                 };
                 Pitchshifter2DataType  pitchShifter={
+                    .delayMemoryPtr = 0,
+                    .delayPointer1 = 0,
+                    .delayPointer2 = 0,
                     .currentDelayPosition=0,
                     .delayIncrement=0x4,
                     .buffersizePowerTwo=13,
+                    .buffersize = 0,
+                    .crossFadeWidth = 0,
                     .crossFadeWidthPwr2=11,
                 };
                 int16_t mix;

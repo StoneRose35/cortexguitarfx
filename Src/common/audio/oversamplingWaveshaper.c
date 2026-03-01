@@ -14,28 +14,8 @@ void initOversamplingWaveshaper(OversamplingWaveshaperDataType*data)
     initWaveShaper(&data->waveshaper,&waveShaperDefaultOverdrive);
 }
 
-//uint16_t oversampledBuffer[AUDIO_BUFFER_SIZE*2*(1 << OVERSAMPLING_FACTOR)];
 
-void  applyOversamplingDistortion(uint16_t*data,OversamplingWaveshaperDataType* waveshaper)
-{
-    int16_t oversample;
-    for (uint16_t c=0;c<AUDIO_BUFFER_SIZE*2*(1 << OVERSAMPLING_FACTOR);c++)
-    {
-        if ((c&OVERSAMPLING_FACTOR)!=0)
-        {
-            oversample=data[c >> OVERSAMPLING_FACTOR];
-        }
-        else
-        {
-            oversample=0;
-        }
 
-        if ((c&OVERSAMPLING_FACTOR)!=0)
-        {
-            data[c >> OVERSAMPLING_FACTOR] = oversample;
-        }
-    }
-}
 int16_t  OversamplingDistortionProcessSample(int16_t sample,OversamplingWaveshaperDataType* waveshaper)
 {
     int32_t osVal1, osVal2, osVal3, osVal4;

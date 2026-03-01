@@ -31,9 +31,11 @@ void setAsInput(uint8_t pinNr, uint8_t pullState)
     case PULL_STATE_DOWN:
         *padCtrl &= ~((1 << PADS_BANK0_GPIO0_PUE_LSB));
         *padCtrl |= (1 << PADS_BANK0_GPIO0_PDE_LSB);
+        break;
     case PULL_STATE_UP:
         *padCtrl &= ~((1 << PADS_BANK0_GPIO0_PDE_LSB));
         *padCtrl |= (1 << PADS_BANK0_GPIO0_PUE_LSB);
+        break;
     default:
         break;
     }

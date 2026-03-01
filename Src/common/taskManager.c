@@ -31,7 +31,7 @@ const UserCommandType userCommands[] = {
 	{"SYSINFO",&sysInfoCommand,CONTEXT_TYPE_NONE},
 	{"SETDT",&setDateTimeCommand,CONTEXT_TYPE_NONE},
 	{"HELP",&helpCommand,CONTEXT_TYPE_NONE},
-	{"0",0}
+	{"0",0,0}
 };
 
 

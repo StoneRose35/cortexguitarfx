@@ -25,10 +25,15 @@ int _close()
 }
 
 int _lseek(int file, int offset, int whence) {
+  (void)file;
+  (void)offset;
+  (void)whence;
   return 0;
 }
 
 void _kill(int pid, int sig) {
+  (void)pid;
+  (void)sig;
   return;
 }
 
@@ -37,10 +42,13 @@ int _getpid(void) {
 }
 
 int _isatty(int file) {
+  (void)file;
   return 1;
 }
 
 int _fstat(int file, struct stat *st) {
+  (void)file;
+  (void)st;
   return 0;
 }
 

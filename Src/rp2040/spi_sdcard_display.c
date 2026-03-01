@@ -1,3 +1,6 @@
+
+typedef void spi_sdcard_display;
+#include "globalConfig.h"
 #ifdef ADAFRUIT_1_8_COLOR_TFT_SDCARD
 
 

@@ -20,6 +20,11 @@ namespace PiPicoFX {
                 ~Reverb();
                 int16_t processSample(int16_t);
                 ReverbType reverb={
+                    .allpasses = {},
+                    .delayPointer=0,
+                    .feedbackValues = {},
+                    .delayPointers = {},
+                    .mix = 0,
                     .paramNr = 0
                 };
                 int16_t reverbTime=300;

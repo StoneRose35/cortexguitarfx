@@ -125,6 +125,7 @@ void sendCharAsyncUsb(void * commBfr,uint8_t blocking)
 
 void sendCharAsyncBt(void * commBfr,uint8_t blocking)
 {
+	(void)blocking;
 	CommBuffer bfr=(CommBuffer)commBfr;
 	uint32_t offset,len;
 	getOutputBuffer(bfr,&len,&offset);

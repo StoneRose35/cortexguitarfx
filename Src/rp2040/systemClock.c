@@ -15,7 +15,7 @@
 #include "system.h"
 
 #define SYS_CLK_VREG_VOLTAGE_AUTO_ADJUST_DELAY_US 1000
-#define VREG_VOLTAGE_1_15 0b01100
+#define VREG_VOLTAGE_1_15 12
 
 void setupClock()
 {

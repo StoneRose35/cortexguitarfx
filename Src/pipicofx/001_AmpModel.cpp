@@ -5,6 +5,7 @@ extern "C" {
 #include "pipicofx/delayMemoryHandler.h"
 int16_t analogDelayFeedbackFunction(int16_t sampleIn,void*fbkFilterData,volatile uint32_t*audioStatePtr)
 {
+    (void)audioStatePtr;
     FirstOrderIirType* tData = (FirstOrderIirType*)fbkFilterData;
     return firstOrderIirLowpassProcessSample(sampleIn,tData);
 }

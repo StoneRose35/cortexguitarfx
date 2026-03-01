@@ -3,7 +3,8 @@
 #include "systemChoice.h"
 
 #ifdef HARDWARE
-register void* address __asm__("sp");
+typedef char* register_t ;
+register_t address __asm__("sp");
 #else
 #include <stdio.h>
 void* address;

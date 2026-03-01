@@ -27,7 +27,7 @@ static volatile uint8_t lastTrigger;
 void isr_c1_io_irq_bank0_irq13()
 {
     uint32_t* switchIntAddress;
-    if ((*ENCODER_1_INTR & (1 << ENCODER_1_EDGE_HIGH)) == (1 << ENCODER_1_EDGE_HIGH))
+    if ((*ENCODER_1_INTR & (uint32_t)(1 << ENCODER_1_EDGE_HIGH)) == (uint32_t)(1 << ENCODER_1_EDGE_HIGH))
     {
         *ENCODER_1_INTR |= (1 << ENCODER_1_EDGE_HIGH);
         if(lastTrigger == 1)
@@ -100,7 +100,7 @@ void isr_c1_io_irq_bank0_irq13()
     for (uint8_t c=0;c<3;c++)
     {
         switchIntAddress = (uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*switchPins[c]) & 0xFFE0) >> 3)); 
-        if ((*switchIntAddress & (1 << (((4*switchPins[c]) & 0x1F)+3))) == (1 << (((4*switchPins[c]) & 0x1F)+3)))
+        if ((*switchIntAddress & (1 << (uint32_t)(((4*switchPins[c]) & 0x1F)+3))) == (uint32_t)(1 << (((4*switchPins[c]) & 0x1F)+3)))
         {
             *switchIntAddress |= (1 << (((4*switchPins[c]) & 0x1F)+3));
             if (oldTickSwitches[c] + ROTARY_ENCODER_DEBOUNCE < getTickValue())
@@ -110,7 +110,7 @@ void isr_c1_io_irq_bank0_irq13()
                 oldTickSwitches[c]=getTickValue();
             }
         }
-        else if ((*switchIntAddress & (1 << (((4*switchPins[c]) & 0x1F)+2))) == (1 << (((4*switchPins[c]) & 0x1F)+2)))
+        else if ((*switchIntAddress & (uint32_t)(1 << (((4*switchPins[c]) & 0x1F)+2))) == (uint32_t)(1 << (((4*switchPins[c]) & 0x1F)+2)))
         {
             *switchIntAddress |= (1 << (((4*switchPins[c]) & 0x1F)+2));
             if (oldTickSwitches[c] + ROTARY_ENCODER_DEBOUNCE < getTickValue())
@@ -128,6 +128,7 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
 {
     uint32_t* switchInteAddress;
     uint32_t* switchRegisterAddress;
+    uint32_t* switchIntAddress;
     // define pullups for encoder input and switch
     *ENCODER_1_PAD_CNTR &= ~(1 << PADS_BANK0_GPIO0_PDE_LSB);
     *ENCODER_1_PAD_CNTR |= (1 << PADS_BANK0_GPIO0_PUE_LSB);
@@ -157,9 +158,11 @@ void initRotaryEncoder(const uint8_t* pins,const uint8_t nswitches)
         switchInteAddress = (uint32_t*)(IO_BANK0_BASE + IO_BANK0_PROC1_INTE0_OFFSET + (((4*pins[c]) & 0xFFE0) >> 3));
         *switchInteAddress |= (1 << (((4*pins[c]) & 0x1F)+2)) | (1 << (((4*pins[c]) & 0x1F)+3)); // (1 << SWITCH_EDGE_HIGH) | (1 << SWITCH_EDGE_LOW);
         switchPins[c]=pins[c];
+
+        // clear interrupt flags to prevent spurious first triggers
+        switchIntAddress = (uint32_t*)(IO_BANK0_BASE + IO_BANK0_INTR0_OFFSET + (((4*switchPins[c]) & 0xFFE0) >> 3)); 
+        *switchIntAddress |= (1 << (((4*switchPins[c]) & 0x1F)+3)) | (1 << (((4*switchPins[c]) & 0x1F)+2));
     }
-
-
 
     *NVIC_ISER = (1 << 13);
     setInterruptPriority(13,1);

@@ -146,6 +146,7 @@ void writeText(char * str,uint16_t posH,uint16_t posV,uint8_t fontType)
 
 void casetCmd(uint16_t fontPosH,uint8_t fontSizeH)
 {
+    (void)fontSizeH;
     uint8_t cmdData[4];
     cmdData[0] = ((fontPosH << 3) & 0xFF00) >> 8;
     cmdData[1] = ((fontPosH << 3) & 0xFF);
@@ -156,6 +157,7 @@ void casetCmd(uint16_t fontPosH,uint8_t fontSizeH)
 
 void rasetCmd(uint16_t fontPosV,uint8_t fontSizeV)
 {
+    (void)fontSizeV;
     uint8_t cmdData[4];
     cmdData[0] = ((fontPosV << 3) & 0xFF00) >> 8;
     cmdData[1] = ((fontPosV << 3) & 0xFF);

@@ -1,6 +1,6 @@
 #ifndef _RP2040_REGISTERS_
 #define _RP2040_REGISTERS_
-
+#include "globalConfig.h"
 #include "stdint.h"
 
 /**
@@ -32,7 +32,11 @@
 #define ENCODER_1 7
 #define ENCODER_2 6
 #define ENTER_SWITCH 22
+#ifdef AVR_FLASHER
 #define EXIT_SWITCH 2
+#else
+#define EXIT_SWITCH 20
+#endif
 
 // driver for ssd1306-based display (128*64 pixel oled display interfaced using spi)
 #define SSD1306_CS_DISPLAY 21
@@ -40,9 +44,10 @@
 #define SSD1306_MOSI 19
 #define SSD1306_DISPLAY_CD 14
 #define SSD1306_DISPLAY_RESET 15
+#ifdef AVR_FLASHER
 #define PROG_MISO 20
-
 #define PROG_RESET 13
+#endif
 
 // pin definitions for two uart ports
 #define UART_USB_RX 1

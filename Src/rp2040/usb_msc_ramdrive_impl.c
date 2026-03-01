@@ -110,11 +110,11 @@ void usb_msc_handle_reset()
 // called when a packet is received, dont do anylthing unless the packet is the last one to be received 
 void usb_msc_handle_received_packet(UsbMultipacketTransfer* transfer)
 {
-
+    (void)transfer;
 }
 
 // called when a packet has been sent, don't do anything in case of the ramdrive since the data is there from the very beginning
 void usb_msc_handle_sent_packet(UsbMultipacketTransfer* transfer)
 {
-
+    (void)transfer;
 }

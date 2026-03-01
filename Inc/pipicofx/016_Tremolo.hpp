@@ -20,11 +20,14 @@ namespace PiPicoFX {
                 int16_t processSample(int16_t);
                 TremoloType tremolo={
                     .depth=0,
+                    .lfoUpdateCnt = 0,
                     .currentLfoVal=0,
+                    .nextLfoVal = 0,
                     .modulator = {
                         .squareRatio=0,
                         .phaseIncrement=131,
                         .phaseIncrementCorrection1=0,
+                        .phaseIncrementCorrection2=0,
                         .currentPhase=0,
                         .pulseWidth=0
                     }

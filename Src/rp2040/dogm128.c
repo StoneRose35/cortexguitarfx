@@ -45,7 +45,7 @@ void dogm128SendData(const uint8_t*data,uint8_t l)
 
 void initDisplay()
 {
-    #ifndef EXTENSION_BOARD
+    #ifndef AVR_FLASHER
     // get spi out of reset
     *RESETS |= (1 << RESETS_RESET_SPI0_LSB); 
 	*RESETS &= ~(1 << RESETS_RESET_SPI0_LSB);
