@@ -2,14 +2,24 @@ extern "C" {
 #include "stdlib.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/oled_display.h"
+#include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
 #include "images/pipicofx_param_2_scaled.h"
 #include "images/pipicofx_param_1_scaled.h"
+#include "images/editOverlay.h"
+#include "images/settingsOverlay.h"
+#include "images/fwUpgradeOverlay.h"
+#include "images/aboutoverlay.h"
+#include "images/fwupdateScreen.h"
+#include "images/looperOverlay.h"
+#include "images/freezable.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
 #include "systick.h"
+#include "bootloader_activation.h"
+#include "gen/version.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
 
@@ -34,6 +44,27 @@ extern uint8_t currentBank;
 extern uint8_t currentPreset;
 static volatile uint32_t longPressCnt=0;
 static volatile uint8_t enterState=0;
+static uint8_t overlayMode=0;
+static uint8_t overlayNr=0xFF;
+
+static const BwImageTypeConst* overlays[]={
+    &looperOverlay_streamimg,
+    &editOverlay_streamimg, 
+    &settingsOverlay_streamimg, 
+    &aboutoverlay_streamimg, 
+    &fwUpgradeOverlay_streamimg};
+
+
+#define LVL0_OVERLAY_NR_LOOPER 0
+#define LVL0_OVERLAY_NR_EDIT 1
+#define LVL0_OVERLAY_NR_SYSTEMSETTINGS 2
+#define LVL0_OVERLAY_NR_ABOUT 3
+#define LVL0_OVERLAY_NR_FWUPDATE 4
+#define LVL0_OVERLAY_NR_ABOUT_SHOWING 5
+
+#define OM_NONE 0
+#define OM_OVERLAYS 1
+
 static void create()
 {
     char lineBuffer[24];
@@ -45,6 +76,11 @@ static void create()
     if (ui.locked != 0)
     {
         drawImage(122,0,&lock,imgBuffer);
+    }
+
+    if (ui.currentProgram->isFreezable())
+    {
+        drawImage(110,16,&freezable_streamimg,imgBuffer);
     }
 
     for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
@@ -200,11 +236,73 @@ static void enterPressedCallback()
 static void enterReleasedCallback(void) 
 {
     enterState=0;
+    char strbfr[24];
+    BwImageType* imgBuffer = getImageBuffer();
     if (consumeEnterReleased == 1)
     {
         consumeEnterReleased = 0;
         return;
     }
+
+    switch (overlayMode)
+    {
+        case OM_NONE:
+            overlayMode = OM_OVERLAYS;
+            overlayNr = LVL0_OVERLAY_NR_LOOPER;
+            drawImage(41,0,&looperOverlay_streamimg,imgBuffer);
+            uiStackPush(0xFF);
+            break;
+        case OM_OVERLAYS:
+            if (overlayNr == LVL0_OVERLAY_NR_LOOPER)
+            {
+                overlayMode = OM_NONE;
+                uiStackPop();
+                uiStackPush(0);   
+                enterLevel8();
+            }
+            else if (overlayNr == LVL0_OVERLAY_NR_EDIT)
+            {
+                overlayMode = OM_NONE;
+                uiStackPop();
+                uiStackPush(0);   
+                enterLevel1();
+            }
+            else if (overlayNr == LVL0_OVERLAY_NR_SYSTEMSETTINGS)
+            {
+                overlayMode = OM_NONE;
+                uiStackPop();
+                uiStackPush(0);   
+                enterLevel5();
+            }
+            else if (overlayNr == LVL0_OVERLAY_NR_ABOUT)
+            {
+                overlayMode = OM_NONE;
+                overlayNr = LVL0_OVERLAY_NR_ABOUT_SHOWING;
+                clearSquareInt(0,0,128,43,imgBuffer);
+                *strbfr=0;
+                appendToString(strbfr,"About PiPicoFX");
+                drawText(0,8,strbfr,imgBuffer,(void*)0);
+                drawText(0,16,PI_PICO_FX_VERSION_NR,imgBuffer,(void*)0);
+                drawText(0,24,PI_PICO_FX_MCU_BOARD,imgBuffer,(void*)0);
+                *strbfr=0;
+                appendToString(strbfr,"built ");
+                appendToString(strbfr,PI_PICO_FX_BUILD_DATE);
+                drawText(0,32,strbfr,imgBuffer,(void*)0);
+                *strbfr=0;
+                appendToString(strbfr,"      ");
+                appendToString(strbfr,PI_PICO_FX_BUILD_TIME);
+                drawText(0,40,strbfr,imgBuffer,(void*)0);
+            }
+            else if (overlayNr == LVL0_OVERLAY_NR_FWUPDATE)
+            {
+                overlayMode = OM_NONE;
+                drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
+                DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
+                jumpToBootloader();
+            }
+    }
+
+
     if (ui.locked == 0)
     {
         uiStackPush(0);
@@ -229,6 +327,7 @@ static void exitCallback()
 
 static void rotaryCallback(int16_t encoderDelta)
 {
+    BwImageType* imgBuffer = getImageBuffer();
     if (enterState==1)
     {
         if (currentPreset == 0xFF)
@@ -240,44 +339,61 @@ static void rotaryCallback(int16_t encoderDelta)
         enterLevel3();
         return;
     }
-    if (encoderDelta != 0 && programChangeState==0)
+    switch (overlayMode)
     {
-        if (encoderDelta > 0)
-        {
-            encoderDelta = 1;
-        }
-        else
-        {
-            encoderDelta = -1;
-        }
-        ui.currentProgramIdx += encoderDelta;
-        if (ui.currentProgramIdx >= N_FX_PROGRAMS && encoderDelta > 0)
-        {
-            ui.currentProgramIdx = N_FX_PROGRAMS-1;
-        } 
-        else if (ui.currentProgramIdx >= N_FX_PROGRAMS && encoderDelta < 0)
-        {
-            ui.currentProgramIdx = 0;
-        }
-        programToInitialize=ui.currentProgramIdx;
-        programChangeState=1;
-        setStompswitchColorRaw(0);
-        if (programToInitialize == 18) // ugly hack to jump to program 9 when loading the generic distortion based program
-        {
-            uiStackPush(0);
-            enterLevel9();
-        }
+        case OM_OVERLAYS:
+            if (encoderDelta > 0)
+            {
+                overlayNr++;
+                if (overlayNr > sizeof(overlays)/(sizeof(BwImageTypeConst*)))
+                {
+                    overlayNr=sizeof(overlays)/(sizeof(BwImageTypeConst*));
+                }
+            }
+            else
+            {
+                overlayNr--;
+                if (overlayNr > sizeof(overlays)/(sizeof(BwImageTypeConst*)))
+                {
+                    overlayNr=0;
+                }
+
+            }
+            drawImage(41,0,overlays[overlayNr],imgBuffer);
+            break;
+        case OM_NONE:
+            if (programChangeState==0)
+            {
+                if (encoderDelta > 0)
+                {
+                    encoderDelta = 1;
+                }
+                else
+                {
+                    encoderDelta = -1;
+                }
+                ui.currentProgramIdx += encoderDelta;
+                if (ui.currentProgramIdx >= N_FX_PROGRAMS && encoderDelta > 0)
+                {
+                    ui.currentProgramIdx = N_FX_PROGRAMS-1;
+                } 
+                else if (ui.currentProgramIdx >= N_FX_PROGRAMS && encoderDelta < 0)
+                {
+                    ui.currentProgramIdx = 0;
+                }
+                programToInitialize=ui.currentProgramIdx;
+                programChangeState=1;
+                setStompswitchColorRaw(0);
+                if (programToInitialize == 18) // ugly hack to jump to program 9 when loading the generic distortion based program
+                {
+                    uiStackPush(0);
+                    enterLevel9();
+                }
+            }
+            break;
     }
 }
 
-/*
-static void genericStompSwitchCallback(uint8_t switchNr, PiPicoFXUiType* data)
-{
-    currentPreset = switchNr;
-    uiStackPush(data, 0);
-    enterLevel3(data);
-}
-*/
 
 static void stompswitch1Callback(void)
 {

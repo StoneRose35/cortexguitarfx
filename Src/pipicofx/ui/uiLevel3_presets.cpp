@@ -70,15 +70,15 @@ static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk);
 #define BANK_PRESET_CHANGE_INCREASE 1
 #define BANK_PRESET_CHANGE_DECREASE 0 
 
-#define OVERLAY_NR_LOOPER 0
-#define OVERLAY_NR_EDIT 1
-#define OVERLAY_NR_COPY 2
-#define OVERLAY_NR_SWAP 3
-#define OVERLAY_NR_DELETE 4
-#define OVERLAY_NR_SYSTEMSETTINGS 5
-#define OVERLAY_NR_ABOUT 6
-#define OVERLAY_NR_FWUPDATE 7
-#define OVERLAY_NR_ABOUT_SHOWING 8
+#define LVL3_OVERLAY_NR_LOOPER 0
+#define LVL3_OVERLAY_NR_EDIT 1
+#define LVL3_OVERLAY_NR_COPY 2
+#define LVL3_OVERLAY_NR_SWAP 3
+#define LVL3_OVERLAY_NR_DELETE 4
+#define LVL3_OVERLAY_NR_SYSTEMSETTINGS 5
+#define LVL3_OVERLAY_NR_ABOUT 6
+#define LVL3_OVERLAY_NR_FWUPDATE 7
+#define LVL3_OVERLAY_NR_ABOUT_SHOWING 8
 
 
 #define EOM_NONE 0
@@ -191,36 +191,36 @@ static void enterReleasedCallback(void)
     {
         case EOM_NONE:
             editOverlayMode = EOM_OVERLAYS;
-            overlayNr = OVERLAY_NR_LOOPER;
+            overlayNr = LVL3_OVERLAY_NR_LOOPER;
             drawImage(41,0,&looperOverlay_streamimg,imgBuffer);
             uiStackPush(0xFF);
             break;
         case EOM_OVERLAYS:
-            if (overlayNr == OVERLAY_NR_LOOPER)
+            if (overlayNr == LVL3_OVERLAY_NR_LOOPER)
             {
                 editOverlayMode = EOM_NONE;
                 uiStackPop();
-                uiStackPush( 3);   
+                uiStackPush(3);   
                 enterLevel8();
             }
-            else if (overlayNr == OVERLAY_NR_EDIT)
+            else if (overlayNr == LVL3_OVERLAY_NR_EDIT)
             {
                 editOverlayMode = EOM_NONE;
                 uiStackPop();
                 uiStackPush(3);   
                 enterLevel4();
             }
-            else if (overlayNr == OVERLAY_NR_SYSTEMSETTINGS)
+            else if (overlayNr == LVL3_OVERLAY_NR_SYSTEMSETTINGS)
             {
                 editOverlayMode = EOM_NONE;
                 uiStackPop();
                 uiStackPush(3);   
                 enterLevel5();
             }
-            else if (overlayNr == OVERLAY_NR_ABOUT)
+            else if (overlayNr == LVL3_OVERLAY_NR_ABOUT)
             {
                 editOverlayMode = EOM_NONE;
-                overlayNr = OVERLAY_NR_ABOUT_SHOWING;
+                overlayNr = LVL3_OVERLAY_NR_ABOUT_SHOWING;
                 clearSquareInt(0,0,128,43,imgBuffer);
                 *strbfr=0;
                 appendToString(strbfr,"About PiPicoFX");
@@ -236,28 +236,28 @@ static void enterReleasedCallback(void)
                 appendToString(strbfr,PI_PICO_FX_BUILD_TIME);
                 drawText(0,40,strbfr,imgBuffer,(void*)0);
             }
-            else if (overlayNr == OVERLAY_NR_FWUPDATE)
+            else if (overlayNr == LVL3_OVERLAY_NR_FWUPDATE)
             {
                 editOverlayMode = EOM_NONE;
                 drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
                 DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
                 jumpToBootloader();
             }
-            else if (overlayNr == OVERLAY_NR_COPY)
+            else if (overlayNr == LVL3_OVERLAY_NR_COPY)
             {
                 editOverlayMode = EOM_COPY;
                 copySwapPreset = currentPreset;
                 copySwapBank = currentBank;
                 createPresetSelector(imgBuffer);
             }
-            else if (overlayNr == OVERLAY_NR_SWAP)
+            else if (overlayNr == LVL3_OVERLAY_NR_SWAP)
             {
                 editOverlayMode = EOM_SWAP;
                 copySwapPreset = currentPreset;
                 copySwapBank = currentBank;
                 createPresetSelector(imgBuffer);
             }
-            else if (overlayNr == OVERLAY_NR_DELETE)
+            else if (overlayNr == LVL3_OVERLAY_NR_DELETE)
             {
                 editOverlayMode = EOM_DELETE_COMMIT;
                 // display question dialog
