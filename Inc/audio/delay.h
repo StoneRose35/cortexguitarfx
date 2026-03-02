@@ -20,6 +20,7 @@ typedef struct
     float feedback; 
     uint32_t delayBufferLength;
     float mix;
+    float gainIn;
     AudioProcessorFunc feedbackFunction;
     void * feebackData;
     uint8_t frozen;

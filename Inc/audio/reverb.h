@@ -10,6 +10,7 @@ typedef struct
     float feedbackValues[4];
     float * delayPointers[4];
     float mix;
+    float gainIn;
     uint8_t paramNr;
     uint8_t frozen;
 

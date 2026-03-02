@@ -160,7 +160,7 @@ float reverbProcessSample(float sampleIn,ReverbType*reverbData)
     {
         if (!reverbData->frozen)
         {
-            sampleInterm = sampleIn + ((reverbData->delayPointers[rc][((reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]) & 0xFFF)]+
+            sampleInterm = sampleIn*reverbData->gainIn + ((reverbData->delayPointers[rc][((reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]) & 0xFFF)]+
             reverbData->delayPointers[rc][(reverbData->delayPointer - reverbParameterSet[reverbData->paramNr].delayInSamples[rc]-1) & 0xFFF] )*0.5f)*reverbData->feedbackValues[rc];
             reverbData->delayPointers[rc][reverbData->delayPointer & 0xFFF]=sampleInterm;
         }
@@ -183,6 +183,6 @@ float reverbProcessSample(float sampleIn,ReverbType*reverbData)
         reverbSignal = allpassProcessSample(reverbSignal,reverbData->allpasses+c);
     }
 
-    sampleOut = (1.0f-reverbData->mix)*sampleIn + reverbData->mix*reverbSignal;
+    sampleOut = reverbData->mix*(reverbSignal-sampleIn) + sampleIn; // (1.0f-reverbData->mix)*sampleIn + reverbData->mix*reverbSignal;
     return sampleOut;
 }

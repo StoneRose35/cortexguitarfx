@@ -26,7 +26,7 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
 
     delayIdx = (data->delayLinePtr - data->delayInSamples) & (data->delayBufferLength -1);
 
-    sampleOut = *(data->delayLine +delayIdx)*data->mix + sampleIn*(1.0f - data->mix);
+    sampleOut = data->mix*(*(data->delayLine +delayIdx) - sampleIn) + sampleIn;//  *(data->delayLine +delayIdx)*data->mix + sampleIn*(1.0f - data->mix);
     if (!data->frozen)
     {
         sampleFedBack = *(data->delayLine +delayIdx);
@@ -35,7 +35,7 @@ float delayLineProcessSample(float sampleIn,DelayDataType*data)
             sampleFedBack = data->feedbackFunction(sampleFedBack,data->feebackData);
         }
         sampleFedBack=data->feedback*sampleFedBack;
-            *(data->delayLine + data->delayLinePtr) = sampleIn + sampleFedBack;
+        *(data->delayLine + data->delayLinePtr) = sampleIn*data->gainIn + sampleFedBack;
     }
     else // frozen: 100% feedback, no more input
     {
@@ -67,7 +67,11 @@ float delayLineWetProcessSample(float sampleIn,DelayDataType*data)
         }
         sampleFedBack *= data->feedback;
 
-        *(data->delayLine + data->delayLinePtr) = sampleIn + sampleFedBack;
+        *(data->delayLine + data->delayLinePtr) = sampleIn*data->gainIn + sampleFedBack;
+    }
+    else
+    {
+        *(data->delayLine + data->delayLinePtr) = *(data->delayLine +delayIdx);
     }
     data->delayLinePtr++;
     data->delayLinePtr &= (data->delayBufferLength -1);

@@ -25,6 +25,7 @@ namespace PiPicoFX {
                     .feedbackValues={},
                     .delayPointers={},
                     .mix=0.0f,
+                    .gainIn = 1.0f,
                     .paramNr = 0,
                     .frozen=0
                 };

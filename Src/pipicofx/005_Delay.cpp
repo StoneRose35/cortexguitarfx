@@ -29,7 +29,8 @@ float Delay::Delay::processSample(float sampleIn)
     FxProgram::processSample(sampleIn);
     if (this->getFreezeState()==FXP_FREEZE_STATE_FREEZING || this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
     {
-        this->delay.feedback = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedFeedbackValue;
+        this->delay.feedback = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)) + (1.0f - ((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1))*this->meltedFeedbackValue;
+        this->delay.gainIn = 1.0f - (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1));
     }
     //this->delay.delayInSamples = this->delay.delayInSamples + ((FXPROGRAM_DELAY_DELAY_TIME_LOWPASS_T*(delayInSamplesTargetValue - this->delay.delayInSamples)) >> 8);
     newIn = delayLineProcessSample(newIn, &this->delay);

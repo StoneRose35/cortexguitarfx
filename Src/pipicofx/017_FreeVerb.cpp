@@ -30,6 +30,16 @@ float FreeVerb::FreeVerb::processSample(float sampleIn)
     }
     float sampleOut;
     float delaySum=0.0f;
+    FxProgram::processSample(sampleIn);
+    if (this->getFreezeState()==FXP_FREEZE_STATE_FREEZING || this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
+    {
+        float frzVal = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1));
+        for (uint8_t c=0;c<8;c++)
+        {
+            this->delays[c].feedback = frzVal + (1.0f - frzVal)*this->meltedFeedbackValue;
+            this->delays[c].gainIn = 1.0f - frzVal;
+        }
+    }
     for (uint8_t c=0;c<8;c++)
     {
         delaySum += delayLineWetProcessSample(newIn,this->delays+c);
@@ -67,6 +77,7 @@ void FreeVerb::FreeVerb::setup()
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
+    this->setFreezable(1);
 
 }
 
@@ -150,4 +161,32 @@ void FreeVerb::Param4::parameterDisplay(char*res)
     dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);
     decimalUInt16ToChar(dVal,res,2);
     appendToString(res,"%");
+}
+
+void FreeVerb::FreeVerb::freeze()
+{
+    FxProgram::freeze();
+    this->meltedFeedbackValue = this->delays[0].feedback;
+    this->freezeCnt=0;
+}
+
+void FreeVerb::FreeVerb::unfreeze()
+{
+    FxProgram::unfreeze();
+}
+
+void FreeVerb::FreeVerb::onFreeze()
+{
+    for(uint8_t c=0;c<8;c++)
+    {
+        this->delays[c].frozen = 1;
+    }
+}
+
+void FreeVerb::FreeVerb::onMelt()
+{
+    for(uint8_t c=0;c<8;c++)
+    {
+        this->delays[c].frozen = 0;
+    }
 }

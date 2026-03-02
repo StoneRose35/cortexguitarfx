@@ -23,14 +23,14 @@ namespace PiPicoFX {
                 ~FreeVerb();
                 float processSample(float);
                 DelayDataType delays[8]= {
-                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1695,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
-                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1760,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
-                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1623,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
-                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1548,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
-                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1390,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
-                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1476,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
-                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1293,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
-                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1215,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0}
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1695,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.gainIn=1.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1760,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.gainIn=1.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1623,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.gainIn=1.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1548,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.gainIn=1.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1390,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.gainIn=1.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1476,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.gainIn=1.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1293,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.gainIn=1.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0},
+                    {.delayLine=0,.delayLinePtr=0,.delayInSamples = 1215,.feedback=0.0f,.delayBufferLength=2048,.mix=0.0f,.gainIn=1.0f,.feedbackFunction=freeVerbLowpass,.feebackData=0,.frozen=0}
                 };
                 FirstOrderIirType feedbackFilters[8]={
                     {
@@ -59,7 +59,7 @@ namespace PiPicoFX {
                     }
                 };
                 AllpassType allpasses[4]={
-                    {.coefficient=0.5f,.delayPtr=0,.delayInSamples=245,  .oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0},
+                    {.coefficient=0.5f,.delayPtr=0,.delayInSamples = 245,.oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0},
                     {.coefficient=0.5f,.delayPtr=0,.delayInSamples = 605,.oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0},
                     {.coefficient=0.5f,.delayPtr=0,.delayInSamples = 480,.oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0},
                     {.coefficient=0.5f,.delayPtr=0,.delayInSamples = 371,.oldValues=0.0f,.bufferSize=1023,.delayLineIn=0,.delayLineOut=0}
@@ -70,7 +70,12 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
+                void freeze() override;
+                void unfreeze() override;
+                void onFreeze() override;
+                void onMelt() override;
                 void setup();
+                float meltedFeedbackValue;
         };
 
         class Param1:  public FxProgramParameter

@@ -12,7 +12,9 @@ typedef struct
     FirstOrderIirType lowpass;
     float mix;
     float decay;
+    float gainIn;
     float outs[4];
+    uint8_t frozen;
 } Reverb2Type;
 
 

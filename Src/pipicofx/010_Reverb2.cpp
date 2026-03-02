@@ -11,10 +11,17 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float Reverb2::Reverb2::processSample(float sampleIn)
 {
+    FxProgram::processSample(sampleIn);
     float newIn=0.0f;
     if (this->isOn())
     {
         newIn = sampleIn;
+    }
+
+    if (this->getFreezeState()==FXP_FREEZE_STATE_FREEZING || this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
+    {
+        this->reverb.decay = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)) + (1.0f - ((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1))*this->meltedDecay;
+        this->reverb.gainIn = (1.0f - (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)))*0.5f;
     }
     newIn = gainStageProcessSample(newIn,&this->presetVolume);
     newIn = reverb2ProcessSample(newIn,&this->reverb);
@@ -68,9 +75,34 @@ void Reverb2::Reverb2::setup()
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
+    this->setFreezable(1);
 }
 
 Reverb2::Reverb2::~Reverb2()
 {
     freeDelayMemory(this->reverb.aps[0].delayLineIn);
+}
+
+void Reverb2::Reverb2::freeze()
+{
+    FxProgram::freeze();
+    this->freezeCnt = 0;
+    this->meltedDecay = this->reverb.decay;
+}
+
+void Reverb2::Reverb2::onFreeze()
+{
+    this->reverb.frozen = 1;
+}
+
+void Reverb2::Reverb2::onMelt()
+{
+    this->reverb.frozen = 0;
+    this->reverb.gainIn =0.5f;
+}
+
+void Reverb2::Reverb2::unfreeze()
+{
+    FxProgram::unfreeze();
+    reverb.frozen = 0;
 }

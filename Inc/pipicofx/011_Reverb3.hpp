@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class Reverb3 : public FxProgram
         {
             public:
-                Reverb3() : FxProgram(3,"Hadamard Reverb",(16*DIFFUSOR_SIZE + 4096)<<2){
+                Reverb3() : FxProgram(3,"MatrixReverb",(16*DIFFUSOR_SIZE + 4096)<<2){
                     this->setup();
                 };
                 ~Reverb3();
@@ -27,6 +27,11 @@ namespace PiPicoFX {
                 };
             private:
                 void setup();
+                void freeze() override;
+                void unfreeze() override;
+                void onFreeze() override;
+                void onMelt() override;
+                float meltedFeedbackValue;
         };
 
         class Param1:  public FxProgramParameter

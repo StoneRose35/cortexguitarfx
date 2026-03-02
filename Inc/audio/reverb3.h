@@ -13,10 +13,12 @@ typedef struct
     DelayDataType delay;
     int16_t delayModulationTime;
     float delayModulationDepth;
+    float gainIn;
     int16_t sampleCounter;
     uint16_t delayLength;
     uint8_t modulatorState; // 0: rising, 1: falling
     uint8_t modulation;
+    uint8_t frozen;
 } Reverb3Type;
 
 void initReverb3(Reverb3Type*,float*);

@@ -25,6 +25,11 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
+                void freeze() override;
+                void unfreeze() override;
+                void onFreeze() override;
+                void onMelt() override;
+                float meltedDecay;
                 void setup();
         };
 

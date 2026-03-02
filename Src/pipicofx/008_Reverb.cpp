@@ -19,10 +19,11 @@ __ITCM_CODE
     }
     if (this->getFreezeState()==FXP_FREEZE_STATE_FREEZING || this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
     {
-        this->reverb.feedbackValues[0] = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedTaus[0];
-        this->reverb.feedbackValues[1] = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedTaus[1];
-        this->reverb.feedbackValues[2] = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedTaus[2];
-        this->reverb.feedbackValues[3] = (((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES) + (1.0f - ((float)freezeCnt)/(float)FXP_FREEZE_DURATION_IN_SAMPLES)*this->meltedTaus[3];
+        this->reverb.feedbackValues[0] = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)) + (1.0f - ((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1))*this->meltedTaus[0];
+        this->reverb.feedbackValues[1] = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)) + (1.0f - ((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1))*this->meltedTaus[1];
+        this->reverb.feedbackValues[2] = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)) + (1.0f - ((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1))*this->meltedTaus[2];
+        this->reverb.feedbackValues[3] = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)) + (1.0f - ((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1))*this->meltedTaus[3];
+        this->reverb.gainIn = 1.0f - (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1));
     }
     newIn = gainStageProcessSample(newIn,&this->presetVolume);
     newIn =  reverbProcessSample(newIn,&this->reverb);
@@ -125,6 +126,7 @@ void Reverb::Reverb::onFreeze()
 void Reverb::Reverb::onMelt()
 {
     this->reverb.frozen = 0;
+    this->reverb.gainIn = 1.0f;
 }
 
 void Reverb::Reverb::unfreeze()

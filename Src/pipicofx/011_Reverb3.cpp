@@ -12,12 +12,18 @@ using namespace PiPicoFX;
 __ITCM_CODE
 float Reverb3::Reverb3::processSample(float sampleIn)
 {
+    FxProgram::processSample(sampleIn);
     float newIn=0.0f;
     if (this->isOn())
     {
         newIn = sampleIn;
     }
     float reverberatedSample;
+    if (this->getFreezeState()==FXP_FREEZE_STATE_FREEZING || this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
+    {
+        this->reverb.delay.feedback = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)) + (1.0f - ((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1))*this->meltedFeedbackValue;
+        this->reverb.delay.gainIn = 1.0f - (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1));
+    }
     newIn = gainStageProcessSample(newIn,&this->presetVolume);
     reverberatedSample = reverb3processSample(newIn,&this->reverb);
     newIn = ((1.0f - this->mix)*newIn) + (this->mix*reverberatedSample);
@@ -90,9 +96,33 @@ void Reverb3::Reverb3::setup()
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
+    this->setFreezable(1);
 }
 
 Reverb3::Reverb3::~Reverb3()
 {
     freeDelayMemory(this->reverb.diffusers[0].delayPointers[0]);
+}
+
+
+void Reverb3::Reverb3::freeze()
+{
+    FxProgram::freeze();
+    this->meltedFeedbackValue = this->reverb.delay.feedback;
+    this->freezeCnt=0;
+}
+
+void Reverb3::Reverb3::unfreeze()
+{
+    FxProgram::unfreeze();
+}
+
+void Reverb3::Reverb3::onFreeze()
+{
+    this->reverb.delay.frozen = 1;
+}
+
+void Reverb3::Reverb3::onMelt()
+{
+    this->reverb.delay.frozen = 0;
 }
