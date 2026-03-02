@@ -53,6 +53,7 @@ namespace PiPicoFX {
                     .feedback = 0.0f,
                     .delayBufferLength = 0xff,
                     .mix = 0.0f,
+                    .gainIn = 1.0f,
                     .feedbackFunction=0,
                     .feebackData = 0,
                     .frozen=0};
@@ -62,6 +63,7 @@ namespace PiPicoFX {
                     .feedbackValues = {},
                     .delayPointers = {},
                     .mix=0.5f,
+                    .gainIn = 1.0f,
                     .paramNr=0,
                     .frozen = 0
                 };

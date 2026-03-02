@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2022
  * 
  */
+
+ typedef void oled_display;
 #ifdef JOYIT_128X64_DISPLAY
 #include "globalConfig.h"
 

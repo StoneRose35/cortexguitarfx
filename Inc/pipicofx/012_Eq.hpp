@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class Eq : public FxProgram
         {
             public:
-                Eq() : FxProgram(4,"3-Band Equalizer",0){
+                Eq() : FxProgram(4,"3-Band EQ",0){
                     this->setup();
                 };
                 float processSample(float);
