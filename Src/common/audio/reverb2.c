@@ -37,6 +37,7 @@ void initReverb2(Reverb2Type*reverbData,float * delayMemoryPointer )
     reverbData->lowpass.alpha = 9830.0f/32768.0f;
     reverbData->lowpass.oldVal = 0.0f;
     reverbData->lowpass.oldXVal = 0.0f;
+    reverbData->gainIn = 1.0f;
     reverbData->mix=0.0f;   
 }
 
@@ -70,7 +71,7 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
 
     if (reverbData->frozen)
     {
-        processSignal = reverbData->outs[3];
+        processSignal = reverbData->outs[0];
     }
     else
     {
@@ -85,7 +86,7 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
 
     if (reverbData->frozen)
     {
-        processSignal = reverbData->outs[3];
+        processSignal = reverbData->outs[1];
     }
     else
     {
@@ -100,7 +101,7 @@ float reverb2ProcessSample(float sampleIn,Reverb2Type*reverbData)
 
     if (reverbData->frozen)
     {
-        processSignal = reverbData->outs[3];
+        processSignal = reverbData->outs[2];
     }
     else
     {

@@ -35,6 +35,7 @@ void initReverb3(Reverb3Type*data,float*delayMemoryPtr)
     data->delay.feedback = 0.5f;
     data->delay.feedbackFunction = 0;
     data->delay.mix = 1.0f;
+    data->delay.gainIn=1.0f;
     data->delay.frozen = 0;
     data->delayModulationDepth = 128;
     data->delayModulationTime = 2048;
