@@ -26,6 +26,9 @@ extern "C" {
 static void knob0Callback(uint16_t val);
 static void knob1Callback(uint16_t val);
 static void knob2Callback(uint16_t val);
+static void drawParameterDescriptions();
+static void drawParameterValues();
+static void drawProgramHeader();
 extern PiPicoFXUiType ui;
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
 BwImageTypeConst lock=
@@ -43,6 +46,7 @@ extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
 static volatile uint32_t longPressCnt=0;
+static volatile uint32_t lastTick;
 static volatile uint8_t enterState=0;
 static uint8_t overlayMode=0;
 static uint8_t overlayNr=0xFF;
@@ -62,51 +66,19 @@ static const BwImageTypeConst* overlays[]={
 #define LVL0_OVERLAY_NR_FWUPDATE 4
 #define LVL0_OVERLAY_NR_ABOUT_SHOWING 5
 
+#define LVL0_PARAMETER_DISPLAY_DURATION 132
+
 #define OM_NONE 0
 #define OM_OVERLAYS 1
 
 static void create()
 {
-    char lineBuffer[24];
     BwImageType* imgBuffer = getImageBuffer();
     lock.data =locksymbol;
     clearImage(imgBuffer);
-    const GFXfont * font =  getGFXFont(FREESANS9PT7B);
-    drawText(0,1*14,ui.currentProgram->getName(),imgBuffer,font);
-    if (ui.locked != 0)
-    {
-        drawImage(122,0,&lock,imgBuffer);
-    }
+    drawProgramHeader();
 
-    if (ui.currentProgram->isFreezable())
-    {
-        drawImage(110,16,&freezable_streamimg,imgBuffer);
-    }
-
-    for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
-    {
-        if (ui.currentProgram->getParameter(c)->getControl() == 0)
-        {
-            lineBuffer[0]=0;
-            appendToString(lineBuffer,"P1:");
-            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
-            drawText(0,5*8,lineBuffer,imgBuffer,0);
-        }
-        if (ui.currentProgram->getParameter(c)->getControl() == 1)
-        {
-            lineBuffer[0]=0;
-            appendToString(lineBuffer,"P2:");
-            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
-            drawText(0,6*8,lineBuffer,imgBuffer,0);
-        }
-        if (ui.currentProgram->getParameter(c)->getControl() == 2)
-        {
-            lineBuffer[0]=0;
-            appendToString(lineBuffer,"P3:");
-            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
-            drawText(0,7*8,lineBuffer,imgBuffer,0);
-        }                
-    }
+    drawParameterDescriptions();
     for (uint8_t c=0;c < ui.currentProgram->getParameterCount();c++)
     {
         if (ui.currentProgram->getParameter(c)->getControl()==0)
@@ -122,73 +94,37 @@ static void create()
             ui.currentProgram->getParameter(c)->parameterCallback(getChannel2Value());
         }
     }
+    lastTick=getTickValue();
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
-    uint8_t bargraphBuffer[128];
-    BwImageType bargraph={
-        .data = bargraphBuffer,
-        .sx = 128,
-        .sy = 4,
-        .type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
-        .byteSize = 128
-    };
+    uint32_t t=getTickValue();
     BwImageType* imgBuffer = getImageBuffer();
-    
-    bargraph.data = bargraphBuffer;
-    // show basic display
-    for (uint8_t c=0;c<128;c++)
+    // draw Level bars
+    clearSquareInt(0,52,128-3*6,64,imgBuffer);
+    //in
+    drawSquareInt(0,54,0 + ((avgInput)*(128-3*6))/128,56,imgBuffer);
+    //out
+    drawSquareInt(0,58,0 + ((avgOutput)*(128-3*6))/128,60,imgBuffer);
+    //cpu load
+    drawSquareInt(0,62,0 + ((cpuLoad)*(128-3*6))/128,64,imgBuffer);
+
+    if (overlayMode != OM_OVERLAYS)
     {
-        clearPixel(c,0,&bargraph);
-        clearPixel(c,3,&bargraph);
-        if (c<=avgInput)
+        if ((t - lastTick) < LVL0_PARAMETER_DISPLAY_DURATION)
         {
-            setPixel(c,1,&bargraph);
-            setPixel(c,2,&bargraph);
+            drawParameterDescriptions();
         }
         else
         {
-            clearPixel(c,1,&bargraph);
-            clearPixel(c,2,&bargraph);
+            drawParameterValues();
         }
     }
-    drawImage(0,32-3*4,(BwImageTypeConst*)&bargraph,imgBuffer);
-
-    for (uint8_t c=0;c<128;c++)
+    if (t < lastTick || t > lastTick + (LVL0_PARAMETER_DISPLAY_DURATION << 1))
     {
-        clearPixel(c,0,&bargraph);
-        clearPixel(c,3,&bargraph);
-        if (c<=avgOutput)
-        {
-            setPixel(c,1,&bargraph);
-            setPixel(c,2,&bargraph);
-        }
-        else
-        {
-            clearPixel(c,1,&bargraph);
-            clearPixel(c,2,&bargraph);
-        }
+        lastTick = t;
     }
-    drawImage(0,32-2*4,(BwImageTypeConst*)&bargraph,imgBuffer);
-
-
-    for (uint8_t c=0;c<128;c++)
-    {
-        clearPixel(c,0,&bargraph);
-        clearPixel(c,3,&bargraph);
-        if (c<=cpuLoad)
-        {
-            setPixel(c,1,&bargraph);
-            setPixel(c,2,&bargraph);
-        }
-        else
-        {
-            clearPixel(c,1,&bargraph);
-            clearPixel(c,2,&bargraph);
-        }
-    }
-    drawImage(0,32-1*4,(BwImageTypeConst*)&bargraph,imgBuffer);
     if (longPressCnt > 0 && getTickValue() - longPressCnt > LONGPRESS_DURATION_SYSTICKS && ui.currentProgram->isFreezable() && ui.currentProgram->isOn())
     {
         ui.currentProgram->freeze();
@@ -301,28 +237,45 @@ static void enterReleasedCallback(void)
                 jumpToBootloader();
             }
     }
-
-
-    if (ui.locked == 0)
-    {
-        uiStackPush(0);
-        enterLevel1();
-    }
 }
 
 static void exitCallback()
 {
+    BwImageType* imgBuffer = getImageBuffer();
+    // remove overlay menu (if there)
+    switch (overlayMode)
+    {
+        case OM_NONE:
+            //
+            if (uiStackCurrent() == 0x0)
+            {
+                ui.locked ^=1;
+                if (ui.locked != 0)
+                {
+                    drawImage(122,0,&lock,imgBuffer);
+                }
+                else
+                {
+                    clearSquareInt(122,0,128,8,imgBuffer);
+                }
+                return;
+            }
+            // apply current program to preset when coming from 4
+            if(uiStackCurrent()==4)
+            {
+                presets[currentPreset].programNr = ui.currentProgramIdx;
+            }
+            break;
+        case OM_OVERLAYS:
+            clearSquareInt(0,0,112,64,imgBuffer);
+            drawProgramHeader();
+            overlayNr=0xFF;
+            overlayMode = OM_NONE;
+            uiStackPop();
+            uiStackPush(0);
+            break;
+    }
 
-    if (uiStackCurrent() == 0x0)
-    {
-        ui.locked ^=1;
-        return;
-    }
-    // apply current program to preset when coming from 4
-    if(uiStackCurrent()==4)
-    {
-        presets[currentPreset].programNr = ui.currentProgramIdx;
-    }
 }
 
 static void rotaryCallback(int16_t encoderDelta)
@@ -469,9 +422,90 @@ void enterLevel0()
     registerStompswitch3ReleasedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    setStompswitchColorRaw(0);
+    //setStompswitchColorRaw(0);
     ui.defaultOn=0;
-    ui.currentProgram->switchOff();
+    //ui.currentProgram->switchOff();
     enterState = 0;
     create();
+}
+
+
+static void drawParameterDescriptions()
+{
+    char lineBuffer[24];
+    BwImageType* imgBuffer = getImageBuffer();
+    clearSquareInt(0,20,110,20+3*8,imgBuffer);
+    for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
+    {
+        if (ui.currentProgram->getParameter(c)->getControl() == 0)
+        {
+            lineBuffer[0]=0;
+            appendToString(lineBuffer,"P1:");
+            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
+            drawText(0,20 + 1*8,lineBuffer,imgBuffer,0);
+        }
+        if (ui.currentProgram->getParameter(c)->getControl() == 1)
+        {
+            lineBuffer[0]=0;
+            appendToString(lineBuffer,"P2:");
+            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
+            drawText(0,20 + 2*8,lineBuffer,imgBuffer,0);
+        }
+        if (ui.currentProgram->getParameter(c)->getControl() == 2)
+        {
+            lineBuffer[0]=0;
+            appendToString(lineBuffer,"P3:");
+            appendToString(lineBuffer,ui.currentProgram->getParameter(c)->getParameterName());
+            drawText(0,20 + 3*8,lineBuffer,imgBuffer,0);
+        }                
+    }
+}
+
+static void drawParameterValues()
+{
+    char lineBuffer[24];
+    
+    BwImageType* imgBuffer = getImageBuffer();
+    clearSquareInt(0,20,110,20+3*8,imgBuffer);
+    for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
+    {
+        if (ui.currentProgram->getParameter(c)->getControl() == 0)
+        {
+            lineBuffer[0]=0;
+            appendToString(lineBuffer,"P1:");
+            ui.currentProgram->getParameter(c)->parameterDisplay(lineBuffer+3);
+            drawText(0,20 + 1*8,lineBuffer,imgBuffer,0);
+        }
+        if (ui.currentProgram->getParameter(c)->getControl() == 1)
+        {
+            lineBuffer[0]=0;
+            appendToString(lineBuffer,"P2:");
+            ui.currentProgram->getParameter(c)->parameterDisplay(lineBuffer+3);
+            drawText(0,20 + 2*8,lineBuffer,imgBuffer,0);
+        }
+        if (ui.currentProgram->getParameter(c)->getControl() == 2)
+        {
+            lineBuffer[0]=0;
+            appendToString(lineBuffer,"P3:");
+            ui.currentProgram->getParameter(c)->parameterDisplay(lineBuffer+3);
+            drawText(0,20 + 3*8,lineBuffer,imgBuffer,0);
+        }                
+    }
+}
+
+static void drawProgramHeader()
+{
+    BwImageType* imgBuffer = getImageBuffer();
+    clearSquareInt(0,0,128,32,imgBuffer);
+    const GFXfont * font =  getGFXFont(FREESANS9PT7B);
+    drawText(0,1*14,ui.currentProgram->getName(),imgBuffer,font);
+    if (ui.locked != 0)
+    {
+        drawImage(122,0,&lock,imgBuffer);
+    }
+
+    if (ui.currentProgram->isFreezable())
+    {
+        drawImage(110,16,&freezable_streamimg,imgBuffer);
+    }
 }

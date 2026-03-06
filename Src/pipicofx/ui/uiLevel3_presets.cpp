@@ -112,18 +112,20 @@ static void create()
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {    
     uint16_t yval; 
-    (void)cpuLoad;
+
     if (editOverlayMode != EOM_NONE)
     {
         return;
     }
     BwImageType* imgBuffer = getImageBuffer();
     // draw Level bars
-    clearSquareInt(0,56,128-3*6,64,imgBuffer);
+    clearSquareInt(0,52,128-3*6,64,imgBuffer);
     //in
-    drawSquareInt(0,58,0 + ((avgInput)*(128-3*6))/128,60,imgBuffer);
+    drawSquareInt(0,54,0 + ((avgInput)*(128-3*6))/128,56,imgBuffer);
     //out
-    drawSquareInt(0,62,0 + ((avgOutput)*(128-3*6))/128,64,imgBuffer);
+    drawSquareInt(0,58,0 + ((avgOutput)*(128-3*6))/128,60,imgBuffer);
+    //cpu load
+    drawSquareInt(0,62,0 + ((cpuLoad)*(128-3*6))/128,64,imgBuffer);
 
     // draw current position of potentiometers
     clearSquareInt(122,0,124,64,imgBuffer);
