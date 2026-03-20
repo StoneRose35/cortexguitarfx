@@ -162,7 +162,7 @@ __ITCM_CODE
 {
     uint8_t intermVal;
     intermVal = val >> 10;
-    if (intermVal == 3)
+    if (intermVal >2 )
     {
         intermVal = 2;
     }

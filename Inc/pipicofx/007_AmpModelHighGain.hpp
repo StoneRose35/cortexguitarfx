@@ -31,7 +31,7 @@ namespace PiPicoFX {
 
                 float highpassCutoff;
                 uint8_t nWaveshapers;
-                float highpass_out,highpass_old_out,highpass_old_in;
+                float highpass_out=0.0f,highpass_old_out=0.0f,highpass_old_in=0.0f;
                 const char cabNames[9][24]={
                     "Custom             ",
                     "Custom IIR         ",

@@ -24,7 +24,19 @@ extern "C" {
 #include "systick.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
+#include "pipicofx/MultiAudioProcessor.hpp"
+
+
+/**
+ * Mode "Presets": The Footswitches allow to select or switch between presets consisting of three programs
+ * the preset are organized in banks
+ * Left+Middle Footswitch: Bank down, load preview of next lower bank, hitting a single footswitch then selects a preset of that bank
+ * Right+Middle Footswitch: Bank up, load preview of next higher bank, hitting a single footswitch then selects a preset of that bank
+ * Enter: shows overlay allowing to jump to various submodes
+ * Rotary+Enter: Change Mode
+ */
 extern PiPicoFXUiType ui;
+extern MultiAudioProcessor audioProcessor; 
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
@@ -43,7 +55,7 @@ static const BwImageTypeConst* overlays[]={
     &settingsOverlay_streamimg, 
     &aboutoverlay_streamimg, 
     &fwUpgradeOverlay_streamimg};
-extern volatile uint8_t programToInitialize;
+extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
 extern volatile uint8_t consumeEnterReleased;
 
@@ -57,8 +69,8 @@ static uint8_t handleReleaseEvent = 0;
 static volatile uint8_t enterState=0;
 static void handleBankChange(uint8_t);
 static void handlePresetChange(uint8_t);
-static void setPresetNr(uint8_t,PiPicoFXUiType*);
-static void setPreset(PiPicoFXUiType*);
+static void setPresetNr(uint8_t);
+static void setPreset();
 static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img);
 static void limitPreviewBankRange(uint8_t increase);
 static void createPresetSelector(BwImageType*imgBuffer);
@@ -92,7 +104,7 @@ static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk);
 
 #define BANK_LIMIT 32
 
-
+//TODO general overhaul: display topology and programs instead of information about one specific program
 
 static void create()
 {
@@ -100,7 +112,7 @@ static void create()
     // display preset Name and Bank Number
     clearImage(imgBuffer);
     drawBankAndPreset(imgBuffer);
-    drawParameterDisplay(ui.currentProgram,imgBuffer);
+    drawParameterDisplay(((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition)),imgBuffer);
 
     pot1Val = getChannel0Value();
     pot2Val = getChannel1Value();
@@ -112,17 +124,20 @@ static void create()
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {    
     uint16_t yval; 
-
     if (editOverlayMode != EOM_NONE)
     {
         return;
     }
     BwImageType* imgBuffer = getImageBuffer();
     // draw Level bars
-    clearSquareInt(0,52,128-3*6,64,imgBuffer);
+    clearSquareInt(0,54,128-3*6,64,imgBuffer);
     //in
     drawSquareInt(0,54,0 + ((avgInput)*(128-3*6))/128,56,imgBuffer);
+    drawSquareInt(0,54,0 + ((avgInput)*(128-3*6))/128,56,imgBuffer);
     //out
+    drawSquareInt(0,58,0 + ((avgOutput)*(128-3*6))/128,60,imgBuffer);
+    //cpu load
+    drawSquareInt(0,62,0 + ((cpuLoad)*(128-3*6))/128,64,imgBuffer);
     drawSquareInt(0,58,0 + ((avgOutput)*(128-3*6))/128,60,imgBuffer);
     //cpu load
     drawSquareInt(0,62,0 + ((cpuLoad)*(128-3*6))/128,64,imgBuffer);
@@ -340,7 +355,7 @@ static void enterReleasedCallback(void)
                 generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
             }
             reloadPresetsFromEeprom(presets,currentBank);
-            setPreset(&ui);
+            setPreset();
             // jump back to normal display
             clearSquareInt(41,0,41+47,43,imgBuffer);
             drawBankAndPreset(imgBuffer);
@@ -350,7 +365,7 @@ static void enterReleasedCallback(void)
         case EOM_DELETE_COMMIT:
             clearPreset(currentBank*3+currentPreset);
             generateEmptyPreset(presets + currentPreset,currentBank,currentPreset);
-            setPreset(&ui);
+            setPreset();
             break;
     }
 }
@@ -379,7 +394,7 @@ static void exitCallback()
             clearSquareInt(0,0,112,64,imgBuffer);
             drawBankAndPreset(imgBuffer);
             drawImage(41,0,overlays[overlayNr],imgBuffer);
-            drawParameterDisplay(ui.currentProgram,imgBuffer);
+            drawParameterDisplay(((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition)),imgBuffer);
             break;
     }
 }
@@ -486,7 +501,7 @@ static void stompswitch1Callback(void)
         }
         else if ((currentPreset != 0 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
-            setPresetNr(0,&ui);
+            setPresetNr(0);
             create();
         }
         else if (presetChangeLock == 1)
@@ -527,7 +542,7 @@ static void stompswitch2Callback(void)
         }
         else if ((currentPreset != 1 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
-            setPresetNr(1,&ui);
+            setPresetNr(1);
             create();
         }
         else if (presetChangeLock == 1)
@@ -562,7 +577,7 @@ static void stompswitch3Callback(void)
         }
         else if ((currentPreset != 2 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
-            setPresetNr(2,&ui);
+            setPresetNr(2);
             create();
         }
         else if (presetChangeLock == 1)
@@ -648,11 +663,26 @@ void enterLevel3()
     enterState = 0;
     ui.defaultOn=1;
 
-    ui.currentProgramIdx = presets[currentPreset].programNr;
-    programToInitialize=ui.currentProgramIdx;
+    switch (ui.currentProgramPosition)
+    {
+        case 0:
+            ui.currentProgramIdx = presets[currentPreset].programNrA;
+            break;
+        case 1:
+            ui.currentProgramIdx = presets[currentPreset].programNrB;
+            break;
+        case 2:
+            ui.currentProgramIdx = presets[currentPreset].programNrC;
+            break;    
+        default:
+            break;    
+    }
+    programsToInitialize[0]=presets[currentPreset].programNrA;
+    programsToInitialize[1]=presets[currentPreset].programNrB;
+    programsToInitialize[2]=presets[currentPreset].programNrC;
     programChangeState = 1;
 
-    setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
+    setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
 }
 
 static void handleBankChange(uint8_t increase)
@@ -709,10 +739,10 @@ static void handlePresetChange(uint8_t increase)
     {
         currentPreset--;
     }
-    setPreset(&ui);
+    setPreset();
 }
 
-static void setPresetNr(uint8_t nr,PiPicoFXUiType* data)
+static void setPresetNr(uint8_t nr)
 {
     if (previewBankNr != currentBank && previewBankNr != 0xFF)
     {
@@ -721,22 +751,46 @@ static void setPresetNr(uint8_t nr,PiPicoFXUiType* data)
         reloadPresetsFromEeprom(presets,currentBank);
     }
     currentPreset = nr;
-    setPreset(data);
+    setPreset();
 }
 
-static void setPreset(PiPicoFXUiType*data)
+static void setPreset()
 {
-    if (data->currentProgramIdx != presets[currentPreset].programNr)
+
+    if (programsToInitialize[0] != presets[currentPreset].programNrA)
     {
-        data->currentProgramIdx = presets[currentPreset].programNr;
-        programToInitialize=data->currentProgramIdx;
+        programsToInitialize[0] = presets[currentPreset].programNrA;
         programChangeState=1;
     }
     else
     {
-        applyPreset(presets + currentPreset,data->currentProgram);
+        programsToInitialize[0]=0xff;
+        applyPreset(presets + currentPreset,((FxProgram*)audioProcessor.getFxProgram(0)),0);
     }
-    setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
+
+    if (programsToInitialize[1] != presets[currentPreset].programNrB)
+    {
+        programsToInitialize[1] = presets[currentPreset].programNrB;
+        programChangeState=1;
+    }
+    else
+    {
+        programsToInitialize[1]=0xff;
+        applyPreset(presets + currentPreset,((FxProgram*)audioProcessor.getFxProgram(1)),1);
+    }
+
+    if (programsToInitialize[2] != presets[currentPreset].programNrA)
+    {
+        programsToInitialize[2] = presets[currentPreset].programNrA;
+        programChangeState=1;
+    }
+    else
+    {
+        programsToInitialize[2]=0xff;
+        applyPreset(presets + currentPreset,((FxProgram*)audioProcessor.getFxProgram(2)),2);
+    }
+
+    setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
     create();
 }
 

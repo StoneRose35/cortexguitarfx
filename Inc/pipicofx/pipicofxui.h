@@ -16,16 +16,17 @@ extern "C" {
 
 typedef struct 
 {
-    PiPicoFX::FxProgram* currentProgram;
-    PiPicoFX::FxProgramParameter * currentParameter;
-    uint8_t uiLevelStack[8];
-    void * data;
-    uint8_t uiLevelStackPtr;
-    uint8_t currentProgramIdx;
-    uint8_t currentParameterIdx;
-    uint8_t locked : 1;
-    uint8_t editViaRotary : 1;
+    PiPicoFX::FxProgram * currentProgram; // the fx program / single effect currently in focus
+    PiPicoFX::FxProgramParameter * currentParameter; // the parameter currently in focus
+    uint8_t uiLevelStack[8]; //visited page numbers to indicated the menu page we're currently in
+    void * data; // generic data to hand over from one menu page to another one, used to report the preset name from the string editor 
+    uint8_t uiLevelStackPtr; // internal: the pointer to the current position  within uiLevelStack
+    uint8_t currentProgramIdx; // the index of the program currently in focus in the ist of programs
+    uint8_t currentParameterIdx; // the index of the parameter currently i focus within the list of parameters of an FxProgram
+    uint8_t locked : 1; // if set: analog pot should not change effect settings
+    uint8_t editViaRotary : 1; // if set: all parameters must be edited using the rotary encoder
     uint8_t defaultOn : 1; // switches programs on when changing programs, off otherwise 
+    uint8_t currentProgramPosition: 2; // is either 0:A, 1:B or 2:C
 } PiPicoFXUiType;
 
 #ifdef __cplusplus 
@@ -97,4 +98,5 @@ void enterLevel6(void);
 void enterLevel7(void);
 void enterLevel8(void);
 void enterLevel9(void);
+void enterLevel10(void);
 #endif

@@ -67,6 +67,10 @@ float compressorProcessSample(float sampleIn,CompressorDataType*data)
         absSample = sampleOut;
     }
     data->currentAvg = firstOrderIirDualCoeffLPProcessSample(absSample,&data->avgLowpass);
+    if (data->currentAvg < 0.000001f)
+    {
+        data->currentAvg = 0.000001f;
+    }
     return sampleOut;
 }
 

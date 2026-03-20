@@ -9,17 +9,40 @@ extern "C" {
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 }
+#include "pipicofx/MultiAudioProcessor.hpp"
 
+/**
+ * Submode "Parameter Edit": Allows to change the values of the parameters in focus of the program
+ * currently in focus
+ * Rotary: Change parameter value
+ * Exit: return to previous mode 
+ * Exit: return to previous mode
+ * Knobs: edit parameters assigned to knobs
+ */
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
 extern PiPicoFXUiType ui;
+extern MultiAudioProcessor audioProcessor; 
+
 static void create()
 {
+    char lineBfr[24];
+    for (uint8_t c=0;c<24;c++)
+    {
+        lineBfr[c]=0;
+    }
     BwImageType* imgBuffer = getImageBuffer();
     clearImage(imgBuffer);
-    drawText(0,8,ui.currentProgram->getName(),imgBuffer,0);
-    drawText(0,16,ui.currentParameter->getParameterName(),imgBuffer,0);
+    drawText(0,8,((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getName(),imgBuffer,0);
+
+    appendToString(lineBfr,ui.currentParameter->getParameterName());
+    appendToStringUntil(lineBfr,"               ",20);
+    UInt8ToChar(ui.currentParameterIdx+1,lineBfr+17);
+    appendToString(lineBfr+17,"/");
+    UInt8ToChar(((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameterCount(),lineBfr+19);
+
+    drawText(0,16,lineBfr,imgBuffer,0);
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
@@ -52,11 +75,11 @@ static inline void knobCallback(uint16_t val,uint8_t control)
 {
     if (ui.locked == 0)
     {
-        for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
+        for (uint8_t c=0;c<((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameterCount();c++)
         {
-            if (ui.currentProgram->getParameter(c)->getControl()==control)
+            if (((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getControl()==control)
             {
-                ui.currentProgram->getParameter(c)->parameterCallback(val);
+                ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->parameterCallback(val);
             }
         }  
     } 

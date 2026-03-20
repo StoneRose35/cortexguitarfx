@@ -1,4 +1,5 @@
 #ifdef __cplusplus
+#include "pipicofx/MultiAudioProcessor.hpp"
 extern "C" {
 #endif
 #include "stdint.h"
@@ -14,8 +15,18 @@ extern "C" {
 #define AVERAGING_LOWPASS_CUTOFF 0.000305f // 10/32768
 
 
+__DTCM_DATA
 volatile int16_t fadeCounter;
 uint16_t bufferCnt;
+
+extern MultiAudioProcessor audioProcessor;
+
+
+__QSPI_CODE
+void initAudioEngine(void)
+{
+    audioProcessor=MultiAudioProcessor();
+}
 
 __ITCM_CODE
 void processAudioBuffers(void)
@@ -32,7 +43,6 @@ void processAudioBuffers(void)
     extern volatile uint32_t cpuLoad;
     extern float avgInOld,avgOutOld;
     extern uint32_t task;
-    extern PiPicoFXUiType ui;
     extern LooperDataType looper;
     ticStart = getTimeLW();
     audioBufferPtr = getEditableAudioBufferHiRes();
@@ -74,7 +84,7 @@ void processAudioBuffers(void)
 
         if (programChangeState != 3) // processing
         {
-            outputSample = ui.currentProgram->processSample(inputSample);
+            outputSample = audioProcessor.processSample(inputSample); // (*(ui.currentPrograms))->processSample(inputSample);
         }
         else
         {

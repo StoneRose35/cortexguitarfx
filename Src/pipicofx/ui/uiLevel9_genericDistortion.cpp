@@ -10,6 +10,8 @@ extern "C" {
 #include "drivers/stompswitches.h"
 #include "ln.h"
 }
+#include "pipicofx/MultiAudioProcessor.hpp"
+#include "pipicofx/FxProgramLoader.hpp"
 
 #define OFFSET_DISTORTION_GRAPH 60
 
@@ -29,7 +31,9 @@ extern "C" {
 #define ENCODER_DELTA_SCALE 0.001f
 
 extern PiPicoFXUiType ui;
-
+extern MultiAudioProcessor audioProcessor; 
+extern volatile uint8_t programsToInitialize[3];
+extern volatile uint8_t programChangeState;
 static  GenericDistortionSimpleType * distortion=(GenericDistortionSimpleType*)0;
 static volatile uint8_t editType = OD_EDIT_POINT01_POS_X;
 static volatile uint8_t selectionMode = OD_MODE_SELECTING;
@@ -37,9 +41,9 @@ static volatile uint8_t selectionMode = OD_MODE_SELECTING;
 static void create()
 {
     BwImageType* imgBuffer = getImageBuffer();
-    if (stringEquals(ui.currentProgram->getName(),"XAmp")==1)
+    if (stringEquals(((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getName(),"XAmp")==1)
     {
-        PiPicoFX::XAmp::XAmp *xamp = static_cast<PiPicoFX::XAmp::XAmp*>(ui.currentProgram);
+        PiPicoFX::XAmp::XAmp *xamp = static_cast<PiPicoFX::XAmp::XAmp*>(audioProcessor.getFxProgram(ui.currentProgramPosition));
         distortion = &xamp->distortion;
     }
     clearImage(imgBuffer);
@@ -228,17 +232,17 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 
 static void knob0Callback(uint16_t val)
 {
-    ui.currentProgram->getParameter(0)->parameterCallback(val);
+    ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(0)->parameterCallback(val);
 }
 
 static void knob1Callback(uint16_t val)
 {
-    ui.currentProgram->getParameter(1)->parameterCallback(val);
+    ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(1)->parameterCallback(val);
 }
 
 static void knob2Callback(uint16_t val)
 {
-    ui.currentProgram->getParameter(2)->parameterCallback(val);
+    ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(2)->parameterCallback(val);
 }
 
 static void enterCallback() 
@@ -246,6 +250,46 @@ static void enterCallback()
     selectionMode ^=1;
 }
 
+static void stompswitch1Callback(void)
+{
+
+    ui.currentProgramIdx--;
+    if (ui.currentProgramIdx >= N_FX_PROGRAMS)
+    {
+        ui.currentProgramIdx = 0;
+    }
+    programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
+    programChangeState=1;
+    setStompswitchColorRaw(0);
+}
+
+static void stompswitch2Callback(void)
+{
+
+    uint8_t ret = ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->toggleOn();
+    if (ret) 
+    {
+        setStompswitchColorRaw(2 << 2);
+    }
+    else
+    {
+        setStompswitchColorRaw(0);
+    }
+
+}
+
+static void stompswitch3Callback(void)
+{
+
+    ui.currentProgramIdx++;
+    if (ui.currentProgramIdx >= N_FX_PROGRAMS )
+    {
+        ui.currentProgramIdx = N_FX_PROGRAMS-1;
+    } 
+    programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
+    programChangeState=1;
+    setStompswitchColorRaw(0);
+}
 
 static void rotaryCallback(int16_t encoderDelta)
 {
@@ -326,6 +370,9 @@ static void rotaryCallback(int16_t encoderDelta)
 void enterLevel9()
 {
     clearCallbackAssignments();
+    registerStompswitch1ReleasedCallback(&stompswitch1Callback);
+    registerStompswitch2ReleasedCallback(&stompswitch2Callback);
+    registerStompswitch3ReleasedCallback(&stompswitch3Callback);
     registerEnterButtonPressedCallback(&enterCallback);
     registerRotaryCallback(&rotaryCallback);
     registerKnob0Callback(&knob0Callback);

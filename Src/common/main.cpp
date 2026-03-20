@@ -45,6 +45,7 @@ extern "C" {
 #include "audio/oversamplingWaveshaper.h"
 #include "audio/looper.h"
 #include "audio/audiotools.h"
+#include "audioEngine.h"
 #include "pipicofx/delayMemoryHandler.h"
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
@@ -56,6 +57,7 @@ extern "C" {
 }
 #include "pipicofx/picofxCore.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
+#include "pipicofx/MultiAudioProcessor.hpp"
 
 extern "C" {
 
@@ -67,10 +69,9 @@ volatile uint32_t task=0;
 volatile uint8_t context;
 
 extern CommBufferType usbCommBuffer;
-extern CommBufferType btCommBuffer;
-//extern uint32_t FLASH_SYNC_NUMBER; 
-//extern uint32_t QSPI_SYNC_NUMBER;
-//extern uint32_t AVR_SYNC_NUMBER;
+
+extern MultiAudioProcessor audioProcessor; 
+
 extern uint32_t _binary___mic_stomp_expansion_board_mic_stomp_bin_start;
 extern uint32_t _binary___mic_stomp_expansion_board_mic_stomp_bin_end;
 
@@ -97,7 +98,10 @@ const uint8_t stompswitch_progs[]={8,7,1};
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0xFF;
-volatile uint8_t programToInitialize=0xFF;
+volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF};
+AudioProcessor * currentFxProgram;
+__DTCM_DATA
+MultiAudioProcessor audioProcessor;
 LooperDataType looper;
 #ifdef EXTENSION_BOARD
 // 0: done
@@ -249,6 +253,7 @@ int main(void)
     #endif
 	context |= (1 << CONTEXT_USB);
 	
+    initAudioEngine();
     piPicoFxUiSetup();
 	ClearDisplay();
 	#ifndef FORCE_TEST_MODE
@@ -263,6 +268,7 @@ int main(void)
     LooperInit(&looper);
     
     //enable audio engine last (when fx programs have been set up)
+
     initSAI();
     enableAudioEngine();
     
@@ -490,37 +496,50 @@ int main(void)
           onStompSwitch3Released();
       }
 
+      // remove all entries and replaces them by new one 
+      // when programsToInitialize is not 0xFF at the given position
+      // updates the currently edited parameter of the ui structure
         if (programChangeState == 3)
-        {            
-            if (programToInitialize != 0xFF)
-            {
-                delete ui.currentProgram;
-                ui.currentProgram = loadProgram(programToInitialize);
-                if (ui.defaultOn)
+        {         
+            for (uint8_t q = 0;q < 3;q++)
+            {   
+                if (programsToInitialize[q] != 0xFF)
                 {
-                    ui.currentProgram->switchOn();
-                }
-                else
-                {
-                    ui.currentProgram->switchOff();
-                }
-                
-                ui.currentParameterIdx = 0;
-                ui.currentParameter = ui.currentProgram->getParameter(ui.currentParameterIdx);
-                if (ui.currentProgram != nullptr)
-                {
+                    currentFxProgram = audioProcessor.removeFxProgram(q);
+                    if (currentFxProgram != nullptr)
+                    {
+                        delete currentFxProgram; 
+                        currentFxProgram = nullptr;
+                    }
+                    currentFxProgram = loadProgram(programsToInitialize[q]);
+                    audioProcessor.addFxProgram(currentFxProgram,q);
+                    if (ui.defaultOn)
+                    {
+                        ((FxProgram*)currentFxProgram)->switchOn();
+                    }
+                    else
+                    {
+                        ((FxProgram*)currentFxProgram)->switchOff();
+                    }
+                    
+                    ui.currentParameterIdx = 0;
+                    if (q == ui.currentProgramPosition)
+                    {
+                        ui.currentProgram = ((FxProgram*)currentFxProgram);
+                        ui.currentProgramIdx = programsToInitialize[q];
+                        ui.currentParameter = ((FxProgram*)currentFxProgram)->getParameter(ui.currentParameterIdx);
+                    }
+
                     if (currentPreset != 0xFF)
                     {
-                        applyPreset(presets+currentPreset,ui.currentProgram);
+                        applyPreset(presets+currentPreset,(FxProgram*)currentFxProgram,q);
                     }
-                    programChangeState = 4;
+                        //programChangeState = 4;
+                    
+                    onCreate();
                 }
-                onCreate();
             }
-            else
-            {
-                programChangeState = 4;
-            }
+            programChangeState = 4;
         }
       if ((task & (1 << TASK_I2C_DATA_RECEIVED))!=0)
       {

@@ -4,6 +4,46 @@
 #define FIRST_CNT_VALUE 12
 #define SECOND_CNT_VALUES 17
 using namespace std;
+
+
+extern "C" {
+#include "math.h"
+void zeroString(char*data,int16_t len)
+{
+    for (uint16_t c=0;c<len;c++)
+    {
+        *(data+c)=0;
+    }
+}
+
+float int2float(int32_t a)
+{
+    return (float)a;
+}
+
+int32_t float2int(float a)
+{
+    return (int32_t)a;
+}
+
+float fln(float a)
+{
+    return logf(a);
+}
+
+
+float convolve(const float*coeffs,float*data,uint32_t offset)
+{
+    float res=0.0f;
+    for(uint32_t c=0;c<64;c++)
+    {
+        res += *(coeffs + c) * *(data + ((offset + c)&0x3F));
+    }
+    return res;
+}
+
+}
+
 class BaseClass
 {
     public:
@@ -59,13 +99,50 @@ class DerivedA: public BaseClass
         }
 };
 
+class SimpleClass
+{
+    public:
+        float a;
+        float b;
+        char name[24];
+};
+
+class ClassWithDynamicArray
+{
+    public:
+        SimpleClass ** dynamicArray;
+        int arrayLength;
+        ClassWithDynamicArray(int len)
+        {
+            this->dynamicArray = new SimpleClass*[len];
+            this->arrayLength = len;
+            for (uint8_t c=0;c<len;c++)
+            {
+                this->dynamicArray[c]=nullptr;
+            }
+        }
+};
+
 int main(int argc,char ** argv)
 {
-    DerivedA * aInst = new DerivedA();
-    float res;
-    for(uint16_t c=0;c<20;c++)
+    ClassWithDynamicArray cls1=ClassWithDynamicArray(4);
+    SimpleClass simpleClass = SimpleClass();
+    simpleClass.a = 45.22f;
+    simpleClass.b = 12.21f;
+    sprintf(simpleClass.name,"Funk;");
+    cls1.dynamicArray[2]=&simpleClass;
+    for (uint8_t c=0;c< 4;c++)
     {
-        res = aInst->process((float)c);
-        cout << "process of " << (float)c << " is " << res << endl;
+        if (cls1.dynamicArray[c] == nullptr)
+        {
+            printf("entry at %d is nullptr\r\n",c);
+        }
+        else
+        {
+            printf("\ta: %f\r\n",cls1.dynamicArray[c]->a);
+            printf("\tb: %f\r\n",cls1.dynamicArray[c]->b);
+            printf("\tname: %s\r\n",cls1.dynamicArray[c]->name);
+        }
     }
+    printf("initiated dynamic object\n");
 }

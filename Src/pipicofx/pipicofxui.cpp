@@ -14,9 +14,11 @@ extern "C" {
 }
 #endif
 #include "pipicofx/FxProgramLoader.hpp"
+#include "pipicofx/MultiAudioProcessor.hpp"
 
 
 extern PiPicoFXUiType ui;
+extern MultiAudioProcessor audioProcessor; 
 static BwImageBufferType imgBuffer;
 static BwImageType img;
 const uiEnterFct uiEnterFunctions[]={
@@ -28,7 +30,8 @@ const uiEnterFct uiEnterFunctions[]={
     &enterLevel5,
     &enterLevel6,
     &enterLevel7,
-    &enterLevel8};
+    &enterLevel8,
+    &enterLevel10};
 /*
 Callback function pointers
 */
@@ -341,6 +344,7 @@ __QSPI_CODE
 void piPicoFxUiSetup(void)
 {
     ui.currentProgram=PiPicoFX::loadProgram(2);
+    audioProcessor.addFxProgram(ui.currentProgram,0);
     ui.currentProgramIdx=2;
     ui.currentParameter=ui.currentProgram->getParameter(0);
     ui.currentParameterIdx=0;

@@ -148,7 +148,6 @@ void Delay::Delay::freeze()
 {
     FxProgram::freeze();
     this->meltedFeedbackValue = this->delay.feedback;
-    this->freezeCnt=0;
 }
 
 void Delay::Delay::unfreeze()

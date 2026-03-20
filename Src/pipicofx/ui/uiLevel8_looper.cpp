@@ -198,7 +198,10 @@ register onUpdate, on Create
 */
 void enterLevel8()
 {
-    clearCallbackAssignments();
+    //clearCallbackAssignments();
+    registerStompswitch1ReleasedCallback(0);
+    registerStompswitch2ReleasedCallback(0);
+    registerStompswitch3ReleasedCallback(0);
     registerStompswitch1PressedCallback(&stompswitch1Callback);
     registerStompswitch2PressedCallback(&stompswitch2Callback);
     registerStompswitch3PressedCallback(&stompswitch3Callback);

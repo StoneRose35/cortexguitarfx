@@ -46,7 +46,9 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     }
     if (cs==preset->magicNr)
     {
-        if (preset->programNr >= N_FX_PROGRAMS) // program number is larger than the maximum number of program
+        if (preset->programNrA >= N_FX_PROGRAMS 
+            || preset->programNrB >= N_FX_PROGRAMS
+            || preset->programNrC >= N_FX_PROGRAMS) // any program nr is larger than the maximum number of program
         {
             return 1;
         }
@@ -70,24 +72,24 @@ void clearPreset(uint16_t presetPos)
 }
 
 __QSPI_CODE
-void applyPreset(FxPresetType* preset,PiPicoFX::FxProgram * program)
+void applyPreset(FxPresetType* preset,PiPicoFX::FxProgram * program,uint8_t programPosition)
 {
     uint8_t nParams;
     nParams = program->getParameterCount();
     for (uint8_t c=0;c<nParams;c++)
     {
-        program->getParameter(c)->parameterCallback(preset->parameters[c]);
+        program->getParameter(c)->parameterCallback(preset->parametersA[c + (programPosition << 3)]);
     }
 }
 
 __QSPI_CODE
-void parametersToPreset(FxPresetType* preset,FxProgram * program)
+void parametersToPreset(FxPresetType* preset,FxProgram * program,uint8_t programPosition)
 {
     uint8_t nParams;
     nParams = program->getParameterCount();
     for (uint8_t c=0;c<nParams;c++)
     {
-        preset->parameters[c] = program->getParameter(c)->rawValue;
+        preset->parametersA[c + (programPosition<<3)] = program->getParameter(c)->rawValue;
     }    
 }
 
@@ -105,12 +107,28 @@ void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
     UInt8ToChar(pos,nrbfr);
     appendToString(preset->name,nrbfr);
     appendToStringUntil(preset->name,"        ",8);
-    preset->programNr = 2;
-    for (uint8_t c=0;c< 8; c++)
-    {
-        preset->parameters[c] = 0x3FF; //set all values to 1023 to start with Volume 1
-    } 
-    preset->ledColor = 1;
+    preset->programNrA = 2;
+    preset->programNrB = 2;
+    preset->programNrC = 2;
+    preset->topology = PRESET_TOPOLOGY_SERIAL;
 
+    for (uint8_t c=0;c< 8; c++) 
+    {
+        preset->parametersA[c] = 0x3FF; //set all values to 1023 to start with Volume 1
+    } 
+
+    for (uint8_t c=0;c< 8; c++) 
+    {
+        preset->parametersB[c] = 0x3FF; //set all values to 1023 to start with Volume 1
+    } 
+
+    for (uint8_t c=0;c< 8; c++) 
+    {
+        preset->parametersC[c] = 0x3FF; //set all values to 1023 to start with Volume 1
+    } 
+
+    preset->ledColorA = 1;
+    preset->ledColorB = 1;
+    preset->ledColorC = 1;
 }
  

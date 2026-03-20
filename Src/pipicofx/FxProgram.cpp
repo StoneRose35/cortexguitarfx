@@ -121,7 +121,10 @@ void FxProgram::unfreeze()
     {
         if (((this->settingsState & (0x3 << FXP_FREEZE_STATE_POS))) == FXP_FREEZE_STATE_FROZEN || ((this->settingsState & (0x3 << FXP_FREEZE_STATE_POS))) == FXP_FREEZE_STATE_FREEZING)
         {
-            this->onMelt();
+            if (((this->settingsState & (0x3 << FXP_FREEZE_STATE_POS))) == FXP_FREEZE_STATE_FROZEN )
+            {
+                this->onMelt();
+            }
             this->settingsState &= ~(0x3 << FXP_FREEZE_STATE_POS);
             this->settingsState |= FXP_FREEZE_STATE_MELTING;
         }

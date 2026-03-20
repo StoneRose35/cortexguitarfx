@@ -9,6 +9,7 @@ void initDelay(DelayDataType*data,float * memoryPointer,uint32_t bufferLength)
 {
     data->delayLine = memoryPointer;
     data->delayBufferLength = bufferLength;
+    data->gainIn = 1.0f;
     for (uint32_t c=0;c<bufferLength;c++)
     {
         data->delayLine[c]=0.0f;

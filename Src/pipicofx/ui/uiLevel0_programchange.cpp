@@ -13,6 +13,7 @@ extern "C" {
 #include "images/aboutoverlay.h"
 #include "images/fwupdateScreen.h"
 #include "images/looperOverlay.h"
+#include "images/routingoverlay.h"
 #include "images/freezable.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
@@ -22,7 +23,19 @@ extern "C" {
 #include "gen/version.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
+#include "pipicofx/MultiAudioProcessor.hpp"
 
+
+/** 
+ Mode "Program Change" / 20 Stompboxes in one
+ the two outermost footswitches change between programs (left:down, right up), the middle footswitch toggles bypass/on for the 
+ program/effect chosen. The Three Knob act in an analog manner always reading out the current values
+ Rotary: also changes between effects
+ Rotary+Enter: Change Mode
+ Enter: shows overlay allowing to jump to various submodes
+ Exit: lock/unlock knobs
+ Knobs: edit parameters assigned to knobs
+*/
 static void knob0Callback(uint16_t val);
 static void knob1Callback(uint16_t val);
 static void knob2Callback(uint16_t val);
@@ -30,6 +43,7 @@ static void drawParameterDescriptions();
 static void drawParameterValues();
 static void drawProgramHeader();
 extern PiPicoFXUiType ui;
+extern MultiAudioProcessor audioProcessor; 
 uint8_t locksymbol[5]={0b01111000,0b01111110,0b01111001,0b01111110,0b01111000 };
 BwImageTypeConst lock=
 {
@@ -38,9 +52,9 @@ BwImageTypeConst lock=
     .sy=8,
     .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES
 };
-extern volatile uint8_t programToInitialize;
 extern volatile uint8_t programChangeState;
 extern volatile uint8_t consumeEnterReleased;
+extern volatile uint8_t programsToInitialize[3];
 extern const uint8_t stompswitch_progs[];
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
@@ -54,6 +68,7 @@ static uint8_t overlayNr=0xFF;
 static const BwImageTypeConst* overlays[]={
     &looperOverlay_streamimg,
     &editOverlay_streamimg, 
+    &routingoverlay_streamimg,
     &settingsOverlay_streamimg, 
     &aboutoverlay_streamimg, 
     &fwUpgradeOverlay_streamimg};
@@ -61,10 +76,11 @@ static const BwImageTypeConst* overlays[]={
 
 #define LVL0_OVERLAY_NR_LOOPER 0
 #define LVL0_OVERLAY_NR_EDIT 1
-#define LVL0_OVERLAY_NR_SYSTEMSETTINGS 2
-#define LVL0_OVERLAY_NR_ABOUT 3
-#define LVL0_OVERLAY_NR_FWUPDATE 4
-#define LVL0_OVERLAY_NR_ABOUT_SHOWING 5
+#define LVL0_OVERLAY_NR_ROUTING 2
+#define LVL0_OVERLAY_NR_SYSTEMSETTINGS 3
+#define LVL0_OVERLAY_NR_ABOUT 4
+#define LVL0_OVERLAY_NR_FWUPDATE 5
+#define LVL0_OVERLAY_NR_ABOUT_SHOWING 6
 
 #define LVL0_PARAMETER_DISPLAY_DURATION 132
 
@@ -125,9 +141,9 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
     {
         lastTick = t;
     }
-    if (longPressCnt > 0 && getTickValue() - longPressCnt > LONGPRESS_DURATION_SYSTICKS && ui.currentProgram->isFreezable() && ui.currentProgram->isOn())
+    if (longPressCnt > 0 && getTickValue() - longPressCnt > LONGPRESS_DURATION_SYSTICKS && ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->isFreezable() && ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->isOn())
     {
-        ui.currentProgram->freeze();
+        ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->freeze();
         longPressCnt=0;
         setStompswitchColorRaw(1 << 2);
     }
@@ -135,13 +151,13 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 
 static inline void knobCallback(uint16_t val,uint8_t control)
 {
-    if (ui.locked == 0)
+    if (ui.locked == 0 && audioProcessor.getFxProgram(ui.currentProgramPosition) != nullptr)
     {
-        for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
+        for (uint8_t c=0;c<((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameterCount();c++)
         {
-            if (ui.currentProgram->getParameter(c)->getControl()==control)
+            if (((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getControl()==control)
             {
-                ui.currentProgram->getParameter(c)->parameterCallback(val);
+                ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->parameterCallback(val);
             }
         }  
     } 
@@ -203,6 +219,13 @@ static void enterReleasedCallback(void)
                 uiStackPush(0);   
                 enterLevel1();
             }
+            else if (overlayNr == LVL0_OVERLAY_NR_ROUTING)
+            {
+                overlayMode = OM_NONE;
+                uiStackPop();
+                uiStackPush(0);   
+                enterLevel10();
+            }
             else if (overlayNr == LVL0_OVERLAY_NR_SYSTEMSETTINGS)
             {
                 overlayMode = OM_NONE;
@@ -234,9 +257,10 @@ static void enterReleasedCallback(void)
                 overlayMode = OM_NONE;
                 drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
                 DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
-                jumpToBootloader();
+                //jumpToBootloader();
             }
     }
+
 }
 
 static void exitCallback()
@@ -263,7 +287,20 @@ static void exitCallback()
             // apply current program to preset when coming from 4
             if(uiStackCurrent()==4)
             {
-                presets[currentPreset].programNr = ui.currentProgramIdx;
+                switch (ui.currentProgramPosition)
+                {
+                    case 0:
+                        presets[currentPreset].programNrA = ui.currentProgramIdx;
+                        break;
+                    case 1:
+                        presets[currentPreset].programNrB = ui.currentProgramIdx;
+                        break;
+                    case 2:
+                        presets[currentPreset].programNrC = ui.currentProgramIdx;
+                        break;
+                    default:
+                        break;
+                }
             }
             break;
         case OM_OVERLAYS:
@@ -275,7 +312,6 @@ static void exitCallback()
             uiStackPush(0);
             break;
     }
-
 }
 
 static void rotaryCallback(int16_t encoderDelta)
@@ -298,15 +334,15 @@ static void rotaryCallback(int16_t encoderDelta)
             if (encoderDelta > 0)
             {
                 overlayNr++;
-                if (overlayNr > sizeof(overlays)/(sizeof(BwImageTypeConst*)))
+                if (overlayNr > (sizeof(overlays)/(sizeof(BwImageTypeConst*)))-1)
                 {
-                    overlayNr=sizeof(overlays)/(sizeof(BwImageTypeConst*));
+                    overlayNr=(sizeof(overlays)/(sizeof(BwImageTypeConst*)))-1;
                 }
             }
             else
             {
                 overlayNr--;
-                if (overlayNr > sizeof(overlays)/(sizeof(BwImageTypeConst*)))
+                if (overlayNr > (sizeof(overlays)/(sizeof(BwImageTypeConst*)))-1)
                 {
                     overlayNr=0;
                 }
@@ -334,10 +370,10 @@ static void rotaryCallback(int16_t encoderDelta)
                 {
                     ui.currentProgramIdx = 0;
                 }
-                programToInitialize=ui.currentProgramIdx;
+                programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
                 programChangeState=1;
                 setStompswitchColorRaw(0);
-                if (programToInitialize == 18) // ugly hack to jump to program 9 when loading the generic distortion based program
+                if (programsToInitialize[ui.currentProgramPosition] == 18) // ugly hack to jump to program 9 when loading the generic distortion based program
                 {
                     uiStackPush(0);
                     enterLevel9();
@@ -356,10 +392,9 @@ static void stompswitch1Callback(void)
     {
         ui.currentProgramIdx = 0;
     }
-    programToInitialize=ui.currentProgramIdx;
+    programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
     programChangeState=1;
     setStompswitchColorRaw(0);
-    //genericStompSwitchCallback(0,data);
 }
 
 static void stompSwitch2Pressed()
@@ -370,9 +405,9 @@ static void stompSwitch2Pressed()
 
 static void stompswitch2Callback(void)
 {
-    if (longPressCnt != 0) // no freeze happened, toggle normally
+    if (longPressCnt != 0 && audioProcessor.getFxProgram(ui.currentProgramPosition) != nullptr) // no freeze happened, toggle normally
     {
-        uint8_t ret = ui.currentProgram->toggleOn();
+        uint8_t ret = ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->toggleOn();
         if (ret) 
         {
             setStompswitchColorRaw(2 << 2);
@@ -383,7 +418,6 @@ static void stompswitch2Callback(void)
         }
     }
     longPressCnt=0;
-    //genericStompSwitchCallback(1,data);
 }
 
 static void stompswitch3Callback(void)
@@ -394,10 +428,57 @@ static void stompswitch3Callback(void)
     {
         ui.currentProgramIdx = N_FX_PROGRAMS-1;
     } 
-    programToInitialize=ui.currentProgramIdx;
+    programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
     programChangeState=1;
     setStompswitchColorRaw(0);
-    //genericStompSwitchCallback(2,data);
+}
+
+
+
+static void drawProgramNameAndParams()
+{
+    char lineBuffer[24];
+    BwImageType* imgBuffer = getImageBuffer();
+    clearImage(imgBuffer);
+    if (audioProcessor.getFxProgram(ui.currentProgramPosition) != 0)
+    {
+        const GFXfont * font =  getGFXFont(FREESANS9PT7B);
+        drawText(0,12,((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getName(),imgBuffer,font);
+        if (ui.locked != 0)
+        {
+            drawImage(122,0,&lock,imgBuffer);
+        }
+
+        if (((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->isFreezable())
+        {
+            drawImage(110,16,&freezable_streamimg,imgBuffer);
+        }
+
+        for (uint8_t c=0;c<((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameterCount();c++)
+        {
+            if (((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getControl() == 0)
+            {
+                lineBuffer[0]=0;
+                appendToString(lineBuffer,"P1:");
+                appendToString(lineBuffer,((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getParameterName());
+                drawText(0,19+1*8,lineBuffer,imgBuffer,0);
+            }
+            if (((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getControl() == 1)
+            {
+                lineBuffer[0]=0;
+                appendToString(lineBuffer,"P2:");
+                appendToString(lineBuffer,((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getParameterName());
+                drawText(0,19+2*8,lineBuffer,imgBuffer,0);
+            }
+            if (((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getControl() == 2)
+            {
+                lineBuffer[0]=0;
+                appendToString(lineBuffer,"P3:");
+                appendToString(lineBuffer,((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getParameterName());
+                drawText(0,19+3*8,lineBuffer,imgBuffer,0);
+            }                
+        }
+    }
 }
 
 
@@ -422,9 +503,22 @@ void enterLevel0()
     registerStompswitch3ReleasedCallback(&stompswitch3Callback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
-    //setStompswitchColorRaw(0);
+    if (audioProcessor.getFxProgram(ui.currentProgramPosition) != nullptr && ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->isFrozen())
+    {
+        setStompswitchColorRaw(1 << 2);
+    }
+    else if (audioProcessor.getFxProgram(ui.currentProgramPosition) != nullptr && ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->isOn())
+    {
+        setStompswitchColorRaw(2 << 2);
+    }
+    else
+    {
+        setStompswitchColorRaw(0);
+    }
     ui.defaultOn=0;
-    //ui.currentProgram->switchOff();
+    //1[programsToInitialize]=0xFF;
+    //2[programsToInitialize]=0xFF;
+    //((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->switchOff();
     enterState = 0;
     create();
 }

@@ -13,8 +13,9 @@ extern "C" {
 #include "drivers/stompswitches.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
+#include "pipicofx/MultiAudioProcessor.hpp"
 
-#define EDITLEVEL_PROGRAM 0
+#define EDITLEVEL_ROUTING 0
 #define EDITLEVEL_LEDCOLOR 1
 #define EDITLEVEL_PARAMETERS 2
 #define EDITLEVEL_NAME 3
@@ -27,7 +28,9 @@ extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
 extern volatile uint8_t programChangeState;
+extern volatile uint8_t programsToInitialize[3];
 extern PiPicoFXUiType ui;
+extern MultiAudioProcessor audioProcessor; 
 
 static uint8_t editType; // 0: Program
                                   // 1: Led Color
@@ -36,7 +39,7 @@ static volatile uint8_t exitState=0; // 0: Exit pressed the first time, 1: save 
 
 static void create()
 {
-    char strbfr[8];
+    char strbfr[24];
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
     BwImageType * imgBuffer = getImageBuffer();
     clearImage(imgBuffer);
@@ -45,9 +48,9 @@ static void create()
     drawText(5,21,strbfr,imgBuffer,font);
     switch (editType)
     {
-        case EDITLEVEL_PROGRAM:
+        case EDITLEVEL_ROUTING:
             *(strbfr) = 0;    
-            appendToString(strbfr,"Select Program");
+            appendToString(strbfr,"Routing");
             break;
         case EDITLEVEL_LEDCOLOR:
             *(strbfr) = 0;    
@@ -87,33 +90,34 @@ static void enterCallback()
     
     switch (editType)
     {
-        case EDITLEVEL_PROGRAM:
+        case EDITLEVEL_ROUTING:
+            //TODO change
             uiStackPush(4);
             (&ui)->locked = 0;
             enterLevel0();
             break;
         case EDITLEVEL_LEDCOLOR:
-            presets[currentPreset].ledColor++;
-            presets[currentPreset].ledColor &= 0x3;
-            if (presets[currentPreset].ledColor == 0)
+            presets[currentPreset].ledColorPreset++;
+            presets[currentPreset].ledColorPreset &= 0x3;
+            if (presets[currentPreset].ledColorPreset == 0)
             {
-                presets[currentPreset].ledColor++;
+                presets[currentPreset].ledColorPreset++;
             }
-            setStompswitchColorRaw(presets[currentPreset].ledColor << (currentPreset << 1));
+            setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
             break;
         case EDITLEVEL_PARAMETERS:
             uiStackPush(4);
             (&ui)->locked = 1;
             (&ui)->currentParameterIdx = 0;
-            (&ui)->currentParameter = (&ui)->currentProgram->getParameter((&ui)->currentParameterIdx);
-            if ((&ui)->currentProgram->getParameterCount() > 0)
+            (&ui)->currentParameter = ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter((&ui)->currentParameterIdx);
+            if (((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameterCount() > 0)
             {
                 enterLevel1();
             }
             break;
         case EDITLEVEL_NAME:
             uiStackPush(4);
-            presets[currentPreset].name[23]=0;
+            presets[currentPreset].name[15]=0;
             (&ui)->data = presets[currentPreset].name;
             enterLevel6();
 
@@ -141,7 +145,9 @@ static void exitCallback()
         {
             generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
         }
-        if (ui.currentProgramIdx != presets[currentPreset].programNr)
+        if (programsToInitialize[0] != presets[currentPreset].programNrA || 
+            programsToInitialize[1] != presets[currentPreset].programNrB ||
+            programsToInitialize[2] != presets[currentPreset].programNrC)
         {
             programChangeState = 1;
         }
