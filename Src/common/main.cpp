@@ -85,7 +85,7 @@ PiPicoFXUiType ui;
 
 const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
 #define ADC_LOWPASS 60
-#define UI_DMIN 8
+#define UI_DMIN 2
 uint32_t encoderVal,encoderCntr,encNew;
 int16_t encoderDelta;
 RotaryEncoderIncrementType rotaryEncoderInfo;
@@ -97,8 +97,8 @@ volatile uint8_t programsActivated=0;
 const uint8_t stompswitch_progs[]={8,7,1};
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
-volatile uint8_t currentPreset=0xFF;
-volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF};
+volatile uint8_t currentPreset=0x0;
+volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF}; // 0xFF: null values, otherwise bits 0-6: program nr to initialize, bit 7: copy parameters from preset or not
 AudioProcessor * currentFxProgram;
 __DTCM_DATA
 MultiAudioProcessor audioProcessor;
@@ -111,7 +111,7 @@ LooperDataType looper;
 // 4: fade in
 volatile uint8_t programChangeState=0;
 volatile uint8_t stompSwitchState;
-volatile uint8_t consumeEnterReleased=0;
+volatile uint8_t bypassEnterReleased=0;
 #define ROTARY_ENCODER_MAX_INCR 512
 #define ROTARY_ENCODER_SPEED_FACTOR 32
 #endif
@@ -511,7 +511,7 @@ int main(void)
                         delete currentFxProgram; 
                         currentFxProgram = nullptr;
                     }
-                    currentFxProgram = loadProgram(programsToInitialize[q]);
+                    currentFxProgram = loadProgram(programsToInitialize[q]&0x7F);
                     audioProcessor.addFxProgram(currentFxProgram,q);
                     if (ui.defaultOn)
                     {
@@ -526,16 +526,14 @@ int main(void)
                     if (q == ui.currentProgramPosition)
                     {
                         ui.currentProgram = ((FxProgram*)currentFxProgram);
-                        ui.currentProgramIdx = programsToInitialize[q];
+                        ui.currentProgramIdx = programsToInitialize[q]&0x7F;
                         ui.currentParameter = ((FxProgram*)currentFxProgram)->getParameter(ui.currentParameterIdx);
                     }
 
-                    if (currentPreset != 0xFF)
+                    if (programsToInitialize[q] & 0x80)
                     {
                         applyPreset(presets+currentPreset,(FxProgram*)currentFxProgram,q);
                     }
-                        //programChangeState = 4;
-                    
                     onCreate();
                 }
             }

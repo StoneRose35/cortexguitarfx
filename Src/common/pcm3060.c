@@ -19,7 +19,7 @@ void setupPCM3060()
 #include "drivers/i2c.h"
 #include "globalConfig.h"
 
-
+uint8_t outputVolSendBfr[3];
 static uint8_t pcm3060Write(uint16_t data)
 {
     uint8_t res=0;
@@ -169,7 +169,6 @@ uint8_t pcm3060GetInputState()
 void pcm3060SetOutputVolume(uint8_t channel,uint8_t volume)
 {
     uint16_t regData;
-    uint8_t sendBfr[3];
     if (getTargetAddressExternal()!=PCM3060_I2C_ADDRESS)
     {
         setTargetAddressExternal(PCM3060_I2C_ADDRESS);
@@ -189,10 +188,10 @@ void pcm3060SetOutputVolume(uint8_t channel,uint8_t volume)
     }
     else
     {
-        sendBfr[0]=PCM3060_R65;
-        sendBfr[1]=volume;
-        sendBfr[2]=volume;
-        I2CsendMultipleExternal(sendBfr,3);
+        outputVolSendBfr[0]=PCM3060_R65;
+        outputVolSendBfr[1]=volume;
+        outputVolSendBfr[2]=volume;
+        I2CsendMultipleExternal(outputVolSendBfr,3);
     }
 }
 

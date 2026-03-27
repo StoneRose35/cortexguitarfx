@@ -14,16 +14,19 @@ extern "C" {
 #include "images/fwupdateScreen.h"
 #include "images/looperOverlay.h"
 #include "images/routingoverlay.h"
+#include "images/saveOverlay.h"
 #include "images/freezable.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
 #include "systick.h"
 #include "bootloader_activation.h"
+#include "pcm3060.h"
 #include "gen/version.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
 #include "pipicofx/MultiAudioProcessor.hpp"
+#include "pipicofx/picofxCore.hpp"
 
 
 /** 
@@ -53,9 +56,10 @@ BwImageTypeConst lock=
     .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES
 };
 extern volatile uint8_t programChangeState;
-extern volatile uint8_t consumeEnterReleased;
+extern volatile uint8_t bypassEnterReleased;
 extern volatile uint8_t programsToInitialize[3];
 extern const uint8_t stompswitch_progs[];
+volatile uint16_t initialKnobValues[3];
 extern FxPresetType presets[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
@@ -66,6 +70,7 @@ static uint8_t overlayMode=0;
 static uint8_t overlayNr=0xFF;
 
 static const BwImageTypeConst* overlays[]={
+    &saveOverlay_streamimg,
     &looperOverlay_streamimg,
     &editOverlay_streamimg, 
     &routingoverlay_streamimg,
@@ -74,18 +79,20 @@ static const BwImageTypeConst* overlays[]={
     &fwUpgradeOverlay_streamimg};
 
 
-#define LVL0_OVERLAY_NR_LOOPER 0
-#define LVL0_OVERLAY_NR_EDIT 1
-#define LVL0_OVERLAY_NR_ROUTING 2
-#define LVL0_OVERLAY_NR_SYSTEMSETTINGS 3
-#define LVL0_OVERLAY_NR_ABOUT 4
-#define LVL0_OVERLAY_NR_FWUPDATE 5
-#define LVL0_OVERLAY_NR_ABOUT_SHOWING 6
+#define LVL0_OVERLAY_NR_SAVE 0
+#define LVL0_OVERLAY_NR_LOOPER 1
+#define LVL0_OVERLAY_NR_EDIT 2
+#define LVL0_OVERLAY_NR_ROUTING 3
+#define LVL0_OVERLAY_NR_SYSTEMSETTINGS 4
+#define LVL0_OVERLAY_NR_ABOUT 5
+#define LVL0_OVERLAY_NR_FWUPDATE 6
+#define LVL0_OVERLAY_NR_ABOUT_SHOWING 7
 
 #define LVL0_PARAMETER_DISPLAY_DURATION 132
 
 #define OM_NONE 0
 #define OM_OVERLAYS 1
+#define OM_SAVE_REVERT 2
 
 static void create()
 {
@@ -115,16 +122,21 @@ static void create()
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
+    (void)avgInput;
+    (void)avgOutput;
+    (void)cpuLoad;
     uint32_t t=getTickValue();
     BwImageType* imgBuffer = getImageBuffer();
-    // draw Level bars
-    clearSquareInt(0,52,128-3*6,64,imgBuffer);
-    //in
-    drawSquareInt(0,54,0 + ((avgInput)*(128-3*6))/128,56,imgBuffer);
-    //out
-    drawSquareInt(0,58,0 + ((avgOutput)*(128-3*6))/128,60,imgBuffer);
-    //cpu load
-    drawSquareInt(0,62,0 + ((cpuLoad)*(128-3*6))/128,64,imgBuffer);
+    uint8_t bottomPaneData[256];
+    BwImageType bottomPane = {
+        .data = bottomPaneData,
+        .sx=128,
+        .sy=16,
+        .type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
+        .byteSize=256
+    };
+    drawBottomPanel(&bottomPane);
+    drawImage(0,48,(BwImageTypeConst*)&bottomPane,imgBuffer);
 
     if (overlayMode != OM_OVERLAYS)
     {
@@ -158,6 +170,7 @@ static inline void knobCallback(uint16_t val,uint8_t control)
             if (((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->getControl()==control)
             {
                 ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getParameter(c)->parameterCallback(val);
+                programsToInitialize[ui.currentProgramPosition] = ui.currentProgramIdx; // tag
             }
         }  
     } 
@@ -167,7 +180,29 @@ static inline void knobCallback(uint16_t val,uint8_t control)
 
 static void knob0Callback(uint16_t val)
 {
-    knobCallback(val,0);
+    BwImageType* imgBuffer = getImageBuffer();
+    if (enterState == 0)
+    {
+        knobCallback(val,0);
+    }
+    else 
+    {
+        if ((val > initialKnobValues[0] && (val - initialKnobValues[0]) >512) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >512))
+        {
+            initialKnobValues[0]=0xFFFF;
+            bypassEnterReleased = 1;
+            if (val > 2047 && ui.locked == 0)
+            {
+                ui.locked = 1;
+                drawImage(122,0,&lock,imgBuffer);
+            }
+            else if ( val< 2047 && ui.locked == 1)
+            {
+                ui.locked = 0;
+                clearSquareInt(122,0,128,8,imgBuffer);
+            }
+        }
+    }
 }
 
 static void knob1Callback(uint16_t val)
@@ -177,12 +212,27 @@ static void knob1Callback(uint16_t val)
 
 static void knob2Callback(uint16_t val)
 {
-    knobCallback(val,2);
+    if (enterState == 0)
+    {
+        knobCallback(val,2);
+    }
+    else
+    {
+        if ((val > initialKnobValues[2] && (val - initialKnobValues[2]) >512) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >512))
+        {
+            initialKnobValues[2]= 0xFFFF;
+            bypassEnterReleased = 1;
+            pcm3060SetOutputVolume(PCM3060_CHANNEL_BOTH,(uint8_t)(val >> 4));
+        }
+    }
 }
 
 static void enterPressedCallback()
 {
     enterState = 1;
+    initialKnobValues[0]=getChannel0Value();
+    initialKnobValues[1]=getChannel1Value();
+    initialKnobValues[2]=getChannel2Value();
 }
 
 static void enterReleasedCallback(void) 
@@ -190,9 +240,9 @@ static void enterReleasedCallback(void)
     enterState=0;
     char strbfr[24];
     BwImageType* imgBuffer = getImageBuffer();
-    if (consumeEnterReleased == 1)
+    if (bypassEnterReleased == 1)
     {
-        consumeEnterReleased = 0;
+        bypassEnterReleased = 0;
         return;
     }
 
@@ -200,12 +250,20 @@ static void enterReleasedCallback(void)
     {
         case OM_NONE:
             overlayMode = OM_OVERLAYS;
-            overlayNr = LVL0_OVERLAY_NR_LOOPER;
-            drawImage(41,0,&looperOverlay_streamimg,imgBuffer);
+            overlayNr = LVL0_OVERLAY_NR_SAVE;
+            drawImage(41,0,overlays[overlayNr],imgBuffer);
             uiStackPush(0xFF);
             break;
         case OM_OVERLAYS:
-            if (overlayNr == LVL0_OVERLAY_NR_LOOPER)
+            if (overlayNr == LVL0_OVERLAY_NR_SAVE)
+            {
+                clearSquareInt(64-35,4,64+35,22,imgBuffer);
+                drawRectFrame(64-35,4,64+35,22,imgBuffer);
+                drawText(64-35+2,4+2+8,"Enter:Save",imgBuffer,0);
+                drawText(64-35+2,4+2+16,"Exit:Revert",imgBuffer,0);
+                overlayMode = OM_SAVE_REVERT;
+            }
+            else if (overlayNr == LVL0_OVERLAY_NR_LOOPER)
             {
                 overlayMode = OM_NONE;
                 uiStackPop();
@@ -259,6 +317,15 @@ static void enterReleasedCallback(void)
                 DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
                 //jumpToBootloader();
             }
+            break;
+        case OM_SAVE_REVERT:
+            overlayMode = OM_NONE;
+            savePreset(presets+currentPreset,currentBank*3 + currentPreset);
+            clearSquareInt(0,0,112,64,imgBuffer);
+            drawProgramHeader();
+            uiStackPop();
+            uiStackPush(0);
+            break;
     }
 
 }
@@ -304,13 +371,32 @@ static void exitCallback()
             }
             break;
         case OM_OVERLAYS:
-            clearSquareInt(0,0,112,64,imgBuffer);
+            clearSquareInt(0,0,112,48,imgBuffer);
             drawProgramHeader();
             overlayNr=0xFF;
             overlayMode = OM_NONE;
             uiStackPop();
             uiStackPush(0);
             break;
+        case OM_SAVE_REVERT:
+            clearSquareInt(0,0,112,48,imgBuffer);
+            drawProgramHeader();
+            overlayNr=0xFF;
+            overlayMode = OM_NONE;
+            uiStackPop();
+            if (loadPreset(presets+currentPreset,currentBank*3 + currentPreset)!=0)
+            {
+                generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
+            }
+            if (programsToInitialize[0] != presets[currentPreset].programNrA || 
+                programsToInitialize[1] != presets[currentPreset].programNrB ||
+                programsToInitialize[2] != presets[currentPreset].programNrC)
+            {
+                programChangeState = 1;
+            }
+            uiStackPush(0);
+            break;
+
     }
 }
 
@@ -324,7 +410,7 @@ static void rotaryCallback(int16_t encoderDelta)
             currentPreset = 0;
         }
         enterState=0;
-        consumeEnterReleased = 1;
+        bypassEnterReleased = 1;
         enterLevel3();
         return;
     }
@@ -386,15 +472,26 @@ static void rotaryCallback(int16_t encoderDelta)
 
 static void stompswitch1Callback(void)
 {
-
-    ui.currentProgramIdx--;
-    if (ui.currentProgramIdx >= N_FX_PROGRAMS)
+    if (enterState == 0)
     {
-        ui.currentProgramIdx = 0;
+        ui.currentProgramIdx--;
+        if (ui.currentProgramIdx >= N_FX_PROGRAMS)
+        {
+            ui.currentProgramIdx = 0;
+        }
+        programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
+        programChangeState=1;
+        setStompswitchColorRaw(0);
     }
-    programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
-    programChangeState=1;
-    setStompswitchColorRaw(0);
+    else
+    {
+        bypassEnterReleased = 1;
+        if (ui.currentParameterIdx >0)
+        {
+            ui.currentParameterIdx--;
+            ui.currentParameter = ui.currentProgram->getParameter(ui.currentParameterIdx);
+        }
+    }
 }
 
 static void stompSwitch2Pressed()
@@ -422,19 +519,30 @@ static void stompswitch2Callback(void)
 
 static void stompswitch3Callback(void)
 {
-
-    ui.currentProgramIdx++;
-    if (ui.currentProgramIdx >= N_FX_PROGRAMS )
+    if (enterState==0)
     {
-        ui.currentProgramIdx = N_FX_PROGRAMS-1;
-    } 
-    programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
-    programChangeState=1;
-    setStompswitchColorRaw(0);
+        ui.currentProgramIdx++;
+        if (ui.currentProgramIdx >= N_FX_PROGRAMS )
+        {
+            ui.currentProgramIdx = N_FX_PROGRAMS-1;
+        } 
+        programsToInitialize[ui.currentProgramPosition]=ui.currentProgramIdx;
+        programChangeState=1;
+        setStompswitchColorRaw(0);
+    }
+    else
+    {
+        bypassEnterReleased = 1;
+        if (ui.currentParameterIdx <  ui.currentProgram->getParameterCount()-1)
+        {
+            ui.currentParameterIdx++;
+            ui.currentParameter = ui.currentProgram->getParameter(ui.currentParameterIdx);
+        }
+    }
 }
 
 
-
+/*
 static void drawProgramNameAndParams()
 {
     char lineBuffer[24];
@@ -479,7 +587,8 @@ static void drawProgramNameAndParams()
             }                
         }
     }
-}
+        
+}*/
 
 
 /*
@@ -516,6 +625,7 @@ void enterLevel0()
         setStompswitchColorRaw(0);
     }
     ui.defaultOn=0;
+    ui.mode = PPFX_MODE_STOMPBOX;
     //1[programsToInitialize]=0xFF;
     //2[programsToInitialize]=0xFF;
     //((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->switchOff();
@@ -529,6 +639,10 @@ static void drawParameterDescriptions()
     char lineBuffer[24];
     BwImageType* imgBuffer = getImageBuffer();
     clearSquareInt(0,20,110,20+3*8,imgBuffer);
+    if (ui.currentProgram == nullptr)
+    {
+        return;
+    }
     for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
     {
         if (ui.currentProgram->getParameter(c)->getControl() == 0)
@@ -561,6 +675,10 @@ static void drawParameterValues()
     
     BwImageType* imgBuffer = getImageBuffer();
     clearSquareInt(0,20,110,20+3*8,imgBuffer);
+    if (ui.currentProgram == nullptr)
+    {
+        return;
+    }
     for (uint8_t c=0;c<ui.currentProgram->getParameterCount();c++)
     {
         if (ui.currentProgram->getParameter(c)->getControl() == 0)
@@ -591,6 +709,10 @@ static void drawProgramHeader()
 {
     BwImageType* imgBuffer = getImageBuffer();
     clearSquareInt(0,0,128,32,imgBuffer);
+    if (ui.currentProgram == nullptr)
+    {
+        return;
+    }
     const GFXfont * font =  getGFXFont(FREESANS9PT7B);
     drawText(0,1*14,ui.currentProgram->getName(),imgBuffer,font);
     if (ui.locked != 0)

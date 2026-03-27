@@ -57,7 +57,7 @@ static const BwImageTypeConst* overlays[]={
     &fwUpgradeOverlay_streamimg};
 extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
-extern volatile uint8_t consumeEnterReleased;
+extern volatile uint8_t bypassEnterReleased;
 
 static uint8_t presetChangeLock = 0; // used to prohibit action when the second stomp switch is released
 static uint16_t pot1Val=0;
@@ -196,9 +196,9 @@ static void enterPressedCallback()
 static void enterReleasedCallback(void) 
 {
     enterState=0;
-    if (consumeEnterReleased == 1)
+    if (bypassEnterReleased == 1)
     {
-        consumeEnterReleased = 0;
+        bypassEnterReleased = 0;
         return;
     }
     BwImageType* imgBuffer = getImageBuffer();
@@ -405,7 +405,7 @@ static void rotaryCallback(int16_t encoderDelta)
 {
     if (enterState==1)
     {
-        consumeEnterReleased = 1;
+        bypassEnterReleased = 1;
         enterLevel0();
         return;
     }
@@ -724,9 +724,7 @@ static void handleBankChange(uint8_t increase)
     drawImage(2,2,(BwImageTypeConst*)&previewImage,imgBuffer);
     free((void*)previewImage.data);
     presetChangeLock = 1;
-    // move preset index away to force reload
-    //currentPreset = 0xFF;
-    //data->currentProgramIdx = 0xff;
+
 }
 
 static void handlePresetChange(uint8_t increase)

@@ -80,7 +80,7 @@ void processAudioBuffers(void)
         {
             avgIn = inputSample;
         }
-        avgInOld = AVERAGING_LOWPASS_CUTOFF*avgIn + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgInOld);
+        avgInOld = avgInOld + AVERAGING_LOWPASS_CUTOFF*(avgIn - avgInOld); //AVERAGING_LOWPASS_CUTOFF*avgIn + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgInOld);
 
         if (programChangeState != 3) // processing
         {
@@ -127,7 +127,7 @@ void processAudioBuffers(void)
         {
             avgOut = outputSample;
         }
-        avgOutOld = AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
+        avgOutOld = avgOutOld + AVERAGING_LOWPASS_CUTOFF*(avgOut - avgOutOld);// AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
         outputSample=clip(outputSample,getAudioStatePtr());
         outputSampleInt=((int32_t)(outputSample*8388607.0f));
         //inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);

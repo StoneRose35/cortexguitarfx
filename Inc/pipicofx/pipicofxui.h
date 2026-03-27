@@ -27,7 +27,77 @@ typedef struct
     uint8_t editViaRotary : 1; // if set: all parameters must be edited using the rotary encoder
     uint8_t defaultOn : 1; // switches programs on when changing programs, off otherwise 
     uint8_t currentProgramPosition: 2; // is either 0:A, 1:B or 2:C
+    uint8_t mode : 3; // defines the mode which determined which aspects are shown and cap be manipulated
 } PiPicoFXUiType;
+
+/* mode change: enter+rotary, change of enter released if rotary
+   position changed while enter depressed
+   exit: back to previous mode 
+*/
+
+/*
+Upper part Display: Preset Name, Bank and Preset Nr
+stompswitches select presets within bank, left+middle stompswitch: bank down
+long press on stomp switch: jump to looper mode
+middle+right stompswitch: bank up 
+overlays: save/reset,edit name, edit led color, copy preset, swap preset, delete preset, about, settings, firmware upgrade
+enter+p1: switch on/off HiZ, enter+p2: switch on/off Mic, enter+p3: set global volume
+*/
+#define PPFX_MODE_PRESETS 0
+
+/*
+stompswitches switch on/off/freeze individual stompboxes of the preset
+Upper part Display:
+Program of A, Program of B, Program of C
+enter+stomp switch: set focus to stompbox and enter stompbox mode
+overlays: save/reset, routing, about, settings, firmware upgrade
+enter+p1: switch on/off HiZ, enter+p2: switch on/off Mic, enter+p3: set global volume
+*/
+#define PPFX_MODE_PEDALBOARD 1
+
+
+/*
+left stomp, right stomp,rotary: select next/previous effect
+Upper part Display: Program/Effect name 
+p1 parameter and value
+p2 parameter and value
+p3 parameter and value
+parameter in focus
+enter+left/right stomp: change parameter in focus
+enter+p1: lock/unlock parameters, reset when locking
+enter+p3: set global volume
+p1,p2,p3: parameter edit (if unlocked)
+middle stompbox: switch on/off/freeze effect
+overlays: save/reset, edit parameter, about, settings, firmware upgrade
+*/
+#define PPFX_MODE_STOMPBOX 2
+
+
+/*
+left stomp, right stomp,rotary: select next/previous parameters in groups of three
+Parameter page nr/total parameters
+Upper part display: 
+up to three times:
+  Parameter Name
+   parameter value (output of parameterDisplay())
+   numerical value as horizontal bar, current positition of p1/p2/p3
+enter+p1, p2, p3: set current parameter value
+p1, p2, p3 set default parameters
+exit: to stompbox mode
+*/
+#define PPFX_MODE_EDITPARAM 3
+
+/*
+left stomp: start, record or overdub
+middle stomp: special function(retrigger, to preset mode)
+right stomp: stop, delete
+enter+p1: direct level
+enter+p2: loop level
+enter+p3: set global volume
+*/
+#define PPFX_MODE_LOOPER 4
+
+
 
 #ifdef __cplusplus 
 extern "C" {
@@ -99,4 +169,6 @@ void enterLevel7(void);
 void enterLevel8(void);
 void enterLevel9(void);
 void enterLevel10(void);
+
+void drawBottomPanel(BwImageType* imgBuffer);
 #endif
