@@ -736,6 +736,19 @@ void drawImage(uint8_t px, uint8_t py,const BwImageTypeConst * img, BwImageType*
 }
 
 __QSPI_CODE
+void togglePixel(int32_t px,int32_t py,BwImageType*img)
+{
+	if (getPixel(px,py,(BwImageTypeConst*)img))
+	{
+		clearPixel(px,py,img);
+	}
+	else
+	{
+		setPixel(px,py,img);
+	}
+}
+
+__QSPI_CODE
 uint8_t getPixel(int32_t px,int32_t py,const BwImageTypeConst*img)
 {
 if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)

@@ -381,7 +381,7 @@ void drawBottomPanel(BwImageType* imgBuffer)
     if (currentPreset != 0xFF)
     {
         appendToString(lineBfr,presets[currentPreset].name);
-        drawText(offsetX,1,lineBfr,imgBuffer,font);
+        drawText(offsetX,6,lineBfr,imgBuffer,font);
     }
     float dbVal;
     if (avgInOld > 0.0f)

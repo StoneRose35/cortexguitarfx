@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class MultimodeFilter : public FxProgram
         {
             public:
-                MultimodeFilter(): FxProgram(4,"MMFilter",0)
+                MultimodeFilter(): FxProgram(4,"MMFilter",0,17)
                 {
                     this->setup();
                 };

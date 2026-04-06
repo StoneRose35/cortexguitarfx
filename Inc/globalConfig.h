@@ -42,6 +42,8 @@
 // the minimal duration of a long press in 10ms, a value of 100 would result in 1s duration
 #define LONGPRESS_DURATION_SYSTICKS 130
 
+// the alpha value for the lowpass filter for the adc values, the effective alpha is ADC_LOWPASS/1024
+#define ADC_LOWPASS 60
 
 
 #define UI_LATENCY_IN_SAMPLES (UI_UPDATE_IN_SAMPLE_BUFFERS*AUDIO_BUFFER_SIZE)

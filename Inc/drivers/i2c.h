@@ -20,6 +20,10 @@ uint16_t I2CReceiveMultiple(I2C_TypeDef * i2cBlk,uint8_t* dataBfr,uint16_t nByte
 uint16_t I2CReceiveMultipleInternal(uint8_t* dataBfr,uint16_t nBytes);
 uint16_t I2CReceiveMultipleExternal(uint8_t* dataBfr,uint16_t nBytes);
 
+uint8_t I2CsendMultipleExternalAsync(uint8_t * data, uint16_t nSend);
+uint8_t I2CsendMultipleInternalAsync(uint8_t * data, uint16_t nSend);
+uint8_t I2CsendMultipleAsync(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uint8_t slave_address);
+
 void setTargetAddressInternal(uint8_t address);
 void setTargetAddressExternal(uint8_t address);
 uint8_t getTargetAddressInternal();

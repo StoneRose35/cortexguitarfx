@@ -2,6 +2,7 @@
 #define _PICOFX_CORE_H_
 #include "stdint.h"
 #include "FxProgram.hpp"
+#include "MultiAudioProcessor.hpp"
 #define PARAMETER_NAME_MAXLEN 16
 #define FXPROGRAM_NAME_MAXLEN 16
 #define FXPROGRAM_MAX_PARAMETERS 8
@@ -62,8 +63,17 @@ extern "C" {
     void savePreset(FxPresetType* preset,uint16_t presetPos);
     uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos);
     void clearPreset(uint16_t presetPos);
-    void applyPreset(FxPresetType* preset,FxProgram * program,uint8_t programPosition);
-    void parametersToPreset(FxPresetType* preset,FxProgram * programs,uint8_t programPosition);
+
+    /** 
+     * copies preset information for up to three fx program from memory to the audio processor
+     * 
+    */
+    void applyPreset(FxPresetType* preset,MultiAudioProcessor *audioProcessor);
+    /**
+     * applies the preset information to a single fx program
+     */
+    void applyPresetToProgram(FxPresetType* preset,PiPicoFX::MultiAudioProcessor * audioProcessor,uint8_t programNr);
+    void parametersToPreset(FxPresetType* preset,MultiAudioProcessor * audioProcessor);
     void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos);
 }
 #endif

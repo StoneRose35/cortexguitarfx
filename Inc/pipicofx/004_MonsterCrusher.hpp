@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class MonsterCrusher : public FxProgram
         {
             public:
-                MonsterCrusher() : FxProgram(2,"Monstercrusher",0){
+                MonsterCrusher() : FxProgram(2,"Monstercrusher",0,3){
                     this->setup();
                 };
                 float processSample(float);

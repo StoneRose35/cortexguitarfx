@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class SineModulation : public FxProgram
         {
             public:
-                SineModulation() : FxProgram(6,"Sine Modulation",SINE_CHORUS_DELAY_SIZE<<2){
+                SineModulation() : FxProgram(6,"Sine Modulation",SINE_CHORUS_DELAY_SIZE<<2,8){
                     this->setup();
                 };
                 ~SineModulation();

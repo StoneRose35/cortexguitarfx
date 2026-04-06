@@ -25,7 +25,7 @@ namespace PiPicoFX {
         class ShimmerVerb : public FxProgram
         {
             public:
-                ShimmerVerb() : FxProgram(4,"ShimmerVerb",15104<<2){
+                ShimmerVerb() : FxProgram(4,"ShimmerVerb",15104<<2,14){
                     this->setup();
                 };
                 ~ShimmerVerb();

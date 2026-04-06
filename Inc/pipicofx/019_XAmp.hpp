@@ -15,7 +15,7 @@ namespace PiPicoFX {
         class XAmp : public FxProgram
         {
             public:
-                XAmp(): FxProgram(4,"XAmp",MAX_DELAY_SINGLEBUFFER<<2)
+                XAmp(): FxProgram(4,"XAmp",MAX_DELAY_SINGLEBUFFER<<2,18)
                 {
                     this->setup();
                 };

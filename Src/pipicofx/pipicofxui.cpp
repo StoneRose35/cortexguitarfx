@@ -16,9 +16,11 @@ extern "C" {
 #include "pipicofx/FxProgramLoader.hpp"
 #include "pipicofx/MultiAudioProcessor.hpp"
 
-
+extern FxPresetType presets[3];
 extern PiPicoFXUiType ui;
 extern MultiAudioProcessor audioProcessor; 
+extern uint8_t currentBank;
+extern uint8_t currentPreset;
 static BwImageBufferType imgBuffer;
 static BwImageType img;
 const uiEnterFct uiEnterFunctions[]={
@@ -31,7 +33,8 @@ const uiEnterFct uiEnterFunctions[]={
     &enterLevel6,
     &enterLevel7,
     &enterLevel8,
-    &enterLevel10};
+    &enterLevel10,
+    &enterLevel11};
 /*
 Callback function pointers
 */
@@ -311,6 +314,31 @@ void onCreate(void)
         onCreateCallback();
     }
 }
+
+
+__QSPI_CODE
+void uiSwitchMode(void)
+{
+    switch (ui.mode)
+    {
+        case PPFX_MODE_PRESETS:
+            enterLevel3();
+            break;
+        case PPFX_MODE_PEDALBOARD:
+            enterLevel11();
+            break;
+        case PPFX_MODE_STOMPBOX:
+            enterLevel0();
+            break;
+        case PPFX_MODE_EDITPARAM:
+            enterLevel2();
+            break;
+        case PPFX_MODE_LOOPER:
+            enterLevel8();
+            break;
+    }
+}
+
 __QSPI_CODE
 uint8_t uiStackPush(uint8_t val)
 {
@@ -343,6 +371,19 @@ uint8_t uiStackCurrent()
 __QSPI_CODE
 void piPicoFxUiSetup(void)
 {
+    if (loadPreset(presets,currentBank*3)!=0)
+    {
+        generateEmptyPreset(presets,currentBank,0);
+    }
+    if (loadPreset(presets+1,currentBank*3+1)!=0)
+    {
+        generateEmptyPreset(presets+1,currentBank,1);
+    }
+    if (loadPreset(presets+2,currentBank*3+2)!=0)
+    {
+        generateEmptyPreset(presets+2,currentBank,2);
+    }
+    applyPreset(presets + currentPreset,&audioProcessor);
     ui.currentProgram=PiPicoFX::loadProgram(2);
     audioProcessor.addFxProgram(ui.currentProgram,0);
     ui.currentProgramIdx=2;

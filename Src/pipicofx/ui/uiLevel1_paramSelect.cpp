@@ -84,7 +84,7 @@ static void enterCallback()
 
 static void exitCallback()
 {
-    parametersToPreset(presets+currentPreset,((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition)),ui.currentProgramPosition);
+    //parametersToPreset(presets+currentPreset,((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition)),ui.currentProgramPosition);
 }
 
 static inline void knobCallback(uint16_t val,uint8_t control)

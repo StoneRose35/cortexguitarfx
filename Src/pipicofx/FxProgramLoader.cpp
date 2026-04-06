@@ -3,7 +3,7 @@
 #include "pipicofx/FxProgram.hpp"
 #include "pipicofx/001_AmpModel.hpp"
 #include "pipicofx/002_VibChorus.hpp"
-#include "pipicofx/003_Off.hpp"
+#include "pipicofx/003_Boost.hpp"
 #include "pipicofx/004_MonsterCrusher.hpp"
 #include "pipicofx/005_Delay.hpp"
 #include "pipicofx/006_Compressor.hpp"
@@ -35,7 +35,7 @@ namespace PiPicoFX {
                 res = new(std::nothrow) PiPicoFX::VibChorus::VibChorus();
                 break;
             case 2:
-                res = new(std::nothrow) PiPicoFX::Off::Off();
+                res = new(std::nothrow) PiPicoFX::Boost::Boost();
                 break;
             case 3:
                 res = new(std::nothrow) PiPicoFX::MonsterCrusher::MonsterCrusher();

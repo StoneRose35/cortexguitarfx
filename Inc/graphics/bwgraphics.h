@@ -49,7 +49,8 @@ typedef struct BwImageBufferStruct
 	uint8_t type;
 } BwImageBufferType;
 
-
+__QSPI_CODE
+void togglePixel(int32_t px,int32_t py,BwImageType*img);
 __QSPI_CODE
 uint8_t getPixel(int32_t px,int32_t py,const BwImageTypeConst*img);
 __QSPI_CODE

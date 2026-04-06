@@ -4,10 +4,11 @@
 using namespace PiPicoFX;
 
 __QSPI_CODE
-PiPicoFX::FxProgram::FxProgram(uint8_t nParams,const char * name,uint32_t memUseage)
+PiPicoFX::FxProgram::FxProgram(uint8_t nParams,const char * name,uint32_t memUseage,uint8_t idx)
 {
     nParameters=nParams;
     paramCnt=0;
+    index=idx;
     programName = name;
     memoryUseage = memUseage;
     parameters = new FxProgramParameter*[nParameters];
@@ -197,4 +198,10 @@ __QSPI_CODE
 void FxProgram::onMelt()
 {
     
+}
+
+__QSPI_CODE
+uint8_t FxProgram::getIndex()
+{
+    return index;
 }

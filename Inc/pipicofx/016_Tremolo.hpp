@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class Tremolo : public FxProgram
         {
             public:
-                Tremolo() : FxProgram(5,"Tremolo",0){
+                Tremolo() : FxProgram(5,"Tremolo",0,15){
                     this->setup();
                 };
                 float processSample(float);

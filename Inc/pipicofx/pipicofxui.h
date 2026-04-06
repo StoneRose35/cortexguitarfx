@@ -28,6 +28,8 @@ typedef struct
     uint8_t defaultOn : 1; // switches programs on when changing programs, off otherwise 
     uint8_t currentProgramPosition: 2; // is either 0:A, 1:B or 2:C
     uint8_t mode : 3; // defines the mode which determined which aspects are shown and cap be manipulated
+    uint8_t enterState; // reflects the state of the enter button, 1 is pressed and 0 is released
+    uint8_t bypassEnterReleased; // indicated if the released event of the enter button should be discarded, this is the case if enter has been used as a modifier
 } PiPicoFXUiType;
 
 /* mode change: enter+rotary, change of enter released if rotary
@@ -40,7 +42,7 @@ Upper part Display: Preset Name, Bank and Preset Nr
 stompswitches select presets within bank, left+middle stompswitch: bank down
 long press on stomp switch: jump to looper mode
 middle+right stompswitch: bank up 
-overlays: save/reset,edit name, edit led color, copy preset, swap preset, delete preset, about, settings, firmware upgrade
+overlays: save/reset,edit name, edit led color, copy preset, swap preset, delete preset, settings,  about, firmware upgrade
 enter+p1: switch on/off HiZ, enter+p2: switch on/off Mic, enter+p3: set global volume
 */
 #define PPFX_MODE_PRESETS 0
@@ -50,7 +52,7 @@ stompswitches switch on/off/freeze individual stompboxes of the preset
 Upper part Display:
 Program of A, Program of B, Program of C
 enter+stomp switch: set focus to stompbox and enter stompbox mode
-overlays: save/reset, routing, about, settings, firmware upgrade
+overlays: save/reset, routing, settings, about, firmware upgrade
 enter+p1: switch on/off HiZ, enter+p2: switch on/off Mic, enter+p3: set global volume
 */
 #define PPFX_MODE_PEDALBOARD 1
@@ -149,7 +151,7 @@ void onUpdate(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad);
 void onCreate(void);
 BwImageType * getImageBuffer();
 
-
+void uiSwitchMode(void);
 uint8_t uiStackPush(uint8_t val);
 uint8_t uiStackPop();
 uint8_t uiStackCurrent();
@@ -169,6 +171,13 @@ void enterLevel7(void);
 void enterLevel8(void);
 void enterLevel9(void);
 void enterLevel10(void);
+void enterLevel11(void);
 
 void drawBottomPanel(BwImageType* imgBuffer);
+
+void drawMasterVolume(int32_t currentVolume,BwImageType*img);
+
+void drawAbout(BwImageType* imgBuffer);
+
+
 #endif

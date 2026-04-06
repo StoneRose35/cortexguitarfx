@@ -28,4 +28,6 @@ void resetTime();
  */
 uint32_t getTimeLW();
 
+
+void waitUs(uint32_t us);
 #endif

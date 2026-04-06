@@ -10,7 +10,7 @@ extern "C" {
 #include "pipicofx/FxProgram.hpp"
 #include "pipicofx/fxProgramParameter.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
-
+#include "pipicofx/MultiAudioProcessor.hpp"
 __QSPI_CODE
 void savePreset(FxPresetType* preset,uint16_t presetPos)
 {
@@ -72,25 +72,107 @@ void clearPreset(uint16_t presetPos)
 }
 
 __QSPI_CODE
-void applyPreset(FxPresetType* preset,PiPicoFX::FxProgram * program,uint8_t programPosition)
+void applyPreset(FxPresetType* preset,PiPicoFX::MultiAudioProcessor * audioProcessor)
 {
     uint8_t nParams;
-    nParams = program->getParameterCount();
-    for (uint8_t c=0;c<nParams;c++)
+    
+    if (audioProcessor->getFxProgram(0) != nullptr)
     {
-        program->getParameter(c)->parameterCallback(preset->parametersA[c + (programPosition << 3)]);
+        nParams = ((FxProgram*)audioProcessor->getFxProgram(0))->getParameterCount();
+        for (uint8_t c=0;c<nParams;c++)
+        {
+            ((FxProgram*)audioProcessor->getFxProgram(0))->getParameter(c)->parameterCallback(preset->parametersA[c]);
+        }
+    }
+    if (audioProcessor->getFxProgram(1) != nullptr)
+    {
+        nParams = ((FxProgram*)audioProcessor->getFxProgram(1))->getParameterCount();
+        for (uint8_t c=0;c<nParams;c++)
+        {
+            ((FxProgram*)audioProcessor->getFxProgram(1))->getParameter(c)->parameterCallback(preset->parametersB[c]);
+        }
+    }   
+    if (audioProcessor->getFxProgram(2) != nullptr)
+    {
+        nParams = ((FxProgram*)audioProcessor->getFxProgram(2))->getParameterCount();
+        for (uint8_t c=0;c<nParams;c++)
+        {
+            ((FxProgram*)audioProcessor->getFxProgram(2))->getParameter(c)->parameterCallback(preset->parametersC[c]);
+        }
+    }    
+}
+
+__QSPI_CODE
+void applyPresetToProgram(FxPresetType* preset,PiPicoFX::MultiAudioProcessor * audioProcessor,uint8_t programNr)
+{
+    uint8_t nParams;
+    switch(programNr)
+    {
+        case 0:
+            if (audioProcessor->getFxProgram(0) != nullptr)
+            {
+                nParams = ((FxProgram*)audioProcessor->getFxProgram(0))->getParameterCount();
+                for (uint8_t c=0;c<nParams;c++)
+                {
+                    ((FxProgram*)audioProcessor->getFxProgram(0))->getParameter(c)->parameterCallback(preset->parametersA[c]);
+                }
+            }
+            break;
+        case 1:
+            if (audioProcessor->getFxProgram(1) != nullptr)
+            {
+                nParams = ((FxProgram*)audioProcessor->getFxProgram(1))->getParameterCount();
+                for (uint8_t c=0;c<nParams;c++)
+                {
+                    ((FxProgram*)audioProcessor->getFxProgram(1))->getParameter(c)->parameterCallback(preset->parametersB[c]);
+                }
+            }   
+            break;
+        case 2: 
+            if (audioProcessor->getFxProgram(2) != nullptr)
+            {
+                nParams = ((FxProgram*)audioProcessor->getFxProgram(2))->getParameterCount();
+                for (uint8_t c=0;c<nParams;c++)
+                {
+                    ((FxProgram*)audioProcessor->getFxProgram(2))->getParameter(c)->parameterCallback(preset->parametersC[c]);
+                }
+            }  
+            break;
     }
 }
 
 __QSPI_CODE
-void parametersToPreset(FxPresetType* preset,FxProgram * program,uint8_t programPosition)
+void parametersToPreset(FxPresetType* preset,MultiAudioProcessor * audioProcessor)
 {
     uint8_t nParams;
-    nParams = program->getParameterCount();
-    for (uint8_t c=0;c<nParams;c++)
+    if (audioProcessor->getFxProgram(0) != nullptr)
     {
-        preset->parametersA[c + (programPosition<<3)] = program->getParameter(c)->rawValue;
-    }    
+        preset->programNrA = ((FxProgram*)audioProcessor->getFxProgram(0))->getIndex();
+        nParams = ((FxProgram*)audioProcessor->getFxProgram(0))->getParameterCount();
+        for (uint8_t c=0;c<nParams;c++)
+        {
+            preset->parametersA[c] = ((FxProgram*)audioProcessor->getFxProgram(0))->getParameter(c)->rawValue;
+        }   
+    }
+    if (audioProcessor->getFxProgram(1) != nullptr)
+    {
+        preset->programNrB = ((FxProgram*)audioProcessor->getFxProgram(1))->getIndex();
+        nParams = ((FxProgram*)audioProcessor->getFxProgram(1))->getParameterCount();
+        for (uint8_t c=0;c<nParams;c++)
+        {
+            preset->parametersB[c] = ((FxProgram*)audioProcessor->getFxProgram(1))->getParameter(c)->rawValue;
+        } 
+    }
+    if (audioProcessor->getFxProgram(2) != nullptr)
+    {
+        preset->programNrC = ((FxProgram*)audioProcessor->getFxProgram(2))->getIndex();
+        nParams = ((FxProgram*)audioProcessor->getFxProgram(2))->getParameterCount();
+        for (uint8_t c=0;c<nParams;c++)
+        {
+            preset->parametersC[c] = ((FxProgram*)audioProcessor->getFxProgram(2))->getParameter(c)->rawValue;
+        } 
+    }
+ 
 }
 
 __QSPI_CODE
@@ -108,8 +190,8 @@ void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
     appendToString(preset->name,nrbfr);
     appendToStringUntil(preset->name,"        ",8);
     preset->programNrA = 2;
-    preset->programNrB = 2;
-    preset->programNrC = 2;
+    preset->programNrB = 0x3F;
+    preset->programNrC = 0x3F;
     preset->topology = PRESET_TOPOLOGY_SERIAL;
 
     for (uint8_t c=0;c< 8; c++) 
@@ -126,7 +208,7 @@ void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
     {
         preset->parametersC[c] = 0x3FF; //set all values to 1023 to start with Volume 1
     } 
-
+    preset->ledColorPreset = 1;
     preset->ledColorA = 1;
     preset->ledColorB = 1;
     preset->ledColorC = 1;

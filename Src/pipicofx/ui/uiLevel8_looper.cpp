@@ -18,20 +18,7 @@ extern "C" {
 extern LooperDataType looper;
 extern PiPicoFXUiType ui;
 static void create()
-{
-    BwImageType* imgBuffer = getImageBuffer();
-    clearImage(imgBuffer);
-    const GFXfont * font = getGFXFont(FREEMONO12PT7B);
-    drawText(4,20,"Looper",imgBuffer,font);
-    if (looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
-    {
-        drawText(6,32,"middle: retrigger",imgBuffer,(void*)0);
-    }
-    else if (looper.looperFunction == LOOPER_FUNCTION_EXIT)
-    {
-        drawText(6,32,"middle: exit",imgBuffer,(void*)0);
-    }
-    
+{    
     if (looper.looperState == LOOPER_STATE_PLAYING)
     {
         setStompswitchColorRaw(COLOR_LOOPER_PLAYING); // should be green
@@ -49,11 +36,6 @@ static void create()
         setStompswitchColorRaw(COLOR_LOOPER_OFF);
     }
 
-    if (looper.indexEnd != LOOPER_INDEX_NULL)
-    {
-        drawSquareInt(0,LOOP_SQUARE_CENTER-5,128,LOOP_SQUARE_CENTER+5,imgBuffer);
-        clearSquareInt(1,LOOP_SQUARE_CENTER-4,127,LOOP_SQUARE_CENTER+4,imgBuffer);
-    }
 
 }
 
@@ -63,6 +45,19 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
     (void)avgOutput;
     (void)cpuLoad;
     BwImageType* imgBuffer = getImageBuffer();   
+    uint8_t bottomPaneData[256];
+    BwImageType bottomPane = {
+        .data = bottomPaneData,
+        .sx=128,
+        .sy=16,
+        .type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
+        .byteSize=256
+    };
+    clearImage(imgBuffer);
+    const GFXfont * font = getGFXFont(FREEMONO12PT7B);
+    drawText(4,20,"Looper",imgBuffer,font);
+    drawBottomPanel(&bottomPane);
+    drawImage(0,48,(BwImageTypeConst*)&bottomPane,imgBuffer);
     if (looper.indexEnd != LOOPER_INDEX_NULL)
     {
         
@@ -115,14 +110,38 @@ static void exitCallback(PiPicoFXUiType*data)
 */
 static void rotaryCallback(int16_t encoderDelta)
 {
-    (void)encoderDelta;
-    if (looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
+    if (ui.enterState == 1)
     {
-        looper.looperFunction = LOOPER_FUNCTION_EXIT;
+        ui.bypassEnterReleased = 1;
+        if (encoderDelta > 0)
+        {
+            ui.mode++;
+            if (ui.mode > 4)
+            {
+                ui.mode=4;
+            }
+        }
+        else
+        {
+            ui.mode--;
+            if (ui.mode > 4)
+            {
+                ui.mode=0;
+            }
+        }
+        uiSwitchMode();
+        return;
     }
     else
     {
-        looper.looperFunction = LOOPER_FUNCTION_RETRIGGER;
+        if (looper.looperFunction == LOOPER_FUNCTION_RETRIGGER)
+        {
+            looper.looperFunction = LOOPER_FUNCTION_EXIT;
+        }
+        else
+        {
+            looper.looperFunction = LOOPER_FUNCTION_RETRIGGER;
+        }
     }
 }
 

@@ -17,7 +17,7 @@ namespace PiPicoFX {
         class FreeVerb : public FxProgram
         {
             public:
-                FreeVerb() : FxProgram(4,"FreeVerb",24576<<2){
+                FreeVerb() : FxProgram(4,"FreeVerb",24576<<2,16){
                     this->setup();
                 };
                 ~FreeVerb();

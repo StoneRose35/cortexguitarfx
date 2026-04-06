@@ -6,15 +6,15 @@
 extern uint32_t task;
 
 volatile uint16_t adcChannelValues[3];
-uint16_t adcValuesBuffer[3];
+volatile uint16_t adcChannelValuesOld[3];
 
 void DMA1_Stream2_IRQHandler() //raised when all 3 adc values have been read
 {
-    //TIM2->CR1 &= ~(1 << TIM_CR1_CEN_Pos);
     DMA1->LIFCR = (1 << DMA_LIFCR_CTCIF2_Pos);
-    adcValuesBuffer[0]=adcChannelValues[0];
-    adcValuesBuffer[1]=adcChannelValues[1];
-    adcValuesBuffer[2]=adcChannelValues[2];
+    adcChannelValuesOld[0] += ((ADC_LOWPASS*(adcChannelValues[0]-adcChannelValuesOld[0]))>>10);
+    adcChannelValuesOld[1] += ((ADC_LOWPASS*(adcChannelValues[1]-adcChannelValuesOld[1]))>>10);
+    adcChannelValuesOld[2] += ((ADC_LOWPASS*(adcChannelValues[2]-adcChannelValuesOld[2]))>>10);
+    restartAdc();
     task |= (1 << TASK_UPDATE_POTENTIOMETER_VALUES);
 }
 
@@ -83,20 +83,13 @@ void initAdc()
     gpio->MODER |= (3 << ((POT3 & 0xF)<<1));
     gpio->PUPDR &= ~(3 << ((POT3 & 0xF)<< 1));
 
-        //setup timer 2
-    RCC->APB1LENR |= (1 << RCC_APB1LENR_TIM2EN_Pos);
-    TIM2->PSC = 0xFFFF; // divide 240MHz by 65535 (Prescaler) and 122 (ARR, CCR2) to achieve 30Hz ADC Sampling Frequency
-                       // among all three channels thus update the potentiometers at 10Hz
-    TIM2->ARR=122;
-    TIM2->CCR2=122;
+   adcChannelValuesOld[0]=0;
+   adcChannelValuesOld[1]=0;
+   adcChannelValuesOld[2]=0;
 }
 
 void initRoundRobinReading()
 {
-    TIM2->CNT=0;
-    TIM2->CCMR1 = (3 << TIM_CCMR1_OC2M_Pos);
-    TIM2->CCER |= (1 << TIM_CCER_CC2E_Pos);
-    TIM2->CR1 |= (1 << TIM_CR1_CEN_Pos);
 
     // setup dma 1 channel 0 stream 2
     DMA1_Stream2->PAR=(uint32_t)&(ADC1->DR);
@@ -123,15 +116,15 @@ void restartAdc()
 
 uint16_t getChannel0Value()
 {
-    return adcValuesBuffer[0]>>4;
+    return adcChannelValuesOld[0]>>4;
 }
 
 uint16_t getChannel1Value()
 {
-    return adcValuesBuffer[1]>>4;
+    return adcChannelValuesOld[1]>>4;
 }
 
 uint16_t getChannel2Value()
 {
-    return adcValuesBuffer[2]>>4;
+    return adcChannelValuesOld[2]>>4;
 }

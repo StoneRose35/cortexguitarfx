@@ -86,6 +86,7 @@ switch (this->cabSimType)
     {
         out = reverbProcessSample(out,&this->reverb);
     }
+    out = gainStageProcessSample(out,&this->presetVolume);
     if (!this->isOn())
     {
         return (sampleIn + out);

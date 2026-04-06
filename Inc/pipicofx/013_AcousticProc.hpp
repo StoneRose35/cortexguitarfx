@@ -16,7 +16,7 @@ namespace PiPicoFX {
         class AcousticProc : public FxProgram
         {
             public:
-                AcousticProc() : FxProgram(7,"Acoustic Proc",20480<<2){
+                AcousticProc() : FxProgram(7,"Acoustic Proc",20480<<2,12){
                     this->setup();
                 };
                 ~AcousticProc();

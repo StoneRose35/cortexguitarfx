@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class PitchShifter : public FxProgram
         {
             public:
-                PitchShifter() : FxProgram(4,"Pitchshifter",8192<<3){
+                PitchShifter() : FxProgram(4,"Pitchshifter",8192<<3,13){
                     this->setup();
                 };
                 ~PitchShifter();

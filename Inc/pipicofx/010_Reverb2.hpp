@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class Reverb2 : public FxProgram
         {
             public:
-                Reverb2() : FxProgram(3,"Allpass Reverb",24576<<2){
+                Reverb2() : FxProgram(3,"Allpass Reverb",24576<<2,9){
                     this->setup();
                 };
                 ~Reverb2();

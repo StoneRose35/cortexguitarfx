@@ -3,7 +3,7 @@ driver for a stomp switches interface which communicates it's status over i2c
 */
 #include "drivers/i2c.h"
 #include "drivers/stompswitches.h"
-
+#include "timer.h"
 
 // bit 0: momentary
 // bit 1: sticky pressed
@@ -63,6 +63,7 @@ void setStompswitchColor(uint8_t switchNr,uint8_t clr)
             break;
     }
     sendColors();
+    waitUs(200);
 }
 
 void setStompswitchColorRaw(uint8_t data)

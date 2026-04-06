@@ -6,7 +6,7 @@ extern "C" {
 #include "drivers/display128x64.h"
 #include "drivers/adc.h"
 #include "pipicofx/pipicofxui.h"
-#include "images/playoverlay.h"
+#include "images/saveOverlay.h"
 #include "images/editOverlay.h"
 #include "images/copyoverlay.h"
 #include "images/swapoverlay.h"
@@ -16,11 +16,16 @@ extern "C" {
 #include "images/aboutoverlay.h"
 #include "images/fwupdateScreen.h"
 #include "images/looperOverlay.h"
+#include "images/ledcoloroverlay.h"
+#include "images/toggleswitch_on.h"
+#include "images/toggleswitch_off.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
 #include "gen/version.h"
 #include "bootloader_activation.h"
+#include "pcm3060.h"
+#include "pipicofx/pipicofxui.h"
 #include "systick.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
@@ -38,6 +43,7 @@ extern "C" {
 extern PiPicoFXUiType ui;
 extern MultiAudioProcessor audioProcessor; 
 extern FxPresetType presets[3];
+extern volatile uint16_t initialKnobValues[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
 static uint8_t overlayNr=0xFF;
@@ -47,8 +53,9 @@ static uint8_t copySwapBank;
 static uint8_t copySwapPreset;
                                        
 static const BwImageTypeConst* overlays[]={
-    &looperOverlay_streamimg,
+    &saveOverlay_streamimg,
     &editOverlay_streamimg,
+    &ledcoloroverlay_streamimg,
     &copyoverlay_streamimg,
     &swapoverlay_streamimg,
     &deleteoverlay_streamimg,  
@@ -57,16 +64,13 @@ static const BwImageTypeConst* overlays[]={
     &fwUpgradeOverlay_streamimg};
 extern volatile uint8_t programsToInitialize[3];
 extern volatile uint8_t programChangeState;
-extern volatile uint8_t bypassEnterReleased;
 
 static uint8_t presetChangeLock = 0; // used to prohibit action when the second stomp switch is released
-static uint16_t pot1Val=0;
-static uint16_t pot2Val=0;
-static uint16_t pot3Val=0;
+static uint8_t currentVolume;
 static uint8_t previewBankNr=0xFF;
 static uint32_t longPressTickStart = 0;
 static uint8_t handleReleaseEvent = 0;
-static volatile uint8_t enterState=0;
+static uint8_t channelState=0xf; // bits 0-1 HiZ, bits2-3 mic, 0: off  1: on, 3: unknown
 static void handleBankChange(uint8_t);
 static void handlePresetChange(uint8_t);
 static void setPresetNr(uint8_t);
@@ -74,23 +78,24 @@ static void setPreset();
 static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img);
 static void limitPreviewBankRange(uint8_t increase);
 static void createPresetSelector(BwImageType*imgBuffer);
-static void drawParameterDisplay(FxProgram*prog,BwImageStruct*imgBuffer);
+//static void drawParameterDisplay(FxProgram*prog,BwImageStruct*imgBuffer);
 static void drawBankAndPreset(BwImageStruct*imgBuffer);
+static void drawPrograms(BwImageType* imgBuffer);
 static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk);
 
 #define BANK_PRESET_CHANGE_NONE 2
 #define BANK_PRESET_CHANGE_INCREASE 1
 #define BANK_PRESET_CHANGE_DECREASE 0 
 
-#define LVL3_OVERLAY_NR_LOOPER 0
-#define LVL3_OVERLAY_NR_EDIT 1
-#define LVL3_OVERLAY_NR_COPY 2
-#define LVL3_OVERLAY_NR_SWAP 3
-#define LVL3_OVERLAY_NR_DELETE 4
-#define LVL3_OVERLAY_NR_SYSTEMSETTINGS 5
-#define LVL3_OVERLAY_NR_ABOUT 6
-#define LVL3_OVERLAY_NR_FWUPDATE 7
-#define LVL3_OVERLAY_NR_ABOUT_SHOWING 8
+#define LVL3_OVERLAY_NR_SAVE 0
+#define LVL3_OVERLAY_NR_EDIT_NAME 1
+#define LVL3_OVERLAY_NR_EDIT_LED_COLOR 2
+#define LVL3_OVERLAY_NR_COPY 3
+#define LVL3_OVERLAY_NR_SWAP 4
+#define LVL3_OVERLAY_NR_DELETE 5
+#define LVL3_OVERLAY_NR_SYSTEMSETTINGS 6
+#define LVL3_OVERLAY_NR_ABOUT 7
+#define LVL3_OVERLAY_NR_FWUPDATE 8
 
 
 #define EOM_NONE 0
@@ -101,83 +106,117 @@ static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk);
 #define EOM_COPY_COMMIT 5
 #define EOM_SWAP_COMMIT 6
 #define EOM_DELETE_COMMIT 7
+#define EOM_ABOUT 8
+#define EOM_FIRMWARE_UPDATE 9
+#define EOM_SAVE 10
+#define EOM_BANKPREVIEW 11
 
 #define BANK_LIMIT 32
 
-//TODO general overhaul: display topology and programs instead of information about one specific program
 
 static void create()
 {
-    BwImageType* imgBuffer = getImageBuffer();
-    // display preset Name and Bank Number
-    clearImage(imgBuffer);
-    drawBankAndPreset(imgBuffer);
-    drawParameterDisplay(((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition)),imgBuffer);
-
-    pot1Val = getChannel0Value();
-    pot2Val = getChannel1Value();
-    pot3Val = getChannel2Value();
-
-    
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {    
-    uint16_t yval; 
-    if (editOverlayMode != EOM_NONE)
-    {
-        return;
-    }
+    (void)avgInput;
+    (void)avgOutput;
+    (void)cpuLoad;
     BwImageType* imgBuffer = getImageBuffer();
-    // draw Level bars
-    clearSquareInt(0,54,128-3*6,64,imgBuffer);
-    //in
-    drawSquareInt(0,54,0 + ((avgInput)*(128-3*6))/128,56,imgBuffer);
-    drawSquareInt(0,54,0 + ((avgInput)*(128-3*6))/128,56,imgBuffer);
-    //out
-    drawSquareInt(0,58,0 + ((avgOutput)*(128-3*6))/128,60,imgBuffer);
-    //cpu load
-    drawSquareInt(0,62,0 + ((cpuLoad)*(128-3*6))/128,64,imgBuffer);
-    drawSquareInt(0,58,0 + ((avgOutput)*(128-3*6))/128,60,imgBuffer);
-    //cpu load
-    drawSquareInt(0,62,0 + ((cpuLoad)*(128-3*6))/128,64,imgBuffer);
+    uint8_t bottomPaneData[256];
+    BwImageType bottomPane = {
+        .data = bottomPaneData,
+        .sx=128,
+        .sy=16,
+        .type = BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
+        .byteSize=256
+    };
+    clearImage(imgBuffer);
+    drawBankAndPreset(imgBuffer);
+    drawPrograms(imgBuffer);
+    drawBottomPanel(&bottomPane);
+    drawImage(0,48,(BwImageTypeConst*)&bottomPane,imgBuffer);
 
-    // draw current position of potentiometers
-    clearSquareInt(122,0,124,64,imgBuffer);
-    yval =  (4096-pot3Val)>>6;
-    if (yval == 0)
-    {
-        yval = 1;
-    }
-    else if (yval == 63)
-    {
-        yval = 62;
-    }
-    drawSquareInt(122,yval-1,124,yval+1,imgBuffer);
 
-    clearSquareInt(122-1*6,0,124-1*6,64,imgBuffer);
-    yval =  (4096-pot2Val)>>6;
-    if (yval == 0)
+    if (editOverlayMode == EOM_OVERLAYS)
     {
-        yval = 1;
+        drawImage(41,0,overlays[overlayNr],imgBuffer);
     }
-    else if (yval == 63)
+    else if (editOverlayMode == EOM_SAVE)
     {
-        yval = 62;
+        clearSquareInt(64-35,4,64+35,22,imgBuffer);
+        drawRectFrame(64-35,4,64+35,22,imgBuffer);
+        drawText(64-35+2,4+2+8,"Enter:Save",imgBuffer,0);
+        drawText(64-35+2,4+2+16,"Exit:Revert",imgBuffer,0);
     }
-    drawSquareInt(122-1*6,yval-1,124-1*6,yval+1,imgBuffer);
+    else if (editOverlayMode == EOM_ABOUT)
+    {
+        drawAbout(imgBuffer);
+    }
+    else if (editOverlayMode == EOM_FIRMWARE_UPDATE)
+    {
+        drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
+    }
+    else if (editOverlayMode == EOM_COPY || editOverlayMode == EOM_SWAP)
+    {
+        createPresetSelector(imgBuffer);
+    }
+    else if (editOverlayMode == EOM_DELETE_COMMIT || editOverlayMode == EOM_COPY_COMMIT || editOverlayMode == EOM_SWAP_COMMIT )
+    {
+        clearSquareInt(64-32,4,64+32,24,imgBuffer);
+        drawRectFrame(64-32,4,64+32,24,imgBuffer);
+        drawText(64-32+2,4+2+7,"Enter:OK",imgBuffer,(void*)0);
+        drawText(64-32+2,4+2+8+7,"Exit:Abort",imgBuffer,(void*)0);
+    }
+    else if (editOverlayMode == EOM_BANKPREVIEW)
+    {
+        BwImageType previewImage=
+        {
+            .data=(uint8_t*)malloc(96*48/8),
+            .sx=96,
+            .sy=48,
+            .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
+            .byteSize=96*48/8
+        };
+        createBankPreviewOverlay(previewBankNr,&previewImage);
+        drawImage(2,2,(BwImageTypeConst*)&previewImage,imgBuffer);
+        free((void*)previewImage.data);
+    }
 
-    clearSquareInt(122-2*6,0,124-2*6,64,imgBuffer);
-    yval =  (4096-pot1Val)>>6;
-    if (yval == 0)
+
+    if (initialKnobValues[0]==0xFFFF)
     {
-        yval = 1;
+        if ((channelState & 0x3)==0)
+        {
+            drawImage(59,4,&toggleswitch_off_streamimg,imgBuffer);
+        }
+        else
+        {
+            drawImage(59,4,&toggleswitch_on_streamimg,imgBuffer);
+        }
+        drawText(64-9,46,"Mic",imgBuffer,0);
     }
-    else if (yval == 63)
+
+    if (initialKnobValues[1]==0xFFFF)
     {
-        yval = 62;
+        if (((channelState>>2) & 0x3)==0)
+        {
+            drawImage(59,4,&toggleswitch_off_streamimg,imgBuffer);
+        }
+        else
+        {
+            drawImage(59,4,&toggleswitch_on_streamimg,imgBuffer);
+        }
+        drawText(64-9,46,"Mic",imgBuffer,0);
     }
-    drawSquareInt(122-2*6,yval-1,124-2*6,yval+1,imgBuffer);
+
+    if (initialKnobValues[2]==0xFFFF) // master volume is being edited, draw current position
+    {
+        drawMasterVolume(currentVolume,imgBuffer);
+    }
+    
+
 
     if (longPressTickStart != 0 and getTickValue() - longPressTickStart > LONGPRESS_DURATION_SYSTICKS)
     {
@@ -190,42 +229,44 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 
 static void enterPressedCallback()
 {
-    enterState = 1;
+    ui.enterState = 1;
+    initialKnobValues[0]=getChannel0Value();
+    initialKnobValues[1]=getChannel1Value();
+    initialKnobValues[2]=getChannel2Value();
 }
 
 static void enterReleasedCallback(void) 
 {
-    enterState=0;
-    if (bypassEnterReleased == 1)
+    ui.enterState=0;
+    if (ui.bypassEnterReleased == 1)
     {
-        bypassEnterReleased = 0;
+        initialKnobValues[0]=getChannel0Value();
+        initialKnobValues[1]=getChannel1Value();
+        initialKnobValues[2]=getChannel2Value();
+        ui.bypassEnterReleased = 0;
         return;
     }
-    BwImageType* imgBuffer = getImageBuffer();
-    char strbfr[24];
     // show overlay menu (if not there)
     switch (editOverlayMode)
     {
         case EOM_NONE:
             editOverlayMode = EOM_OVERLAYS;
-            overlayNr = LVL3_OVERLAY_NR_LOOPER;
-            drawImage(41,0,&looperOverlay_streamimg,imgBuffer);
+            overlayNr = LVL3_OVERLAY_NR_SAVE;
             uiStackPush(0xFF);
             break;
         case EOM_OVERLAYS:
-            if (overlayNr == LVL3_OVERLAY_NR_LOOPER)
+            if (overlayNr == LVL3_OVERLAY_NR_SAVE)
             {
-                editOverlayMode = EOM_NONE;
-                uiStackPop();
-                uiStackPush(3);   
-                enterLevel8();
+                editOverlayMode = EOM_SAVE;
             }
-            else if (overlayNr == LVL3_OVERLAY_NR_EDIT)
+            if (overlayNr == LVL3_OVERLAY_NR_EDIT_NAME)
             {
                 editOverlayMode = EOM_NONE;
                 uiStackPop();
                 uiStackPush(3);   
-                enterLevel4();
+                presets[currentPreset].name[15]=0;
+                ui.data = presets[currentPreset].name;
+                enterLevel6();
             }
             else if (overlayNr == LVL3_OVERLAY_NR_SYSTEMSETTINGS)
             {
@@ -236,77 +277,46 @@ static void enterReleasedCallback(void)
             }
             else if (overlayNr == LVL3_OVERLAY_NR_ABOUT)
             {
-                editOverlayMode = EOM_NONE;
-                overlayNr = LVL3_OVERLAY_NR_ABOUT_SHOWING;
-                clearSquareInt(0,0,128,43,imgBuffer);
-                *strbfr=0;
-                appendToString(strbfr,"About PiPicoFX");
-                drawText(0,8,strbfr,imgBuffer,(void*)0);
-                drawText(0,16,PI_PICO_FX_VERSION_NR,imgBuffer,(void*)0);
-                drawText(0,24,PI_PICO_FX_MCU_BOARD,imgBuffer,(void*)0);
-                *strbfr=0;
-                appendToString(strbfr,"built ");
-                appendToString(strbfr,PI_PICO_FX_BUILD_DATE);
-                drawText(0,32,strbfr,imgBuffer,(void*)0);
-                *strbfr=0;
-                appendToString(strbfr,"      ");
-                appendToString(strbfr,PI_PICO_FX_BUILD_TIME);
-                drawText(0,40,strbfr,imgBuffer,(void*)0);
+                editOverlayMode = EOM_ABOUT;
             }
             else if (overlayNr == LVL3_OVERLAY_NR_FWUPDATE)
             {
-                editOverlayMode = EOM_NONE;
-                drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
-                DisplayImageStandardAdressing(0,0,128,8,imgBuffer->data);
-                jumpToBootloader();
+                editOverlayMode = EOM_FIRMWARE_UPDATE;
             }
             else if (overlayNr == LVL3_OVERLAY_NR_COPY)
             {
                 editOverlayMode = EOM_COPY;
                 copySwapPreset = currentPreset;
                 copySwapBank = currentBank;
-                createPresetSelector(imgBuffer);
             }
             else if (overlayNr == LVL3_OVERLAY_NR_SWAP)
             {
                 editOverlayMode = EOM_SWAP;
                 copySwapPreset = currentPreset;
                 copySwapBank = currentBank;
-                createPresetSelector(imgBuffer);
             }
             else if (overlayNr == LVL3_OVERLAY_NR_DELETE)
             {
                 editOverlayMode = EOM_DELETE_COMMIT;
-                // display question dialog
-                clearSquareInt(64-32,4,64+32,24,imgBuffer);
-                drawRectFrame(64-32,4,64+32,24,imgBuffer);
-                drawText(64-32+2,4+2+7,"Enter:OK",imgBuffer,(void*)0);
-                drawText(64-32+2,4+2+8+7,"Exit:Abort",imgBuffer,(void*)0);
-                editOverlayMode = EOM_DELETE_COMMIT;
+            }
+            else if (overlayNr == LVL3_OVERLAY_NR_EDIT_LED_COLOR)
+            {
+                presets[currentPreset].ledColorPreset++;
+                presets[currentPreset].ledColorPreset &= 0x3;
+                if (presets[currentPreset].ledColorPreset == 0)
+                {
+                    presets[currentPreset].ledColorPreset++;
+                }
+                setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
             }
             break;
         case EOM_COPY:
-            // display question dialog
-            clearSquareInt(64-32,4,64+32,24,imgBuffer);
-            drawRectFrame(64-32,4,64+32,24,imgBuffer);
-            drawText(64-32+2,4+2+7,"Enter:OK",imgBuffer,(void*)0);
-            drawText(64-32+2,4+2+8+7,"Exit:Abort",imgBuffer,(void*)0);
             editOverlayMode = EOM_COPY_COMMIT;
             break;
         case EOM_SWAP:
-            // display question dialog
-            clearSquareInt(64-32,4,64+32,24,imgBuffer);
-            drawRectFrame(64-32,4,64+32,24,imgBuffer);
-            drawText(64-32+2,4+2+7,"Enter:OK",imgBuffer,(void*)0);
-            drawText(64-32+2,4+2+8+7,"Exit:Abort",imgBuffer,(void*)0);
             editOverlayMode = EOM_SWAP_COMMIT;
             break;
         case EOM_DELETE:
-            // display question dialog
-            clearSquareInt(64-32,4,64+32,24,imgBuffer);
-            drawRectFrame(64-32,4,64+32,24,imgBuffer);
-            drawText(64-32+2,4+2+7,"Enter:OK",imgBuffer,(void*)0);
-            drawText(64-32+2,4+2+8+7,"Exit:Abort",imgBuffer,(void*)0);
             editOverlayMode = EOM_DELETE_COMMIT;
             break;
         case EOM_COPY_COMMIT:
@@ -323,9 +333,6 @@ static void enterReleasedCallback(void)
             {
                 reloadPresetsFromEeprom(presets,currentBank);
             }
-            // jump back to norma display
-            clearSquareInt(41,0,41+47,43,imgBuffer);
-            drawBankAndPreset(imgBuffer);
             overlayNr=0xFF;
             editOverlayMode = EOM_NONE;
             break;
@@ -356,9 +363,6 @@ static void enterReleasedCallback(void)
             }
             reloadPresetsFromEeprom(presets,currentBank);
             setPreset();
-            // jump back to normal display
-            clearSquareInt(41,0,41+47,43,imgBuffer);
-            drawBankAndPreset(imgBuffer);
             overlayNr=0xFF;
             editOverlayMode = EOM_NONE;
             break;
@@ -367,12 +371,17 @@ static void enterReleasedCallback(void)
             generateEmptyPreset(presets + currentPreset,currentBank,currentPreset);
             setPreset();
             break;
+        case EOM_SAVE:
+            editOverlayMode = EOM_NONE;
+            savePreset(presets+currentPreset,currentBank*3 + currentPreset);
+            uiStackPop();
+            uiStackPush(3);
+            break;    
     }
 }
 
 static void exitCallback()
 {
-    BwImageType* imgBuffer = getImageBuffer();
     // remove overlay menu (if there)
     switch (editOverlayMode)
     {
@@ -383,18 +392,28 @@ static void exitCallback()
         case EOM_COPY_COMMIT:
         case EOM_SWAP_COMMIT:
         case EOM_DELETE_COMMIT:
-            clearSquareInt(0,0,112,64,imgBuffer);
-            drawBankAndPreset(imgBuffer);
             overlayNr=0xFF;
             editOverlayMode = EOM_NONE;
             break;
         case EOM_COPY:
         case EOM_SWAP:
             editOverlayMode = EOM_OVERLAYS;
-            clearSquareInt(0,0,112,64,imgBuffer);
-            drawBankAndPreset(imgBuffer);
-            drawImage(41,0,overlays[overlayNr],imgBuffer);
-            drawParameterDisplay(((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition)),imgBuffer);
+            break;
+        case EOM_SAVE:
+            overlayNr=0xFF;
+            editOverlayMode = EOM_NONE;
+            uiStackPop();
+            if (loadPreset(presets+currentPreset,currentBank*3 + currentPreset)!=0)
+            {
+                generateEmptyPreset(presets+currentPreset,currentBank,currentPreset);
+            }
+            if (programsToInitialize[0] != presets[currentPreset].programNrA || 
+                programsToInitialize[1] != presets[currentPreset].programNrB ||
+                programsToInitialize[2] != presets[currentPreset].programNrC)
+            {
+                programChangeState = 1;
+            }
+            uiStackPush(3);
             break;
     }
 }
@@ -403,10 +422,26 @@ static void exitCallback()
 
 static void rotaryCallback(int16_t encoderDelta)
 {
-    if (enterState==1)
+    if (ui.enterState==1)
     {
-        bypassEnterReleased = 1;
-        enterLevel0();
+        ui.bypassEnterReleased = 1;
+        if (encoderDelta > 0)
+        {
+            ui.mode++;
+            if (ui.mode > 4)
+            {
+                ui.mode=4;
+            }
+        }
+        else
+        {
+            ui.mode--;
+            if (ui.mode > 4)
+            {
+                ui.mode=0;
+            }
+        }
+        uiSwitchMode();
         return;
     }
     BwImageType* imgBuffer = getImageBuffer();
@@ -487,7 +522,7 @@ static void rotaryCallback(int16_t encoderDelta)
 static void stompswitch1Callback(void)
 {
     uint8_t nbStompSwitch;
-    if (handleReleaseEvent == 0)
+    if (handleReleaseEvent == 0 || editOverlayMode != EOM_NONE)
     {
         return;
     }
@@ -502,15 +537,10 @@ static void stompswitch1Callback(void)
         else if ((currentPreset != 0 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(0);
-            create();
         }
         else if (presetChangeLock == 1)
         {
             presetChangeLock = 0;
-        }
-        else
-        {
-            create();
         }
         
     }
@@ -523,7 +553,7 @@ static void stompswitch1Callback(void)
 static void stompswitch2Callback(void)
 {
     uint8_t nbStompSwitch1, nbStompSwitch3;
-    if (handleReleaseEvent == 0)
+    if (handleReleaseEvent == 0 || editOverlayMode != EOM_NONE)
     {
         return;
     }
@@ -543,15 +573,10 @@ static void stompswitch2Callback(void)
         else if ((currentPreset != 1 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(1);
-            create();
         }
         else if (presetChangeLock == 1)
         {
             presetChangeLock = 0;
-        }
-        else
-        {
-            create();
         }
     }
     else
@@ -563,7 +588,7 @@ static void stompswitch2Callback(void)
 static void stompswitch3Callback(void)
 {
     uint8_t nbStompSwitch;
-    if (handleReleaseEvent == 0)
+    if (handleReleaseEvent == 0 || editOverlayMode != EOM_NONE)
     {
         return;
     }
@@ -578,15 +603,10 @@ static void stompswitch3Callback(void)
         else if ((currentPreset != 2 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(2);
-            create();
         }
         else if (presetChangeLock == 1)
         {
             presetChangeLock = 0;
-        }
-        else
-        {
-            create();
         }
     }
     else
@@ -624,22 +644,72 @@ static void stompSwitch3PressedCallback(void)
 
 static void knob0Callback(uint16_t val)
 {
-    pot1Val = val;
+    if (ui.enterState == 1)
+    {
+        if ((val > initialKnobValues[0] && (val - initialKnobValues[0]) >512) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >512))
+        {
+            initialKnobValues[0] = 0xFFFF;
+            ui.bypassEnterReleased = 1;
+            initialKnobValues[1]=getChannel1Value();
+            initialKnobValues[2]=getChannel2Value();
+            if (val > 2047 && ((channelState & 0x3)==0 || (channelState & 0x3)==0))
+            {
+                pcm3060SetInputState(PCM3060_CHANNEL_LEFT,1);
+                channelState &= ~0x3;
+                channelState |= 0x1;
+            }
+            else if (val <= 2047 && ((channelState & 0x3)==1 || (channelState & 0x3)==0))
+            {
+                pcm3060SetInputState(PCM3060_CHANNEL_LEFT,0);
+                channelState &= ~0x3;
+            }
+        }
+    }
 }
 
 static void knob1Callback(uint16_t val)
 {
-    pot2Val = val;
+    if (ui.enterState == 1)
+    {
+        if ((val > initialKnobValues[1] && (val - initialKnobValues[1]) >512) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >512))
+        {
+            initialKnobValues[1] = 0xFFFF;
+            ui.bypassEnterReleased = 1;
+            initialKnobValues[0]=getChannel0Value();
+            initialKnobValues[2]=getChannel2Value();
+            if (val > 2047 && (((channelState >> 2) & 0x3)==0 || ((channelState >> 2) & 0x3)==0))
+            {
+                pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,1);
+                channelState &= ~(0x3 << 2);
+                channelState |= (0x1 << 2);
+            }
+            else if (val <= 2047 && ((channelState & 0x3)==1 || (channelState & 0x3)==0))
+            {
+                pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,0);
+                channelState &= ~(0x3 << 2);
+            }
+        }
+    }
 }
 
 static void knob2Callback(uint16_t val)
 {
-    pot3Val = val;
+    if (ui.enterState == 1)
+    {
+        if ((val > initialKnobValues[2] && (val - initialKnobValues[2]) >512) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >512))
+        {
+            initialKnobValues[2]= 0xFFFF;
+            ui.bypassEnterReleased = 1;
+            currentVolume = (uint8_t)(val >> 4);
+            pcm3060SetOutputVolume(PCM3060_CHANNEL_BOTH,currentVolume);
+            initialKnobValues[0]=getChannel0Value();
+            initialKnobValues[1]=getChannel1Value();
+        }
+    }
 }
 
 void enterLevel3()
 {
-    reloadPresetsFromEeprom(presets,currentBank);
     ui.editViaRotary = 1;
     clearCallbackAssignments();
     registerEnterButtonReleasedCallback(&enterReleasedCallback);
@@ -660,9 +730,8 @@ void enterLevel3()
     create();
     overlayNr=0xFF;
     handleReleaseEvent = 0;
-    enterState = 0;
     ui.defaultOn=1;
-
+    channelState = 0xF;
     switch (ui.currentProgramPosition)
     {
         case 0:
@@ -677,10 +746,6 @@ void enterLevel3()
         default:
             break;    
     }
-    programsToInitialize[0]=presets[currentPreset].programNrA;
-    programsToInitialize[1]=presets[currentPreset].programNrB;
-    programsToInitialize[2]=presets[currentPreset].programNrC;
-    programChangeState = 1;
 
     setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
 }
@@ -711,18 +776,7 @@ static void handleBankChange(uint8_t increase)
         }
         limitPreviewBankRange(increase);
     }
-    BwImageType previewImage=
-    {
-        .data=(uint8_t*)malloc(96*48/8),
-        .sx=96,
-        .sy=48,
-        .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
-        .byteSize=96*48/8
-    };
-    createBankPreviewOverlay(previewBankNr,&previewImage);
-    BwImageType* imgBuffer = getImageBuffer();
-    drawImage(2,2,(BwImageTypeConst*)&previewImage,imgBuffer);
-    free((void*)previewImage.data);
+    editOverlayMode = EOM_BANKPREVIEW;
     presetChangeLock = 1;
 
 }
@@ -737,6 +791,7 @@ static void handlePresetChange(uint8_t increase)
     {
         currentPreset--;
     }
+
     setPreset();
 }
 
@@ -754,42 +809,43 @@ static void setPresetNr(uint8_t nr)
 
 static void setPreset()
 {
-
-    if (programsToInitialize[0] != presets[currentPreset].programNrA)
+    if ((audioProcessor.getFxProgram(0) == nullptr && presets[currentPreset].programNrA != 0x3F) || 
+        (audioProcessor.getFxProgram(0) != nullptr && 
+        ((FxProgram*)audioProcessor.getFxProgram(0))->getIndex() != presets[currentPreset].programNrA))
     {
-        programsToInitialize[0] = presets[currentPreset].programNrA;
+        programsToInitialize[0] = presets[currentPreset].programNrA & 0x80;
         programChangeState=1;
     }
     else
     {
         programsToInitialize[0]=0xff;
-        applyPreset(presets + currentPreset,((FxProgram*)audioProcessor.getFxProgram(0)),0);
     }
 
-    if (programsToInitialize[1] != presets[currentPreset].programNrB)
+    if ((audioProcessor.getFxProgram(1) == nullptr && presets[currentPreset].programNrB != 0x3F) || 
+        (audioProcessor.getFxProgram(1) != nullptr && 
+        ((FxProgram*)audioProcessor.getFxProgram(1))->getIndex() != presets[currentPreset].programNrB))
     {
-        programsToInitialize[1] = presets[currentPreset].programNrB;
+        programsToInitialize[1] = presets[currentPreset].programNrB & 0x80;
         programChangeState=1;
     }
     else
     {
         programsToInitialize[1]=0xff;
-        applyPreset(presets + currentPreset,((FxProgram*)audioProcessor.getFxProgram(1)),1);
     }
 
-    if (programsToInitialize[2] != presets[currentPreset].programNrA)
+    if ((audioProcessor.getFxProgram(2) == nullptr && presets[currentPreset].programNrC != 0x3F) || 
+        (audioProcessor.getFxProgram(2) != nullptr && 
+        ((FxProgram*)audioProcessor.getFxProgram(2))->getIndex() != presets[currentPreset].programNrC))
     {
-        programsToInitialize[2] = presets[currentPreset].programNrA;
+        programsToInitialize[2] = presets[currentPreset].programNrC & 0x80;
         programChangeState=1;
     }
     else
     {
         programsToInitialize[2]=0xff;
-        applyPreset(presets + currentPreset,((FxProgram*)audioProcessor.getFxProgram(2)),2);
     }
-
     setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
-    create();
+    //create();
 }
 
 
@@ -838,10 +894,8 @@ static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img)
     FxPresetType previewPresets[3];
     char bfr[32];
     char nrBfr[8];
-    //const GFXfont * font = getGFXFont(TOMTHUMB);
     reloadPresetsFromEeprom(previewPresets,bankNr);
     clearSquareInt(0,0,96-1,48-1,img);
-    //clearSquareInt(1,1,96-1,48-1,img);
     drawRectFrame(0,0,96-1,48-1,img);
     *bfr=0;
     *nrBfr=0;
@@ -876,85 +930,41 @@ static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img)
     drawText(3,3*10+9,bfr,img,0);    
 }
 
-static void drawParameterDisplay(FxProgram*prog,BwImageStruct*imgBuffer)
-{
-    uint8_t startY;
-    uint16_t val_p1=0xFFFF,val_p2=0xFFFF,val_p3=0xFFFF;
-    clearSquareInt(128-4-2*6,0,128,64,imgBuffer);
-    for (uint8_t c=0;c<prog->getParameterCount();c++)
-    {
-        uint8_t currentCtrl = prog->getParameter(c)->getControl();
-        switch (currentCtrl)
-        {
-        case 0:
-            val_p1 = prog->getParameter(c)->rawValue;
-            break;
-        case 1:
-            val_p2 = prog->getParameter(c)->rawValue;
-            break;
-        case 2: 
-            val_p3 = prog->getParameter(c)->rawValue;
-        default:
-            break;
-        }
-    }
-
-    if (val_p3 != 0xFFFF)
-    {
-        startY = ((uint16_t)4096-val_p3)>>6;
-        if (startY > 0x3f)
-        {
-            startY = 0x3f;
-        }
-        // frame for value of p3
-        drawSquareInt(128-4,0,128,64,imgBuffer);
-        clearSquareInt(128-4+1,1,128-1,64-1,imgBuffer);
-        // value of p3
-        drawSquareInt(128-4+1,startY, 128-1,64-1,imgBuffer);
-    }
-
-    if (val_p2 != 0xFFFF)
-    {
-        startY = ((uint16_t)4096-val_p2)>>6;
-        if (startY > 0x3f)
-        {
-            startY = 0x3f;
-        }
-        // frame for value of p2
-        drawSquareInt(128-4-1*6,0,128-1*6,64,imgBuffer);
-        clearSquareInt(128-4+1-1*6,1,128-1-1*6,64-1,imgBuffer);
-        // value of p2
-        drawSquareInt(128-4+1-1*6,startY,128-1-1*6,64-1,imgBuffer);
-    }
-
-    if (val_p1 != 0xFFFF)
-    {
-        startY = ((uint16_t)4096-val_p1)>>6;
-        if (startY > 0x3f)
-        {
-            startY = 0x3f;
-        }
-        // frame for value of p1
-        drawSquareInt(128-4-2*6,0,128-2*6,64,imgBuffer);
-        clearSquareInt(128-4+1-2*6,1,128-1-2*6,64-1,imgBuffer);
-        // value of p1
-        drawSquareInt(128-4+1-2*6,startY,128-1-2*6,64-1,imgBuffer);
-    }
-}
-
 static void drawBankAndPreset(BwImageStruct*imgBuffer)
 {
     char strbfr[24];
     char nrbfr[4];
     const GFXfont * font = getGFXFont(FREESANS12PT7B);
     *(strbfr) = 0;
-    appendToString(strbfr,"Bank:");
+    appendToString(strbfr,presets[currentPreset].name);
+    drawText(2,18,strbfr,imgBuffer,font);
+    *(strbfr) = 0;
+    appendToString(strbfr,"Bank ");
     UInt8ToChar(currentBank,nrbfr);
     appendToString(strbfr,nrbfr);
-    drawText(5,21,strbfr,imgBuffer,font);
-    *(strbfr) = 0;
-    appendToString(strbfr,presets[currentPreset].name);
-    drawText(5,42,strbfr,imgBuffer,font);
+    drawText(128-7*8,32,strbfr,imgBuffer,getGFXFont(FREESANSBOLD9PT7B));
+
+}
+
+
+static void drawPrograms(BwImageType* imgBuffer)
+{
+    char lineBuffer[24];
+    const char * ABC[]={"A:","B:","C:"}; 
+    if (ui.currentProgram == nullptr)
+    {
+        return;
+    }
+    for (uint8_t c=0;c<audioProcessor.getProgramListLength();c++)
+    {
+        if (audioProcessor.getFxProgram(c) != nullptr)
+        {
+            lineBuffer[0]=0;
+            appendToString(lineBuffer,*(ABC + c));
+            appendToString(lineBuffer,((FxProgram*)audioProcessor.getFxProgram(c))->getName());
+            drawText(0,28 + c*8,lineBuffer,imgBuffer,0);
+        }               
+    }
 }
 
 static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk)

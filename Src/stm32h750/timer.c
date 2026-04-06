@@ -30,3 +30,18 @@ uint32_t getTimeLW()
 {
     return TIM5->CNT;
 }
+
+void waitUs(uint32_t us)
+{
+    uint32_t t0=TIM5->CNT;
+    uint32_t t1=TIM5->CNT;
+    while (t1-t0 < us)
+    {
+        if (t1 < t0)
+        {
+            us -= (0xFFFFFFFF - t0);
+            t0=0;
+        }
+        t1 = TIM5->CNT;
+    }
+}

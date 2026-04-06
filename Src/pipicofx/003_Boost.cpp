@@ -1,4 +1,4 @@
-#include "pipicofx/003_Off.hpp"
+#include "pipicofx/003_Boost.hpp"
 extern "C" {
 #include "stringFunctions.h"
 #include "audio/gainstage.h"
@@ -7,7 +7,7 @@ extern "C" {
 using namespace PiPicoFX;
 
 __ITCM_CODE
-float Off::Off::processSample(float sampleIn)
+float Boost::Boost::processSample(float sampleIn)
 {
     float newIn=0.0f;
     if (this->isOn())
@@ -23,14 +23,14 @@ float Off::Off::processSample(float sampleIn)
 }
 
 
-void Off::Param1::parameterCallback(uint16_t val)
+void Boost::Param1::parameterCallback(uint16_t val)
 {
     pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
     rawValue = val;
 }
 
 
-void Off::Param1::parameterDisplay(char*res)
+void Boost::Param1::parameterDisplay(char*res)
 {
     uint16_t dVal;
     dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);
@@ -39,7 +39,7 @@ void Off::Param1::parameterDisplay(char*res)
 }
 
 
-void Off::Off::setup()
+void Boost::Boost::setup()
 {
     this->addParameter(new Param1(this));
 }

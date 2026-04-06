@@ -33,6 +33,7 @@ extern "C" {
 #include "sai.h"
 #include "drivers/i2c.h"
 #include "drivers/wm8731.h"
+#include "drivers/24lc128.h"
 #include "avrProgrammer.h"
 #include "pcm3060.h"
 #include "memchecker.h"
@@ -91,7 +92,6 @@ int16_t encoderDelta;
 RotaryEncoderIncrementType rotaryEncoderInfo;
 uint8_t enterSwitchVal;
 uint8_t exitSwitchVal;
-char displayData[128];
 uint16_t adcVal;
 volatile uint8_t programsActivated=0;
 const uint8_t stompswitch_progs[]={8,7,1};
@@ -99,6 +99,7 @@ FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0x0;
 volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF}; // 0xFF: null values, otherwise bits 0-6: program nr to initialize, bit 7: copy parameters from preset or not
+volatile uint16_t initialKnobValues[3];
 AudioProcessor * currentFxProgram;
 __DTCM_DATA
 MultiAudioProcessor audioProcessor;
@@ -111,7 +112,6 @@ LooperDataType looper;
 // 4: fade in
 volatile uint8_t programChangeState=0;
 volatile uint8_t stompSwitchState;
-volatile uint8_t bypassEnterReleased=0;
 #define ROTARY_ENCODER_MAX_INCR 512
 #define ROTARY_ENCODER_SPEED_FACTOR 32
 #endif
@@ -124,8 +124,6 @@ uint8_t switchVals[2]={0,0};
 uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
-uint16_t adcChannel=0;
-uint8_t * fb;
 
 uint32_t tickStart, tickEnd;
 char chrbfr[16];
@@ -152,7 +150,7 @@ int main(void)
     configureAndEnableMPU();
     SCB_EnableICache();
     SCB_EnableDCache();
-	initUart(2000000);
+	//initUart(2000000);
 	initDMA();
     initFmcSdram();
     initDelayMemoryHandler();
@@ -268,13 +266,10 @@ int main(void)
     LooperInit(&looper);
     
     //enable audio engine last (when fx programs have been set up)
-
     initSAI();
     enableAudioEngine();
     
     audioStatePtr = getAudioStatePtr();
-    BwImageType * imgBfr = getImageBuffer();
-    fb = imgBfr->data;
 
     clearReleasedStickyBit(0);
     #if defined USB_DBG || defined ENCODER_TUNE
@@ -300,7 +295,7 @@ int main(void)
             avgOldOutBfr = (int32_t)(avgOutOld*128.0f);
             cpuLoadBfr = cpuLoad >> 1;
             onUpdate(avgOldInBfr,avgOldOutBfr,cpuLoadBfr);
-            DisplayWriteFramebufferAsync(fb);
+            DisplayWriteFramebufferAsync(getImageBuffer()->data);
             if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
             {
                 setPin(CLIPPING_LED_INPUT,0);
@@ -324,8 +319,8 @@ int main(void)
             if ((task & (1 << TASK_UPDATE_POTENTIOMETER_VALUES)) == (1 << TASK_UPDATE_POTENTIOMETER_VALUES))
             {
                 // call the update function of the chosen program
-                adcChannel = getChannel0Value();
-                adcChannel0 = adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
+                adcChannel0 = getChannel0Value();
+                //adcChannel0 = adcChannel0 + ((ADC_LOWPASS*(adcChannel - adcChannel0)) >> 8);
                 if ((adcChannel0 > adcChannelOld0) && (adcChannel0-adcChannelOld0) > UI_DMIN )
                 {
                     onKnob0(adcChannel0);
@@ -337,8 +332,8 @@ int main(void)
                     adcChannelOld0=adcChannel0;
                 }
     
-                adcChannel = getChannel1Value();
-                adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
+                adcChannel1 = getChannel1Value();
+                //adcChannel1 = adcChannel1 + ((ADC_LOWPASS*(adcChannel - adcChannel1)) >> 8);
                 if ((adcChannel1 > adcChannelOld1) && (adcChannel1-adcChannelOld1) > UI_DMIN )
                 {
                     onKnob1(adcChannel1);
@@ -350,20 +345,20 @@ int main(void)
                     adcChannelOld1=adcChannel1;
                 }
     
-                adcChannel = getChannel2Value();
-                adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
+                adcChannel2 = getChannel2Value();
+                //adcChannel2 = adcChannel2 + ((ADC_LOWPASS*(adcChannel - adcChannel2)) >> 8);
                 if ((adcChannel2 > adcChannelOld2) && (adcChannel2-adcChannelOld2) > UI_DMIN )
                 {
                     onKnob2(adcChannel2);
                     adcChannelOld2=adcChannel2;
                 }
-                else if ((adcChannel2 < adcChannelOld2) && (adcChannelOld2-adcChannel) > UI_DMIN )
+                else if ((adcChannel2 < adcChannelOld2) && (adcChannelOld2-adcChannel2) > UI_DMIN )
                 {
                     onKnob2(adcChannel2);
-                    adcChannelOld2=adcChannel;
+                    adcChannelOld2=adcChannel2;
                 }
                 task &= ~(1 << TASK_UPDATE_POTENTIOMETER_VALUES);
-                restartAdc();
+                //restartAdc();
             }
                     
 
@@ -496,6 +491,8 @@ int main(void)
           onStompSwitch3Released();
       }
 
+      
+
       // remove all entries and replaces them by new one 
       // when programsToInitialize is not 0xFF at the given position
       // updates the currently edited parameter of the ui structure
@@ -503,14 +500,22 @@ int main(void)
         {         
             for (uint8_t q = 0;q < 3;q++)
             {   
-                if (programsToInitialize[q] != 0xFF)
+                if ((programsToInitialize[q] & 0x3F) != 0x3F)
                 {
                     currentFxProgram = audioProcessor.removeFxProgram(q);
                     if (currentFxProgram != nullptr)
                     {
+                        if (q == ui.currentProgramPosition)
+                        {
+                            ui.currentProgram = 0;
+                            ui.currentParameter = 0;
+                            ui.currentParameterIdx = 0;
+                        }
                         delete currentFxProgram; 
                         currentFxProgram = nullptr;
                     }
+
+
                     currentFxProgram = loadProgram(programsToInitialize[q]&0x7F);
                     audioProcessor.addFxProgram(currentFxProgram,q);
                     if (ui.defaultOn)
@@ -532,11 +537,12 @@ int main(void)
 
                     if (programsToInitialize[q] & 0x80)
                     {
-                        applyPreset(presets+currentPreset,(FxProgram*)currentFxProgram,q);
+                        applyPresetToProgram(presets+currentPreset,&audioProcessor,q);
                     }
-                    onCreate();
+                    //onCreate();
                 }
             }
+            //applyPreset(presets+currentPreset,&audioProcessor);
             programChangeState = 4;
         }
       if ((task & (1 << TASK_I2C_DATA_RECEIVED))!=0)

@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class Compressor : public FxProgram
         {
             public:
-                Compressor() : FxProgram(6,"Compressor",0){
+                Compressor() : FxProgram(6,"Compressor",0,5){
                     this->setup();
                 };
                 float processSample(float);

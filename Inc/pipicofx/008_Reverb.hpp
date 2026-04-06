@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class Reverb : public FxProgram
         {
             public:
-                Reverb() : FxProgram(4,"Reverb",20480<<2){
+                Reverb() : FxProgram(4,"Reverb",20480<<2,7){
                     this->setup();
                 };
                 ~Reverb();

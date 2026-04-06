@@ -1,4 +1,5 @@
 #include "drivers/i2c.h"
+#include "timer.h"
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
 #include "system.h"
@@ -9,6 +10,9 @@ static volatile uint8_t slave_address_internal, slave_address_external;
 static volatile uint8_t firstCommand;
 extern volatile uint32_t task;
 static uint8_t receiveBuffer[I2C_BUFFER_LENGTH];
+static uint8_t transmitBuffer[I2C_BUFFER_LENGTH];
+static volatile uint16_t bytesToTransferNext=0;
+static volatile uint8_t transmitIndex=0;
 static volatile uint16_t nReceived=0;
 static volatile uint16_t nSend=0;
 static volatile uint8_t bmI2CStatus=0; // bit 0: NACK occurred, bit 1: await slve transaction
@@ -18,6 +22,38 @@ volatile I2CReceivedDataType i2cReceivedData =
    .dataSize = 0,
    .senderAddress = 0  
 };
+
+
+void DMA1_Stream4_IRQHandler(void) // adc
+{
+    if ((DMA1->HISR & DMA_HISR_TCIF4) != 0) // transmitter transfer complete
+    {
+        DMA1->HIFCR = (1 << DMA_HIFCR_CTCIF4_Pos); 
+        if (bytesToTransferNext > 0)
+        {
+            uint32_t regbfr;
+            I2C_BLOCK_EXTERNAL->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos)); 
+            I2C_BLOCK_EXTERNAL->CR1 |= (1 << I2C_CR1_TXDMAEN_Pos);
+            I2C_BLOCK_EXTERNAL->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
+            regbfr = I2C_BLOCK_EXTERNAL->CR2;
+            regbfr &= ~((1 << I2C_CR2_RD_WRN_Pos) | (0xFF << I2C_CR2_NBYTES_Pos));
+            regbfr |= (1 << I2C_CR2_START_Pos) | (bytesToTransferNext << I2C_CR2_NBYTES_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
+            I2C_BLOCK_EXTERNAL->CR2 = regbfr;
+            transmitIndex += (I2C_BUFFER_LENGTH >> 1);
+            transmitIndex &= (I2C_BUFFER_LENGTH -1 );
+            DMA1_Stream4->NDTR=bytesToTransferNext;
+            bytesToTransferNext = 0;
+        }
+        else
+        {
+            while ((bmI2CStatus & (1 << I2C_AWAIT_SLAVE_TRANSACTION))!= 0); // block if a slave transaction is awaited
+            I2C_BLOCK_EXTERNAL->ICR = (1 << I2C_ICR_STOPCF_Pos);
+            I2C_BLOCK_EXTERNAL->CR1 |= ((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)| (1 << I2C_CR1_ADDRIE_Pos)); 
+            I2C_BLOCK_EXTERNAL->OAR1 |= (1 << I2C_OAR1_OA1EN_Pos);
+        }
+    }
+    
+}
 
 void I2C1_ER_IRQHandler(void)
 {
@@ -35,6 +71,7 @@ void I2C1_ER_IRQHandler(void)
     }
     else
     {
+        I2C1->ISR |= (1 << I2C_ISR_TXE_Pos);
         #ifdef I2C_DBG
         sendStringBlocking("I2C ERR \r\n");
         #endif
@@ -160,6 +197,16 @@ void initI2c(uint8_t slaveAddressInt,uint8_t slaveAddressExt)
     slave_address_internal = slaveAddressInt;
     slave_address_external = slaveAddressExt;
     firstCommand = 1;
+
+    DMA1_Stream4->PAR=(uint32_t)&(I2C_BLOCK_EXTERNAL->TXDR);
+    DMA1_Stream4->M0AR=(uint32_t)transmitBuffer;
+    DMA1_Stream4->M1AR=(uint32_t)transmitBuffer;
+    DMA1_Stream4->CR = (2 << DMA_SxCR_MSIZE_Pos) | (2 << DMA_SxCR_PSIZE_Pos) | (1 << DMA_SxCR_MINC_Pos) | 
+                       (1 << DMA_SxCR_TCIE_Pos) | (0 << DMA_SxCR_HTIE_Pos) | (1 << DMA_SxCR_DIR_Pos);
+    DMAMUX1_Channel4->CCR = ((34) << DMAMUX_CxCR_DMAREQ_ID_Pos);  
+    DMA1_Stream4->NDTR = 0;
+    DMA1_Stream4->CR |= (1 << DMA_SxCR_EN_Pos);
+    NVIC_EnableIRQ(DMA1_Stream4_IRQn);  
 }
 
 uint16_t I2CsendMultipleInternal(uint8_t * data, uint16_t nSend)
@@ -172,30 +219,96 @@ uint16_t I2CsendMultipleExternal(uint8_t * data, uint16_t nSend)
     return I2CsendMultiple(I2C_BLOCK_EXTERNAL,data,nSend,slave_address_external);
 }
 
+
+uint8_t I2CsendMultipleInternalAsync(uint8_t * data, uint16_t nSend)
+{
+    return I2CsendMultipleAsync(I2C_BLOCK_INTERNAL,data,nSend,slave_address_internal);
+}
+
+uint8_t I2CsendMultipleExternalAsync(uint8_t * data, uint16_t nSend)
+{
+    return I2CsendMultipleAsync(I2C_BLOCK_EXTERNAL,data,nSend,slave_address_external);
+}
+
 uint16_t I2CsendMultiple(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uint8_t slave_address)
 {
     uint32_t regbfr;
     uint16_t sCnt=0;
     while ((i2cBlk->ISR & (1 << I2C_ISR_TXE_Pos))==0);
-    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos)); 
+    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos) | (1 << I2C_CR1_TXDMAEN_Pos)); 
     i2cBlk->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
     regbfr = i2cBlk->CR2;
     regbfr &= ~((I2C_CR2_SADD_Msk) | (1 << I2C_CR2_RD_WRN_Pos) | (0xFF << I2C_CR2_NBYTES_Pos));
     regbfr |= (slave_address << (I2C_CR2_SADD_Pos+1)) | (1 << I2C_CR2_START_Pos) | (nSend << I2C_CR2_NBYTES_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
     i2cBlk->CR2 = regbfr;
 
-    while (sCnt < nSend && bmI2CStatus == 0)
+    while (sCnt < nSend )
     {
         i2cBlk->TXDR = data[sCnt];
         sCnt++;
-        while ((i2cBlk->ISR & I2C_ISR_TXE)==0 && bmI2CStatus == 0);
+        while ((i2cBlk->ISR & I2C_ISR_TXE)==0)
+        {
+
+        }
     }
     nSend=0;
+    while((i2cBlk->ISR & (1 << I2C_ISR_BUSY_Pos))!= 0);
     while ((bmI2CStatus & (1 << I2C_AWAIT_SLAVE_TRANSACTION))!= 0); // block if a slave transaction is awaited
     i2cBlk->ICR = (1 << I2C_ICR_STOPCF_Pos);
     i2cBlk->CR1 |= ((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)| (1 << I2C_CR1_ADDRIE_Pos)); 
     i2cBlk->OAR1 |= (1 << I2C_OAR1_OA1EN_Pos);
     return sCnt;
+}
+
+uint8_t I2CsendMultipleAsync(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uint8_t slave_address)
+{
+    uint32_t regbfr;
+    uint8_t flipTrasmitIndex=0;
+    if (DMA1_Stream4->NDTR >0) // return failure if previous transfer hasn't terminated
+    {   
+        flipTrasmitIndex = 1;
+        for(uint16_t c=0;c<nSend;c++)
+        {
+            *(transmitBuffer + ((transmitIndex + (I2C_BUFFER_LENGTH >> 1)) & (I2C_BUFFER_LENGTH-1)) + c) = *(data+c);
+        }
+    }
+    if (DMA1_Stream4->NDTR >0)
+    {
+        bytesToTransferNext = nSend;
+        flipTrasmitIndex=0;
+        return 1;
+    }
+    if (flipTrasmitIndex)
+    {
+        i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos)); 
+        i2cBlk->CR1 |= (1 << I2C_CR1_TXDMAEN_Pos);
+        i2cBlk->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
+        regbfr = i2cBlk->CR2;
+        regbfr &= ~((I2C_CR2_SADD_Msk) | (1 << I2C_CR2_RD_WRN_Pos) | (0xFF << I2C_CR2_NBYTES_Pos));
+        regbfr |= (slave_address << (I2C_CR2_SADD_Pos+1)) | (1 << I2C_CR2_START_Pos) | (nSend << I2C_CR2_NBYTES_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
+        i2cBlk->CR2 = regbfr;
+        transmitIndex += (I2C_BUFFER_LENGTH >> 1);
+        transmitIndex &= (I2C_BUFFER_LENGTH -1 );
+        DMA1_Stream4->NDTR=bytesToTransferNext;
+        bytesToTransferNext = 0;
+        flipTrasmitIndex = 0;
+        return 0;
+    }
+
+    i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos)); 
+    i2cBlk->CR1 |= (1 << I2C_CR1_TXDMAEN_Pos);
+    i2cBlk->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
+    regbfr = i2cBlk->CR2;
+    regbfr &= ~((I2C_CR2_SADD_Msk) | (1 << I2C_CR2_RD_WRN_Pos) | (0xFF << I2C_CR2_NBYTES_Pos));
+    regbfr |= (slave_address << (I2C_CR2_SADD_Pos+1)) | (1 << I2C_CR2_START_Pos) | (nSend << I2C_CR2_NBYTES_Pos) | (1 << I2C_CR2_AUTOEND_Pos);
+    i2cBlk->CR2 = regbfr;
+    for(uint16_t c=0;c<nSend;c++)
+    {
+        *(transmitBuffer + c+ transmitIndex)= *(data+c);
+    }
+
+    DMA1_Stream4->NDTR=nSend;
+    return 0;
 }
 
 /*

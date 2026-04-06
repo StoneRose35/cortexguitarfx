@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class Reverb3 : public FxProgram
         {
             public:
-                Reverb3() : FxProgram(3,"MatrixReverb",(16*DIFFUSOR_SIZE + 4096)<<2){
+                Reverb3() : FxProgram(3,"MatrixReverb",(16*DIFFUSOR_SIZE + 4096)<<2,10){
                     this->setup();
                 };
                 ~Reverb3();

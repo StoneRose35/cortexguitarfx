@@ -8,11 +8,11 @@ extern "C" {
 }
 
 namespace PiPicoFX {
-    namespace Off {
-        class Off : public FxProgram
+    namespace Boost {
+        class Boost : public FxProgram
         {
             public:
-                Off() : FxProgram(1,"Off",0){
+                Boost() : FxProgram(1,"Boost",0,2){
                     this->setup();
                 };
                 float processSample(float);
@@ -28,7 +28,7 @@ namespace PiPicoFX {
         class Param1:  public FxProgramParameter
         {
             public:
-                Param1(Off* p) :FxProgramParameter(0xff,"Volume")
+                Param1(Boost* p) :FxProgramParameter(0xff,"Volume")
                 {
                     rawValue = 0x3FF;
                     increment = 1;
@@ -37,7 +37,7 @@ namespace PiPicoFX {
                 void parameterCallback(uint16_t val);
                 void parameterDisplay(char* chrbfr);
             private:
-                Off * pData;
+                Boost * pData;
         };
     }
 }

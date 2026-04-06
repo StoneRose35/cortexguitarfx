@@ -18,7 +18,7 @@ namespace PiPicoFX {
 class FxProgram : public AudioProcessor
 {
     public:
-        FxProgram(uint8_t nParams,const char*,uint32_t memoryUseage);
+        FxProgram(uint8_t nParams,const char*,uint32_t memoryUseage,uint8_t idx);
         virtual ~FxProgram();
         void setup(void);
         uint8_t addParameter(FxProgramParameter*p);
@@ -41,6 +41,7 @@ class FxProgram : public AudioProcessor
         uint8_t isOn();
         uint8_t isFrozen();
         uint8_t toggleOn();
+        uint8_t getIndex();
     private:
         uint8_t settingsState=0; //bit 0: state, 0: bypassed/off, 1: on, bit 1: freezable
                                  //  bit 2-3: freeze state, 0: melted, 1: freezing, 2: frozen, 3: melting 
@@ -49,6 +50,7 @@ class FxProgram : public AudioProcessor
         const char * programName;
         uint32_t memoryUseage;
         FxProgramParameter ** parameters;
+        uint8_t index;
     protected:
         uint32_t freezeCnt;
 };
