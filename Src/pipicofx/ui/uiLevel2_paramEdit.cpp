@@ -53,6 +53,9 @@ static const BwImageTypeConst* overlays[]={
 
 static void create()
 {
+    initialKnobValues[0]=getChannel0Value();
+    initialKnobValues[1]=getChannel1Value();
+    initialKnobValues[2]=getChannel2Value();
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
@@ -72,17 +75,20 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         .byteSize=256
     };
     clearImage(img);
+    drawBottomPanel(&bottomPane);
+    drawImage(0,48,(BwImageTypeConst*)&bottomPane,img);
+    if (ui.currentProgram == nullptr)
+    {
+        return;
+    }
     *lineBfr=0;
     appendToString(lineBfr,ui.currentProgram->getName());
     appendToStringUntil(lineBfr,"               ",20);
     UInt8ToChar(currentParameterPage,lineBfr+17);
     appendToString(lineBfr+17,"/");
     UInt8ToChar(totalParameterPages,lineBfr+19);
-
     drawText(0,8,lineBfr,img,0);
-    drawBottomPanel(&bottomPane);
-    drawImage(0,48,(BwImageTypeConst*)&bottomPane,img);
-    
+
     if ((currentParameterPage-1)*3 <ui.currentProgram->getParameterCount())
     {
         *lineBfr=0;
@@ -105,7 +111,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         uint16_t tail = appendToStringUntil(lineBfr,"          ",14);
         ui.currentProgram->getParameter((currentParameterPage-1)*3+1)->parameterDisplay(lineBfr + tail);
         drawText(0,24+5,lineBfr,img,0);
-        drawSquareInt(0,24+6,ui.currentProgram->getParameter((currentParameterPage-1)*3+1)->rawValue  >> 5,35,img);
+        drawSquareInt(0,24+6,ui.currentProgram->getParameter((currentParameterPage-1)*3+1)->rawValue  >> 5,34,img);
         potVal = getChannel1Value() >> 5;
         togglePixel(potVal,24+6,img);
         togglePixel(potVal,24+6+1,img);
@@ -156,6 +162,25 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
     }
 }
 
+static void leftCallback(void)
+{
+    ui.mode--;
+    if (ui.mode > 4)
+    {
+        ui.mode=0;
+    }
+    uiSwitchMode();
+}
+
+static void rightCallback(void)
+{
+    ui.mode++;
+    if (ui.mode > 4)
+    {
+        ui.mode=4;
+    }
+    uiSwitchMode(); 
+}
 
 static void enterPressedCallback()
 {
@@ -336,7 +361,7 @@ static void knob0Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if (((val > initialKnobValues[0] && (val - initialKnobValues[0]) >512) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >512))
+        if (((val > initialKnobValues[0] && (val - initialKnobValues[0]) >KNOB_HYSTERESIS) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >KNOB_HYSTERESIS))
             && (currentParameterPage - 1)*3 < ui.currentProgram->getParameterCount())
         {
             initialKnobValues[0] = 0xFFFF;
@@ -353,7 +378,7 @@ static void knob1Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if (((val > initialKnobValues[1] && (val - initialKnobValues[1]) >512) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >512))
+        if (((val > initialKnobValues[1] && (val - initialKnobValues[1]) >KNOB_HYSTERESIS) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >KNOB_HYSTERESIS))
         && (currentParameterPage - 1)*3 + 1< ui.currentProgram->getParameterCount())
         {
             initialKnobValues[1] = 0xFFFF;
@@ -370,7 +395,7 @@ static void knob2Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if (((val > initialKnobValues[2] && (val - initialKnobValues[2]) >512) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >512))
+        if (((val > initialKnobValues[2] && (val - initialKnobValues[2]) >KNOB_HYSTERESIS) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >KNOB_HYSTERESIS))
         && (currentParameterPage - 1)*3 + 2 < ui.currentProgram->getParameterCount())
         {
             initialKnobValues[2] = 0xFFFF;
@@ -471,6 +496,8 @@ void enterLevel2()
     registerOnUpdateCallback(&update);
     registerEnterButtonPressedCallback(&enterPressedCallback);
     registerEnterButtonReleasedCallback(&enterReleasedCallback);
+    registerLeftButtonPressedCallback(&leftCallback);
+    registerRightButtonPressedCallback(&rightCallback);
     registerExitButtonPressedCallback(&exitCallback);
     registerStompswitch1ReleasedCallback(&stompswitch1Callback);
     registerStompswitch2PressedCallback(&stompSwitch2Pressed);

@@ -26,7 +26,7 @@ void processExternalInterrupt()
         if ((EXTI->PR1 & (1 << (switchPins[c] & 0xF)))!= 0)
         {
             gpio = (GPIO_TypeDef*)(GPIOA_BASE + (switchPins[c] >> 4)*0x400);
-            if (oldTickSwitches[c] + ROTARY_ENCODER_DEBOUNCE < getTickValue())
+            if (oldTickSwitches[c] + SWITCH_DEBOUNCE < getTickValue())
             {
                 if ((gpio->IDR & (1 << (switchPins[c] & 0xF)))==0)
                 {

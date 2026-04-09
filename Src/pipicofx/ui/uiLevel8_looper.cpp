@@ -210,6 +210,26 @@ static void stompswitch3Callback(void)
 }
 
 
+static void leftCallback(void)
+{
+    ui.mode--;
+    if (ui.mode > 4)
+    {
+        ui.mode=0;
+    }
+    uiSwitchMode();
+}
+
+static void rightCallback(void)
+{
+    ui.mode++;
+    if (ui.mode > 4)
+    {
+        ui.mode=4;
+    }
+    uiSwitchMode(); 
+}
+
 /*
 register exit, rotary, knobs and stompswitch callbacks
 remove enter callback
@@ -224,6 +244,8 @@ void enterLevel8()
     registerStompswitch1PressedCallback(&stompswitch1Callback);
     registerStompswitch2PressedCallback(&stompswitch2Callback);
     registerStompswitch3PressedCallback(&stompswitch3Callback);
+    registerLeftButtonPressedCallback(&leftCallback);
+    registerRightButtonPressedCallback(&rightCallback);
     registerRotaryCallback(&rotaryCallback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);

@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #define ROTARY_ENCODER_DEBOUNCE 10
+#define SWITCH_DEBOUNCE 30
 
 typedef struct {
     int16_t increment; // the actual increment value

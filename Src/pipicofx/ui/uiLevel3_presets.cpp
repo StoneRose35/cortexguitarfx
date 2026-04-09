@@ -51,7 +51,7 @@ static uint8_t bankChanged=0; // flag indicating that the bank has been changed 
 static uint8_t editOverlayMode=0;
 static uint8_t copySwapBank;
 static uint8_t copySwapPreset;
-                                       
+static FxPresetType previewPresets[3];            
 static const BwImageTypeConst* overlays[]={
     &saveOverlay_streamimg,
     &editOverlay_streamimg,
@@ -62,7 +62,7 @@ static const BwImageTypeConst* overlays[]={
     &settingsOverlay_streamimg, 
     &aboutoverlay_streamimg, 
     &fwUpgradeOverlay_streamimg};
-extern volatile uint8_t programsToInitialize[3];
+extern volatile uint8_t programsToInitialize[3]; 
 extern volatile uint8_t programChangeState;
 
 static uint8_t presetChangeLock = 0; // used to prohibit action when the second stomp switch is released
@@ -208,7 +208,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         {
             drawImage(59,4,&toggleswitch_on_streamimg,imgBuffer);
         }
-        drawText(64-9,46,"Mic",imgBuffer,0);
+        drawText(64-9,46,"HiZ",imgBuffer,0);
     }
 
     if (initialKnobValues[2]==0xFFFF) // master volume is being edited, draw current position
@@ -507,7 +507,7 @@ static void rotaryCallback(int16_t encoderDelta)
             }
             if (copySwapBank != oldCopyBank) // Bank has changed: complete redraw
             {
-                createPresetSelector(imgBuffer);
+                reloadPresetsFromEeprom(previewPresets,copySwapBank);
             }
             else    // only preset has changed, change only highlighted rectangle
             {
@@ -522,7 +522,7 @@ static void rotaryCallback(int16_t encoderDelta)
 static void stompswitch1Callback(void)
 {
     uint8_t nbStompSwitch;
-    if (handleReleaseEvent == 0 || editOverlayMode != EOM_NONE)
+    if (handleReleaseEvent == 0 || (editOverlayMode != EOM_NONE && editOverlayMode != EOM_BANKPREVIEW))
     {
         return;
     }
@@ -537,6 +537,7 @@ static void stompswitch1Callback(void)
         else if ((currentPreset != 0 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(0);
+            editOverlayMode = EOM_NONE;
         }
         else if (presetChangeLock == 1)
         {
@@ -553,7 +554,7 @@ static void stompswitch1Callback(void)
 static void stompswitch2Callback(void)
 {
     uint8_t nbStompSwitch1, nbStompSwitch3;
-    if (handleReleaseEvent == 0 || editOverlayMode != EOM_NONE)
+    if (handleReleaseEvent == 0 || (editOverlayMode != EOM_NONE && editOverlayMode != EOM_BANKPREVIEW))
     {
         return;
     }
@@ -573,6 +574,7 @@ static void stompswitch2Callback(void)
         else if ((currentPreset != 1 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(1);
+            editOverlayMode = EOM_NONE;
         }
         else if (presetChangeLock == 1)
         {
@@ -588,7 +590,7 @@ static void stompswitch2Callback(void)
 static void stompswitch3Callback(void)
 {
     uint8_t nbStompSwitch;
-    if (handleReleaseEvent == 0 || editOverlayMode != EOM_NONE)
+    if (handleReleaseEvent == 0 || (editOverlayMode != EOM_NONE && editOverlayMode != EOM_BANKPREVIEW))
     {
         return;
     }
@@ -603,6 +605,7 @@ static void stompswitch3Callback(void)
         else if ((currentPreset != 2 || previewBankNr != currentBank) && presetChangeLock == 0)
         {
             setPresetNr(2);
+            editOverlayMode = EOM_NONE;
         }
         else if (presetChangeLock == 1)
         {
@@ -613,6 +616,26 @@ static void stompswitch3Callback(void)
     {
         bankChanged = 0;
     }
+}
+
+static void leftCallback(void)
+{
+    ui.mode--;
+    if (ui.mode > 4)
+    {
+        ui.mode=0;
+    }
+    uiSwitchMode();
+}
+
+static void rightCallback(void)
+{
+    ui.mode++;
+    if (ui.mode > 4)
+    {
+        ui.mode=4;
+    }
+    uiSwitchMode(); 
 }
 
 static void stompSwitch1PressedCallback()
@@ -646,19 +669,19 @@ static void knob0Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if ((val > initialKnobValues[0] && (val - initialKnobValues[0]) >512) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >512))
+        if ((val > initialKnobValues[0] && (val - initialKnobValues[0]) >KNOB_HYSTERESIS) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >KNOB_HYSTERESIS))
         {
             initialKnobValues[0] = 0xFFFF;
             ui.bypassEnterReleased = 1;
             initialKnobValues[1]=getChannel1Value();
             initialKnobValues[2]=getChannel2Value();
-            if (val > 2047 && ((channelState & 0x3)==0 || (channelState & 0x3)==0))
+            if (val > 2047 && (channelState & 0x3)==0)
             {
                 pcm3060SetInputState(PCM3060_CHANNEL_LEFT,1);
                 channelState &= ~0x3;
                 channelState |= 0x1;
             }
-            else if (val <= 2047 && ((channelState & 0x3)==1 || (channelState & 0x3)==0))
+            else if (val <= 2047 && (channelState & 0x3)!=0)
             {
                 pcm3060SetInputState(PCM3060_CHANNEL_LEFT,0);
                 channelState &= ~0x3;
@@ -671,19 +694,19 @@ static void knob1Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if ((val > initialKnobValues[1] && (val - initialKnobValues[1]) >512) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >512))
+        if ((val > initialKnobValues[1] && (val - initialKnobValues[1]) >KNOB_HYSTERESIS) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >KNOB_HYSTERESIS))
         {
             initialKnobValues[1] = 0xFFFF;
             ui.bypassEnterReleased = 1;
             initialKnobValues[0]=getChannel0Value();
             initialKnobValues[2]=getChannel2Value();
-            if (val > 2047 && (((channelState >> 2) & 0x3)==0 || ((channelState >> 2) & 0x3)==0))
+            if (val > 2047 && ((channelState >> 2) & 0x3)==0 )
             {
                 pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,1);
                 channelState &= ~(0x3 << 2);
                 channelState |= (0x1 << 2);
             }
-            else if (val <= 2047 && ((channelState & 0x3)==1 || (channelState & 0x3)==0))
+            else if (val <= 2047 && ((channelState>>2) & 0x3)!=0 )
             {
                 pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,0);
                 channelState &= ~(0x3 << 2);
@@ -696,7 +719,7 @@ static void knob2Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if ((val > initialKnobValues[2] && (val - initialKnobValues[2]) >512) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >512))
+        if ((val > initialKnobValues[2] && (val - initialKnobValues[2]) >KNOB_HYSTERESIS) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >KNOB_HYSTERESIS))
         {
             initialKnobValues[2]= 0xFFFF;
             ui.bypassEnterReleased = 1;
@@ -715,6 +738,8 @@ void enterLevel3()
     registerEnterButtonReleasedCallback(&enterReleasedCallback);
     registerEnterButtonPressedCallback(&enterPressedCallback);
     registerExitButtonPressedCallback(&exitCallback);
+    registerLeftButtonPressedCallback(&leftCallback);
+    registerRightButtonPressedCallback(&rightCallback);
     registerRotaryCallback(&rotaryCallback);
     registerStompswitch1ReleasedCallback(&stompswitch1Callback);
     registerStompswitch2ReleasedCallback(&stompswitch2Callback);
@@ -776,6 +801,7 @@ static void handleBankChange(uint8_t increase)
         }
         limitPreviewBankRange(increase);
     }
+    reloadPresetsFromEeprom(previewPresets,previewBankNr);
     editOverlayMode = EOM_BANKPREVIEW;
     presetChangeLock = 1;
 
@@ -809,41 +835,52 @@ static void setPresetNr(uint8_t nr)
 
 static void setPreset()
 {
-    if ((audioProcessor.getFxProgram(0) == nullptr && presets[currentPreset].programNrA != 0x3F) || 
+    if (presets[currentPreset].programNrA != 0x3F && (audioProcessor.getFxProgram(0) == nullptr || 
         (audioProcessor.getFxProgram(0) != nullptr && 
-        ((FxProgram*)audioProcessor.getFxProgram(0))->getIndex() != presets[currentPreset].programNrA))
+        ((FxProgram*)audioProcessor.getFxProgram(0))->getIndex() != presets[currentPreset].programNrA)))
     {
-        programsToInitialize[0] = presets[currentPreset].programNrA & 0x80;
-        programChangeState=1;
+        programsToInitialize[0] = presets[currentPreset].programNrA | 0x80;
+    }
+    else if (presets[currentPreset].programNrA == 0x3F)
+    {
+        programsToInitialize[0]=0x7e;
     }
     else
     {
-        programsToInitialize[0]=0xff;
+        programsToInitialize[0]=0x7f;
     }
 
-    if ((audioProcessor.getFxProgram(1) == nullptr && presets[currentPreset].programNrB != 0x3F) || 
+    if (presets[currentPreset].programNrB != 0x3F && (audioProcessor.getFxProgram(1) == nullptr || 
         (audioProcessor.getFxProgram(1) != nullptr && 
-        ((FxProgram*)audioProcessor.getFxProgram(1))->getIndex() != presets[currentPreset].programNrB))
+        ((FxProgram*)audioProcessor.getFxProgram(1))->getIndex() != presets[currentPreset].programNrB)))
     {
-        programsToInitialize[1] = presets[currentPreset].programNrB & 0x80;
-        programChangeState=1;
+        programsToInitialize[1] = presets[currentPreset].programNrB | 0x80;
+    }
+    else if (presets[currentPreset].programNrB == 0x3F)
+    {
+        programsToInitialize[1]=0x7e;
     }
     else
     {
-        programsToInitialize[1]=0xff;
+        programsToInitialize[0]=0x7f;
     }
 
-    if ((audioProcessor.getFxProgram(2) == nullptr && presets[currentPreset].programNrC != 0x3F) || 
+    if (presets[currentPreset].programNrC != 0x3F && (audioProcessor.getFxProgram(2) == nullptr || 
         (audioProcessor.getFxProgram(2) != nullptr && 
-        ((FxProgram*)audioProcessor.getFxProgram(2))->getIndex() != presets[currentPreset].programNrC))
+        ((FxProgram*)audioProcessor.getFxProgram(2))->getIndex() != presets[currentPreset].programNrC)))
     {
-        programsToInitialize[2] = presets[currentPreset].programNrC & 0x80;
-        programChangeState=1;
+        programsToInitialize[2] = presets[currentPreset].programNrC | 0x80;
+    }
+    else if (presets[currentPreset].programNrC == 0x3F)
+    {
+        programsToInitialize[2]=0x7e;
     }
     else
     {
-        programsToInitialize[2]=0xff;
+        programsToInitialize[2]=0x7f;
     }
+
+    programChangeState = 1;
     setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
     //create();
 }
@@ -862,7 +899,7 @@ static void createPresetSelector(BwImageType*imgBuffer)
     appendToString(strbfr,nrbfr);
     drawText(10+2,4+2+7,strbfr,imgBuffer,(void*)0);
     drawHorizontal(14,4,106,imgBuffer);
-    FxPresetType copyPresets[3];
+    
     uint8_t textLineData[90];
     BwImageStruct textLine={
         .data=textLineData,
@@ -871,19 +908,17 @@ static void createPresetSelector(BwImageType*imgBuffer)
         .type=BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES,
         .byteSize=90
     };
-
-    reloadPresetsFromEeprom(copyPresets,copySwapBank);
     // preset names and rectangles around them
     clearImage(&textLine);
-    drawText(0,1+7,copyPresets[0].name,&textLine,(void*)0);
+    drawText(0,1+7,previewPresets[0].name,&textLine,(void*)0);
     drawImage(10+4,4+13+0*13,(BwImageStructConst*)&textLine,imgBuffer);
     drawRectFrame(10+2,4+10+2+0*13,106-2,4+10+12+0*13,imgBuffer);
     clearImage(&textLine);
-    drawText(0,1+7,copyPresets[1].name,&textLine,(void*)0);
+    drawText(0,1+7,previewPresets[1].name,&textLine,(void*)0);
     drawImage(10+4,4+13+1*13,(BwImageStructConst*)&textLine,imgBuffer);
     drawRectFrame(10+2,4+10+2+1*13,106-2,4+10+12+1*13,imgBuffer);
     clearImage(&textLine);
-    drawText(0,1+7,copyPresets[2].name,&textLine,(void*)0);
+    drawText(0,1+7,previewPresets[2].name,&textLine,(void*)0);
     drawImage(10+4,4+13+2*13,(BwImageStructConst*)&textLine,imgBuffer);
     drawRectFrame(10+2,4+10+2+2*13,106-2,4+10+12+2*13,imgBuffer);
     // bold rectangle around selected preset
@@ -891,10 +926,8 @@ static void createPresetSelector(BwImageType*imgBuffer)
 }
 static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img)
 {
-    FxPresetType previewPresets[3];
     char bfr[32];
     char nrBfr[8];
-    reloadPresetsFromEeprom(previewPresets,bankNr);
     clearSquareInt(0,0,96-1,48-1,img);
     drawRectFrame(0,0,96-1,48-1,img);
     *bfr=0;
@@ -951,10 +984,6 @@ static void drawPrograms(BwImageType* imgBuffer)
 {
     char lineBuffer[24];
     const char * ABC[]={"A:","B:","C:"}; 
-    if (ui.currentProgram == nullptr)
-    {
-        return;
-    }
     for (uint8_t c=0;c<audioProcessor.getProgramListLength();c++)
     {
         if (audioProcessor.getFxProgram(c) != nullptr)

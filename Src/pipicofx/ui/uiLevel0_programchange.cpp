@@ -114,7 +114,9 @@ static void create()
             ui.currentProgram->getParameter(c)->parameterCallback(getChannel2Value());
         }
     }
-    
+    initialKnobValues[0]=getChannel0Value();
+    initialKnobValues[1]=getChannel1Value();
+    initialKnobValues[2]=getChannel2Value();
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
@@ -218,7 +220,7 @@ static void knob0Callback(uint16_t val)
     }
     else 
     {
-        if ((val > initialKnobValues[0] && (val - initialKnobValues[0]) >512) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >512))
+        if ((val > initialKnobValues[0] && (val - initialKnobValues[0]) >KNOB_HYSTERESIS) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >KNOB_HYSTERESIS))
         {
             initialKnobValues[0]=0xFFFF;
             ui.bypassEnterReleased = 1;
@@ -249,7 +251,7 @@ static void knob2Callback(uint16_t val)
     }
     else
     {
-        if ((val > initialKnobValues[2] && (val - initialKnobValues[2]) >512) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >512))
+        if ((val > initialKnobValues[2] && (val - initialKnobValues[2]) >KNOB_HYSTERESIS) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >KNOB_HYSTERESIS))
         {
             initialKnobValues[2]= 0xFFFF;
             ui.bypassEnterReleased = 1;
@@ -424,9 +426,9 @@ static void rotaryCallback(int16_t encoderDelta)
         case OM_NONE:
             if (programChangeState==0)
             {
-                programsToInitialize[0]=0x3F;
-                programsToInitialize[1]=0x3F;
-                programsToInitialize[2]=0x3F;
+                programsToInitialize[0]=0x7F;
+                programsToInitialize[1]=0x7F;
+                programsToInitialize[2]=0x7F;
                 if (encoderDelta > 0)
                 {
                     encoderDelta = 1;
@@ -439,7 +441,7 @@ static void rotaryCallback(int16_t encoderDelta)
                 {
                     ui.currentProgramIdx = 0xFF;
                 } 
-                else if (ui.currentProgramIdx ==0xFF && encoderDelta < 0)
+                else if (ui.currentProgramIdx > N_FX_PROGRAMS-1 && encoderDelta < 0)
                 {
                     ui.currentProgramIdx = N_FX_PROGRAMS-1;
                 }
@@ -487,6 +489,26 @@ static void stompswitch1Callback(void)
             ui.currentParameter = ui.currentProgram->getParameter(ui.currentParameterIdx);
         }
     }
+}
+
+static void leftCallback(void)
+{
+    ui.mode--;
+    if (ui.mode > 4)
+    {
+        ui.mode=0;
+    }
+    uiSwitchMode();
+}
+
+static void rightCallback(void)
+{
+    ui.mode++;
+    if (ui.mode > 4)
+    {
+        ui.mode=4;
+    }
+    uiSwitchMode(); 
 }
 
 static void stompSwitch2Pressed()
@@ -548,6 +570,8 @@ void enterLevel0()
     registerEnterButtonPressedCallback(&enterPressedCallback);
     registerEnterButtonReleasedCallback(&enterReleasedCallback);
     registerExitButtonPressedCallback(&exitCallback);
+    registerLeftButtonPressedCallback(&leftCallback);
+    registerRightButtonPressedCallback(&rightCallback);
     registerRotaryCallback(&rotaryCallback);
     registerKnob0Callback(&knob0Callback);
     registerKnob1Callback(&knob1Callback);

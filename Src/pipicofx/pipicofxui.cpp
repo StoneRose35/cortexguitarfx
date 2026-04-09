@@ -19,8 +19,10 @@ extern "C" {
 extern FxPresetType presets[3];
 extern PiPicoFXUiType ui;
 extern MultiAudioProcessor audioProcessor; 
+extern volatile uint8_t programsToInitialize[3];
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
+extern volatile uint8_t programChangeState;
 static BwImageBufferType imgBuffer;
 static BwImageType img;
 const uiEnterFct uiEnterFunctions[]={
@@ -42,6 +44,10 @@ static void (*enterButtonPressedCallback)(void)=0;
 static void (*enterButtonReleasedCallback)(void)=0; 
 static void (*exitButtonPressedCallback)(void)=0;
 static void (*exitButtonReleasedCallback)(void)=0;
+static void (*leftButtonPressedCallback)(void)=0;
+static void (*leftButtonReleasedCallback)(void)=0;
+static void (*rightButtonPressedCallback)(void)=0;
+static void (*rightButtonReleasedCallback)(void)=0;
 static void (*rotaryCallback)(int16_t val)=0;
 static void (*knob0Callback)(uint16_t val)=0;
 static void (*knob1Callback)(uint16_t val)=0;
@@ -97,6 +103,31 @@ void registerExitButtonReleasedCallback(void(*cb)(void))
 {
     exitButtonReleasedCallback=cb;
 }
+
+__QSPI_CODE
+void registerLeftButtonPressedCallback(void(*cb)(void))
+{
+    leftButtonPressedCallback=cb;
+}
+
+__QSPI_CODE
+void registerLeftButtonReleasedCallback(void(*cb)(void))
+{
+    leftButtonReleasedCallback=cb;
+}
+
+__QSPI_CODE
+void registerRightButtonPressedCallback(void(*cb)(void))
+{
+    rightButtonPressedCallback=cb;
+}
+
+__QSPI_CODE
+void registerRightButtonReleasedCallback(void(*cb)(void))
+{
+    rightButtonReleasedCallback=cb;
+}
+
 __QSPI_CODE
 void registerStompswitch1PressedCallback(void(*cb)(void))
 {
@@ -164,6 +195,10 @@ void clearCallbackAssignments()
     enterButtonReleasedCallback = 0;
     exitButtonPressedCallback = 0;
     exitButtonReleasedCallback = 0;
+    leftButtonPressedCallback = 0;
+    leftButtonReleasedCallback = 0;
+    rightButtonPressedCallback = 0;
+    rightButtonReleasedCallback = 0;
     knob0Callback = 0;
     knob1Callback = 0;
     knob2Callback = 0;
@@ -218,6 +253,43 @@ void onExitReleased()
         exitButtonReleasedCallback();
     }
 }
+
+__QSPI_CODE
+void onLeftPressed()
+{
+    if (leftButtonPressedCallback!=0)
+    {
+        leftButtonPressedCallback();
+    }
+}
+
+__QSPI_CODE
+void onLeftReleased()
+{
+    if (leftButtonReleasedCallback!=0)
+    {
+        leftButtonReleasedCallback();
+    }
+}
+
+__QSPI_CODE
+void onRightPressed()
+{
+    if (rightButtonPressedCallback!=0)
+    {
+        rightButtonPressedCallback();
+    }
+}
+
+__QSPI_CODE
+void onRightReleased()
+{
+    if (rightButtonReleasedCallback!=0)
+    {
+        rightButtonReleasedCallback();
+    }
+}
+
 __QSPI_CODE
 void onRotaryChange(int16_t delta)
 {
@@ -383,11 +455,14 @@ void piPicoFxUiSetup(void)
     {
         generateEmptyPreset(presets+2,currentBank,2);
     }
-    applyPreset(presets + currentPreset,&audioProcessor);
-    ui.currentProgram=PiPicoFX::loadProgram(2);
-    audioProcessor.addFxProgram(ui.currentProgram,0);
-    ui.currentProgramIdx=2;
-    ui.currentParameter=ui.currentProgram->getParameter(0);
+    programsToInitialize[0] = (presets+currentPreset)->programNrA | 0x80;
+    programsToInitialize[1] = (presets+currentPreset)->programNrB | 0x80;
+    programsToInitialize[2] = (presets+currentPreset)->programNrC | 0x80;
+    ui.currentProgramPosition = 0;
+    //ui.currentProgram=PiPicoFX::loadProgram(2);
+    //audioProcessor.addFxProgram(ui.currentProgram,0);
+    ui.currentProgramIdx=presets->programNrA;
+    //ui.currentParameter=ui.currentProgram->getParameter(0);
     ui.currentParameterIdx=0;
     ui.locked=0;
     ui.editViaRotary =0;
@@ -411,4 +486,5 @@ void piPicoFxUiSetup(void)
     #ifdef VERTICAL_DISPLAY
     imgBuffer.type = BWIMAGE_BW_IMAGE_STRUCT_HORIZONTAL_BYTES;
     #endif
+    programChangeState = 1; // initially load programs of the current presets once the audio engine runs
 }

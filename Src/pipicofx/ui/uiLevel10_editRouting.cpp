@@ -141,7 +141,7 @@ static void rotaryCallback(int16_t encoderDelta)
     {
         if (encoderDelta > 0)
         {
-            programsToInitialize[ui.currentProgramPosition] = 0xFF;
+            programsToInitialize[ui.currentProgramPosition] = 0x7F;
             ui.currentProgramPosition++;
             if (ui.currentProgramPosition > 2)
             {
@@ -150,7 +150,7 @@ static void rotaryCallback(int16_t encoderDelta)
         }
         else
         {
-            programsToInitialize[ui.currentProgramPosition] = 0xFF;
+            programsToInitialize[ui.currentProgramPosition] = 0x7F;
             ui.currentProgramPosition--;
             if (ui.currentProgramPosition > 2)
             {

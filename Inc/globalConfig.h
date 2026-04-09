@@ -45,6 +45,8 @@
 // the alpha value for the lowpass filter for the adc values, the effective alpha is ADC_LOWPASS/1024
 #define ADC_LOWPASS 60
 
+// how much the knobs should move before a change of value is detected
+#define KNOB_HYSTERESIS 32
 
 #define UI_LATENCY_IN_SAMPLES (UI_UPDATE_IN_SAMPLE_BUFFERS*AUDIO_BUFFER_SIZE)
 // --------------------------

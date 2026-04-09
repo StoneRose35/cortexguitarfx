@@ -140,7 +140,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         {
             drawImage(59,4,&toggleswitch_on_streamimg,imgBuffer);
         }
-        drawText(64-9,46,"Mic",imgBuffer,0);
+        drawText(64-9,46,"HiZ",imgBuffer,0);
     }
 
     if (initialKnobValues[2]==0xFFFF) // master volume is being edited, draw current position
@@ -183,19 +183,19 @@ static void knob0Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if ((val > initialKnobValues[0] && (val - initialKnobValues[0]) >512) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >512))
+        if ((val > initialKnobValues[0] && (val - initialKnobValues[0]) >KNOB_HYSTERESIS) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >KNOB_HYSTERESIS))
         {
             initialKnobValues[0] = 0xFFFF;
             ui.bypassEnterReleased = 1;
             initialKnobValues[1]=getChannel1Value();
             initialKnobValues[2]=getChannel2Value();
-            if (val > 2047 && ((channelState & 0x3)==0 || (channelState & 0x3)==0))
+            if (val > 2047 && (channelState & 0x3)==0)
             {
                 pcm3060SetInputState(PCM3060_CHANNEL_LEFT,1);
                 channelState &= ~0x3;
                 channelState |= 0x1;
             }
-            else if (val <= 2047 && ((channelState & 0x3)==1 || (channelState & 0x3)==0))
+            else if (val <= 2047 && (channelState & 0x3)!=0 )
             {
                 pcm3060SetInputState(PCM3060_CHANNEL_LEFT,0);
                 channelState &= ~0x3;
@@ -208,19 +208,19 @@ static void knob1Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if ((val > initialKnobValues[1] && (val - initialKnobValues[1]) >512) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >512))
+        if ((val > initialKnobValues[1] && (val - initialKnobValues[1]) >KNOB_HYSTERESIS) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >KNOB_HYSTERESIS))
         {
             initialKnobValues[1] = 0xFFFF;
             ui.bypassEnterReleased = 1;
             initialKnobValues[0]=getChannel0Value();
             initialKnobValues[2]=getChannel2Value();
-            if (val > 2047 && (((channelState >> 2) & 0x3)==0 || ((channelState >> 2) & 0x3)==0))
+            if (val > 2047 && ((channelState >> 2) & 0x3)==0 )
             {
                 pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,1);
                 channelState &= ~(0x3 << 2);
                 channelState |= (0x1 << 2);
             }
-            else if (val <= 2047 && ((channelState & 0x3)==1 || (channelState & 0x3)==0))
+            else if (val <= 2047 && (((channelState>>2) & 0x3)!=0))
             {
                 pcm3060SetInputState(PCM3060_CHANNEL_RIGHT,0);
                 channelState &= ~(0x3 << 2);
@@ -233,7 +233,7 @@ static void knob2Callback(uint16_t val)
 {
     if (ui.enterState == 1)
     {
-        if ((val > initialKnobValues[2] && (val - initialKnobValues[2]) >512) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >512))
+        if ((val > initialKnobValues[2] && (val - initialKnobValues[2]) >KNOB_HYSTERESIS) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >KNOB_HYSTERESIS))
         {
             initialKnobValues[2]= 0xFFFF;
             ui.bypassEnterReleased = 1;
@@ -463,6 +463,25 @@ static void rotaryCallback(int16_t encoderDelta)
     }
 }
 
+static void leftCallback(void)
+{
+    ui.mode--;
+    if (ui.mode > 4)
+    {
+        ui.mode=0;
+    }
+    uiSwitchMode();
+}
+
+static void rightCallback(void)
+{
+    ui.mode++;
+    if (ui.mode > 4)
+    {
+        ui.mode=4;
+    }
+    uiSwitchMode(); 
+}
 
 static void stompSwitch1Pressed()
 {
@@ -571,6 +590,8 @@ void enterLevel11()
     registerEnterButtonPressedCallback(&enterPressedCallback);
     registerEnterButtonReleasedCallback(&enterReleasedCallback);
     registerExitButtonPressedCallback(&exitCallback);
+    registerLeftButtonPressedCallback(&leftCallback);
+    registerRightButtonPressedCallback(&rightCallback);
     registerRotaryCallback(&rotaryCallback);
     registerKnob0Callback(&knob0Callback);
     registerKnob1Callback(&knob1Callback);

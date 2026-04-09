@@ -46,12 +46,14 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     }
     if (cs==preset->magicNr)
     {
+        /*
         if (preset->programNrA >= N_FX_PROGRAMS 
             || preset->programNrB >= N_FX_PROGRAMS
             || preset->programNrC >= N_FX_PROGRAMS) // any program nr is larger than the maximum number of program
         {
             return 1;
         }
+        */
         return 0;
     }
     return 1;

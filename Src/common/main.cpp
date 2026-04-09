@@ -84,7 +84,7 @@ volatile uint8_t fxProgramIdx = 1;
 volatile uint32_t cpuLoad=0;
 PiPicoFXUiType ui;
 
-const uint8_t switchesPins[2]={ENTER_SWITCH,EXIT_SWITCH};
+const uint8_t switchesPins[4]={ENTER_SWITCH,EXIT_SWITCH,LEFT_SWITCH,RIGHT_SWITCH};
 #define ADC_LOWPASS 60
 #define UI_DMIN 2
 uint32_t encoderVal,encoderCntr,encNew;
@@ -98,7 +98,7 @@ const uint8_t stompswitch_progs[]={8,7,1};
 FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0x0;
-volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF}; // 0xFF: null values, otherwise bits 0-6: program nr to initialize, bit 7: copy parameters from preset or not
+volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF}; // 0x7f: do not change, 0x7e do not reload a program, otherwise bits 0-6: program nr to initialize, bit 7: copy parameters from preset or not
 volatile uint16_t initialKnobValues[3];
 AudioProcessor * currentFxProgram;
 __DTCM_DATA
@@ -120,7 +120,7 @@ volatile uint8_t stompSwitchState;
 int16_t avgOldOutBfr;
 int16_t avgOldInBfr;
 uint16_t cpuLoadBfr;
-uint8_t switchVals[2]={0,0};
+uint8_t switchVals[4]={0,0,0,0};
 uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
@@ -187,7 +187,7 @@ int main(void)
 	//Initialise Component-specific drivers
 	initDisplay();
 
-    initRotaryEncoder(switchesPins,2);
+    initRotaryEncoder(switchesPins,4);
 
 
     // wait for flashing when button 0 (Enter switch) is pressed during startup 
@@ -254,14 +254,7 @@ int main(void)
     initAudioEngine();
     piPicoFxUiSetup();
 	ClearDisplay();
-	#ifndef FORCE_TEST_MODE
-		enterLevel0();
-	#else
-	    // switch on program "off"
-		//piPicoUiController.currentProgramIdx = 2;
-		//piPicoUiController.currentProgram=loadProgram(piPicoUiController.currentProgramIdx);
-	    enterLevel7(&piPicoUiController);
-	#endif
+
     
     LooperInit(&looper);
     
@@ -272,6 +265,16 @@ int main(void)
     audioStatePtr = getAudioStatePtr();
 
     clearReleasedStickyBit(0);
+
+    #ifndef FORCE_TEST_MODE
+		enterLevel0();
+	#else
+	    // switch on program "off"
+		//piPicoUiController.currentProgramIdx = 2;
+		//piPicoUiController.currentProgram=loadProgram(piPicoUiController.currentProgramIdx);
+	    enterLevel7(&piPicoUiController);
+	#endif
+
     #if defined USB_DBG || defined ENCODER_TUNE
     initUart(115200);
     #endif
@@ -296,6 +299,7 @@ int main(void)
             cpuLoadBfr = cpuLoad >> 1;
             onUpdate(avgOldInBfr,avgOldOutBfr,cpuLoadBfr);
             DisplayWriteFramebufferAsync(getImageBuffer()->data);
+            /*
             if ((*audioStatePtr & (1 << AUDIO_STATE_INPUT_CLIPPED)) == (1 << AUDIO_STATE_INPUT_CLIPPED))
             {
                 setPin(CLIPPING_LED_INPUT,0);
@@ -305,6 +309,7 @@ int main(void)
             {
                 setPin(CLIPPING_LED_INPUT,1);
             }
+                */
             if ((*audioStatePtr & (1 << AUDIO_STATE_OUTPUT_CLIPPED)) == (1 << AUDIO_STATE_OUTPUT_CLIPPED))
             {
                 setPin(CLIPPING_LED_OUTPUT,0);
@@ -394,6 +399,30 @@ int main(void)
         {
             onExitReleased();
             clearReleasedStickyBit(1);
+        }
+
+        switchVals[2] = getSwitchValue(2);
+        if ((switchVals[2] & 1) > 0)
+        {
+            onLeftPressed();
+            clearPressedStickyBit(2);
+        }
+        if ((switchVals[2] & 2) > 0)
+        {
+            onLeftReleased();
+            clearReleasedStickyBit(2);
+        }
+
+        switchVals[3] = getSwitchValue(3);
+        if ((switchVals[3] & 1) > 0)
+        {
+            onRightPressed();
+            clearPressedStickyBit(3);
+        }
+        if ((switchVals[3] & 2) > 0)
+        {
+            onRightReleased();
+            clearReleasedStickyBit(3);
         }
        getStickyIncrementAndSpeed(&rotaryEncoderInfo);
        if (rotaryEncoderInfo.increment != 0)
@@ -494,13 +523,15 @@ int main(void)
       
 
       // remove all entries and replaces them by new one 
-      // when programsToInitialize is not 0xFF at the given position
+      // when programsToInitialize is not 0x3f at the given position
       // updates the currently edited parameter of the ui structure
         if (programChangeState == 3)
         {         
             for (uint8_t q = 0;q < 3;q++)
             {   
-                if ((programsToInitialize[q] & 0x3F) != 0x3F)
+
+
+                if ((programsToInitialize[q] & 0x7F) != 0x7F)
                 {
                     currentFxProgram = audioProcessor.removeFxProgram(q);
                     if (currentFxProgram != nullptr)
@@ -515,29 +546,31 @@ int main(void)
                         currentFxProgram = nullptr;
                     }
 
-
                     currentFxProgram = loadProgram(programsToInitialize[q]&0x7F);
                     audioProcessor.addFxProgram(currentFxProgram,q);
-                    if (ui.defaultOn)
+                    if (currentFxProgram != nullptr)
                     {
-                        ((FxProgram*)currentFxProgram)->switchOn();
-                    }
-                    else
-                    {
-                        ((FxProgram*)currentFxProgram)->switchOff();
-                    }
-                    
-                    ui.currentParameterIdx = 0;
-                    if (q == ui.currentProgramPosition)
-                    {
-                        ui.currentProgram = ((FxProgram*)currentFxProgram);
-                        ui.currentProgramIdx = programsToInitialize[q]&0x7F;
-                        ui.currentParameter = ((FxProgram*)currentFxProgram)->getParameter(ui.currentParameterIdx);
-                    }
+                        if (ui.defaultOn)
+                        {
+                            ((FxProgram*)currentFxProgram)->switchOn();
+                        }
+                        else
+                        {
+                            ((FxProgram*)currentFxProgram)->switchOff();
+                        }
+                        
+                        ui.currentParameterIdx = 0;
+                        if (q == ui.currentProgramPosition)
+                        {
+                            ui.currentProgram = ((FxProgram*)currentFxProgram);
+                            ui.currentProgramIdx = programsToInitialize[q]&0x7F;
+                            ui.currentParameter = ((FxProgram*)currentFxProgram)->getParameter(ui.currentParameterIdx);
+                        }
 
-                    if (programsToInitialize[q] & 0x80)
-                    {
-                        applyPresetToProgram(presets+currentPreset,&audioProcessor,q);
+                        if (programsToInitialize[q] & 0x80)
+                        {
+                            applyPresetToProgram(presets+currentPreset,&audioProcessor,q);
+                        }
                     }
                     //onCreate();
                 }
