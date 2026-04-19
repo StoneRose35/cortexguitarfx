@@ -97,8 +97,9 @@ static void create()
     lastTick=getTickValue();
     if (ui.currentProgram == nullptr)
     {
-        return;lastTick=getTickValue();
+        return;
     }
+    /*
     for (uint8_t c=0;c < ui.currentProgram->getParameterCount();c++)
     {
         if (ui.currentProgram->getParameter(c)->getControl()==0)
@@ -113,7 +114,7 @@ static void create()
         {
             ui.currentProgram->getParameter(c)->parameterCallback(getChannel2Value());
         }
-    }
+    }*/
     initialKnobValues[0]=getChannel0Value();
     initialKnobValues[1]=getChannel1Value();
     initialKnobValues[2]=getChannel2Value();

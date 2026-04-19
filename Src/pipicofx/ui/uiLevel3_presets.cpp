@@ -80,7 +80,7 @@ static void limitPreviewBankRange(uint8_t increase);
 static void createPresetSelector(BwImageType*imgBuffer);
 //static void drawParameterDisplay(FxProgram*prog,BwImageStruct*imgBuffer);
 static void drawBankAndPreset(BwImageStruct*imgBuffer);
-static void drawPrograms(BwImageType* imgBuffer);
+//static void drawPrograms(BwImageType* imgBuffer);
 static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk);
 
 #define BANK_PRESET_CHANGE_NONE 2
@@ -134,7 +134,6 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
     };
     clearImage(imgBuffer);
     drawBankAndPreset(imgBuffer);
-    drawPrograms(imgBuffer);
     drawBottomPanel(&bottomPane);
     drawImage(0,48,(BwImageTypeConst*)&bottomPane,imgBuffer);
 
@@ -975,26 +974,10 @@ static void drawBankAndPreset(BwImageStruct*imgBuffer)
     appendToString(strbfr,"Bank ");
     UInt8ToChar(currentBank,nrbfr);
     appendToString(strbfr,nrbfr);
-    drawText(128-7*8,32,strbfr,imgBuffer,getGFXFont(FREESANSBOLD9PT7B));
+    drawText(2,34,strbfr,imgBuffer,getGFXFont(FREESANSBOLD9PT7B));
 
 }
 
-
-static void drawPrograms(BwImageType* imgBuffer)
-{
-    char lineBuffer[24];
-    const char * ABC[]={"A:","B:","C:"}; 
-    for (uint8_t c=0;c<audioProcessor.getProgramListLength();c++)
-    {
-        if (audioProcessor.getFxProgram(c) != nullptr)
-        {
-            lineBuffer[0]=0;
-            appendToString(lineBuffer,*(ABC + c));
-            appendToString(lineBuffer,((FxProgram*)audioProcessor.getFxProgram(c))->getName());
-            drawText(0,28 + c*8,lineBuffer,imgBuffer,0);
-        }               
-    }
-}
 
 static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk)
 {
