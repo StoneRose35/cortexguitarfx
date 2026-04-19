@@ -29,7 +29,7 @@ namespace PiPicoFX {
                     .paramNr = 0,
                     .frozen=0
                 };
-                float reverbTime=300;
+                float reverbTime=300.0f;
                 GainStageDataType presetVolume={
                     .gain=1.0f,
                     .offset=0.0f

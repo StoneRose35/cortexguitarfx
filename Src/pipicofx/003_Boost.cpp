@@ -42,4 +42,5 @@ void Boost::Param1::parameterDisplay(char*res)
 void Boost::Boost::setup()
 {
     this->addParameter(new Param1(this));
+    FxProgram::setup();
 }

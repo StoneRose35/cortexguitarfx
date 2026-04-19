@@ -136,7 +136,7 @@ void Delay::Delay::setup()
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->setFreezable(1);
-
+    FxProgram::setup();
 }
 
 Delay::Delay::~Delay()

@@ -66,4 +66,5 @@ void MonsterCrusher::MonsterCrusher::setup()
 {
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
+    FxProgram::setup();
 }

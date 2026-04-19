@@ -25,7 +25,15 @@ PiPicoFX::FxProgram::~FxProgram()
 }
 
 __QSPI_CODE
-void FxProgram::setup(void){}
+/*
+call after all parameters are set to have consistent parameter values and behaviour
+*/
+void FxProgram::setup(void){
+    for (uint8_t c=0;c<getParameterCount();c++)
+    {
+        getParameter(c)->parameterCallback(getParameter(c)->rawValue);
+    }
+}
 
 __QSPI_CODE
 uint8_t FxProgram::addParameter(FxProgramParameter*p){

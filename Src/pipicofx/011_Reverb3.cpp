@@ -97,6 +97,7 @@ void Reverb3::Reverb3::setup()
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->setFreezable(1);
+    FxProgram::setup();
 }
 
 Reverb3::Reverb3::~Reverb3()

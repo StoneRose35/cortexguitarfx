@@ -135,6 +135,7 @@ void AmpModel::AmpModel::setup()
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->setFreezable(0);
+    FxProgram::setup();
 }
 
 /*

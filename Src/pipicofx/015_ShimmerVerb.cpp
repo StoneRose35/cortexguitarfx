@@ -91,7 +91,7 @@ void ShimmerVerb::ShimmerVerb::setup()
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-
+    FxProgram::setup();
 }
 
 ShimmerVerb::ShimmerVerb::~ShimmerVerb()

@@ -76,6 +76,7 @@ void Reverb2::Reverb2::setup()
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->setFreezable(1);
+    FxProgram::setup();
 }
 
 Reverb2::Reverb2::~Reverb2()

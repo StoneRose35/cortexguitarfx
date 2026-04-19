@@ -32,7 +32,7 @@ void Tremolo::Tremolo::setup()
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->addParameter(new Param5(this));
-
+    FxProgram::setup();
 }
 
 void Tremolo::Param1::parameterCallback(uint16_t val)

@@ -78,7 +78,7 @@ void FreeVerb::FreeVerb::setup()
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->setFreezable(1);
-
+    FxProgram::setup();
 }
 
 FreeVerb::FreeVerb::~FreeVerb()

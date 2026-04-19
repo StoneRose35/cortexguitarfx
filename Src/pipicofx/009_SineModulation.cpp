@@ -117,6 +117,7 @@ void SineModulation::SineModulation::setup()
     this->addParameter(new Param4(this));
     this->addParameter(new Param5(this));
     this->addParameter(new Param6(this));
+    FxProgram::setup();
 }
 
 SineModulation::SineModulation::~SineModulation()

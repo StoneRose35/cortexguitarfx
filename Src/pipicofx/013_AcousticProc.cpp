@@ -39,6 +39,7 @@ void AcousticProc::AcousticProc::setup()
     this->addParameter(new Param5(this));
     this->addParameter(new Param6(this));
     this->addParameter(new Param7(this));
+    FxProgram::setup();
 }
 
 AcousticProc::AcousticProc::~AcousticProc()

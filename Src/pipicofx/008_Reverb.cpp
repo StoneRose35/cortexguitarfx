@@ -101,6 +101,7 @@ void Reverb::Param4::parameterDisplay(char*res)
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->setFreezable(1);
+    FxProgram::setup();
 }
 
 Reverb::Reverb::~Reverb()
