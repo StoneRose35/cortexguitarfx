@@ -26,26 +26,27 @@ float AmpModel::AmpModel::processSample(float sampleIn)
         newIn = sampleIn;
     }
 
-    this->highpass_out =  (1.0f + this->highpassCutoff)/2.0f*(newIn - this->highpass_old_in) + this->highpassCutoff*this->highpass_old_out; //(((((1 << 15) + this->highpassCutoff) >> 1)*(sampleIn - this->highpass_old_in))>>15) + ((this->highpassCutoff *this->highpass_old_out) >> 15);
-    this->highpass_old_in = newIn;
-    this->highpass_old_out = this->highpass_out;
+    //this->highpass_out =  (1.0f + this->highpassCutoff)/2.0f*(newIn - this->highpass_old_in) + this->highpassCutoff*this->highpass_old_out; //(((((1 << 15) + this->highpassCutoff) >> 1)*(sampleIn - this->highpass_old_in))>>15) + ((this->highpassCutoff *this->highpass_old_out) >> 15);
+    //this->highpass_old_in = newIn;
+    //this->highpass_old_out = this->highpass_out;
 
-    out = this->highpass_out;
-    
+    //out = this->highpass_out;
+    out = threeBandEqProcessSample(newIn,&preEq);
     for (uint8_t c=0;c<this->nWaveshapers;c++)
     {
         out = waveShaperProcessSample(out,&this->waveshaper1);
     }
     
+    out = threeBandEqProcessSample(out,&postEq);
 
     out = gainStageProcessSample(out,&presetVolume);
 
-    out = out/2.0f;
+    //out = out/2.0f;
     out = secondOrderIirFilterProcessSample(out,&this->filter1);
     
     out = firFilterProcessSample(out, &this->filter3);
     
-    out = delayLineProcessSample(out, &this->delay);
+    //out = delayLineProcessSample(out, &this->delay);
     
     if (!this->isOn())
     {
@@ -54,19 +55,21 @@ float AmpModel::AmpModel::processSample(float sampleIn)
     return out;
 }
 
-void AmpModel::Param1::parameterCallback(uint16_t val) // highpass cutoff before the nonlinear stage
+void AmpModel::Param1::parameterCallback(uint16_t val) // pre-Eq as single parameter setting
 {
-    float fval;
+    //float fval;
 
-    fval = ((FXPROGRAM1_HIGHCUT_DELTA*(float)val)/4096.0f);
-    pData->highpassCutoff = FXPROGRAM1_HIGHCUT_VAL1 + fval;
+    //fval = ((FXPROGRAM1_HIGHCUT_DELTA*(float)val)/4096.0f);
+    //pData->highpassCutoff = FXPROGRAM1_HIGHCUT_VAL1 + fval;
+
+    setSingleParam(val,&pData->preEq);
     rawValue=val;
 }
 
 void AmpModel::Param1::parameterDisplay(char* chrbfr)
 {
     uint32_t dval;
-    dval=(uint32_t)(pData->highpassCutoff*100.0f);
+    dval=(uint32_t)((float)rawValue*0.2439560f); // map to 0-999
     Int16ToChar(dval,chrbfr);
 }
 
@@ -84,21 +87,21 @@ void AmpModel::Param2::parameterDisplay(char* res)
     UInt8ToChar(pData->nWaveshapers,res);
 };
 
-void AmpModel::Param3::parameterCallback(uint16_t val)// delay intensity
+void AmpModel::Param3::parameterCallback(uint16_t val)// post-EQ
 {
     
-    pData->delay.delayInSamples = 2400 + (val << 3);
-    pData->delay.mix = ((float)val)/8192.0f; // up to 100%
-    pData->delay.feedback = 0.25f;
+    setSingleParam(val,&pData->postEq);
+    //pData->delay.delayInSamples = 2400 + (val << 3);
+    //pData->delay.mix = ((float)val)/8192.0f; // up to 100%
+    //pData->delay.feedback = 0.25f;
     rawValue=val;
 }
 
 void AmpModel::Param3::parameterDisplay(char* res)
 {
-    int16_t dVal;
-    dVal=(int16_t)(pData->delay.mix*100.0f);
-    Int16ToChar(dVal,res);
-    appendToString(res,"%");
+    uint32_t dval;
+    dval=(uint32_t)((float)rawValue*0.2439560f); // map to 0-999
+    Int16ToChar(dval,res);
 }
 
 void AmpModel::Param4::parameterCallback(uint16_t val)
@@ -116,22 +119,25 @@ void AmpModel::Param4::parameterDisplay(char* res)
 
 AmpModel::AmpModel::~AmpModel()
 {
-    freeDelayMemory(this->delay.delayLine);
+    //freeDelayMemory(this->delay.delayLine);
 }
 
 void AmpModel::AmpModel::setup()
 {
     initfirFilter(&filter3);
     initWaveShaper(&waveshaper1,&waveShaperDefaultOverdrive);
-    initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 2),MAX_DELAY_SINGLEBUFFER);
-    delay.feebackData = (void*)&feedbackFilter;
+    //initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 2),MAX_DELAY_SINGLEBUFFER);
+    //delay.feebackData = (void*)&feedbackFilter;
+    initThreeBandEq(&preEq);
+    initThreeBandEq(&postEq);
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-    this->setFreezable(1);
+    this->setFreezable(0);
 }
 
+/*
 void AmpModel::AmpModel::freeze()
 {
     FxProgram::freeze();
@@ -143,3 +149,4 @@ void AmpModel::AmpModel::unfreeze()
     FxProgram::unfreeze();
     delay.frozen=0;
 }
+    */

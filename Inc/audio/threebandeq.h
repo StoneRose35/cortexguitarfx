@@ -4,9 +4,9 @@
 #include "secondOrderIirFilter.h"
 typedef struct 
 {
-    SecondOrderIirFilterType * lowShelf;
-    SecondOrderIirFilterType * midBand;
-    SecondOrderIirFilterType * highShelf;
+    SecondOrderIirFilterType lowShelf;
+    SecondOrderIirFilterType midBand;
+    SecondOrderIirFilterType highShelf;
 
     float lowFactor; // ranging from -1 to 8
     float midFactor; 
@@ -16,4 +16,5 @@ typedef struct
 void initThreeBandEq(ThreeBandEQType*data);
 float threeBandEqProcessSample(float sampleIn,ThreeBandEQType*data);
 void threeBandEqReset(ThreeBandEQType*data);
+void setSingleParam(uint16_t param, ThreeBandEQType*data);
 #endif
