@@ -26,9 +26,10 @@ extern uint8_t currentPreset;
 extern PiPicoFXUiType ui;
 extern MultiAudioProcessor audioProcessor; 
 extern volatile uint16_t initialKnobValues[3];
+static volatile uint8_t bmKnobsLocked; //bitmap, 0: unlocked, 1: locked, lsb is knob 1, lsb+1 is knob 1 and lsb+2 is knob 2
 extern volatile uint8_t programChangeState;
 extern volatile uint8_t programsToInitialize[3];
-static uint8_t currentParameterPage;
+static uint8_t currentParameterPage = 1;
 static uint8_t totalParameterPages;
 static uint8_t overlayNr=0xFF;
 static uint8_t overlayMode=0;
@@ -56,6 +57,7 @@ static void create()
     initialKnobValues[0]=getChannel0Value();
     initialKnobValues[1]=getChannel1Value();
     initialKnobValues[2]=getChannel2Value();
+    bmKnobsLocked = 0x7;
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
@@ -160,26 +162,81 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         longPressCnt=0;
         setStompswitchColorRaw(1 << 2);
     }
+
+    // unlock knobs if knob has been moved over the current parameter value and has moved more than KNOB_HYSTERESIS
+    if ((currentParameterPage-1)*3 <ui.currentProgram->getParameterCount() && (bmKnobsLocked & 1)!=0)
+    {
+        int16_t programParameterVal = ui.currentProgram->getParameter((currentParameterPage-1)*3)->rawValue;
+        int16_t knobVal = getChannel0Value();
+        
+        if (((programParameterVal - knobVal) >= 0 && (programParameterVal - knobVal) < KNOB_HYSTERESIS && ((initialKnobValues[0] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[0] - knobVal <= -KNOB_HYSTERESIS_2)) ||
+            ((programParameterVal - knobVal) <= 0 && (knobVal - programParameterVal) < KNOB_HYSTERESIS && ((initialKnobValues[0] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[0] - knobVal <= -KNOB_HYSTERESIS_2)))
+        {
+            bmKnobsLocked &= ~0x1;
+        }
+    }
+    if ((currentParameterPage-1)*3 + 1 <ui.currentProgram->getParameterCount() && (bmKnobsLocked & (1 << 1))!=0)
+    {
+        int16_t programParameterVal = ui.currentProgram->getParameter((currentParameterPage-1)*3 + 1)->rawValue;
+        int16_t knobVal = getChannel1Value();
+        if (((programParameterVal - knobVal) >= 0 && (programParameterVal - knobVal) < KNOB_HYSTERESIS && ((initialKnobValues[1] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[1] - knobVal <= -KNOB_HYSTERESIS_2)) ||
+            ((programParameterVal - knobVal) <= 0 && (knobVal - programParameterVal) < KNOB_HYSTERESIS && ((initialKnobValues[1] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[1] - knobVal <= -KNOB_HYSTERESIS_2)))
+        {
+            bmKnobsLocked &= ~(0x1 << 1);
+        }
+    }
+    if ((currentParameterPage-1)*3 + 2 <ui.currentProgram->getParameterCount() && (bmKnobsLocked & (1 << 2))!=0)
+    {
+        int16_t programParameterVal = ui.currentProgram->getParameter((currentParameterPage-1)*3 + 2)->rawValue;
+        int16_t knobVal = getChannel2Value();
+        if (((programParameterVal - knobVal) >= 0 && (programParameterVal - knobVal) < KNOB_HYSTERESIS && ((initialKnobValues[2] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[2] - knobVal <= -KNOB_HYSTERESIS_2)) ||
+            ((programParameterVal - knobVal) <= 0 && (knobVal - programParameterVal) < KNOB_HYSTERESIS && ((initialKnobValues[2] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[2] - knobVal <= -KNOB_HYSTERESIS_2)))
+        {
+            bmKnobsLocked &= ~(0x1 << 2);
+        }
+    }
 }
 
 static void leftCallback(void)
 {
-    ui.mode--;
-    if (ui.mode > 4)
+    if (currentParameterPage > 1)
     {
-        ui.mode=0;
+        currentParameterPage--;
+        initialKnobValues[0]=getChannel0Value();
+        initialKnobValues[1]=getChannel1Value();
+        initialKnobValues[2]=getChannel2Value();
+        bmKnobsLocked=0x7;
     }
-    uiSwitchMode();
+    else
+    {
+        ui.mode--;
+        if (ui.mode > 4)
+        {
+            ui.mode=0;
+        }
+        uiSwitchMode();
+    }
 }
 
 static void rightCallback(void)
 {
-    ui.mode++;
-    if (ui.mode > 4)
+    if (currentParameterPage < totalParameterPages)
     {
-        ui.mode=4;
+        currentParameterPage++;
+        initialKnobValues[0]=getChannel0Value();
+        initialKnobValues[1]=getChannel1Value();
+        initialKnobValues[2]=getChannel2Value();
+        bmKnobsLocked =0x7;
     }
-    uiSwitchMode(); 
+    else
+    {
+        ui.mode++;
+        if (ui.mode > 4)
+        {
+            ui.mode=4;
+        }
+        uiSwitchMode(); 
+    }
 }
 
 static void enterPressedCallback()
@@ -269,6 +326,7 @@ static void exitCallback()
 
 static void stompswitch1Callback(void)
 {
+    /*
     uint8_t nbStompSwitch;
     nbStompSwitch=getStompSwitchState(1);
     if ((nbStompSwitch & 0x1) == 0x1)
@@ -278,6 +336,7 @@ static void stompswitch1Callback(void)
             currentParameterPage--;
         }
     }
+    */
 }
 
 static void stompSwitch2Pressed()
@@ -288,16 +347,11 @@ static void stompSwitch2Pressed()
 
 static void stompswitch2Callback(void)
 {
+    /*
     uint8_t nbStompSwitch1, nbStompSwitch3;
     nbStompSwitch1=getStompSwitchState(0);
     nbStompSwitch3=getStompSwitchState(2);
-    if ((nbStompSwitch1 & 0x1) == 0x1)
-    {
-        if (currentParameterPage > 1)
-        {
-            currentParameterPage--;
-        }
-    }
+    
     if (((nbStompSwitch1 & 0x1) == 0x1) && ((nbStompSwitch3 & 0x1) == 0x0))
     {
         if (currentParameterPage > 1)
@@ -312,9 +366,9 @@ static void stompswitch2Callback(void)
             currentParameterPage++;
         }
     }
-    
+    */
 
-    else if (longPressCnt != 0 && audioProcessor.getFxProgram(ui.currentProgramPosition) != nullptr) // no freeze happened, toggle normally
+    if (longPressCnt != 0 && audioProcessor.getFxProgram(ui.currentProgramPosition) != nullptr) // no freeze happened, toggle normally
     {
         uint8_t ret = ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->toggleOn();
         if (ret) 
@@ -331,6 +385,7 @@ static void stompswitch2Callback(void)
 
 static void stompswitch3Callback(void)
 {
+    /*
     uint8_t nbStompSwitch;
     nbStompSwitch=getStompSwitchState(1);
     if ((nbStompSwitch & 0x1) == 0x1)
@@ -340,6 +395,7 @@ static void stompswitch3Callback(void)
             currentParameterPage++;
         }
     }
+    */
 }
 
 static inline void knobCallback(uint16_t val,uint8_t control)
@@ -359,6 +415,7 @@ static inline void knobCallback(uint16_t val,uint8_t control)
 
 static void knob0Callback(uint16_t val)
 {
+    /*
     if (ui.enterState == 1)
     {
         if (((val > initialKnobValues[0] && (val - initialKnobValues[0]) >KNOB_HYSTERESIS) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >KNOB_HYSTERESIS))
@@ -372,10 +429,17 @@ static void knob0Callback(uint16_t val)
             ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3);
         }
     }
+    */
+    if ((bmKnobsLocked & (1 << 0))==0)
+    {
+        ui.currentProgram->getParameter((currentParameterPage - 1)*3)->parameterCallback(val);
+        ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3);
+    }
 }
 
 static void knob1Callback(uint16_t val)
 {
+    /*
     if (ui.enterState == 1)
     {
         if (((val > initialKnobValues[1] && (val - initialKnobValues[1]) >KNOB_HYSTERESIS) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >KNOB_HYSTERESIS))
@@ -388,11 +452,17 @@ static void knob1Callback(uint16_t val)
             ui.currentProgram->getParameter((currentParameterPage - 1)*3+1)->parameterCallback(val);
             ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3+1);
         }
+    }*/
+    if ((bmKnobsLocked & (1 << 1))==0)
+    {
+        ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1)->parameterCallback(val);
+        ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1);
     }
 }
 
 static void knob2Callback(uint16_t val)
 {
+    /*
     if (ui.enterState == 1)
     {
         if (((val > initialKnobValues[2] && (val - initialKnobValues[2]) >KNOB_HYSTERESIS) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >KNOB_HYSTERESIS))
@@ -405,6 +475,11 @@ static void knob2Callback(uint16_t val)
             ui.currentProgram->getParameter((currentParameterPage - 1)*3+2)->parameterCallback(val);
             ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3+2);
         }
+    }*/
+    if ((bmKnobsLocked & (1 << 2))==0)
+    {
+        ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2)->parameterCallback(val);
+        ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2);
     }
 }
 
@@ -413,9 +488,9 @@ static void rotaryCallback(int16_t encoderDelta)
 {
     if (ui.enterState == 0)
     {
-        switch (overlayMode)
+
+        if (overlayMode == OM_OVERLAYS)
         {
-            case OM_OVERLAYS:
                 if (encoderDelta > 0)
                 {
                     overlayNr++;
@@ -434,9 +509,8 @@ static void rotaryCallback(int16_t encoderDelta)
 
                 }
                 //drawImage(41,0,overlays[overlayNr],imgBuffer);
-                break;
         }
-        if (ui.currentParameter != nullptr)
+        else if (ui.currentParameter != nullptr)
         {
             if (ui.currentParameter->increment > 1) // handle parameter whose increments are
             {                                          // larger than one as discrete param, thus increment only by one
@@ -459,6 +533,11 @@ static void rotaryCallback(int16_t encoderDelta)
                 ui.currentParameter->rawValue = ((1 << 12)-1);
             }
             ui.currentParameter->parameterCallback(ui.currentParameter->rawValue);
+            initialKnobValues[0]=getChannel0Value();
+            initialKnobValues[1]=getChannel1Value();
+            initialKnobValues[2]=getChannel2Value();
+            bmKnobsLocked = 0x7; // lock all knobs when the encoder has been used to set a parameter
+
         }
         
     }
@@ -504,6 +583,6 @@ void enterLevel2()
     registerStompswitch2ReleasedCallback(&stompswitch2Callback);
     registerStompswitch3ReleasedCallback(&stompswitch3Callback);
     create();
-    currentParameterPage = 1;
-    totalParameterPages = (ui.currentProgram->getParameterCount()/3) + 1;
+    //currentParameterPage = 1;
+    totalParameterPages = ((ui.currentProgram->getParameterCount()+2)/3);
 }
