@@ -99,7 +99,7 @@ FxPresetType presets[3];
 volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0x0;
 volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF}; // 0x7f: do not change, 0x7e do not reload a program, otherwise bits 0-6: program nr to initialize, bit 7: copy parameters from preset or not
-volatile uint16_t initialKnobValues[3];
+volatile int16_t initialKnobValues[3];
 AudioProcessor * currentFxProgram;
 __DTCM_DATA
 MultiAudioProcessor audioProcessor;
