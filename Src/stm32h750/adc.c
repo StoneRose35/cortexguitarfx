@@ -61,7 +61,11 @@ void initAdc()
     setSampleCycles(4,POT2_CHANNEL);
     setSampleCycles(4,POT3_CHANNEL);    
 
-    // on rising edge, output compare 2 of timer 2
+    // calibrate the adc
+    ADC1->CR &= ~(1 << ADC_CR_ADCALDIF_Pos); 
+    ADC1->CR |= (1 << ADC_CR_ADCALLIN_Pos);
+    ADC1->CR |= (1 << ADC_CR_ADCAL_Pos);
+    while ((ADC1->CR & (1 << ADC_CR_ADCAL_Pos))!=0);
 
     // enable the port to which the pots are attached
     // and set mode to analog
