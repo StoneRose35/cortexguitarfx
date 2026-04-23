@@ -4,7 +4,7 @@
 #include "stm32h750/stm32h7xx.h"
 #include "system.h"
 #include "qspi.h"
-#include "systick.h"
+#include "drivers/systick.h"
 
 #define QSPI_PROGRAMMER_IDLE 0
 #define QSPI_PROGRAMMER_IDENTIFIER_RECEIVED 1

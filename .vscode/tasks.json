@@ -214,6 +214,8 @@
                 "./../Src/common/stringFunctions.c",
                 "./../Src/common/math/*.c",
                 "./../Src/pipicofx/delayMemoryHandler.c",
+                "./../Src/common/graphics/bwgraphics.c",
+                "./../Src/common/graphics/gfxFonts.c",
                 "./../Tests/libs/wavReader.c"
             ],
             "options": {
@@ -281,6 +283,48 @@
             },
             "dependsOn": "compile c part for c++ test",
             "detail": "Compiles the current c++ file with the audio libs, "
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile ui rendering tests",
+            "detail": "Compiles a test which ouputs a screen to a bitmap file ",
+            "command": "g++",
+            "args": [
+                "-I./Inc",
+                "-I./Tests/inc",
+                "-fdiagnostics-color=always",
+                "-g",
+                "out/*.o",
+                "./Src/stm32h750/audioEngine.cpp",
+                "./Src/pipicofx/ui/uiLevel0_programchange.cpp",
+                "./Src/pipicofx/ui/uiLevel3_presets.cpp",
+                "./Src/pipicofx/ui/uiLevelCommon.cpp",
+                "./Src/pipicofx/ui/uiLevelBottomPanel.cpp",
+                "./Src/pipicofx/pipicofxui.cpp",
+                "./Src/pipicofx/FxProgram.cpp",
+                "./Src/pipicofx/FxPrograms.cpp",
+                "./Src/pipicofx/FxProgramLoader.cpp",
+                "./Src/pipicofx/FxProgramParameter.cpp",
+                "./Src/pipicofx/0*.cpp",
+                "./Src/pipicofx/*AudioProcessor.cpp",
+                "./Tests/libs/bmplib.cpp",
+                "./Tests/uiToBitmapTest.cpp",
+                "-o",
+                "./Tests/out/uiToBitmapTest",
+                "-lm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "compile c part for c++ test"
+            
         }
     ]
 }

@@ -1,3 +1,4 @@
+#include "stm32h750/stm32h750xx.h"
 #include "drivers/24lc128.h"
 #include "drivers/systick.h"
 #include "drivers/i2c.h"

@@ -1,5 +1,6 @@
 extern "C"
 {
+#include "stm32h750/stm32h750_cfg_pins.h"
 #include "pipicofx/pipicofxui.h"
 #include "graphics/bwgraphics.h"
 #include "drivers/display128x64.h"

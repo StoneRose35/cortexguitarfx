@@ -18,7 +18,7 @@ extern "C" {
 #include "images/fwupdateScreen.h"
 #include "pcm3060.h"
 #include "stringFunctions.h"
-#include "systick.h"
+#include "drivers/systick.h"
 }
 #include "pipicofx/MultiAudioProcessor.hpp"
 

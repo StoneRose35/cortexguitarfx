@@ -1,7 +1,10 @@
 #ifndef _BMPLIB_H_
 #define _BMPLIB_H_
 #include "stdint.h"
-
+extern "C"
+{
+    #include "graphics/bwgraphics.h"
+}
 typedef struct {
     uint32_t size;
     uint16_t reserved1;
@@ -51,5 +54,6 @@ void bmpLibSetPixel(uint16_t x,uint16_t y,BitmapFileHeaderType*bmp);
 void bmpLibClearPixel(uint16_t x,uint16_t y,BitmapFileHeaderType*bmp);
 void writeBmp(const char*filename, BitmapFileHeaderType*bmp);
 int readBmpHeaders(const char *filename,BitmapFileHeaderType*bmp);
+void renderImage(BwImageType*img,BitmapFileHeaderType*bmp,uint16_t scalingFactor);
 
 #endif

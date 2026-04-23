@@ -1,3 +1,4 @@
+#include "stm32h750/stm32h750xx.h"
 #include "drivers/i2c.h"
 #include "timer.h"
 #include "stm32h750/stm32h750xx.h"

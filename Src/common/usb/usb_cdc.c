@@ -5,7 +5,7 @@
 #include "usb/usb_dfu.h"
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/helpers.h"
-#include "systick.h"
+#include "drivers/systick.h"
 #include "globalConfig.h"
 #include "memoryRegions.h"
 #include "gen/versionDef.h"

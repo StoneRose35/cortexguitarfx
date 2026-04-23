@@ -4,7 +4,12 @@
 #include "stdlib.h"
 #include "math.h"
 #include "memoryRegions.h"
-#include "graphics/bwgraphics.h"
+#ifdef HARDWARE
+extern const uint8_t oled_font_5x7[98][5];
+#else
+#include "fonts/oled_font_5x7.h"
+#endif
+
 float fsqrt(float a)
 {
     return sqrtf(a);
@@ -28,8 +33,6 @@ float fsin(float x)
 	return sinf(x);
 }
 
-
-extern const uint8_t oled_font_5x7[98][5];
 
 __QSPI_CODE
 void changeLine(float spx,float spy,float epx, float epy,uint8_t draw,BwImageType* img)
@@ -721,7 +724,7 @@ void drawImage(uint8_t px, uint8_t py,const BwImageTypeConst * img, BwImageType*
 			cyOut =cy + py;
 			if (cxOut  < imgBuffer->sx && cyOut < imgBuffer->sy)
 			{
-				pixel= getPixel(cx,cy,img);
+				pixel= getPixel(cx,cy,(BwImageType*)img);
 				if (pixel)
 				{
 					setPixel(cxOut,cyOut,imgBuffer);
@@ -738,7 +741,7 @@ void drawImage(uint8_t px, uint8_t py,const BwImageTypeConst * img, BwImageType*
 __QSPI_CODE
 void togglePixel(int32_t px,int32_t py,BwImageType*img)
 {
-	if (getPixel(px,py,(BwImageTypeConst*)img))
+	if (getPixel(px,py,img))
 	{
 		clearPixel(px,py,img);
 	}
@@ -749,7 +752,7 @@ void togglePixel(int32_t px,int32_t py,BwImageType*img)
 }
 
 __QSPI_CODE
-uint8_t getPixel(int32_t px,int32_t py,const BwImageTypeConst*img)
+uint8_t getPixel(int32_t px,int32_t py,const BwImageType*img)
 {
 if (img->type == BWIMAGE_BW_IMAGE_STRUCT_VERTICAL_BYTES)
 {

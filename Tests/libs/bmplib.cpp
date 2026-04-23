@@ -1,4 +1,5 @@
-#include "../inc/bmplib.h"
+#include "../inc/bmplib.hpp"
+#include "graphics/bwgraphics.h"
 #include "stdlib.h"
 #include "stdio.h"
 
@@ -199,4 +200,30 @@ int readBmpHeaders(const char *filename,BitmapFileHeaderType*bmp)
     }
     fclose(fid);
     return 0;
+}
+
+void renderImage(BwImageType*img,BitmapFileHeaderType*bmp,uint16_t scalingFactor)
+{
+    uint8_t pixel;
+    for(uint16_t x=0; x < img->sx*scalingFactor;x+=scalingFactor)
+    {
+        for (uint16_t y=0;y < img->sy*scalingFactor;y+=scalingFactor)
+        {
+            pixel = getPixel(x/scalingFactor,y/scalingFactor,img);
+            for (uint16_t pixelx=0;pixelx<scalingFactor;pixelx++)
+            {
+                for (uint16_t pixely=0;pixely<scalingFactor;pixely++)
+                {
+                    if (pixel)
+                    {
+                        bmpLibSetPixel(x+pixelx,y+pixely,bmp);
+                    }
+                    else
+                    {
+                        bmpLibClearPixel(x+pixelx,y+pixely,bmp);
+                    }
+                }
+            }
+        }
+    }
 }

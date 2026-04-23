@@ -3,7 +3,6 @@
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
 #include "drivers/display128x64.h"
-#include "drivers/systick.h"
 
 #define SPI1_TXDR_BYTE  *((volatile uint8_t*)&SPI1->TXDR) 
 #define SPI1_RXDR_BYTE  *((volatile uint8_t*)&SPI1->RXDR) 

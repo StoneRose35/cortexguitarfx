@@ -2,7 +2,6 @@
 #define _SYSTICK_
 
 #include <stdint.h>
-#ifdef HARDWARE
 
 /**
  * @brief returns the number of ticks passed since the systick-time was been switched on
@@ -15,7 +14,5 @@ uint32_t getTickValue();
 void initSystickTimer();
 void stopSystickTimer();
 void waitSysticks(uint32_t);
-
-#endif
 
 #endif

@@ -3,6 +3,7 @@
 
 #define __LOBYTE(a) (((uint16_t)a & 0xff))
 #define __HIBYTE(a) (((uint16_t)a & 0xFF00) >> 8)
+#ifdef HARDWARE
 #ifndef __QSPI_CODE
 #define __QSPI_CODE __attribute__ ((section (".qspi_code")))
 #endif
@@ -16,6 +17,17 @@
 #define __DTCM_BSS __attribute__ ((section (".dtcm_bss")))
 #define __DTCM_DATA __attribute__ ((section (".dtcm_data")))
 #define __RAMFUNC __attribute__ ((section (".RamFunc")))
+#else
 
+#define __QSPI_CODE 
+#define __QSPI_DATA 
+#define __QSPI_DATA_FAST 
+#define __ITCM_CODE  
+#define __ITCM_CODE_FLASH  
+#define __SDRAM_BSS 
+#define __DTCM_BSS 
+#define __DTCM_DATA 
+#define __RAMFUNC 
+#endif
 
 #endif // MEMORY_REGIONS_H

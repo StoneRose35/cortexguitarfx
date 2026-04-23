@@ -26,7 +26,7 @@ extern "C" {
 #include "bootloader_activation.h"
 #include "pcm3060.h"
 #include "pipicofx/pipicofxui.h"
-#include "systick.h"
+#include "drivers/systick.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
 #include "pipicofx/MultiAudioProcessor.hpp"

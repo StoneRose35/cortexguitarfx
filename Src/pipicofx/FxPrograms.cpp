@@ -2,6 +2,7 @@ extern "C" {
 #include <stdint.h>
 
 #ifdef HARDWARE
+#include "stm32h750/stm32h750xx.h"
 #include "drivers/24lc128.h"
 #endif
 #include "stringFunctions.h"
@@ -39,6 +40,12 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     address = presetPos*sizeof(FxPresetType);
     #ifdef HARDWARE
     eeprom24lc128ReadArray(address,sizeof(FxPresetType),presetArrayPtr);
+    #else
+    // simulate an empty eeprom when not compiling against hardware
+    for (uint16_t c=0;c<sizeof(FxPresetType);c++)
+    {
+        *(presetArrayPtr + c)=0xFF;
+    }
     #endif
     for (uint8_t c=0;c<sizeof(FxPresetType)-2;c++)
     {
@@ -70,7 +77,9 @@ void clearPreset(uint16_t presetPos)
     {
         presetArray[c]=0xFF;
     }
+    #ifdef HARDWARE
     eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArray);
+    #endif
 }
 
 __QSPI_CODE

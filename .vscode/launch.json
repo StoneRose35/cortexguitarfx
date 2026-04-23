@@ -179,6 +179,32 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
+            "name": "g++ - run ui rendering tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Tests/out/uiToBitmapTest",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Automatische Strukturierung und Einrückung für \"gdb\" aktivieren",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Disassemblierungsvariante auf Intel festlegen",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "compile ui rendering tests",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "gcc-9 - run audio test",
             "type": "cppdbg",
             "request": "launch",

@@ -1,7 +1,7 @@
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
 #include "stm32h750/helpers.h"
-#include "systick.h"
+#include "drivers/systick.h"
 #include "drivers/i2c.h"
 #include "cs4270_audio_codec.h"
 

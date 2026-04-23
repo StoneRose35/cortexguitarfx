@@ -15,7 +15,7 @@ extern "C" {
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
 #include "stringFunctions.h"
-#include "systick.h"
+#include "drivers/systick.h"
 }
 #include "pipicofx/MultiAudioProcessor.hpp"
 

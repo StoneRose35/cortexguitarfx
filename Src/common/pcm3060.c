@@ -12,7 +12,7 @@ void setupPCM3060()
 */
 
 
-
+#include "stm32h750/stm32h750xx.h"
 #include "pcm3060.h"
 #include "stdint.h"
 #include "drivers/systick.h"

@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "stm32h750/stm32h750xx.h"
 #include "drivers/wm8731.h"
 #include "drivers/i2c.h"
 

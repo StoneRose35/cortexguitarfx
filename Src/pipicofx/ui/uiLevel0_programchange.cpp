@@ -19,7 +19,7 @@ extern "C" {
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
 #include "drivers/stompswitches.h"
-#include "systick.h"
+#include "drivers/systick.h"
 #include "bootloader_activation.h"
 #include "pcm3060.h"
 #include "gen/version.h"

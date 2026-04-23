@@ -3,15 +3,17 @@
 #include <stdint.h>
 #include "graphics/gfxfont.h"
 #include "memoryRegions.h"
-#ifndef RP2040_FEATHER
-#include "math.h"
+//#ifndef HARDWARE
+//#include "math.h"
+
 
 float fsqrt(float a);
 int32_t float2int(float a);
 float int2float(int32_t a);
 float fcos(float x);
 float fsin(float x);
-#endif
+
+//#endif
 
 #ifndef __QSPI_CODE
 #define __QSPI_CODE
@@ -52,7 +54,7 @@ typedef struct BwImageBufferStruct
 __QSPI_CODE
 void togglePixel(int32_t px,int32_t py,BwImageType*img);
 __QSPI_CODE
-uint8_t getPixel(int32_t px,int32_t py,const BwImageTypeConst*img);
+uint8_t getPixel(int32_t px,int32_t py,const BwImageType*img);
 __QSPI_CODE
 void drawLineFloat(float spx,float spy,float epx, float epy,BwImageType* img);
 __QSPI_CODE

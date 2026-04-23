@@ -1,6 +1,7 @@
 /*
 driver for a stomp switches interface which communicates it's status over i2c
 */
+#include "stm32h750/stm32h750xx.h"
 #include "drivers/i2c.h"
 #include "drivers/stompswitches.h"
 #include "timer.h"
