@@ -626,6 +626,7 @@ void enterLevel11()
             setStompswitchColor(c,0);
         }
     }
+    ui.mode = PPFX_MODE_PEDALBOARD;
     create();
 }
 

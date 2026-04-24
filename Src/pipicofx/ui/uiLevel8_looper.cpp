@@ -249,5 +249,6 @@ void enterLevel8()
     registerRotaryCallback(&rotaryCallback);
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
+    ui.mode = PPFX_MODE_LOOPER;
     create();
 }
