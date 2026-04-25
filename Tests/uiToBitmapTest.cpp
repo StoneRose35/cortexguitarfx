@@ -6,6 +6,7 @@ extern "C" {
 #include "audio/looper.h"
 #include "sai.h"
 #include "audioEngine.h"
+#include "pipicofx/delayMemoryHandler.h"
 }
 #include "pipicofx/FxProgramLoader.hpp"
 #include "inc/bmplib.hpp"
@@ -86,18 +87,23 @@ uint8_t getStompSwitchState(uint8_t switchNr)
     return mockedStompSwitchStates[switchNr];
 }
 
+void setStompswitchColor(uint8_t switchNr,uint8_t clr)
+{
+    std::cout << "setting stompswitch " << std::__cxx11::to_string(switchNr) << " to color " << std::__cxx11::to_string(clr) << std::endl;
+}
+
 //void enterLevel0(void){}
 void enterLevel1(void){}
-void enterLevel2(void){}
+//void enterLevel2(void){}
 //void enterLevel3(void){}
 void enterLevel4(void){}
 void enterLevel5(void){}
 void enterLevel6(void){}
 void enterLevel7(void){}
-void enterLevel8(void){}
+//void enterLevel8(void){}
 void enterLevel9(void){}
 void enterLevel10(void){}
-void enterLevel11(void){}
+//void enterLevel11(void){}
 
 uint32_t getTimeLW()
 {
@@ -205,20 +211,23 @@ void setupMockedUi(void)
 
 int main(int argc,char** argv)
 {
-    char * demoPresetName="TheManual";
+    const char * demoPresetName="TheManual";
     BitmapFileHeaderType bmpHeader;
     initBmpFile(&bmpHeader,64*4,128*4);
+    initDelayMemoryHandler();
     piPicoFxUiSetup();
     initAudioEngine();
     LooperInit(&looper);
     
-    enterLevel3();
+    
     uint8_t cnt=0;
     while (*(demoPresetName+ cnt))
     {
         presets[0].name[cnt] = *(demoPresetName+cnt);
         cnt++;
     }
+    presets[0].programNrA=4;
+    programsToInitialize[0]=4; 
     presets[0].name[cnt] = 0;
     avgInOld = 0.001f;
     avgOutOld = 0.001f;
@@ -229,7 +238,16 @@ int main(int argc,char** argv)
         sampleCnt++;
         mockProgramChange();
     }
-    cpuLoad = 133;
+    enterLevel8();
+    ui.currentProgram->getParameter(0)->parameterCallback(3210);
+    ui.currentProgram->getParameter(1)->parameterCallback(1986);
+    ui.currentProgram->getParameter(2)->parameterCallback(513);
+    for (uint16_t c=0;c<512;c++)
+    {
+        processAudioBuffers();
+        sampleCnt++;
+        mockProgramChange();
+    }
     onUpdate(0,0,0);
     BwImageType* img = getImageBuffer();
     renderImage(img,&bmpHeader,4);
