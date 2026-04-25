@@ -574,6 +574,11 @@ int main(void)
                     }
                     //onCreate();
                 }
+                else if (programsToInitialize[q] & 0x80 && audioProcessor.getFxProgram(q) != nullptr)
+                {
+                    applyPresetToProgram(presets+currentPreset,&audioProcessor,q);
+                    ((FxProgram*)audioProcessor.getFxProgram(q))->switchOn();
+                }
             }
             //applyPreset(presets+currentPreset,&audioProcessor);
             programChangeState = 4;

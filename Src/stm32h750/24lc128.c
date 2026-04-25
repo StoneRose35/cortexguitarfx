@@ -52,7 +52,7 @@ uint8_t eeprom24lc128WriteArray(uint32_t startAdress,uint16_t len, uint8_t* data
         {
             lenToWrite = EEPROM_24LC128_PAGE_LENGTH;
         }
-        if ((addrCnt & 0x3F) > ((addrCnt + lenToWrite) & 0x3F)) // crossing page boundary?
+        if ((addrCnt & 0x3F) >= ((addrCnt + lenToWrite) & 0x3F)) // crossing page boundary?
         {
             lenToWrite = ((addrCnt + lenToWrite) & 0xFFC0) - addrCnt;
         }

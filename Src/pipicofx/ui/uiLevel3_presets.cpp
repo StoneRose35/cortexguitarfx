@@ -287,12 +287,14 @@ static void enterReleasedCallback(void)
                 editOverlayMode = EOM_COPY;
                 copySwapPreset = currentPreset;
                 copySwapBank = currentBank;
+                reloadPresetsFromEeprom(previewPresets,copySwapBank);
             }
             else if (overlayNr == LVL3_OVERLAY_NR_SWAP)
             {
                 editOverlayMode = EOM_SWAP;
                 copySwapPreset = currentPreset;
                 copySwapBank = currentBank;
+                reloadPresetsFromEeprom(previewPresets,copySwapBank);
             }
             else if (overlayNr == LVL3_OVERLAY_NR_DELETE)
             {
@@ -372,6 +374,7 @@ static void enterReleasedCallback(void)
             break;
         case EOM_SAVE:
             editOverlayMode = EOM_NONE;
+            parametersToPreset(presets+currentPreset,&audioProcessor);
             savePreset(presets+currentPreset,currentBank*3 + currentPreset);
             uiStackPop();
             uiStackPush(3);
@@ -391,6 +394,8 @@ static void exitCallback()
         case EOM_COPY_COMMIT:
         case EOM_SWAP_COMMIT:
         case EOM_DELETE_COMMIT:
+        case EOM_ABOUT:
+        case EOM_FIRMWARE_UPDATE:
             overlayNr=0xFF;
             editOverlayMode = EOM_NONE;
             break;
@@ -413,6 +418,8 @@ static void exitCallback()
                 programChangeState = 1;
             }
             uiStackPush(3);
+            break;
+        default:
             break;
     }
 }
@@ -752,7 +759,7 @@ void enterLevel3()
     registerOnUpdateCallback(&update);
     registerOnCreateCallback(&create);
     create();
-    overlayNr=0xFF;
+    //overlayNr=0xFF;
     handleReleaseEvent = 0;
     ui.defaultOn=1;
     channelState = 0xF;
@@ -840,13 +847,13 @@ static void setPreset()
     {
         programsToInitialize[0] = presets[currentPreset].programNrA | 0x80;
     }
-    else if (presets[currentPreset].programNrA == 0x3F)
+    else if (presets[currentPreset].programNrA == 0x3F) // no effect should be set
     {
         programsToInitialize[0]=0x7e;
     }
-    else
+    else // effect program remains unchanged, only apply parameters
     {
-        programsToInitialize[0]=0x7f;
+        programsToInitialize[0]=0x7f | 0x80;
     }
 
     if (presets[currentPreset].programNrB != 0x3F && (audioProcessor.getFxProgram(1) == nullptr || 
@@ -861,7 +868,7 @@ static void setPreset()
     }
     else
     {
-        programsToInitialize[0]=0x7f;
+        programsToInitialize[0]=0x7f | 0x80;
     }
 
     if (presets[currentPreset].programNrC != 0x3F && (audioProcessor.getFxProgram(2) == nullptr || 
@@ -876,7 +883,7 @@ static void setPreset()
     }
     else
     {
-        programsToInitialize[2]=0x7f;
+        programsToInitialize[2]=0x7f | 0x80;
     }
 
     programChangeState = 1;
