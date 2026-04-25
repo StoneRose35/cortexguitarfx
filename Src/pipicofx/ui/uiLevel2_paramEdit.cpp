@@ -26,9 +26,11 @@ extern uint8_t currentPreset;
 extern PiPicoFXUiType ui;
 extern MultiAudioProcessor audioProcessor; 
 extern volatile uint16_t initialKnobValues[3];
-static volatile uint8_t bmKnobsLocked; //bitmap, 0: unlocked, 1: locked, lsb is knob 1, lsb+1 is knob 1 and lsb+2 is knob 2
+static volatile uint8_t bmKnobsLockedSelected; //bitmap, 0: unlocked, 1: locked, lsb is knob 1, lsb+1 is knob 1 and lsb+2 is knob 2
+                                               // bit 4-6: selected from knobs 1 to 3
 extern volatile uint8_t programChangeState;
 extern volatile uint8_t programsToInitialize[3];
+static volatile uint8_t currentParameterNr=0;
 static uint8_t currentParameterPage = 1;
 static uint8_t totalParameterPages;
 static uint8_t overlayNr=0xFF;
@@ -57,7 +59,7 @@ static void create()
     initialKnobValues[0]=getChannel0Value();
     initialKnobValues[1]=getChannel1Value();
     initialKnobValues[2]=getChannel2Value();
-    bmKnobsLocked = 0x7;
+    bmKnobsLockedSelected = 0x7; // all locked, none selected
 }
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
@@ -67,6 +69,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
     (void)cpuLoad;
     BwImageType * img = getImageBuffer();
     char lineBfr[32];
+    int16_t knobVal;
     int16_t potVal;
     uint8_t bottomPaneData[256];
     BwImageType bottomPane = {
@@ -97,13 +100,17 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         appendToString(lineBfr,ui.currentProgram->getParameter((currentParameterPage-1)*3)->getParameterName());
         uint16_t tail = appendToStringUntil(lineBfr,"          ",14);
         ui.currentProgram->getParameter((currentParameterPage-1)*3)->parameterDisplay(lineBfr + tail);
-        drawText(0,16,lineBfr,img,0);
+        drawText(2,16,lineBfr,img,0);
         drawSquareInt(0,17,ui.currentProgram->getParameter((currentParameterPage-1)*3)->rawValue  >> 5,21,img);
         potVal = getChannel0Value() >> 5;
         togglePixel(potVal,17,img);
         togglePixel(potVal,17+1,img);
         togglePixel(potVal,17+2,img);
         togglePixel(potVal,17+3,img);
+        if (currentParameterNr == 0)
+        {
+            drawLine(0,11,0,15,img);
+        }
 
     }
     if ((currentParameterPage-1)*3 + 1<ui.currentProgram->getParameterCount())
@@ -112,13 +119,17 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         appendToString(lineBfr,ui.currentProgram->getParameter((currentParameterPage-1)*3+1)->getParameterName());
         uint16_t tail = appendToStringUntil(lineBfr,"          ",14);
         ui.currentProgram->getParameter((currentParameterPage-1)*3+1)->parameterDisplay(lineBfr + tail);
-        drawText(0,24+5,lineBfr,img,0);
+        drawText(2,24+5,lineBfr,img,0);
         drawSquareInt(0,24+6,ui.currentProgram->getParameter((currentParameterPage-1)*3+1)->rawValue  >> 5,34,img);
         potVal = getChannel1Value() >> 5;
         togglePixel(potVal,24+6,img);
         togglePixel(potVal,24+6+1,img);
         togglePixel(potVal,24+6+2,img);
         togglePixel(potVal,24+6+3,img);
+        if (currentParameterNr == 1)
+        {
+            drawLine(0,24+4-4,0,24+4,img);
+        }
     }
     if ((currentParameterPage-1)*3 + 2<ui.currentProgram->getParameterCount())
     {
@@ -126,13 +137,17 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         appendToString(lineBfr,ui.currentProgram->getParameter((currentParameterPage-1)*3+2)->getParameterName());
         uint16_t tail = appendToStringUntil(lineBfr,"          ",14);
         ui.currentProgram->getParameter((currentParameterPage-1)*3+2)->parameterDisplay(lineBfr + tail);
-        drawText(0,32+10,lineBfr,img,0);
+        drawText(2,32+10,lineBfr,img,0);
         drawSquareInt(0,43,ui.currentProgram->getParameter((currentParameterPage-1)*3+2)->rawValue  >> 5,47,img);
         potVal = getChannel2Value() >> 5;
         togglePixel(potVal,43,img);
         togglePixel(potVal,43+1,img);
         togglePixel(potVal,43+2,img);
         togglePixel(potVal,43+3,img);
+        if (currentParameterNr == 2)
+        {
+            drawLine(0,32+9-4,0,32+9,img);
+        }
     }
 
     if (overlayMode == OM_OVERLAYS)
@@ -163,18 +178,72 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         setStompswitchColorRaw(1 << 2);
     }
 
-    // unlock knobs if knob has been moved over the current parameter value and has moved more than KNOB_HYSTERESIS
-    if ((currentParameterPage-1)*3 <ui.currentProgram->getParameterCount() && (bmKnobsLocked & 1)!=0)
+    knobVal = getChannel0Value();
+    if ((currentParameterPage-1)*3 <ui.currentProgram->getParameterCount() && ((bmKnobsLockedSelected >> 4) & 0x1) == 0 && ((initialKnobValues[0] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[0] - knobVal <= -KNOB_HYSTERESIS_2))
+    {
+        // select first, all others are deselected
+        initialKnobValues[0] = knobVal;
+        bmKnobsLockedSelected &= 0x0F;
+        bmKnobsLockedSelected |= (1 << 4); 
+        ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3);
+        currentParameterNr = 0;
+    }
+    // unlock knobs if knob has been moved over the current parameter value and is selected
+    if ((currentParameterPage-1)*3 <ui.currentProgram->getParameterCount() && (bmKnobsLockedSelected & (1 << 4))!=0)
     {
         int16_t programParameterVal = ui.currentProgram->getParameter((currentParameterPage-1)*3)->rawValue;
-        int16_t knobVal = getChannel0Value();
-        
-        if (((programParameterVal - knobVal) >= 0 && (programParameterVal - knobVal) < KNOB_HYSTERESIS && ((initialKnobValues[0] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[0] - knobVal <= -KNOB_HYSTERESIS_2)) ||
-            ((programParameterVal - knobVal) <= 0 && (knobVal - programParameterVal) < KNOB_HYSTERESIS && ((initialKnobValues[0] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[0] - knobVal <= -KNOB_HYSTERESIS_2)))
+       
+        if (((programParameterVal - knobVal) >= 0 && (programParameterVal - knobVal) < KNOB_HYSTERESIS ) ||
+            ((programParameterVal - knobVal) <= 0 && (knobVal - programParameterVal) < KNOB_HYSTERESIS ))
         {
-            bmKnobsLocked &= ~0x1;
+            bmKnobsLockedSelected &= ~0x1;
         }
     }
+
+    knobVal = getChannel1Value();
+    if ((currentParameterPage-1)*3 + 1 <ui.currentProgram->getParameterCount() && ((bmKnobsLockedSelected >> 4) & (2)) == 0 && ((initialKnobValues[1] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[1] - knobVal <= -KNOB_HYSTERESIS_2))
+    {
+        // select second, all others are deselected
+        initialKnobValues[1] = knobVal;
+        bmKnobsLockedSelected &= 0x0F;
+        bmKnobsLockedSelected |= (2 << 4); 
+        ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1);
+        currentParameterNr = 1;
+    }
+    // unlock knobs if knob has been moved over the current parameter value and is selected
+    if ((currentParameterPage-1)*3 + 1 <ui.currentProgram->getParameterCount() && (bmKnobsLockedSelected & (2 << 4))!=0)
+    {
+        int16_t programParameterVal = ui.currentProgram->getParameter((currentParameterPage-1)*3 + 1)->rawValue;
+       
+        if (((programParameterVal - knobVal) >= 0 && (programParameterVal - knobVal) < KNOB_HYSTERESIS ) ||
+            ((programParameterVal - knobVal) <= 0 && (knobVal - programParameterVal) < KNOB_HYSTERESIS ))
+        {
+            bmKnobsLockedSelected &= ~0x2;
+        }
+    }
+
+    knobVal = getChannel2Value();
+    if ((currentParameterPage-1)*3 + 2 <ui.currentProgram->getParameterCount() && ((bmKnobsLockedSelected >> 4) & (4)) == 0 && ((initialKnobValues[2] - knobVal) >= KNOB_HYSTERESIS_2 || initialKnobValues[2] - knobVal <= -KNOB_HYSTERESIS_2))
+    {
+        // select second, all others are deselected
+        initialKnobValues[2] = knobVal;
+        bmKnobsLockedSelected &= 0x0F;
+        bmKnobsLockedSelected |= (4 << 4); 
+        ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2);
+        currentParameterNr = 2;
+    }
+    // unlock knobs if knob has been moved over the current parameter value and is selected
+    if ((currentParameterPage-1)*3 + 2 <ui.currentProgram->getParameterCount() && (bmKnobsLockedSelected & (4 << 4))!=0)
+    {
+        int16_t programParameterVal = ui.currentProgram->getParameter((currentParameterPage-1)*3 + 2)->rawValue;
+       
+        if (((programParameterVal - knobVal) >= 0 && (programParameterVal - knobVal) < KNOB_HYSTERESIS ) ||
+            ((programParameterVal - knobVal) <= 0 && (knobVal - programParameterVal) < KNOB_HYSTERESIS ))
+        {
+            bmKnobsLockedSelected &= ~0x4;
+        }
+    }
+    /*
     if ((currentParameterPage-1)*3 + 1 <ui.currentProgram->getParameterCount() && (bmKnobsLocked & (1 << 1))!=0)
     {
         int16_t programParameterVal = ui.currentProgram->getParameter((currentParameterPage-1)*3 + 1)->rawValue;
@@ -195,6 +264,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
             bmKnobsLocked &= ~(0x1 << 2);
         }
     }
+        */
 }
 
 static void leftCallback(void)
@@ -205,7 +275,7 @@ static void leftCallback(void)
         initialKnobValues[0]=getChannel0Value();
         initialKnobValues[1]=getChannel1Value();
         initialKnobValues[2]=getChannel2Value();
-        bmKnobsLocked=0x7;
+        bmKnobsLockedSelected=0x7;
     }
     else
     {
@@ -226,7 +296,7 @@ static void rightCallback(void)
         initialKnobValues[0]=getChannel0Value();
         initialKnobValues[1]=getChannel1Value();
         initialKnobValues[2]=getChannel2Value();
-        bmKnobsLocked =0x7;
+        bmKnobsLockedSelected =0x7;
     }
     else
     {
@@ -286,6 +356,7 @@ static void enterReleasedCallback()
             break;
         case OM_SAVE:
             overlayMode = OM_NONE;
+            parametersToPreset(presets+currentPreset,&audioProcessor);
             savePreset(presets+currentPreset,currentBank*3 + currentPreset);
             uiStackPop();
             uiStackPush(3);
@@ -430,7 +501,7 @@ static void knob0Callback(uint16_t val)
         }
     }
     */
-    if ((bmKnobsLocked & (1 << 0))==0)
+    if ((bmKnobsLockedSelected & (1 << 0))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3);
@@ -453,7 +524,7 @@ static void knob1Callback(uint16_t val)
             ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3+1);
         }
     }*/
-    if ((bmKnobsLocked & (1 << 1))==0)
+    if ((bmKnobsLockedSelected & (1 << 1))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1);
@@ -476,7 +547,7 @@ static void knob2Callback(uint16_t val)
             ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3+2);
         }
     }*/
-    if ((bmKnobsLocked & (1 << 2))==0)
+    if ((bmKnobsLockedSelected & (1 << 2))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2);
@@ -536,7 +607,7 @@ static void rotaryCallback(int16_t encoderDelta)
             initialKnobValues[0]=getChannel0Value();
             initialKnobValues[1]=getChannel1Value();
             initialKnobValues[2]=getChannel2Value();
-            bmKnobsLocked = 0x7; // lock all knobs when the encoder has been used to set a parameter
+            bmKnobsLockedSelected = 0x7; // lock all knobs when the encoder has been used to set a parameter
 
         }
         
