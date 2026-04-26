@@ -146,7 +146,7 @@ float MultiAudioProcessor::processSample(float s)
             }
             if ((*(this->processors+1)) != 0)
             {
-                sampleOut += (*(this->processors))->processSample(s);
+                sampleOut += (*(this->processors+1))->processSample(s);
                 processorsPresent = 1;
             }
             if (!processorsPresent)

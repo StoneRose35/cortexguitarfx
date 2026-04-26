@@ -107,6 +107,7 @@ void AmpModel::Param3::parameterDisplay(char* res)
 void AmpModel::Param4::parameterCallback(uint16_t val)
 {
     pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
 };
 
 void AmpModel::Param4::parameterDisplay(char* res)

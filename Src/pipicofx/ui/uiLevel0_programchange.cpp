@@ -470,7 +470,7 @@ static void rotaryCallback(int16_t encoderDelta)
 
 static void stompswitch1Callback(void)
 {
-    if (ui.enterState == 0)
+    if (ui.enterState == 0 && ui.bypassEnterReleased == 0)
     {
         ui.currentProgramIdx--;
         if (ui.currentProgramIdx >= N_FX_PROGRAMS)
@@ -481,6 +481,7 @@ static void stompswitch1Callback(void)
         programChangeState=1;
         setStompswitchColorRaw(0);
     }
+    /*
     else
     {
         ui.bypassEnterReleased = 1;
@@ -489,7 +490,7 @@ static void stompswitch1Callback(void)
             ui.currentParameterIdx--;
             ui.currentParameter = ui.currentProgram->getParameter(ui.currentParameterIdx);
         }
-    }
+    }*/
 }
 
 static void leftCallback(void)
@@ -520,7 +521,7 @@ static void stompSwitch2Pressed()
 
 static void stompswitch2Callback(void)
 {
-    if (longPressCnt != 0 && audioProcessor.getFxProgram(ui.currentProgramPosition) != nullptr) // no freeze happened, toggle normally
+    if (longPressCnt != 0 && audioProcessor.getFxProgram(ui.currentProgramPosition) != nullptr && ui.bypassEnterReleased == 0) // no freeze happened, toggle normally
     {
         uint8_t ret = ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->toggleOn();
         if (ret) 
@@ -537,7 +538,7 @@ static void stompswitch2Callback(void)
 
 static void stompswitch3Callback(void)
 {
-    if (ui.enterState==0)
+    if (ui.enterState==0 && ui.bypassEnterReleased == 0)
     {
         ui.currentProgramIdx++;
         if (ui.currentProgramIdx >= N_FX_PROGRAMS )
@@ -548,6 +549,7 @@ static void stompswitch3Callback(void)
         programChangeState=1;
         setStompswitchColorRaw(0);
     }
+    /*
     else
     {
         ui.bypassEnterReleased = 1;
@@ -556,7 +558,7 @@ static void stompswitch3Callback(void)
             ui.currentParameterIdx++;
             ui.currentParameter = ui.currentProgram->getParameter(ui.currentParameterIdx);
         }
-    }
+    }*/
 }
 
 

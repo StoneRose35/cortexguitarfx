@@ -577,8 +577,19 @@ int main(void)
                 else if (programsToInitialize[q] & 0x80 && audioProcessor.getFxProgram(q) != nullptr)
                 {
                     applyPresetToProgram(presets+currentPreset,&audioProcessor,q);
-                    ((FxProgram*)audioProcessor.getFxProgram(q))->switchOn();
+                    if (ui.defaultOn)
+                    {
+                        ((FxProgram*)audioProcessor.getFxProgram(q))->switchOn();
+                    }
+                    else
+                    {
+                        ((FxProgram*)audioProcessor.getFxProgram(q))->switchOff();
+                    }
                 }
+            }
+            if ((programsToInitialize[0] & 0x80) || (programsToInitialize[0] & 0x80) || (programsToInitialize[0] & 0x80))
+            {
+                audioProcessor.setRouting((presets+currentPreset)->topology);
             }
             //applyPreset(presets+currentPreset,&audioProcessor);
             programChangeState = 4;

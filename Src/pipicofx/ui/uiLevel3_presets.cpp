@@ -458,15 +458,15 @@ static void rotaryCallback(int16_t encoderDelta)
             if (encoderDelta > 0)
             {
                 overlayNr++;
-                if (overlayNr > sizeof(overlays)/(sizeof(BwImageTypeConst*)))
+                if (overlayNr >= sizeof(overlays)/(sizeof(BwImageTypeConst*)))
                 {
-                    overlayNr=sizeof(overlays)/(sizeof(BwImageTypeConst*));
+                    overlayNr=sizeof(overlays)/(sizeof(BwImageTypeConst*))-1;
                 }
             }
             else
             {
                 overlayNr--;
-                if (overlayNr > sizeof(overlays)/(sizeof(BwImageTypeConst*)))
+                if (overlayNr >= sizeof(overlays)/(sizeof(BwImageTypeConst*)))
                 {
                     overlayNr=0;
                 }

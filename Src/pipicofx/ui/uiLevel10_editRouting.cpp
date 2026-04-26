@@ -50,7 +50,6 @@ static void create()
 
 static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
 {
-    char strbfr[32];
     BwImageType* imgBuffer = getImageBuffer();
     clearImage(imgBuffer);
     switch (audioProcessor.getRouting())
@@ -73,6 +72,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
         default:
             break;
     }
+    /*
     *strbfr = 0;
     appendToString(strbfr,"Prog:");
     switch (ui.currentProgramPosition)
@@ -90,7 +90,7 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
             break;
     }
     drawText(4,4+8,strbfr,imgBuffer,nullptr);
-
+    */
     if (editProgramPosition)
     {
         drawHorizontal(14,4,30,imgBuffer);
@@ -128,7 +128,7 @@ static void knob2Callback(uint16_t val)
 
 static void enterCallback() 
 {
-    editProgramPosition ^= 1;
+    //editProgramPosition ^= 1;
 }
 
 static void exitCallback()

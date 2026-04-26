@@ -25,10 +25,9 @@ extern "C" {
 
 #define LVL11_OVERLAY_NR_SAVE 0
 #define LVL11_OVERLAY_NR_EDIT_ROUTING 1
-#define LVL11_OVERLAY_NR_LEDCOLOR 2
-#define LVL11_OVERLAY_NR_SYSTEMSETTINGS 3
-#define LVL11_OVERLAY_NR_ABOUT 4
-#define LVL11_OVERLAY_NR_FWUPDATE 5
+#define LVL11_OVERLAY_NR_SYSTEMSETTINGS 2
+#define LVL11_OVERLAY_NR_ABOUT 3
+#define LVL11_OVERLAY_NR_FWUPDATE 4
 
 #define OM_NONE 0
 #define OM_OVERLAYS 1
@@ -59,7 +58,6 @@ static uint8_t overlayNr=0xFF;
 static const BwImageTypeConst* overlays[]={
     &saveOverlay_streamimg,
     &routingoverlay_streamimg,
-    &ledcoloroverlay_streamimg,
     &settingsOverlay_streamimg, 
     &aboutoverlay_streamimg, 
     &fwUpgradeOverlay_streamimg};
@@ -102,18 +100,12 @@ static void update(int16_t avgInput,int16_t avgOutput,uint8_t cpuLoad)
     {
         drawImage(0,0,&fwupdateScreen_streamimg,imgBuffer);
     }
-    else if (overlayMode == OM_LED_COLOR)
+    else if (overlayMode == OM_SAVE)
     {
-        clearSquareInt(2,2,2+100,2+26,imgBuffer);
-        drawText(2,2+8,"what Light there\r\nshall be? for ",imgBuffer,0);
-        if (audioProcessor.getFxProgram(ui.currentProgramPosition) != 0)
-        {
-            drawText(2,2+24,((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))->getName(),imgBuffer,0);
-        }
-        else
-        {
-            drawText(2,2+24,".. the void ..",imgBuffer,0);
-        }
+        clearSquareInt(64-35,4,64+35,22,imgBuffer);
+        drawRectFrame(64-35,4,64+35,22,imgBuffer);
+        drawText(64-35+2,4+2+8,"Enter:Save",imgBuffer,0);
+        drawText(64-35+2,4+2+16,"Exit:Revert",imgBuffer,0);
     }
 
 
@@ -290,11 +282,11 @@ static void enterReleasedCallback(void)
                 uiStackPop();
                 uiStackPush(10);   
                 enterLevel5();
-            }
+            }/*
             else  if (overlayNr == LVL11_OVERLAY_NR_LEDCOLOR)
             {
                 overlayMode = OM_LED_COLOR;
-            } 
+            } */
             else if (overlayNr == LVL11_OVERLAY_NR_ABOUT)
             {
                 overlayMode = OM_ABOUT;
@@ -427,6 +419,7 @@ static void rotaryCallback(int16_t encoderDelta)
                 }
             }
             break;
+        /*
         case OM_LED_COLOR:
             if (ui.currentProgramPosition == 0)
             {
@@ -460,6 +453,7 @@ static void rotaryCallback(int16_t encoderDelta)
                     (presets + currentPreset)->ledColorC--;
                 } 
             }
+        */
     }
 }
 
@@ -488,12 +482,12 @@ static void stompSwitch1Pressed()
     if (ui.enterState == 1)
     {
         ui.currentProgram = (FxProgram*)audioProcessor.getFxProgram(0);
-        if (ui.currentProgram!= nullptr)
-        {
-            ui.mode = PPFX_MODE_STOMPBOX;
-            uiStackPush(11);
-            uiSwitchMode();
-        }
+        ui.currentProgramPosition = 0;
+        ui.currentParameterIdx = 0;
+        ui.bypassEnterReleased = 1;
+        ui.mode = PPFX_MODE_STOMPBOX;
+        //uiStackPush(11);
+        uiSwitchMode();
         return;
     }
     longPressCntA = getTickValue();
@@ -505,12 +499,12 @@ static void stompSwitch2Pressed()
     if (ui.enterState == 1)
     {
         ui.currentProgram = (FxProgram*)audioProcessor.getFxProgram(1);
-        if (ui.currentProgram!= nullptr)
-        {
-            ui.mode = PPFX_MODE_STOMPBOX;
-            uiStackPush(11);
-            uiSwitchMode();
-        }
+        ui.currentProgramPosition = 1;
+        ui.currentParameterIdx = 0;
+        ui.bypassEnterReleased = 1;
+        ui.mode = PPFX_MODE_STOMPBOX;
+        //uiStackPush(11);
+        uiSwitchMode();
         return;
     }
     longPressCntB = getTickValue();
@@ -522,12 +516,12 @@ static void stompSwitch3Pressed()
     if (ui.enterState == 1)
     {
         ui.currentProgram = (FxProgram*)audioProcessor.getFxProgram(2);
-        if (ui.currentProgram!= nullptr)
-        {
-            ui.mode = PPFX_MODE_STOMPBOX;
-            uiStackPush(11);
-            uiSwitchMode();
-        }
+        ui.currentProgramPosition = 2;
+        ui.currentParameterIdx = 0;
+        ui.bypassEnterReleased = 1;
+        ui.mode = PPFX_MODE_STOMPBOX;
+        //uiStackPush(11);
+        uiSwitchMode();
         return;
     }
     longPressCntC = getTickValue();
@@ -627,6 +621,7 @@ void enterLevel11()
         }
     }
     ui.mode = PPFX_MODE_PEDALBOARD;
+    ui.enterState = 0;
     create();
 }
 
