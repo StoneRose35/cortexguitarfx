@@ -34,6 +34,7 @@ static int32_t audioBufferOut[64];
 uint32_t task;
 uint32_t sampleCnt=0;
 uint8_t mockedStompSwitchStates[3]={0,0,0};
+extern int8_t mockedEeprom[16384];
 /** mocked hardware methods */
 extern "C" {
 uint32_t getTickValue()
@@ -76,6 +77,15 @@ void pcm3060SetOutputVolume(uint8_t channel,uint8_t volume)
     std::cout << "setting volume of channel " << std::__cxx11::to_string(channel) << " to " << std::__cxx11::to_string(volume) << std::endl;
 }
 
+uint8_t pcm3060GetInputState()
+{
+    return 3;
+}
+
+uint16_t pcm3060GetOutputVolume()
+{
+    return (0xaf << 8) | (0xaf);
+}
 
 void pcm3060SetInputState(uint8_t channel, uint8_t val)
 {
@@ -97,12 +107,12 @@ void enterLevel1(void){}
 //void enterLevel2(void){}
 //void enterLevel3(void){}
 void enterLevel4(void){}
-void enterLevel5(void){}
-void enterLevel6(void){}
+//void enterLevel5(void){}
+//void enterLevel6(void){}
 void enterLevel7(void){}
 //void enterLevel8(void){}
 void enterLevel9(void){}
-void enterLevel10(void){}
+//void enterLevel10(void){}
 //void enterLevel11(void){}
 
 uint32_t getTimeLW()
@@ -134,8 +144,6 @@ void mockProgramChange()
     {         
         for (uint8_t q = 0;q < 3;q++)
         {   
-
-
             if ((programsToInitialize[q] & 0x7F) != 0x7F)
             {
                 currentFxProgram = audioProcessor.removeFxProgram(q);
@@ -179,6 +187,18 @@ void mockProgramChange()
                 }
                 //onCreate();
             }
+            else if (programsToInitialize[q] & 0x80 && audioProcessor.getFxProgram(q) != nullptr)
+            {
+                applyPresetToProgram(presets+currentPreset,&audioProcessor,q);
+                if (ui.defaultOn)
+                {
+                    ((FxProgram*)audioProcessor.getFxProgram(q))->switchOn();
+                }
+                else
+                {
+                    ((FxProgram*)audioProcessor.getFxProgram(q))->switchOff();
+                }
+            }
         }
         //applyPreset(presets+currentPreset,&audioProcessor);
         programChangeState = 4;
@@ -209,18 +229,10 @@ void setupMockedUi(void)
     looper.memoryPointer = looperData;
 }
 
-int main(int argc,char** argv)
+void setMockPreset()
 {
-    const char * demoPresetName="TheManual";
-    BitmapFileHeaderType bmpHeader;
-    initBmpFile(&bmpHeader,64*4,128*4);
-    initDelayMemoryHandler();
-    piPicoFxUiSetup();
-    initAudioEngine();
-    LooperInit(&looper);
-    
-    
     uint8_t cnt=0;
+    const char * demoPresetName="TheManual";
     while (*(demoPresetName+ cnt))
     {
         presets[0].name[cnt] = *(demoPresetName+cnt);
@@ -229,6 +241,30 @@ int main(int argc,char** argv)
     presets[0].programNrA=4;
     programsToInitialize[0]=4; 
     presets[0].name[cnt] = 0;
+    savePreset(presets,0);
+}
+
+int main(int argc,char** argv)
+{
+    
+    char fileName[32];
+    BwImageType* img;
+    BitmapFileHeaderType bmpHeader;
+    initBmpFile(&bmpHeader,64*4,128*4);
+    initDelayMemoryHandler();
+    for (uint16_t c=0;c<16384;c++)
+    {
+        mockedEeprom[c]=0xFF;
+    }
+    piPicoFxUiSetup();
+
+    initAudioEngine();
+    LooperInit(&looper);
+
+    setMockPreset();
+    savePreset(presets+0,0);
+    savePreset(presets+1,1);
+    savePreset(presets+2,2);
     avgInOld = 0.001f;
     avgOutOld = 0.001f;
     // process 512 sample to virtually load the program
@@ -238,7 +274,8 @@ int main(int argc,char** argv)
         sampleCnt++;
         mockProgramChange();
     }
-    enterLevel8();
+    enterLevel2();
+
     ui.currentProgram->getParameter(0)->parameterCallback(3210);
     ui.currentProgram->getParameter(1)->parameterCallback(1986);
     ui.currentProgram->getParameter(2)->parameterCallback(513);
@@ -248,8 +285,33 @@ int main(int argc,char** argv)
         sampleCnt++;
         mockProgramChange();
     }
-    onUpdate(0,0,0);
-    BwImageType* img = getImageBuffer();
+
+    for (int8_t k=0;k<12;k++)
+    {   
+        //onEnterPressed();
+        //onEnterReleased();
+        for (int8_t q=0;q<k;q++)
+        {
+            onRotaryChange(1);
+        }
+        
+        //onEnterPressed();
+        //onEnterReleased();
+        
+        onUpdate(0,0,0);
+        img = getImageBuffer();
+        renderImage(img,&bmpHeader,4);
+        sprintf(fileName,"lvl2_overlay_%d.bmp",k);
+        writeBmp(fileName,&bmpHeader);
+        //onRotaryChange(1);
+        onExitPressed();
+        onExitReleased();
+        setMockPreset();
+    }
+    
+    /*
+    img = getImageBuffer();
     renderImage(img,&bmpHeader,4);
     writeBmp("uiExample.bmp",&bmpHeader);
+    */
 }

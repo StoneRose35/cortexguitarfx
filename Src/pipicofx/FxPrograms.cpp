@@ -12,6 +12,10 @@ extern "C" {
 #include "pipicofx/fxProgramParameter.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
 #include "pipicofx/MultiAudioProcessor.hpp"
+
+#ifndef HARDWARE
+uint8_t mockedEeprom[16384];
+#endif
 __QSPI_CODE
 void savePreset(FxPresetType* preset,uint16_t presetPos)
 {
@@ -27,6 +31,11 @@ void savePreset(FxPresetType* preset,uint16_t presetPos)
     address = presetPos*sizeof(FxPresetType);
     #ifdef HARDWARE
     eeprom24lc128WriteArray(address,sizeof(FxPresetType),presetArrayPtr);
+    #else
+    for (uint16_t c=0;c<sizeof(FxPresetType);c++)
+    {
+        *(mockedEeprom + address + c)=*(presetArrayPtr+c); 
+    }
     #endif
 }
 
@@ -44,7 +53,7 @@ uint8_t loadPreset(FxPresetType* preset,uint16_t presetPos)
     // simulate an empty eeprom when not compiling against hardware
     for (uint16_t c=0;c<sizeof(FxPresetType);c++)
     {
-        *(presetArrayPtr + c)=0xFF;
+        *(presetArrayPtr + c)=*(mockedEeprom + presetPos*sizeof(FxPresetType) + c);
     }
     #endif
     for (uint8_t c=0;c<sizeof(FxPresetType)-2;c++)
@@ -183,6 +192,7 @@ void parametersToPreset(FxPresetType* preset,MultiAudioProcessor * audioProcesso
             preset->parametersC[c] = ((FxProgram*)audioProcessor->getFxProgram(2))->getParameter(c)->rawValue;
         } 
     }
+    preset->topology = audioProcessor->getRouting();
  
 }
 
