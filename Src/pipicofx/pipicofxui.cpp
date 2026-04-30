@@ -10,6 +10,7 @@ extern "C" {
 #include "images/pipicofx_param_1_scaled.h"
 #include "pipicofx/fxPrograms.h"
 #include "stringFunctions.h"
+#include "usb/usb_cdc.h"
 #ifdef __cplusplus
 }
 #endif
@@ -414,20 +415,48 @@ void uiSwitchMode(void)
 __QSPI_CODE
 uint8_t uiStackPush(uint8_t val)
 {
-    if (ui.uiLevelStackPtr < PIPICOFX_UI_STACK_SIZE)
+
+    if (ui.uiLevelStackPtr < PIPICOFX_UI_STACK_SIZE && uiStackCurrent() != val)
     {
         *(ui.uiLevelStack + ui.uiLevelStackPtr++) = val;
+        #ifdef DEBUG
+        char strbfr[32];
+        strbfr[0]=0;
+        appendToString(strbfr,"Push, UI Stack Level ");
+        UInt8ToChar(ui.uiLevelStackPtr, strbfr+22);
+        sendOverUsb((uint8_t*)strbfr,23,false);
+        #endif
         return 0;
     }
+    #ifdef DEBUG
+    char strbfr[32];
+    strbfr[0]=0;
+    appendToString(strbfr,"UI Push, reached top");
+    sendOverUsb((uint8_t*)strbfr,21,false);
+    #endif
     return 1;
 }
 __QSPI_CODE
 uint8_t uiStackPop()
 {
+
     if (ui.uiLevelStackPtr != 0)
     {
+        #ifdef DEBUG
+        char strbfr[32];
+        strbfr[0]=0;
+        appendToString(strbfr,"Pop, UI Stack Level ");
+        UInt8ToChar(ui.uiLevelStackPtr-1, strbfr+21);
+        sendOverUsb((uint8_t*)strbfr,22,false);
+        #endif
         return *(ui.uiLevelStack + --ui.uiLevelStackPtr);
     }
+    #ifdef DEBUG
+    char strbfr[32];
+    strbfr[0]=0;
+    appendToString(strbfr,"UI Pop, reached top");
+    sendOverUsb((uint8_t*)strbfr,20,false);
+    #endif
     return  *(ui.uiLevelStack + ui.uiLevelStackPtr);
     //return 0xFF;
 }

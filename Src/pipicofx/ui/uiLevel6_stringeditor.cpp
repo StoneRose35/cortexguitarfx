@@ -84,10 +84,7 @@ static void enterCallback()
             drawLine(editPos*11,0,(editPos+1)*11,0,imgBuffer);
             drawLine(editPos*11,3+font->yAdvance,(editPos+1)*11,3+font->yAdvance,imgBuffer);
         }
-        if (uiStackCurrent() != 0xFF)
-        {
-            uiStackPush(0xFF);
-        }
+        uiStackPush(0xFF);
     }
 }
 
