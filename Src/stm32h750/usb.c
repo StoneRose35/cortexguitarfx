@@ -318,7 +318,7 @@ void OTG_FS_IRQHandler(void)
                     }
                     inEndpoint->DIEPINT = (1 << USB_OTG_DIEPINT_XFRC_Pos);
                 }
-                if ((inEndpoint->DIEPINT & (1 << USB_OTG_DIEPINT_TXFE_Pos)) && (USB2_OTG_FS_DEVICE->DIEPEMPMSK & (1 << epNr))==1) // transmit fifo empty
+                if ((inEndpoint->DIEPINT & (1 << USB_OTG_DIEPINT_TXFE_Pos)) && (USB2_OTG_FS_DEVICE->DIEPEMPMSK & (1 << epNr))!=0) // transmit fifo empty
                 {
                     #ifdef USB_DBG
                     sendStringBlocking("USB TX Fifo empty\r\n");
