@@ -503,32 +503,60 @@ function resolveDFUState(stateInt)
 function requestDevice()
 {
     detectDeviceConsole.innerText = "";
-    navigator.usb
-    .requestDevice({ filters: [{ vendorId: 0x4A37, productId: 0x35D2 },{vendorId: 0x0483, productId: 0xDF11}] })
-    .then((usbDevice) => {
-        detectDeviceConsole.innerText = "got compatible Device";
-        if (usbDevice.vendorId === 0x4A37 && usbDevice.productId === 0x35D2)
+    let devFound=false;
+    navigator.usb.getDevices().then( (devices) => {
+        devices.forEach(d =>
+            {
+                if (d.vendorId == 0x4A37 && d.productId == 0x35D2)
+                {
+                    detectDeviceConsole.innerText = "got compatible Device";
+                    mainConsole.innerText = "\nPiPicoFX detected";
+                    firmwareUpgradeState.state = "deviceDetectedPPFX";
+                    populateFirmwaresCombobox((el) => el === "regular");
+                    firmwareUpgradeState.usbDevice = d;
+                    devFound = true;
+                }
+                else if (d.vendorId === 0x0483 && d.productId === 0xDF11)
+                {
+                    detectDeviceConsole.innerText = "got compatible Device";
+                    mainConsole.innerText = "\nSTM32H750 detected";
+                    firmwareUpgradeState.state = "deviceDetectedSTM32";
+                    populateFirmwaresCombobox((el) => el === "firstTime");
+                    firmwareUpgradeState.usbDevice = d;
+                    devFound = true;
+                }
+            }
+        );
+        if (devFound === false)
         {
-            mainConsole.innerText = "\nPiPicoFX detected";
-            firmwareUpgradeState.state = "deviceDetectedPPFX";
-            populateFirmwaresCombobox((el) => el === "regular");
+            navigator.usb
+                .requestDevice({ filters: [{ vendorId: 0x4A37, productId: 0x35D2 },{vendorId: 0x0483, productId: 0xDF11}] })
+                .then((usbDevice) => {
+                    detectDeviceConsole.innerText = "got compatible Device";
+                    if (usbDevice.vendorId === 0x4A37 && usbDevice.productId === 0x35D2)
+                    {
+                        mainConsole.innerText = "\nPiPicoFX detected";
+                        firmwareUpgradeState.state = "deviceDetectedPPFX";
+                        populateFirmwaresCombobox((el) => el === "regular");
+                    }
+                    else if (usbDevice.vendorId === 0x0483 && usbDevice.productId === 0xDF11)
+                    {
+                        mainConsole.innerText = "\nSTM32H750 detected";
+                        firmwareUpgradeState.state = "deviceDetectedSTM32";
+                        populateFirmwaresCombobox((el) => el === "firstTime");
+                    }
+                    firmwareUpgradeState.stateNr = 1;
+                    firmwareUpgradeState.device = usbDevice;
+                    firmwareUpdateButton.disabled=false;
+                })
+                .catch(() => {
+                    detectDeviceConsole.innerText = "No Device Present";
+                    showMsgBox("No USB Board found<br />Connect and hit boot, then press and release reset <br />Then try detecting again",true);
+                    var overlaydiv = document.getElementById("msgbox");
+                    overlaydiv.style.visibility = "visible";
+                });   
         }
-        else if (usbDevice.vendorId === 0x0483 && usbDevice.productId === 0xDF11)
-        {
-            mainConsole.innerText = "\nSTM32H750 detected";
-            firmwareUpgradeState.state = "deviceDetectedSTM32";
-            populateFirmwaresCombobox((el) => el === "firstTime");
-        }
-        firmwareUpgradeState.stateNr = 1;
-        firmwareUpgradeState.device = usbDevice;
-        firmwareUpdateButton.disabled=false;
-  })
-    .catch(() => {
-        detectDeviceConsole.innerText = "No Device Present";
-        showMsgBox("No USB Board found<br />Connect and hit boot, then press and release reset <br />Then try detecting again",true);
-        var overlaydiv = document.getElementById("msgbox");
-        overlaydiv.style.visibility = "visible";
-  });
+    });
 }
 
 
