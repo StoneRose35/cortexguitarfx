@@ -312,13 +312,13 @@ void OTG_FS_IRQHandler(void)
                             prepareEP0Rception();
                         }
                     }
-                    if (transferDoneHandlers[epNr] != 0)
+                    else if (transferDoneHandlers[epNr] != 0)
                     {
                         transferDoneHandlers[epNr]();
                     }
                     inEndpoint->DIEPINT = (1 << USB_OTG_DIEPINT_XFRC_Pos);
                 }
-                if ((inEndpoint->DIEPINT & (1 << USB_OTG_DIEPINT_TXFE_Pos)) && (USB2_OTG_FS_DEVICE->DIEPEMPMSK & (1 << epNr))!=0) // transmit fifo empty
+                if ((inEndpoint->DIEPINT & (1 << USB_OTG_DIEPINT_TXFE_Pos))!=0 && (USB2_OTG_FS_DEVICE->DIEPEMPMSK & (1 << epNr))!=0) // transmit fifo empty
                 {
                     #ifdef USB_DBG
                     sendStringBlocking("USB TX Fifo empty\r\n");
@@ -557,8 +557,9 @@ void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen)
     epInBuffers[epNr] = (uint8_t*)data;
     epInBytesTransferred[epNr]=0;
     epInDataCntrs[epNr] = dlen;
-    
-    inEndpoint->DIEPTSIZ =  (npackets << USB_OTG_DIEPTSIZ_PKTCNT_Pos) | dlen;
+
+    inEndpoint->DIEPTSIZ = (npackets << USB_OTG_DIEPTSIZ_PKTCNT_Pos) | dlen;
+
     epCtrl &= ~(1 << USB_OTG_DIEPCTL_STALL_Pos);
     epCtrl |= (1 << USB_OTG_DIEPCTL_EPENA_Pos) | (1 << USB_OTG_DIEPCTL_CNAK_Pos);
     inEndpoint->DIEPCTL = epCtrl;
@@ -571,11 +572,11 @@ void prepareUSBReception(uint8_t epNr,uint16_t dataSize)
     uint32_t regval=0;
     uint16_t nPackets = (dataSize / epOutMaxPacketSizes[epNr]) + 1;
     USB_OTG_OUTEndpointTypeDef * outEndpoint = ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*epNr));
-    regval = outEndpoint->DOEPTSIZ & USB_OTG_DOEPTSIZ_STUPCNT;
+    regval = outEndpoint->DOEPTSIZ;// & USB_OTG_DOEPTSIZ_STUPCNT;
     regval |= (USB_OTG_DOEPTSIZ_XFRSIZ & dataSize);
     regval |= (USB_OTG_DOEPTSIZ_PKTCNT & (nPackets << 19));
     outEndpoint->DOEPTSIZ = regval;
-    regval=0;
+    regval=outEndpoint->DOEPCTL;
     regval |= (1 << USB_OTG_DOEPCTL_CNAK_Pos) | (1 << USB_OTG_DOEPCTL_EPENA_Pos);
     outEndpoint->DOEPCTL = regval;
 }
