@@ -1,3 +1,31 @@
+
+div, select,option {
+font-family: 'Courier New', Courier, monospace;
+font-size: 14px;
+}
+
+select {
+    background-color: beige;
+    border-radius: 4px;
+    scrollbar-width: thin;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 4px;
+}
+tr {
+    height: fit-content;
+}
+
+td {
+    vertical-align: top;
+    height: fit-content;
+    margin-bottom: 0px;
+}
+
+table {
+    border-spacing: 0px;
+}
+
 .editor-title {
     margin-left: auto;
     margin-right: auto;
@@ -7,6 +35,88 @@
     padding: 10px;
     color: rgb(13, 15, 37);
 }	
+
+.editor-toppanel {
+    display: flex;
+    flex-direction: row;
+    max-height: fit-content;
+    align-items: end;
+    justify-content: right;
+}
+
+.editor-panel {
+    display: flex;
+    flex-direction: row;
+    max-height: fit-content;
+    align-items: end;
+    justify-content:space-between;
+}
+
+.editor-textfield {
+    min-width: 64px;
+    width: auto;
+    padding: 4px;
+    background-color: beige;
+    border-width: 2px;
+    border-style: solid;
+    border-color: rgb(24, 22, 19);
+    border-radius: 4px;
+    text-align: start;
+}
+
+div .editor-vertical {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    padding: 4px;
+}
+
+.editor-effectparam {
+    width: 60%;
+}
+
+.editor-paramvalue {
+    padding-left: 12px;
+    font-weight: 800;
+    font-size: 17px;
+}
+
+.editor-bankcontent {
+    min-width: 180px;
+}
+
+.editor-filler {
+    flex-grow: 1;
+}
+
+.editor-filler-vertical {
+    flex-grow: 1;
+}
+div .editor-horizontal {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+div .editor-effect-group {
+    align-items: center;
+    display: flex;
+    justify-self:right;
+    flex-direction: column;
+    border-style: solid;
+    border-color: #c2c2c2;
+    border-radius: 4px;
+    border-width: 2px;
+    margin: 4px;
+    padding: 4px;
+}
+
+div .editor-vertical-label
+{
+    padding-left: 6px;
+    text-align: left;
+}
 
 .editor-console {
     font-family: 'Courier New', Courier, monospace;
@@ -18,32 +128,51 @@
     margin-bottom: 18px;
     border-style: solid;
     border-width: 2px;
-    width: 100%;
-    max-width: 360px;
+    border-radius: 4px;
+    width: 80%;
     border-color: aqua;
     background-color: black;
     color: beige;
     overflow-y: auto;
 }
+
+
 .editor-console-inner {
     padding: 6px;
     text-align: left;
     text-wrap: wrap;
 }
 .editor-button {
-    margin-left: auto;
-    margin-right: auto;
-    border: 0px;
-    padding: 10px;
-    margin-bottom: 36px;
+    border-style:solid;
+    border-color: rgba(0, 0, 0, 0);
+    border-width: 3px;
+    padding: 4px;
+    margin: 6px;
     font-family: sans-serif;
-    font-size: 24px;
+    font-size: 14px;
     color: rgb(12,23,111);
-    border-radius: 6px;
-    max-width: 360px;
-    width: 100%;
+    border-radius: 4px;
+    width: fit-content;
     background-color: rgb(198,24,56);
-    
+}
+
+.editor-button:active
+{
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 255);
+    border-width: 3px;
+}
+
+.editor-button[disabled] {
+    border: 0px;
+    padding: 4px;
+    margin: 6px;
+    font-family: sans-serif;
+    font-size: 14px;
+    color: rgb(67, 73, 117);
+    border-radius: 4px;
+    width: fit-content;
+    background-color: rgb(197, 141, 151);
 }
 
 .editor-main {
@@ -54,5 +183,84 @@
     height: 100%;
     display:flex;
     flex-direction: column;
-    background-color: rgb(20,124,72);
+    background-color: rgb(132, 185, 159);
+}
+
+.editor-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+}
+
+.editor-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.editor-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+
+.editor-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+
+.editor-text-selectable:checked+label
+{
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.editor-text-selectable
+{
+    display: none;
+}
+
+input:checked + .editor-slider {
+  background-color:rgb(198,24,56);
+}
+
+input:focus + .editor-slider {
+  box-shadow: 0 0 1px #28a539;
+}
+
+input:checked + .editor-slider:before {
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
+  transform: translateX(16px);
+}
+
+
+.editor-slider.round {
+  border-radius: 24px;
+}
+
+.editor-slider.round:before {
+  border-radius: 50%;
+}
+
+.editor-toggle {
+    display: flex;
+}
+
+.editor-toggle-label {
+    text-align: center;
 }

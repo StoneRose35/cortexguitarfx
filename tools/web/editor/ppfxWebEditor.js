@@ -2,6 +2,7 @@ let detectDeviceConsole;
 let editorButton;
 let ppfxDevice;
 
+const MSG_ABOUT=0;
 function init() {
     detectDeviceConsole = document.getElementById("editor-console");
     editorButton = document.getElementById("editor-button");
@@ -22,9 +23,7 @@ async function openCdcInterface(device)
 
 function aboutHandler()
 {
-    getAbout().then( (res) => {
-        detectDeviceConsole.innerText  = new TextDecoder().decode(res);
-    });
+    getAbout();
 }
 
 async function getAbout()
@@ -39,12 +38,43 @@ async function getAbout()
     const writer = ppfxDevice.writable.getWriter();
     await writer.write(cmd0);
     writer.releaseLock();
-    const reader = ppfxDevice.readable.getReader();
+    //const reader = ppfxDevice.readable.getReader();
 
-    const { value, done } = await reader.read();
-    reader.releaseLock();
-    return value;
+    //const { value, done } = await reader.read();
+    //reader.releaseLock();
+    //return value;
     
+}
+
+async function readFromPort()
+{
+    const reader = ppfxDevice.readable.getReader();
+    try {
+    while(true)
+    {
+        const { value, done } = await reader.read();
+        if (done)
+        {
+            break;
+        }
+        if ((value[0] | (value[1] << 8))==MSG_ABOUT)
+        {
+            detectDeviceConsole.innerText  = new TextDecoder().decode(value.subarray(2));
+        }
+        else
+        {
+            console.log("unknown command " + value[0] + " " + value[1] + " received");
+        }
+    }
+    }
+    catch (error)
+    {
+
+    }
+    finally
+    {
+        reader.releaseLock();
+    }
 }
 
 function requestDevice()
@@ -59,6 +89,7 @@ function requestDevice()
                 p.open({baudRate: 115200}).then(() => {
                     detectDeviceConsole.innerText = "PiPicoFX VCom Port Opened";
                     ppfxDevice = p;
+                    readFromPort();
                 });
 
             }
@@ -70,6 +101,7 @@ function requestDevice()
                 p.open({baudRate: 115200}).then(() => {
                     detectDeviceConsole.innerText = "PiPicoFX VCom Port Opened";
                     ppfxDevice = p;
+                    readFromPort();
                 }).catch(() =>{
                     detectDeviceConsole.innerText = "Failed to Open VCom Port";
                 });

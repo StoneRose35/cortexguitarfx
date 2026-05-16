@@ -13,7 +13,9 @@ void processUSBEditorCommand(uint8_t * cmd)
     switch(header->commandNr)
     {
         case USB_CMD_GET_ABOUT:
-            *strbfr = 0;
+            *((uint16_t*)strbfr) = MSG_ABOUT;
+            *(strbfr+2)=0;
+            idx=2;
             idx += appendToString(strbfr+idx,"About PiPicoFX\r\n");
             idx += appendToString(strbfr + idx,PI_PICO_FX_VERSION_NR);
             idx += appendToString(strbfr + idx,"\r\n");

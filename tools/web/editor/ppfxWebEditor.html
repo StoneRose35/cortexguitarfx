@@ -6,13 +6,121 @@
 </head>
 <body onload="init()">
 <div class="editor-main" id="editor_app">
-<div class="editor-title">Editor</div> 
-	<button class="editor-button" onclick="requestDevice()">Detect device</button>
+	<div class="editor-title">Editor</div>
+	<div class="editor-toppanel">
+		<div class="editor-vertical">
+			<input type="range" id="volume" name="volume" min="0" max="255" />
+			<div class="editor-vertical-label">Master Volume</div>
+		</div>
+		<div class="editor-vertical">
+				<label class="editor-switch">
+					<input type="checkbox">
+					<span class="editor-slider round"></span>
+				</label>
+
+				<div class="editor-toggle-label">HiZ</div>
+		</div>
+		<div class="editor-vertical">
+				<label class="editor-switch">
+					<input type="checkbox">
+					<span class="editor-slider round"></span>
+				</label>
+
+				<div class="editor-toggle-label">Mic</div>
+		</div>
+		<button class="editor-button" onclick="requestDevice()">Detect device</button>
+	</div>
+	<div class="editor-panel">
+		<div class="editor-vertical">
+			<div id="currentPreset" class="editor-textfield">DirtyChorus</div>
+			<div  class="editor-vertical-label">Preset</div>
+		</div>
+		<div class="editor-vertical">
+			<div id="currentPosition" class="editor-textfield">2</div>
+			<div  class="editor-vertical-label">Position</div>
+		</div>
+		<div class="editor-vertical">
+			<div id="currentBank" class="editor-textfield">1</div>
+			<div  class="editor-vertical-label">Bank</div>
+		</div>
+		<span class="editor-filler"></span>
+	</div>
+	<div class="editor-panel">
+		<button class="editor-button" onclick="previousBankHandler()">Previous Bank</button>
+		<button class="editor-button" onclick="nextBankHandler()">Next Bank</button>
+		
+		<div class="editor-vertical">
+			<input type="radio" name="presetNr" value="a" id="presetNr1" class="editor-text-selectable" checked></input><label for="presetNr1" id="presetNr1Label">DirtyChorus</label>
+			<input type="radio" name="presetNr" value="b" id="presetNr2"  class="editor-text-selectable" ></input><label for="presetNr2" id="presetNr2Label">B1 P2</label>
+			<input type="radio" name="presetNr" value="c" id="presetNr3"  class="editor-text-selectable" ></input><label for="presetNr3" id="presetNr3Label">B1 P3</label>
+		</div>
+		<span class="editor-filler"></span>
+		<div class="editor-effect-group">
+			<input type="radio" name="effectInFocus" value="fxa" id="effectA" class="editor-text-selectable"></input><label for="effectA">Effect A</label>
+			<label class="editor-switch">
+				<input type="checkbox">
+				<span class="editor-slider round"></span>
+			</label>
+			<select id="EffectAPrograms">
+				<option>None</option>
+				<option value="boost">Boost</option>
+				<option value="amModel">AmpModel</option>
+			</select>
+		</div>
+		<div class="editor-effect-group">
+			<input type="radio" name="effectInFocus" value="fxb" id="effectB" class="editor-text-selectable"></input><label for="effectB">Effect B</label>
+			<label class="editor-switch">
+				<input type="checkbox">
+				<span class="editor-slider round"></span>
+			</label>
+			<select id="EffectBPrograms">
+				<option>None</option>
+				<option value="boost">Boost</option>
+				<option value="amModel">AmpModel</option>
+			</select>
+		</div>
+		<div class="editor-effect-group">
+			<input type="radio" name="effectInFocus" value="fxc" id="effectC" class="editor-text-selectable"></input><label for="effectC">Effect C</label>
+			<label class="editor-switch">
+				<input type="checkbox">
+				<span class="editor-slider round"></span>
+			</label>
+			<select id="EffectAPrograms">
+				<option>None</option>
+				<option value="boost">Boost</option>
+				<option value="amModel">AmpModel</option>
+			</select>
+		</div>
+	</div>
+	<div class="editor-vertical" id="parametersDisplay">
+		<div class="editor-horizontal">
+			<div class="editor-vertical editor-effectparam">
+				<input type="range" id="volume" name="volume" min="0" max="4095" />
+				<div class="editor-vertical-label">Gain</div>
+			</div>
+			<div class="editor-paramvalue">5754</div>
+		</div>
+		<div class="editor-horizontal">
+			<div class="editor-vertical editor-effectparam">
+				<input type="range" id="volume" name="volume" min="0" max="4095" />
+				<div class="editor-vertical-label">Post-EQ</div>
+			</div>
+			<div class="editor-paramvalue">5623</div>
+		</div>
+		<div class="editor-horizontal">
+			<div class="editor-vertical editor-effectparam">
+				<input type="range" id="volume" name="volume" min="0" max="4095" />
+				<div class="editor-vertical-label">Preset Vol</div>
+			</div>
+			<div class="editor-paramvalue">70.1%</div>
+		</div>
+	</div>
+	<span class="editor-filler-vertical"></span>
 	<div class="editor-console" style="height: 156px;">
 		<div class="editor-console-inner" id="editor-console">
 		</div>
 	</div>
     <button class="editor-button" onclick="aboutHandler()">Get About</div>
-</div>
+</div> 
 </body>
 </html>

@@ -1,0 +1,250 @@
+<html>
+<head>
+    <link rel="stylesheet" href="MsgCmdReference.css"></link>
+    <title>PiPicoFx USB Serial Interface: Message and Command Reference</title>
+</head>
+<body>
+    <h2>Commands</h2>
+    <div class="reference-command">
+        <h4>Request About Info</h4>
+        <div class="reference-cmd-description">
+            Get the info of the about dialog including build date and version nr.
+            Causes "About Dialog Content" to be sent.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 0</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 4 by default</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x4</div>
+            <div class="reference-bytevalue">0x0</div>
+        </div>
+    </div>
+    <div class="reference-command">
+        <h4>Get All Programs</h4>
+        <div class="reference-cmd-description">
+            Returns the name and properties of all fx programs available on the device. 
+            Causes "FX Programs Description" to be sent.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 1</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 4 by default</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x4</div>
+            <div class="reference-bytevalue">0x0</div>
+        </div>
+    </div>
+    <div class="reference-command">
+        <h4>Get Parameter Names</h4>
+        <div class="reference-cmd-description">
+            Returns all parameter Names of a given program.
+            Causes "FX Parameter Names" to be sent.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 2</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 5 by default</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Index of the Program for which the parameter should be returned</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x2</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x5</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x3</div>
+        </div>
+    </div>
+    <h2>Messages</h2>
+    <div class="reference-command">
+        <h4>About Dialog Content</h4>
+        <div class="reference-cmd-description">
+            Contains the About Dialog Content as a zero-terminated string.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Message Nr: 0</td>
+            </tr>
+            <tr>
+                <td>2:N</td>
+                <td>About Dialog content as zero terminated String</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">'P'</div>
+            <div class="reference-bytevalue">'i'</div>
+            <div class="reference-bytevalue">'P'</div>
+            <div class="reference-bytevalue">'i'</div>
+            <div class="reference-bytevalue">'c'</div>
+            <div class="reference-bytevalue">'o'</div>
+            <div class="reference-bytevalue">'F'</div>
+            <div class="reference-bytevalue">'X'</div>
+            <div class="reference-bytevalue">'\r'</div>
+            <div class="reference-bytevalue">'\n'</div>
+            <div class="reference-bytevalue">'V'</div>
+            <div class="reference-bytevalue">'1'</div>
+            <div class="reference-bytevalue">'.'</div>
+            <div class="reference-bytevalue">'0'</div>
+            <div class="reference-bytevalue">'.'</div>
+            <div class="reference-bytevalue">'0'</div>
+            <div class="reference-bytevalue">0x0</div>
+        </div>
+    </div>
+    <div class="reference-command">
+        <h4>FX Programs Description</h4>
+        <div class="reference-cmd-description">
+            Contains the names and properties of all Fx Programs available on the device.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Message Nr: 1</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Total number of Fx Programs.
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Properties of the first FX Program<br> Bit 7: 1 if the effect is freezable, 0 otherwise<br>
+                    Bit 6:0 the number of parameters of the fx program
+                </td>
+            </tr>
+            <tr>
+                <td>4:N</td>
+                <td>the Name of the Program as a zero-terminated string.
+                </td>
+            </tr>
+            <tr>
+                <td>N+1:M</td>
+                <td>Properties and Names of the remaining FX Programs.
+                </td>
+            </tr>    
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x2</div>
+            <div class="reference-bytevalue">0x84</div>
+            <div class="reference-bytevalue">'D'</div>
+            <div class="reference-bytevalue">'e'</div>
+            <div class="reference-bytevalue">'l'</div>
+            <div class="reference-bytevalue">'a'</div>
+            <div class="reference-bytevalue">'y'</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x01</div>
+            <div class="reference-bytevalue">'B'</div>
+            <div class="reference-bytevalue">'o'</div>
+            <div class="reference-bytevalue">'o'</div>
+            <div class="reference-bytevalue">'s'</div>
+            <div class="reference-bytevalue">'t'</div>
+            <div class="reference-bytevalue">0x0</div>                  
+        </div>
+    </div>
+<div class="reference-command">
+        <h4>FX Parameter Names</h4>
+        <div class="reference-cmd-description">
+            Contains all the parameter names as an array of zero-terminated strings. 
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Message Nr: 2</td>
+            </tr>
+            <tr>
+                <td>2:N</td>
+                <td>First Parameter Name as a zero-terminated string.
+                </td>
+            </tr>
+            <tr>
+                <td>N+1:M</td>
+                <td>second Parameter Name as a zero-terminated string.
+                </td>
+            </tr>
+            <tr>
+                <td>...</td>
+                <td>...</td>
+            </tr>  
+            <tr>
+                <td>Y+1:Z</td>
+                <td>last Parameter Name as a zero-terminated string.
+                </td>
+            </tr>  
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x2</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">'G'</div>
+            <div class="reference-bytevalue">'a'</div>
+            <div class="reference-bytevalue">'i'</div>
+            <div class="reference-bytevalue">'n'</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">'V'</div>
+            <div class="reference-bytevalue">'o'</div>
+            <div class="reference-bytevalue">'l'</div>
+            <div class="reference-bytevalue">'u'</div>
+            <div class="reference-bytevalue">'m'</div>
+            <div class="reference-bytevalue">'e'</div>
+            <div class="reference-bytevalue">0x0</div>                  
+        </div>
+    </div>
+</body>
+</html>

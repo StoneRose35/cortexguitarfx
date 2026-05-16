@@ -22,6 +22,7 @@ typedef struct
 //#define USB_CMD_
 //#define USB_CMD_
 
+#define MSG_ABOUT 0
 
 void processUSBEditorCommand(uint8_t * cmd);
 #endif
