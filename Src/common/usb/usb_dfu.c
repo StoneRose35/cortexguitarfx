@@ -12,7 +12,7 @@
 #include "flash.h"
 #include "stringFunctions.h"
 #include "globalConfig.h"
-#include "gen/version.h"
+#include "gen/versionDef.h"
 
 
 extern volatile uint32_t task;

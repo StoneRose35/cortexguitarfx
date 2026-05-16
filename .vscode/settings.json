@@ -61,6 +61,6 @@
         "usb_cdc.h": "c"
     },
     "cmake.configureOnOpen": false,
-    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.variableUseNaturalFormat": true,
     "idf.currentSetup": "/home/philipp/esp/esp-idf"
 }

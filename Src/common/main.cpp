@@ -53,6 +53,7 @@ extern "C" {
 #include "drivers/usb.h"
 #include "usb/usb_cdc.h"
 #include "usb/usb_dfu.h"
+#include "usb/usb_cdc_editor_interface.h"
 #include "gen/version.h"
 #include "flash.h"
 }
@@ -100,6 +101,8 @@ volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0x0;
 volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF}; // 0x7f: do not change, 0x7e do not reload a program, otherwise bits 0-6: program nr to initialize, bit 7: copy parameters from preset or not
 volatile int16_t initialKnobValues[3];
+uint8_t usbReceiverbuffer[256];
+volatile uint16_t usbReceiverLevel=0;
 AudioProcessor * currentFxProgram;
 __DTCM_DATA
 MultiAudioProcessor audioProcessor;
@@ -604,6 +607,18 @@ int main(void)
       {
         prepareSystemForDFU();
         task &= ~(1 << TASK_PREPARE_FOR_DFU);
+      }
+
+      if (getUsbCdcReceivedDataLevel() > 0)
+      {
+            usbReceiverLevel += readUsbCdcData(usbReceiverbuffer + usbReceiverLevel);
+            uint16_t * usbCmdSize = (uint16_t*)(usbReceiverbuffer + 2);
+            if (*usbCmdSize == usbReceiverLevel)
+            {
+                // process USB command
+                processUSBEditorCommand(usbReceiverbuffer);usbReceiverLevel=0;
+            } 
+            usbReceiverLevel=0;
       }
       #endif
 	}

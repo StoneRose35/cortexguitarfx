@@ -19,7 +19,7 @@ CPP=arm-none-eabi-g++
 OBJCPY=arm-none-eabi-objcopy
 ELF2UF2=./tools/elf2uf2
 OPT=-Og
-DEFINES=-DDEBUG -DHARDWARE -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
+DEFINES=-DHARDWARE -DSTM32H750xx -DI2S_INPUT -DFLOAT_AUDIO 
 CARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=gnu11 -Wall -Wpedantic -Wextra -I./Inc -I./Inc/gen
 CPPARGS=-fno-builtin -g $(DEFINES) -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -std=c++20 -Wall -Wpedantic -Wextra  -Wno-error=narrowing -I./Inc -I./Inc/gen
 LARGS=-g -Xlinker -print-memory-usage -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -T./STM32H750IBKX_FLASH.ld -Xlinker -Map="./out/$(PROJECT).map" -Xlinker --gc-sections -static --specs="nano.specs" -Wl,--start-group -lstdc++ -lm -Wl,--end-group
@@ -159,18 +159,17 @@ Inc/gen/versionDef.h: Inc/gen
 Inc/gen/version.h: Inc/gen Inc/gen/versionDef.h
 #REV=`expr %REV% / 60`
 	@echo "#ifndef _PI_PICO_VERSION_H_\r\n#define _PI_PICO_VERSION_H_\r\n" > Inc/gen/version.h 
-	@echo "#include \"versionDef.h\"" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_FULL_VERSION[]=\"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION) for $(MCU_BOARD) built $(BUILD_DATE)T$(BUILD_TIME)\";" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_VERSION_NR[]=PI_PICO_FX_VNR;" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_MCU_BOARD[]=\"$(MCU_BOARD)\";" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_BUILD_DATE[]=\"$(BUILD_DATE)\";" >> Inc/gen/version.h 
-	@echo "const char PI_PICO_FX_BUILD_TIME[]=\"$(BUILD_TIME)\";" >> Inc/gen/version.h 
+	@echo "#define PI_PICO_FX_FULL_VERSION \"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION) for $(MCU_BOARD) built $(BUILD_DATE)T$(BUILD_TIME)\"" >> Inc/gen/version.h 
+	@echo "#define PI_PICO_FX_VERSION_NR \"V$(MAIN_VERSION).$(SUB_VERSION).$(MINUTES_SINCE_INCUBATION)\"" >> Inc/gen/version.h 
+	@echo "#define PI_PICO_FX_MCU_BOARD \"$(MCU_BOARD)\"" >> Inc/gen/version.h 
+	@echo "#define PI_PICO_FX_BUILD_DATE \"$(BUILD_DATE)\"" >> Inc/gen/version.h 
+	@echo "#define PI_PICO_FX_BUILD_TIME \"$(BUILD_TIME)\"" >> Inc/gen/version.h 
 	@echo "#ifdef SYNC_NUMBERS" >> Inc/gen/version.h 
 	@echo "__attribute__ ((section (\".sync_number_flash\"))) uint32_t FLASH_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
 	@echo "__attribute__ ((section (\".sync_number_qspi\"))) uint32_t QSPI_SYNC_NUMBER=$(FLASH_QSPI_SYNC_NUMBER);" >> Inc/gen/version.h
 	@echo "#endif" >> Inc/gen/version.h
 	@echo "#define FLASH_QSPI_SYNC_NUMBER $(FLASH_QSPI_SYNC_NUMBER)UL" >> Inc/gen/version.h
-	@echo "const uint32_t AVR_SYNC_NUMBER=$(AVR_SYNC_NUMBER);\r\n" >> Inc/gen/version.h
+	@echo "#define AVR_SYNC_NUMBER $(AVR_SYNC_NUMBER)\r\n" >> Inc/gen/version.h
 	@echo "#endif\r\n" >> Inc/gen/version.h 
 
 # main linking and generating flashable content

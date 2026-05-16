@@ -194,6 +194,10 @@ void USBCDCInit()
 volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress
 volatile uint8_t  receivedDataBfr[128];
 volatile uint16_t receivedDataLevel=0;
+volatile uint16_t sendDataSize=0;
+uint8_t  sendDataBfr[512];
+volatile uint8_t chunksSent=0;
+
 uint8_t usbCdcSetConfiguration(uint16_t confNr)
 {
     
@@ -214,7 +218,7 @@ uint8_t usbCdcSetConfiguration(uint16_t confNr)
     // IN Endpoint 1: Bulk, Packet Size USB_CDC_DATA_OUT_PACKETSIZE, fifo 1
     // define fifo ram area
     offset = USB2_OTG_FS->GRXFSIZ + ((USB2_OTG_FS->DIEPTXF0_HNPTXFSIZ >> 16) & 0xFFFF);
-    USB2_OTG_FS->DIEPTXF[1-1] = offset | ((USB_CDC_DATA_IN_PACKETSIZE << 1) << USB_OTG_DIEPTXF_INEPTXFD_Pos);
+    USB2_OTG_FS->DIEPTXF[1-1] = offset | ((USB_CDC_DATA_IN_PACKETSIZE << 3) << USB_OTG_DIEPTXF_INEPTXFD_Pos);
     // flush fifo
     cnt=0;
     while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U && cnt < USB_CDC_FLUSH_TIMEOUT)
@@ -249,7 +253,7 @@ uint8_t usbCdcSetConfiguration(uint16_t confNr)
     // IN Endpoint 2: Interrupt, Packet Size 8, fifo 2
     // define fifo ram area
     offset = USB2_OTG_FS->GRXFSIZ + ((USB2_OTG_FS->DIEPTXF0_HNPTXFSIZ >> 16) & 0xFFFF) + ((USB2_OTG_FS->DIEPTXF[1-1] >> 16) & 0xFFFF);
-    USB2_OTG_FS->DIEPTXF[2-1] = offset | ((USB_CDC_CONTROL_EP_PACKETSIZE << 1) << USB_OTG_DIEPTXF_INEPTXFD_Pos);
+    USB2_OTG_FS->DIEPTXF[2-1] = offset | ((USB_CDC_CONTROL_EP_PACKETSIZE << 3) << USB_OTG_DIEPTXF_INEPTXFD_Pos);
     // flush fifo
     cnt=0;
     while ((USB2_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U && cnt < USB_CDC_FLUSH_TIMEOUT)
@@ -325,20 +329,51 @@ uint8_t usbCdcSetInterfaceHandler(uint16_t alternateSetting,uint16_t interfaceIn
         setClassSpecificSetupHandler(usbDfuHandleClassSetupRequest); // switch over to dfu mode (required for dfu-util)
         prepareUSBTransfer(0,0,0);
     }
+    else if (alternateSetting==0 && interfaceIndex == 1) // usb CDC data, acknowledge
+    {
+        prepareUSBTransfer(0,0,0);
+    }
     return 0;
 }
 
 
+/**
+ * send data over usb cdc, 
+ * data: pointer to the data to be sent
+ * dlen: total length in bytes to send
+ * blocking: doesn't return until data has been sent of blocking is 1
+ * 
+ * note: blocks if the dlen is larger than the internal buffer size (512)
+ */
 void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking)
 {
-    
-    if ((bmUsbStatus & (1 << USB_CDC_Configured_Pos)) != 0 && (bmUsbStatus & (1 << USB_CDC_TransferInProgress_Pos)) == 0)
+    uint16_t bytesSent=0;
+    chunksSent = 0;
+    sendDataSize =dlen;
+    while (bytesSent < dlen)
     {
-        prepareUSBTransfer(1,data,dlen);
-        bmUsbStatus |= (1 << USB_CDC_TransferInProgress_Pos);
-        if (blocking != 0)
+        for (uint16_t c=0;c<dlen && c < 512;c++)
         {
-        while((bmUsbStatus & (1 << USB_CDC_TransferInProgress_Pos)) != 0);
+            *(sendDataBfr + c) = *(data + c);
+            bytesSent++;
+        }
+        if ((bmUsbStatus & (1 << USB_CDC_Configured_Pos)) != 0 && (bmUsbStatus & (1 << USB_CDC_TransferInProgress_Pos)) == 0)
+        {
+            if (sendDataSize > 64)
+            {
+                prepareUSBTransfer(1,sendDataBfr,64);
+                sendDataSize -= 64;
+            }
+            else
+            {
+                prepareUSBTransfer(1,sendDataBfr,dlen);
+                sendDataSize = 0;
+            }
+            bmUsbStatus |= (1 << USB_CDC_TransferInProgress_Pos);
+            if (blocking != 0 || bytesSent < dlen)
+            {
+                while((bmUsbStatus & (1 << USB_CDC_TransferInProgress_Pos)) != 0);
+            }
         }
     }
 }
@@ -346,7 +381,21 @@ void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking)
 
 void UsbCdcTransferDone(void)
 {
-    bmUsbStatus &= ~(1 << USB_CDC_TransferInProgress_Pos);
+    chunksSent += 1;
+    if (sendDataSize > 64)
+    {
+        prepareUSBTransfer(1,sendDataBfr+(chunksSent << 6),64);   
+        sendDataSize -=64;
+    }
+    else if (sendDataSize > 0)
+    {
+        prepareUSBTransfer(1,sendDataBfr+(chunksSent << 6),sendDataSize);
+        sendDataSize = 0;
+    }
+    else
+    {
+        bmUsbStatus &= ~(1 << USB_CDC_TransferInProgress_Pos);
+    }
 }
 
 void UsbCdcDataReceived(void* dataPtr,uint16_t len)
