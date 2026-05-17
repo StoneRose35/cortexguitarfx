@@ -1,11 +1,27 @@
 let detectDeviceConsole;
-let editorButton;
 let ppfxDevice;
+let fxPrograms;
+let effectAPrograms;
+let effectBPrograms;
+let effectCPrograms;
+let commandBfr=[];
+let currentCommandLength=0;
+let currentCommandNr=0xFFFF;
 
 const MSG_ABOUT=0;
+const MSG_PROGRAMS=1;
+const MSG_INPUTS_AND_MASTER_VOLUME=3;
+
+const USB_CMD_GET_ABOUT=0;
+const USB_CMD_GET_INPUTS_AND_MASTER_VOLUME=3;
+const USB_CMD_SET_INPUTS_AND_MASTER_VOLUME=4;
+const USB_CMD_GET_PROGRAMS=8;
+
 function init() {
     detectDeviceConsole = document.getElementById("editor-console");
-    editorButton = document.getElementById("editor-button");
+    effectAPrograms = document.getElementById("EffectAPrograms");
+    effectBPrograms = document.getElementById("EffectBPrograms");
+    effectCPrograms = document.getElementById("EffectCPrograms");
 }
 
 
@@ -30,50 +46,151 @@ async function getAbout()
 {
     
     let cmdbfr= new ArrayBuffer(4);
-    let cmd0 = new Uint8Array(cmdbfr);
-    cmd0[0]=0;
-    cmd0[1]=0;
-    cmd0[2]=4;
-    cmd0[3]=0;
+    let cmd = new Uint8Array(cmdbfr);
+    cmd[0]=USB_CMD_GET_ABOUT;
+    cmd[1]=0;
+    cmd[2]=4;
+    cmd[3]=0;
     const writer = ppfxDevice.writable.getWriter();
-    await writer.write(cmd0);
-    writer.releaseLock();
-    //const reader = ppfxDevice.readable.getReader();
+    await writer.write(cmd);
+    writer.releaseLock();    
+}
+function getProgramsHandler()
+{
+    getPrograms();
+}
 
-    //const { value, done } = await reader.read();
-    //reader.releaseLock();
-    //return value;
-    
+async function getPrograms()
+{
+    let cmdbfr= new ArrayBuffer(4);
+    let cmd = new Uint8Array(cmdbfr);
+    cmd[0]=USB_CMD_GET_PROGRAMS;
+    cmd[1]=0;
+    cmd[2]=4;
+    cmd[3]=0;
+    const writer = ppfxDevice.writable.getWriter();
+    await writer.write(cmd);
+    writer.releaseLock();  
+}
+
+function processAboutMessage(msg)
+{
+    detectDeviceConsole.innerText  += String.fromCharCode(...msg.slice(4,msg.length));
+}
+
+function processGetPrograms(msg)
+{
+    let n_programs = msg[4];
+    let progCnt=0;
+    fxPrograms=new Array(n_programs);
+    let idx=5;
+    while (idx < msg.length)
+    {
+        
+        let fxProg={ParameterCount: msg[idx]& 0x7F,freezable: false,name: ""};
+        if ((msg[idx] & 0x80)>0)
+        {
+            fxProg.freezable=true;
+        }
+        let nameArray=[];
+        idx++;
+        while(msg[idx]!=0 && idx < msg.length)
+        {
+            nameArray.push(msg[idx++]);
+        }
+        fxProg.name=String.fromCharCode(...nameArray);
+        fxPrograms[progCnt++] = fxProg;
+        idx++;
+    }
+    effectAPrograms.innerHTML="";
+    effectBPrograms.innerHTML="";
+    effectCPrograms.innerHTML="";
+    for (const fxProgram of fxPrograms)
+    {
+        let fxProgramView=document.createElement("option");
+        fxProgramView.innerText = fxProgram.name;
+        if (fxProgram.freezable===true)
+        {
+            fxProgramView.className = "editor-fxprogram-freezable";
+        } 
+        effectAPrograms.appendChild(fxProgramView);
+        fxProgramView=document.createElement("option");
+        fxProgramView.innerText = fxProgram.name;
+        if (fxProgram.freezable===true)
+        {
+            fxProgramView.className = "editor-fxprogram-freezable";
+        } 
+        effectBPrograms.appendChild(fxProgramView);
+        fxProgramView=document.createElement("option");
+        fxProgramView.innerText = fxProgram.name;
+        if (fxProgram.freezable===true)
+        {
+            fxProgramView.className = "editor-fxprogram-freezable";
+        } 
+        effectCPrograms.appendChild(fxProgramView);
+    }
 }
 
 async function readFromPort()
 {
-    const reader = ppfxDevice.readable.getReader();
-    try {
-    while(true)
+    while (true)
     {
-        const { value, done } = await reader.read();
-        if (done)
-        {
-            break;
+        const reader = ppfxDevice.readable.getReader();
+        try {
+            while(true)
+            {
+                const { value, done } = await reader.read();
+                if (done)
+                {
+                    break;
+                }
+                if ((value[0] | (value[1] << 8))==MSG_ABOUT && currentCommandLength ===0)
+                {
+                    currentCommandNr = (value[0] | (value[1] << 8));
+                    currentCommandLength = (value[2] | (value[3] << 8));
+                    commandBfr = commandBfr.concat([].slice.call(value));
+                    console.log("MSG_ABOUT received");
+                }
+                else if ((value[0] | (value[1] << 8))==MSG_PROGRAMS && currentCommandLength === 0)
+                {
+                    currentCommandNr = (value[0] | (value[1] << 8));
+                    currentCommandLength = (value[2] | (value[3] << 8));
+                    commandBfr = commandBfr.concat([].slice.call(value));
+                    console.log("MSG_PROGRAMS received");
+                }
+                else if (currentCommandNr !== 0xFFFF)
+                {
+                    commandBfr = commandBfr.concat([].slice.call(value));
+                }
+                if (commandBfr.length === currentCommandLength)
+                {
+                    switch(currentCommandNr)
+                    {
+                        case MSG_ABOUT:
+                            processAboutMessage(commandBfr);
+                            console.log("handled MSG_ABOUT");
+                            break;
+                        case MSG_PROGRAMS:
+                            processGetPrograms(commandBfr);
+                            console.log("handled MSG_PROGRAMS");
+                            break;
+                    }
+                    
+                    commandBfr=[];
+                    currentCommandLength=0;
+                    currentCommandNr=0xFFFF;
+                }
+            }
         }
-        if ((value[0] | (value[1] << 8))==MSG_ABOUT)
+        catch (error)
         {
-            detectDeviceConsole.innerText  = new TextDecoder().decode(value.subarray(2));
+            console.log("Error reading USB Port");
+            console.log(error);
         }
-        else
+        finally
         {
-            console.log("unknown command " + value[0] + " " + value[1] + " received");
+            reader.releaseLock();
         }
-    }
-    }
-    catch (error)
-    {
-
-    }
-    finally
-    {
-        reader.releaseLock();
     }
 }
 

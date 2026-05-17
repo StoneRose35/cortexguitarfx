@@ -46,6 +46,7 @@ GRAPHICS_OBJS := $(patsubst Src/common/graphics/%.c,out/%.o,$(wildcard Src/commo
 APPS_OBJS := $(patsubst Src/apps/%.c,out/%.o,$(wildcard Src/apps/*.c))
 SERVICES_OBJS := $(patsubst Src/services/%.c,out/%.o,$(wildcard Src/services/*.c))
 USB_OBJS := $(patsubst Src/common/usb/%.c,out/%.o,$(wildcard Src/common/usb/*.c))
+USB_OBJS_CPP := $(patsubst Src/common/usb/%.cpp,out/%.o,$(wildcard Src/common/usb/*.cpp))
 ASSET_IMAGES := $(patsubst Assets/%.png,Inc/images/%.h,$(wildcard Assets/*.png))
 
 
@@ -56,7 +57,7 @@ all_audio: $(AUDIO_OBJS) $(AUDIO_FX_OBJS) $(AUDIO_FX_UI_OBJS_CPP)
 all_audio_cpp: $(AUDIO_FX_OBJS_CPP)
 all_graphics: $(GRAPHICS_OBJS)
 all_services: $(SERVICES_OBJS)
-all_usb: $(USB_OBJS)
+all_usb: $(USB_OBJS) $(USB_OBJS_CPP)
 all_apps: $(APPS_OBJS)
 all_images: $(ASSET_IMAGES)
 all_math: $(MATH_OBJS)
@@ -133,6 +134,9 @@ out/%.o: Src/services/%.c out
 # usb layer
 out/%.o: Src/common/usb/%.c out
 	$(CC) $(CARGS) $(OPT) -c $< -o $@
+
+out/%.o: Src/common/usb/%.cpp out
+	$(CPP) $(CPPARGS) $(OPT) -c $< -o $@
 
 # image assets
 Inc/images/%.h: Assets/%.png out

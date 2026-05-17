@@ -175,6 +175,10 @@ div .editor-vertical-label
     background-color: rgb(197, 141, 151);
 }
 
+.editor-fxprogram-freezable {
+    background-color: rgb(175, 235, 235);
+}
+
 .editor-main {
     margin-left: auto;
     margin-right: auto;

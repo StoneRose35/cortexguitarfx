@@ -53,10 +53,10 @@ extern "C" {
 #include "drivers/usb.h"
 #include "usb/usb_cdc.h"
 #include "usb/usb_dfu.h"
-#include "usb/usb_cdc_editor_interface.h"
 #include "gen/version.h"
 #include "flash.h"
 }
+#include "usb/usb_cdc_editor_interface.hpp"
 #include "pipicofx/picofxCore.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
 #include "pipicofx/MultiAudioProcessor.hpp"

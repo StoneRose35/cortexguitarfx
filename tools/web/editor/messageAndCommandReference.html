@@ -94,6 +94,74 @@
             <div class="reference-bytevalue">0x3</div>
         </div>
     </div>
+        <div class="reference-command">
+        <h4>Get Input and Master Volume State</h4>
+        <div class="reference-cmd-description">
+            Returns the state (on/off) if the HiZ and the Mic Input and the Master Volume Value.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 3</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 4 by default</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x3</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x4</div>
+            <div class="reference-bytevalue">0x0</div>
+        </div>
+    </div>
+    </div>
+        <div class="reference-command">
+        <h4>Sets Input and Master Volume State</h4>
+        <div class="reference-cmd-description">
+            Sets the input states and Master Volume level.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 4</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 6 by default</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Bit 0: HiZ Input state, 1 for "on", 0 for "off"<br />
+                    Bit 1: Mic Input state, 1 for "on", 0 for "off"<br />
+                    Bits 2:7 ignored
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>The Master Volume level, 255 for max, 0 for min.</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x4</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x3</div>
+            <div class="reference-bytevalue">0xCC</div>
+        </div>
+    </div>
     <h2>Messages</h2>
     <div class="reference-command">
         <h4>About Dialog Content</h4>
@@ -110,13 +178,19 @@
                 <td>Message Nr: 0</td>
             </tr>
             <tr>
-                <td>2:N</td>
+                <td>2:3</td>
+                <td>Message Size</td>
+            </tr>
+            <tr>
+                <td>4:N</td>
                 <td>About Dialog content as zero terminated String</td>
             </tr>
         </table>
         <div class="reference-example-title">Example</div>
         <div class="reference-bytearray">
             <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x15</div>
             <div class="reference-bytevalue">0x0</div>
             <div class="reference-bytevalue">'P'</div>
             <div class="reference-bytevalue">'i'</div>
@@ -152,18 +226,22 @@
                 <td>Message Nr: 1</td>
             </tr>
             <tr>
-                <td>2</td>
+                <td>2:3</td>
+                <td>Message Size</td>
+            </tr>
+            <tr>
+                <td>4</td>
                 <td>Total number of Fx Programs.
                 </td>
             </tr>
             <tr>
-                <td>3</td>
+                <td>5</td>
                 <td>Properties of the first FX Program<br> Bit 7: 1 if the effect is freezable, 0 otherwise<br>
                     Bit 6:0 the number of parameters of the fx program
                 </td>
             </tr>
             <tr>
-                <td>4:N</td>
+                <td>6:N</td>
                 <td>the Name of the Program as a zero-terminated string.
                 </td>
             </tr>
@@ -176,6 +254,8 @@
         <div class="reference-example-title">Example</div>
         <div class="reference-bytearray">
             <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x13</div>
             <div class="reference-bytevalue">0x0</div>
             <div class="reference-bytevalue">0x2</div>
             <div class="reference-bytevalue">0x84</div>
@@ -209,7 +289,11 @@
                 <td>Message Nr: 2</td>
             </tr>
             <tr>
-                <td>2:N</td>
+                <td>2:3</td>
+                <td>Message Size</td>
+            </tr>
+            <tr>
+                <td>4:N</td>
                 <td>First Parameter Name as a zero-terminated string.
                 </td>
             </tr>
@@ -232,6 +316,8 @@
         <div class="reference-bytearray">
             <div class="reference-bytevalue">0x2</div>
             <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x10</div>
+            <div class="reference-bytevalue">0x0</div>
             <div class="reference-bytevalue">'G'</div>
             <div class="reference-bytevalue">'a'</div>
             <div class="reference-bytevalue">'i'</div>
@@ -244,6 +330,48 @@
             <div class="reference-bytevalue">'m'</div>
             <div class="reference-bytevalue">'e'</div>
             <div class="reference-bytevalue">0x0</div>                  
+        </div>
+    </div>
+<div class="reference-command">
+        <h4>Input State and Master Volume</h4>
+        <div class="reference-cmd-description">
+            Contains the state (on/off) of the inputs and the Master Volume Level 
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Message Nr: 3</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Message Size</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Bit 0: HiZ Input State, 1 is on, 0 is off<br />
+                    Bit 1: Mic Input State, 1 is on, 0 is off<br />
+                    Bits 2:7 undefined
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>The Master Volume level, 255 being max, 0 min.
+                </td>
+            </tr>
+            
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x3</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x3</div>
+            <div class="reference-bytevalue">0x42</div>                
         </div>
     </div>
 </body>

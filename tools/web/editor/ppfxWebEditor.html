@@ -64,7 +64,7 @@
 			<select id="EffectAPrograms">
 				<option>None</option>
 				<option value="boost">Boost</option>
-				<option value="amModel">AmpModel</option>
+				<option value="amModel" class="editor-fxprogram-freezable">AmpModel</option>
 			</select>
 		</div>
 		<div class="editor-effect-group">
@@ -85,7 +85,7 @@
 				<input type="checkbox">
 				<span class="editor-slider round"></span>
 			</label>
-			<select id="EffectAPrograms">
+			<select id="EffectCPrograms">
 				<option>None</option>
 				<option value="boost">Boost</option>
 				<option value="amModel">AmpModel</option>
@@ -120,7 +120,11 @@
 		<div class="editor-console-inner" id="editor-console">
 		</div>
 	</div>
-    <button class="editor-button" onclick="aboutHandler()">Get About</div>
+	<div class="editor-panel">
+    	<button class="editor-button" onclick="aboutHandler()">Get About</button>
+		<button class="editor-button" onclick="getProgramsHandler()">Get Programs</button>
+		<span class="editor-filler"></span> 
+	</div>
 </div> 
 </body>
 </html>

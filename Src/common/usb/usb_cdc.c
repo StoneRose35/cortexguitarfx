@@ -345,6 +345,7 @@ uint8_t usbCdcSetInterfaceHandler(uint16_t alternateSetting,uint16_t interfaceIn
  * 
  * note: blocks if the dlen is larger than the internal buffer size (512)
  */
+__QSPI_CODE
 void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking)
 {
     uint16_t bytesSent=0;
@@ -379,6 +380,7 @@ void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking)
 }
 
 
+__QSPI_CODE
 void UsbCdcTransferDone(void)
 {
     chunksSent += 1;
@@ -398,6 +400,7 @@ void UsbCdcTransferDone(void)
     }
 }
 
+__QSPI_CODE
 void UsbCdcDataReceived(void* dataPtr,uint16_t len)
 {
     uint16_t c=0;
@@ -420,11 +423,13 @@ void UsbCdcEp0OutHandler(void* dataPtr,uint16_t len)
     prepareUSBReception(0,64);
 }
 
+__QSPI_CODE
 uint16_t getUsbCdcReceivedDataLevel()
 {
     return receivedDataLevel;
 }
 
+__QSPI_CODE
 uint16_t readUsbCdcData(uint8_t * data)
 {
     uint16_t lastDataLevel = receivedDataLevel;
