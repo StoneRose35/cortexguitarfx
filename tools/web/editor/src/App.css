@@ -141,6 +141,7 @@ div .editor-vertical-label
     padding: 6px;
     text-align: left;
     text-wrap: wrap;
+    white-space: pre-line;
 }
 .editor-button {
     border-style:solid;
