@@ -269,3 +269,8 @@ input:checked + .editor-slider:before {
 .editor-toggle-label {
     text-align: center;
 }
+
+img.editor-routing {
+    width: 56px;
+    height:auto;
+}

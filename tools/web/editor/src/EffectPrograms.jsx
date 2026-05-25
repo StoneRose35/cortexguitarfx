@@ -1,19 +1,57 @@
-import './App.css'
 import { useState } from 'react';
-
-
+import './App.css'
 
 function EffectView(props)
 {
-    
+    function getValue(effectState)
+    {
+        if (effectState === "on")
+        {
+            return 1;
+        }
+        else if (effectState === 'off')
+        {
+            return 0;
+        }
+    }
+
     return (
     <div className="editor-effect-group">
-    <input type="radio" name="effectInFocus" value={"fx"+props.id} id={"effectView" + props.id} className="editor-text-selectable"></input><label htmlFor={"effectView" + props.id}>{"Effect " + props.id}</label>
+    <input type="radio" name="effectInFocus" value={"fx"+props.id} id={"effectView" + props.id} className="editor-text-selectable" onChange={(e) => {
+            let c=0;
+            let fxParamsWithValue=[];
+            if (props.presets[props.currentPreset].programsAndParameters[props.id/1].programNr !== 0xff)
+            {
+                for (const paramName of props.fxPrograms[props.presets[props.currentPreset].programsAndParameters[props.id/1].programNr].parameterNames)
+                {
+                    if (c < props.presets[props.currentPreset].programsAndParameters[props.id/1].parameters.length)
+                    {
+                        fxParamsWithValue.push({
+                            "id": c,
+                            "displayName": paramName,
+                            "displayValue": "",
+                            "rawValue": props.presets[props.currentPreset].programsAndParameters[props.id/1].parameters[c] 
+                        });
+                        c++;
+                    }
+                }
+            }
+            props.setCurrentFxProgramIdx(props.id);
+            props.changeFxParams(fxParamsWithValue);
+        
+    }}></input>
+    <label htmlFor={"effectView" + props.id}>{"Effect " + props.id}</label>
     <label className="editor-switch">
-        <input type="checkbox" />
+        <input type="checkbox" checked={getValue(props.presets[props.currentPreset].programsAndParameters[props.id/1].state)} onChange={(e) => props.changeEffectState(props.id/1,e.target.checked)}/>
         <span className="editor-slider round"></span>
     </label>
-      <EffectPrograms id={props.id + "selector"} content={props.fxPrograms}/>
+      <EffectPrograms 
+        id={props.id} 
+        content={props.fxPrograms} 
+        presets={props.presets}
+        currentPreset={props.currentPreset}
+        changePresets={props.changePresets}
+        changeFxParams={props.changeFxParams} />
     </div>);
 }
 
@@ -22,17 +60,39 @@ function EffectPrograms(props)
     const fxProgramContent = props.content.map( cnt => {
         if (cnt.freezable)
         {
-            return (<option key={cnt.id} className='editor-fxprogram-freezable'>{cnt.name}</option>);
+            return (<option key={cnt.id} value={cnt.id} className='editor-fxprogram-freezable'>{cnt.name}</option>);
         }
         else
         {
-            return (<option key={cnt.id} >{cnt.name}</option>);
+            return (<option key={cnt.id} value={cnt.id}>{cnt.name}</option>);
         }
     });
     return (
-			<select id={props.id}>
+        <>
+			<select id={"fxSelector" + props.id}  value={props.presets[props.currentPreset].programsAndParameters[props.id/1].programNr}
+             onChange={(e) => {
+                let c=0;
+                let fxParamsWithValue=[];
+                for (const paramName of props.content[e.target.value].parameterNames)
+                {
+                    if (c < props.presets[props.currentPreset].programsAndParameters[props.id/1].length)
+                    {   
+                        fxParamsWithValue.push({
+                            "id": c,
+                            "displayName": paramName,
+                            "displayValue": "",
+                            "rawValue": props.presets[props.currentPreset].programsAndParameters[props.id/1].parameters[c]
+                        });
+                        c++;
+                    }
+                }
+                const updatedPresets = props.presets.slice();
+                updatedPresets[props.currentPreset].programsAndParameters[props.id/1].programNr = e.target.value;
+                props.changePresets(updatedPresets);
+            }}>
                 {fxProgramContent}
 			</select>
+        </>
     );
 }
 

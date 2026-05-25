@@ -162,6 +162,72 @@
             <div class="reference-bytevalue">0xCC</div>
         </div>
     </div>
+    </div>
+        <div class="reference-command">
+        <h4>Get Current Bank and Preset Number</h4>
+        <div class="reference-cmd-description">
+            Gets the Bank and Preset currently loaded. Causes "Preset and Bank Number" to be sent.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 5</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 4 by default</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x4</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x4</div>
+            <div class="reference-bytevalue">0x0</div>
+        </div>
+    </div>
+    <div>
+        <div class="reference-command">
+        <h4>Get Preset</h4>
+        <div class="reference-cmd-description">
+            Get the preset given a Bank and Preset Number.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 6</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 6 by default</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>the Bank Nr</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>The Preset Nr</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x3</div>
+            <div class="reference-bytevalue">0x1</div>
+        </div>        
+    </div>
     <h2>Messages</h2>
     <div class="reference-command">
         <h4>About Dialog Content</h4>
@@ -293,7 +359,11 @@
                 <td>Message Size</td>
             </tr>
             <tr>
-                <td>4:N</td>
+                <td>4</td>
+                <td>Program index whose parameter names are returned</td>
+            </tr>
+            <tr>
+                <td>5:N</td>
                 <td>First Parameter Name as a zero-terminated string.
                 </td>
             </tr>
@@ -316,8 +386,9 @@
         <div class="reference-bytearray">
             <div class="reference-bytevalue">0x2</div>
             <div class="reference-bytevalue">0x0</div>
-            <div class="reference-bytevalue">0x10</div>
+            <div class="reference-bytevalue">0x11</div>
             <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x1</div>
             <div class="reference-bytevalue">'G'</div>
             <div class="reference-bytevalue">'a'</div>
             <div class="reference-bytevalue">'i'</div>
@@ -372,6 +443,151 @@
             <div class="reference-bytevalue">0x0</div>
             <div class="reference-bytevalue">0x3</div>
             <div class="reference-bytevalue">0x42</div>                
+        </div>
+    </div>
+    <div class="reference-command">
+        <h4>Preset and Bank Number</h4>
+        <div class="reference-cmd-description">
+            Contains the number of the Bank and the Preset within the Bank currently loaded.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Message Nr: 5</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Message Size: 6</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>the Bank Number
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>the Preset Number on the range 0-2
+                </td>
+            </tr>
+            
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x5</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x2</div>
+            <div class="reference-bytevalue">0x1</div>                
+        </div>
+    </div>
+    <div class="reference-command">
+        <h4>Preset</h4>
+        <div class="reference-cmd-description">
+            Contains the Information about a preset
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Message Nr: 6</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Message Size</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>the Bank Number
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td style=" white-space: pre-line;">bits 0:1: the Preset Number on the range 0-2
+                    bits 2:7: The Effect Routing
+                    <div style="display: flex; align-items: center;">
+                        <div>0:</div>
+                        <img src="assets/rt_serial_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>1:</div>
+                        <img src="assets/rt_parallel_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>2:</div>
+                        <img src="assets/rt_s_2p_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>3:</div>
+                        <img src="assets/rt_2p_sl_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>4:</div>
+                        <img src="assets/rt_2s_p_16x16.png" style="height: 40px; "/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>7:7+S</td>
+                <td>The name of the Preset as a zero-terminated string</td>
+            </tr>
+            <tr>
+                <td> N</td>
+                <td>Program Nr for Program A, 255 means none</td>
+            </tr>
+            <tr>
+                <td>N+1:N+1+2*O</td>
+                <td>All O parameter values of Program A as 2byte little endian</td>
+            </tr>
+            <tr>
+                <td>M</td>
+                <td>Program Nr for Program B, 255 means none</td>
+            </tr>
+            <tr>
+                <td>Q:O+2*N</td>
+                <td>All N parameter values of Program B as 2byte little endian</td>
+            </tr>
+            <tr>
+                <td>P</td>
+                <td>Program Nr for Program C, 255 means none</td>
+            </tr>
+            <tr>
+                <td>P+1:P+1+2*Q</td>
+                <td>All Q parameter values of Program C as 2byte little endian</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-cmd-description">
+            Preset at Bank Nr 4, at position 1, serial routing, named "Demo". In Slot A Program Nr 3 is loaded
+            having two parameters which have the values 0x1AC and 0x1DC. On Slot 
+            B and C no programs are loaded
+        </div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x12</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x4</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">'D'</div>
+            <div class="reference-bytevalue">'e'</div>
+            <div class="reference-bytevalue">'m'</div>
+            <div class="reference-bytevalue">'o'</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x3</div>
+            <div class="reference-bytevalue">0xAC</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">0xDC</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">0xFF</div>
+            <div class="reference-bytevalue">0xFF</div>
         </div>
     </div>
 </body>
