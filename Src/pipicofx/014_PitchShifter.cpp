@@ -117,14 +117,17 @@ void PitchShifter::Param4::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-void PitchShifter::PitchShifter::setup()
+void PitchShifter::PitchShifter::setup(uint8_t allocateMemory)
 {
+    if (allocateMemory)
+    {
+        initPitchshifter2(&this->pitchShifter);
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-    initPitchshifter2(&this->pitchShifter);
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 PitchShifter::PitchShifter::~PitchShifter()

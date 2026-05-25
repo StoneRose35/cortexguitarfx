@@ -17,7 +17,11 @@ namespace PiPicoFX {
         {
             public:
                 AcousticProc() : FxProgram(7,"Acoustic Proc",20480<<2,12){
-                    this->setup();
+                    this->setup(1);
+                };
+                AcousticProc(uint8_t discarded) : FxProgram(7,"Acoustic Proc",20480<<2,12){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~AcousticProc();
                 float processSample(float);
@@ -86,7 +90,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

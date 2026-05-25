@@ -91,4 +91,72 @@ namespace PiPicoFX {
         return res;
     }
     
+
+    PiPicoFX::FxProgram * loadProgramWithoutSetup(uint8_t index)
+    {
+        PiPicoFX::FxProgram * res=nullptr;
+        switch(index)
+        {
+            case 0:
+                res = new(std::nothrow) PiPicoFX::AmpModel::AmpModel(1);
+                break;
+            case 1:
+                res = new(std::nothrow) PiPicoFX::VibChorus::VibChorus(1);
+                break;
+            case 2:
+                res = new(std::nothrow) PiPicoFX::Boost::Boost(1);
+                break;
+            case 3:
+                res = new(std::nothrow) PiPicoFX::MonsterCrusher::MonsterCrusher(1);
+                break;
+            case 4:
+                res = new(std::nothrow) PiPicoFX::Delay::Delay(1);
+                break;
+            case 5:
+                res = new(std::nothrow) PiPicoFX::Compressor::Compressor(1);
+                break;
+            case 6:
+                res = new(std::nothrow) PiPicoFX::AmpModelHighGain::AmpModelHighGain(1);
+                break;
+            case 7:
+                res = new(std::nothrow) PiPicoFX::Reverb::Reverb(1);
+                break;
+            case 8:
+                res = new(std::nothrow) PiPicoFX::SineModulation::SineModulation(1);
+                break;
+            case 9:
+                res = new(std::nothrow) PiPicoFX::Reverb2::Reverb2(1);
+                break;
+            case 10:
+                res = new(std::nothrow) PiPicoFX::Reverb3::Reverb3(1);
+                break;
+            case 11:
+                res = new(std::nothrow) PiPicoFX::Eq::Eq(1);
+                break;
+            case 12:
+                res = new(std::nothrow) PiPicoFX::AcousticProc::AcousticProc(1);
+                break;
+            case 13:
+                res = new(std::nothrow) PiPicoFX::PitchShifter::PitchShifter(1);
+                break;
+            case 14:
+                res = new(std::nothrow) PiPicoFX::ShimmerVerb::ShimmerVerb(1);
+                break;
+            case 15:
+                res = new(std::nothrow) PiPicoFX::Tremolo::Tremolo(1);
+                break;
+            case 16:
+                res = new(std::nothrow) PiPicoFX::FreeVerb::FreeVerb(1);
+                break;
+            case 17:
+                res = new(std::nothrow) PiPicoFX::MultimodeFilter::MultimodeFilter(1);
+                break;
+            case 18:
+                res = new(std::nothrow) PiPicoFX::XAmp::XAmp(1);
+                break;
+            default:
+                break;
+        }
+        return res;
+    }
 }

@@ -108,16 +108,19 @@ void SineModulation::Param6::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-void SineModulation::SineModulation::setup()
+void SineModulation::SineModulation::setup(uint8_t allocateMemory)
 {
-    initSineChorus(&this->sineChorus,mallocDelayMemory(SINE_CHORUS_DELAY_SIZE<<2));
+    if(allocateMemory)
+    {
+        initSineChorus(&this->sineChorus,mallocDelayMemory(SINE_CHORUS_DELAY_SIZE<<2));
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->addParameter(new Param5(this));
     this->addParameter(new Param6(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 SineModulation::SineModulation::~SineModulation()

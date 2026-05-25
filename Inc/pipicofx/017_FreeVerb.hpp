@@ -18,7 +18,11 @@ namespace PiPicoFX {
         {
             public:
                 FreeVerb() : FxProgram(4,"FreeVerb",24576<<2,16){
-                    this->setup();
+                    this->setup(1);
+                };
+                FreeVerb(uint8_t discarded) : FxProgram(4,"FreeVerb",24576<<2,16){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~FreeVerb();
                 float processSample(float);
@@ -74,7 +78,7 @@ namespace PiPicoFX {
                 void unfreeze() override;
                 void onFreeze() override;
                 void onMelt() override;
-                void setup();
+                void setup(uint8_t);
                 float meltedFeedbackValue;
         };
 

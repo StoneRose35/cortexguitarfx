@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 Reverb2() : FxProgram(3,"Allpass Reverb",24576<<2,9){
-                    this->setup();
+                    this->setup(1);
+                };
+                Reverb2(uint8_t discarded) : FxProgram(3,"Allpass Reverb",24576<<2,9){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~Reverb2();
                 float processSample(float);
@@ -30,7 +34,7 @@ namespace PiPicoFX {
                 void onFreeze() override;
                 void onMelt() override;
                 float meltedDecay;
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

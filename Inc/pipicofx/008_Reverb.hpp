@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 Reverb() : FxProgram(4,"Reverb",20480<<2,7){
-                    this->setup();
+                    this->setup(1);
+                };
+                Reverb(uint8_t discarded) : FxProgram(4,"Reverb",20480<<2,7){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~Reverb();
                 float processSample(float);
@@ -39,7 +43,7 @@ namespace PiPicoFX {
                 void unfreeze() override;
                 void onFreeze() override;
                 void onMelt() override;
-                void setup();
+                void setup(uint8_t);
                 float meltedTaus[4];
         };
 

@@ -24,7 +24,11 @@ namespace PiPicoFX {
         {
             public:
                 AmpModelHighGain() : FxProgram(6,"Amp High Gain",MAX_DELAY_SINGLEBUFFER<<2,6){
-                    this->setup();
+                    this->setup(1);
+                };
+                AmpModelHighGain(uint8_t discarded) : FxProgram(6,"Amp High Gain",MAX_DELAY_SINGLEBUFFER<<2,6){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~AmpModelHighGain();
                 float processSample(float);
@@ -240,7 +244,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

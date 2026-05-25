@@ -127,16 +127,19 @@ void Delay::Param4::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-void Delay::Delay::setup()
+void Delay::Delay::setup(uint8_t allocateMemory)
 {
-    initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<2),MAX_DELAY_SINGLEBUFFER);
+    if (allocateMemory)
+    {
+        initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<2),MAX_DELAY_SINGLEBUFFER);
+    }
     this->interpCnt = 0;
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->setFreezable(1);
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 Delay::Delay::~Delay()

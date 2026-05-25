@@ -592,7 +592,7 @@ int main(void)
             }
             if ((programsToInitialize[0] & 0x80) || (programsToInitialize[0] & 0x80) || (programsToInitialize[0] & 0x80))
             {
-                audioProcessor.setRouting((presets+currentPreset)->topology);
+                audioProcessor.setRouting((presets+currentPreset)->routing);
             }
             //applyPreset(presets+currentPreset,&audioProcessor);
             programChangeState = 4;
@@ -613,10 +613,10 @@ int main(void)
       {
             usbReceiverLevel += readUsbCdcData(usbReceiverbuffer + usbReceiverLevel);
             uint16_t * usbCmdSize = (uint16_t*)(usbReceiverbuffer + 2);
-            if (*usbCmdSize == usbReceiverLevel)
+            if (*usbCmdSize <= usbReceiverLevel)
             {
                 // process USB command
-                processUSBEditorCommand(usbReceiverbuffer);usbReceiverLevel=0;
+                processUSBEditorCommand(usbReceiverbuffer);
             } 
             usbReceiverLevel=0;
       }

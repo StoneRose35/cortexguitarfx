@@ -62,9 +62,9 @@ void MonsterCrusher::Param2::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-void MonsterCrusher::MonsterCrusher::setup()
+void MonsterCrusher::MonsterCrusher::setup(uint8_t allocateMemory)
 {
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }

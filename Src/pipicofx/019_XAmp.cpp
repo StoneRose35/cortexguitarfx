@@ -34,7 +34,7 @@ float XAmp::XAmp::processSample(float sampleIn)
     return newIn;
 }
 
-void XAmp::XAmp::setup()
+void XAmp::XAmp::setup(uint8_t allocateMemory)
 {
     /*
     float  points[8];
@@ -47,19 +47,22 @@ void XAmp::XAmp::setup()
     points[6]=0.7f;
     points[7]=0.7f;
     */
-    float  points[4];
-    points[0]=0.1f;
-    points[1]=0.1f;
-    points[2]=0.6f;
-    points[3]=0.93f;
-    initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 2),MAX_DELAY_SINGLEBUFFER);
-    MMFilterSetResonance(0.3f,&this->lowpass);
-    gdsSetAllPoints(points,&distortion);
+   if (allocateMemory)
+    {
+        float  points[4];
+        points[0]=0.1f;
+        points[1]=0.1f;
+        points[2]=0.6f;
+        points[3]=0.93f;
+        initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 2),MAX_DELAY_SINGLEBUFFER);
+        MMFilterSetResonance(0.3f,&this->lowpass);
+        gdsSetAllPoints(points,&distortion);
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 XAmp::XAmp::~XAmp()

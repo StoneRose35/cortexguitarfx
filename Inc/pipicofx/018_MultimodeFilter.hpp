@@ -16,7 +16,12 @@ namespace PiPicoFX {
             public:
                 MultimodeFilter(): FxProgram(4,"MMFilter",0,17)
                 {
-                    this->setup();
+                    this->setup(1);
+                };
+                MultimodeFilter(uint8_t discarded): FxProgram(4,"MMFilter",0,17)
+                {
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~MultimodeFilter();
                 float processSample(float);
@@ -37,7 +42,7 @@ namespace PiPicoFX {
                 uint16_t newResonance;
                 uint16_t interpCnt=0;
             private:
-                void setup();
+                void setup(uint8_t);
 
         };
 

@@ -90,14 +90,17 @@ void Reverb3::Param3::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
-void Reverb3::Reverb3::setup()
+void Reverb3::Reverb3::setup(uint8_t allocateMemory)
 {
-    initReverb3(&this->reverb,mallocDelayMemory((16*DIFFUSOR_SIZE + 4096)<<2));
+    if (allocateMemory)
+    {
+        initReverb3(&this->reverb,mallocDelayMemory((16*DIFFUSOR_SIZE + 4096)<<2));
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->setFreezable(1);
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 Reverb3::Reverb3::~Reverb3()

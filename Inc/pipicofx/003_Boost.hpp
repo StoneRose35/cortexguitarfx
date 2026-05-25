@@ -13,7 +13,11 @@ namespace PiPicoFX {
         {
             public:
                 Boost() : FxProgram(1,"Boost",0,2){
-                    this->setup();
+                    this->setup(1);
+                };
+                Boost(uint8_t discarded) : FxProgram(1,"Boost",0,2){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 float processSample(float);
                 GainStageDataType presetVolume={
@@ -21,7 +25,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
 

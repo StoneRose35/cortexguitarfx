@@ -93,15 +93,18 @@ void Reverb::Param4::parameterDisplay(char*res)
     appendToString(res,"%");
 }
 
- void Reverb::Reverb::setup()
+ void Reverb::Reverb::setup(uint8_t allocateMemory)
 {
-    initReverb(&this->reverb,this->reverbTime,mallocDelayMemory(this->getDelayMemoryUseage()));
+    if (allocateMemory)
+    {
+        initReverb(&this->reverb,this->reverbTime,mallocDelayMemory(this->getDelayMemoryUseage()));
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->setFreezable(1);
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 Reverb::Reverb::~Reverb()

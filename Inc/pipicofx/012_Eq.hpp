@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 Eq() : FxProgram(4,"3-Band EQ",0,11){
-                    this->setup();
+                    this->setup(1);
+                };
+                Eq(uint8_t discarded) : FxProgram(4,"3-Band EQ",0,11){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 float processSample(float);
                 ThreeBandEQType eq=
@@ -56,7 +60,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

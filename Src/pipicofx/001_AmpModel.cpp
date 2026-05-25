@@ -123,20 +123,21 @@ AmpModel::AmpModel::~AmpModel()
     //freeDelayMemory(this->delay.delayLine);
 }
 
-void AmpModel::AmpModel::setup()
+void AmpModel::AmpModel::setup(uint8_t allocateMemory)
 {
-    initfirFilter(&filter3);
-    initWaveShaper(&waveshaper1,&waveShaperDefaultOverdrive);
-    //initDelay(&delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER << 2),MAX_DELAY_SINGLEBUFFER);
-    //delay.feebackData = (void*)&feedbackFilter;
-    initThreeBandEq(&preEq);
-    initThreeBandEq(&postEq);
+    if (allocateMemory)
+    {
+        initfirFilter(&filter3);
+        initWaveShaper(&waveshaper1,&waveShaperDefaultOverdrive);
+        initThreeBandEq(&preEq);
+        initThreeBandEq(&postEq);
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->setFreezable(0);
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 /*

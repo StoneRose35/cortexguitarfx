@@ -20,7 +20,7 @@ class FxProgram : public AudioProcessor
     public:
         FxProgram(uint8_t nParams,const char*,uint32_t memoryUseage,uint8_t idx);
         virtual ~FxProgram();
-        void setup(void);
+        void setup(uint8_t allocateMemory);
         uint8_t addParameter(FxProgramParameter*p);
         float processSample(float);
         uint8_t getParameterCount(void);

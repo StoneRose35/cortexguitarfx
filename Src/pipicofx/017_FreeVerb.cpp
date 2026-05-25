@@ -58,27 +58,29 @@ float FreeVerb::FreeVerb::processSample(float sampleIn)
     return sampleOut;
 }
 
-void FreeVerb::FreeVerb::setup()
+void FreeVerb::FreeVerb::setup(uint8_t allocateMemory)
 {
-    float* delayMemPtr = mallocDelayMemory(24576<<2);
-
-    for (uint8_t c=0;c<8;c++)
+    if (allocateMemory)
     {
-        initDelay(this->delays+c,delayMemPtr+c*2048,2048);
-        this->delays[c].feebackData = (void*)(this->feedbackFilters+c);
-    }
-    for (uint8_t c=0;c<4;c++)
-    {
-        this->allpasses[c].delayLineIn=delayMemPtr+8*2048+c*2048;
-        this->allpasses[c].delayLineOut=delayMemPtr+8*2048+c*2048+1024;
-    }
+        float* delayMemPtr = mallocDelayMemory(24576<<2);
 
+        for (uint8_t c=0;c<8;c++)
+        {
+            initDelay(this->delays+c,delayMemPtr+c*2048,2048);
+            this->delays[c].feebackData = (void*)(this->feedbackFilters+c);
+        }
+        for (uint8_t c=0;c<4;c++)
+        {
+            this->allpasses[c].delayLineIn=delayMemPtr+8*2048+c*2048;
+            this->allpasses[c].delayLineOut=delayMemPtr+8*2048+c*2048+1024;
+        }
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->setFreezable(1);
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 FreeVerb::FreeVerb::~FreeVerb()

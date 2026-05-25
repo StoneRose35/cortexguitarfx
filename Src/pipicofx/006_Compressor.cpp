@@ -187,7 +187,7 @@ __ITCM_CODE
     }
 }
 
-void Compressor::Compressor::setup()
+void Compressor::Compressor::setup(uint8_t allocateMemory)
 {
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
@@ -195,5 +195,5 @@ void Compressor::Compressor::setup()
     this->addParameter(new Param4(this));
     this->addParameter(new Param5(this));
     this->addParameter(new Param6(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }

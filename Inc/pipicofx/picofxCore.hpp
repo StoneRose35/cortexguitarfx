@@ -7,11 +7,11 @@
 #define FXPROGRAM_NAME_MAXLEN 16
 #define FXPROGRAM_MAX_PARAMETERS 8
 
-#define PRESET_TOPOLOGY_SERIAL 0
-#define PRESET_TOPOLOGY_PARALLEL 1
-#define PRESET_TOPOLOGY_S_TWOP 2
-#define PRESET_TOPOLOGY_TWOP_S 3
-#define PRESET_TOPOLOGY_TWOS_P 4
+#define PRESET_ROUTING_SERIAL 0
+#define PRESET_ROUTING_PARALLEL 1
+#define PRESET_ROUTING_S_TWOP 2
+#define PRESET_ROUTING_TWOP_S 3
+#define PRESET_ROUTING_TWOS_P 4
 using namespace PiPicoFX;
 typedef float(*processSampleCallback)(float,void*);
 
@@ -51,7 +51,7 @@ typedef struct __attribute__((__packed__)) {
     uint8_t ledColorB : 2; // led color of effect at position B 
     uint8_t programNrC : 6; // the fx Program used in position C of the preset
     uint8_t ledColorC : 2; // led color of effect at position C 
-    uint8_t topology; // the topology, see enumeration on top
+    uint8_t routing; // the routing configuration, see enumeration on top
     uint8_t ledColorPreset; // the led color which should be lit when switch presets
     char name[16]; // the name of the preset
     uint16_t parametersA[8];

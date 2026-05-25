@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 MonsterCrusher() : FxProgram(2,"Monstercrusher",0,3){
-                    this->setup();
+                    this->setup(1);
+                };
+                MonsterCrusher(uint8_t discarded) : FxProgram(2,"Monstercrusher",0,3){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 float processSample(float);
 
@@ -29,7 +33,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

@@ -180,22 +180,25 @@ switch (this->cabSimType)
     }
 }
 
- void AmpModelHighGain::AmpModelHighGain::setup()
+ void AmpModelHighGain::AmpModelHighGain::setup(uint8_t allocateMemory)
 {
-    initfirFilter(&this->customCabFir);
-    initfirFilter(&this->frontmanFir);
-    initfirFilter(&this->hiwattFir);
-    initfirFilter(&this->voxAC15Fir);
-    initMultiWaveShaper(&this->waveshaper1,&multiWaveshaper1);
-    initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<2),MAX_DELAY_SINGLEBUFFER);
-    initReverb(&this->reverb,500,this->delay.delayLine); // putting delay and reverb onto the same memory since they are used mutually exclusively
+    if (allocateMemory)
+    {
+        initfirFilter(&this->customCabFir);
+        initfirFilter(&this->frontmanFir);
+        initfirFilter(&this->hiwattFir);
+        initfirFilter(&this->voxAC15Fir);
+        initMultiWaveShaper(&this->waveshaper1,&multiWaveshaper1);
+        initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<2),MAX_DELAY_SINGLEBUFFER);
+        initReverb(&this->reverb,500,this->delay.delayLine); // putting delay and reverb onto the same memory since they are used mutually exclusively
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->addParameter(new Param5(this));
     this->addParameter(new Param6(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 
 }
 

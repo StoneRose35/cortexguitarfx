@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 SineModulation() : FxProgram(6,"Sine Modulation",SINE_CHORUS_DELAY_SIZE<<2,8){
-                    this->setup();
+                    this->setup(1);
+                };
+                SineModulation(uint8_t discarded) : FxProgram(6,"Sine Modulation",SINE_CHORUS_DELAY_SIZE<<2,8){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~SineModulation();
                 float processSample(float);
@@ -38,7 +42,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

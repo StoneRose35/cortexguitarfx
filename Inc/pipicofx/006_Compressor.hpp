@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 Compressor() : FxProgram(6,"Compressor",0,5){
-                    this->setup();
+                    this->setup(1);
+                };
+                Compressor(uint8_t discarded) : FxProgram(6,"Compressor",0,5){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 float processSample(float);
                 uint8_t compressorType=0;
@@ -37,7 +41,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

@@ -192,7 +192,7 @@ void parametersToPreset(FxPresetType* preset,MultiAudioProcessor * audioProcesso
             preset->parametersC[c] = ((FxProgram*)audioProcessor->getFxProgram(2))->getParameter(c)->rawValue;
         } 
     }
-    preset->topology = audioProcessor->getRouting();
+    preset->routing = audioProcessor->getRouting();
  
 }
 
@@ -213,7 +213,7 @@ void generateEmptyPreset(FxPresetType* preset,uint8_t bank,uint8_t pos)
     preset->programNrA = 2;
     preset->programNrB = 0x3F;
     preset->programNrC = 0x3F;
-    preset->topology = PRESET_TOPOLOGY_SERIAL;
+    preset->routing = PRESET_ROUTING_SERIAL;
 
     for (uint8_t c=0;c< 8; c++) 
     {

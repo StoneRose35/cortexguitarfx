@@ -41,13 +41,13 @@ float MultimodeFilter::MultimodeFilter::processSample(float sampleIn)
     return newIn;
 }
 
-void MultimodeFilter::MultimodeFilter::setup()
+void MultimodeFilter::MultimodeFilter::setup(uint8_t allocateMemory)
 {
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 MultimodeFilter::MultimodeFilter::~MultimodeFilter()

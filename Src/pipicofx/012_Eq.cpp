@@ -24,14 +24,17 @@ float Eq::Eq::processSample(float sampleIn)
     return newIn;
 }
 
-void Eq::Eq::setup()
+void Eq::Eq::setup(uint8_t allocateMemory)
 {
-    initThreeBandEq(&this->eq);
+    if (allocateMemory)
+    {
+        initThreeBandEq(&this->eq);
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 /*

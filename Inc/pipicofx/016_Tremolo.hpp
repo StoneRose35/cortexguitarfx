@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 Tremolo() : FxProgram(5,"Tremolo",0,15){
-                    this->setup();
+                    this->setup(1);
+                };
+                Tremolo(uint8_t discarded) : FxProgram(5,"Tremolo",0,15){
+                     (void)discarded;
+                     this->setup(0);
                 };
                 float processSample(float);
                 TremoloType tremolo={
@@ -37,7 +41,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

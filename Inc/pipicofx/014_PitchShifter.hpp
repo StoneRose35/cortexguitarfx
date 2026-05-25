@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 PitchShifter() : FxProgram(4,"Pitchshifter",8192<<3,13){
-                    this->setup();
+                    this->setup(1);
+                };
+                PitchShifter(uint8_t discarded) : FxProgram(4,"Pitchshifter",8192<<3,13){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~PitchShifter();
                 float processSample(float);
@@ -37,7 +41,7 @@ namespace PiPicoFX {
                 float mix;
 
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

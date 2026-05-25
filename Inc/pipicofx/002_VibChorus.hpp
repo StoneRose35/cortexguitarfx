@@ -14,7 +14,12 @@ namespace PiPicoFX {
         {
             public:
                 VibChorus() : FxProgram(4,"Vibrato/Chorus",2048,1){
-                    this->setup();
+                    this->setup(1);
+                };
+
+                VibChorus(uint8_t discarded) : FxProgram(4,"Vibrato/Chorus",2048,1){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 float processSample(float);
                 SimpleChorusType chorusData={   
@@ -35,7 +40,7 @@ namespace PiPicoFX {
                 };
                 ~VibChorus();
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

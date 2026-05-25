@@ -24,15 +24,18 @@ float Tremolo::Tremolo::processSample(float sampleIn)
     return newIn;
 }
 
-void Tremolo::Tremolo::setup()
+void Tremolo::Tremolo::setup(uint8_t allocateMemory)
 {
-    initTremolo(&this->tremolo);
+    if (allocateMemory)
+    {
+        initTremolo(&this->tremolo);
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->addParameter(new Param5(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 void Tremolo::Param1::parameterCallback(uint16_t val)

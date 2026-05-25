@@ -28,10 +28,13 @@ float AcousticProc::AcousticProc::processSample(float sampleIn)
     return newIn;
 }
 
-void AcousticProc::AcousticProc::setup()
+void AcousticProc::AcousticProc::setup(uint8_t allocateMemory)
 {
-    initThreeBandEq(&this->eq);
-    initReverb(&this->reverb,500,mallocDelayMemory(20480<<2));
+    if (allocateMemory)
+    {
+        initThreeBandEq(&this->eq);
+        initReverb(&this->reverb,500,mallocDelayMemory(20480<<2));
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
@@ -39,7 +42,7 @@ void AcousticProc::AcousticProc::setup()
     this->addParameter(new Param5(this));
     this->addParameter(new Param6(this));
     this->addParameter(new Param7(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 AcousticProc::AcousticProc::~AcousticProc()

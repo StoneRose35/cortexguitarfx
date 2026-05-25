@@ -26,7 +26,12 @@ namespace PiPicoFX {
     {
         public:
             AmpModel() : FxProgram(4,"Amp Model",0,0){
-                this->setup();
+                this->setup(1);
+            };
+
+            AmpModel(uint8_t discarded): FxProgram(4,"Amp Model",0,0){
+                (void)discarded;
+                this->setup(0);
             };
 
             ~AmpModel();
@@ -117,7 +122,7 @@ namespace PiPicoFX {
                 .offset=0.0f
             };
         private:
-            void setup(void);
+            void setup(uint8_t);
     };
 
     class Param1:  public FxProgramParameter

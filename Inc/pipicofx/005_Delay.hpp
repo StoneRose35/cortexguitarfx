@@ -17,7 +17,11 @@ namespace PiPicoFX {
         {
             public:
                 Delay() : FxProgram(4,"Delay",MAX_DELAY_SINGLEBUFFER<<2,4){
-                    this->setup();
+                    this->setup(1);
+                };
+                Delay(uint8_t discarded) : FxProgram(4,"Delay",MAX_DELAY_SINGLEBUFFER<<2,4){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 float processSample(float);
                 DelayDataType delay={
@@ -44,7 +48,7 @@ namespace PiPicoFX {
                 int32_t delayInSamplesTargetValue;
                 uint16_t interpCnt;
             private:
-                void setup();
+                void setup(uint8_t);
                 float meltedFeedbackValue;
                 
                

@@ -28,7 +28,8 @@ __QSPI_CODE
 /*
 call after all parameters are set to have consistent parameter values and behaviour
 */
-void FxProgram::setup(void){
+void FxProgram::setup(uint8_t allocateMemory){
+    (void)allocateMemory;
     for (uint8_t c=0;c<getParameterCount();c++)
     {
         getParameter(c)->parameterCallback(getParameter(c)->rawValue);

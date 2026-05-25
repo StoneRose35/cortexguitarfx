@@ -15,7 +15,11 @@ namespace PiPicoFX {
         {
             public:
                 Reverb3() : FxProgram(3,"MatrixReverb",(16*DIFFUSOR_SIZE + 4096)<<2,10){
-                    this->setup();
+                    this->setup(1);
+                };
+                Reverb3(uint8_t discarded) : FxProgram(3,"MatrixReverb",(16*DIFFUSOR_SIZE + 4096)<<2,10){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~Reverb3();
                 float processSample(float);
@@ -26,7 +30,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
                 void freeze() override;
                 void unfreeze() override;
                 void onFreeze() override;

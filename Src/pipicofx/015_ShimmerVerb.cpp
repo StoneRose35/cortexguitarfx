@@ -46,52 +46,55 @@ float ShimmerVerb::ShimmerVerb::processSample(float sampleIn)
     return newIn;
 }
 
-void ShimmerVerb::ShimmerVerb::setup()
+void ShimmerVerb::ShimmerVerb::setup(uint8_t allocateMemory)
 {
-    float * delayMemoryPointer = mallocDelayMemory(11008<<2); 
-    initPitchshifter2(&this->unicornGlitterData.pitchShifter);
+    if (allocateMemory)
+    {
+        float * delayMemoryPointer = mallocDelayMemory(11008<<2); 
+        initPitchshifter2(&this->unicornGlitterData.pitchShifter);
 
-    initDelay(this->delays,delayMemoryPointer,256);
-    this->delays[0].delayInSamples = 149;
-    this->delays[0].mix = 0.997f;
-    this->delays[0].feedbackFunction=0;
-    this->delays[0].frozen=0;
-    initDelay(this->delays+1,delayMemoryPointer+256,512);
-    this->delays[1].delayInSamples = 337;
-    this->delays[1].mix = 0.997f;
-    this->delays[1].feedbackFunction=0;
-    this->delays[1].frozen=0;
-    initDelay(this->delays+2,delayMemoryPointer+512+256,2048);
-    this->delays[2].delayInSamples = 1597;
-    this->delays[2].mix = 0.997f;
-    this->delays[2].feedbackFunction=0;
-    this->delays[2].frozen=0;
-    initDelay(this->delays+3,delayMemoryPointer+2048+512+256,4096);
-    this->delays[3].delayInSamples = 3989;
-    this->delays[3].mix = 0.997f;
-    this->delays[3].feedbackFunction = (AudioProcessorFunc)unicornGlitter;
-    this->delays[3].feebackData = &this->unicornGlitterData;
-    this->delays[3].frozen=0;
-    this->allpasses[0].delayLineIn = delayMemoryPointer + 4096+2048+512+256;
-    this->allpasses[0].delayLineOut = delayMemoryPointer + 1024+4096+2048+512+256;
-    this->allpasses[0].coefficient = 22936.0f/32768.0f;
-    this->allpasses[0].delayPtr = 0;
-    this->allpasses[0].oldValues = 0;
-    this->allpasses[0].delayInSamples=617;
-    this->allpasses[0].bufferSize = 0x3FF;
+        initDelay(this->delays,delayMemoryPointer,256);
+        this->delays[0].delayInSamples = 149;
+        this->delays[0].mix = 0.997f;
+        this->delays[0].feedbackFunction=0;
+        this->delays[0].frozen=0;
+        initDelay(this->delays+1,delayMemoryPointer+256,512);
+        this->delays[1].delayInSamples = 337;
+        this->delays[1].mix = 0.997f;
+        this->delays[1].feedbackFunction=0;
+        this->delays[1].frozen=0;
+        initDelay(this->delays+2,delayMemoryPointer+512+256,2048);
+        this->delays[2].delayInSamples = 1597;
+        this->delays[2].mix = 0.997f;
+        this->delays[2].feedbackFunction=0;
+        this->delays[2].frozen=0;
+        initDelay(this->delays+3,delayMemoryPointer+2048+512+256,4096);
+        this->delays[3].delayInSamples = 3989;
+        this->delays[3].mix = 0.997f;
+        this->delays[3].feedbackFunction = (AudioProcessorFunc)unicornGlitter;
+        this->delays[3].feebackData = &this->unicornGlitterData;
+        this->delays[3].frozen=0;
+        this->allpasses[0].delayLineIn = delayMemoryPointer + 4096+2048+512+256;
+        this->allpasses[0].delayLineOut = delayMemoryPointer + 1024+4096+2048+512+256;
+        this->allpasses[0].coefficient = 22936.0f/32768.0f;
+        this->allpasses[0].delayPtr = 0;
+        this->allpasses[0].oldValues = 0;
+        this->allpasses[0].delayInSamples=617;
+        this->allpasses[0].bufferSize = 0x3FF;
 
-    this->allpasses[1].delayLineIn = delayMemoryPointer + 1024+1024+4096+2048+512+256;
-    this->allpasses[1].delayLineOut = delayMemoryPointer + 1024+1024+1024+4096+2048+512+256;
-    this->allpasses[1].coefficient = 22936.0f/32768.0f;
-    this->allpasses[1].delayPtr = 0;
-    this->allpasses[1].oldValues = 0;
-    this->allpasses[1].delayInSamples=907;
-    this->allpasses[1].bufferSize = 0x3FF;
+        this->allpasses[1].delayLineIn = delayMemoryPointer + 1024+1024+4096+2048+512+256;
+        this->allpasses[1].delayLineOut = delayMemoryPointer + 1024+1024+1024+4096+2048+512+256;
+        this->allpasses[1].coefficient = 22936.0f/32768.0f;
+        this->allpasses[1].delayPtr = 0;
+        this->allpasses[1].oldValues = 0;
+        this->allpasses[1].delayInSamples=907;
+        this->allpasses[1].bufferSize = 0x3FF;
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 ShimmerVerb::ShimmerVerb::~ShimmerVerb()

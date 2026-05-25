@@ -39,8 +39,8 @@ void Boost::Param1::parameterDisplay(char*res)
 }
 
 
-void Boost::Boost::setup()
+void Boost::Boost::setup(uint8_t allocateMemory)
 {
     this->addParameter(new Param1(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }

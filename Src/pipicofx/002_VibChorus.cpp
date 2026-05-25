@@ -84,14 +84,17 @@ void VibChorus::Param4::parameterDisplay(char* res)
     appendToString(res,"%");
 };
 
-void VibChorus::VibChorus::setup()
+void VibChorus::VibChorus::setup(uint8_t allocateMemory)
 {
-    initSimpleChorus(&chorusData);
+    if (allocateMemory)
+    {
+        initSimpleChorus(&chorusData);
+    }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-    FxProgram::setup();
+    FxProgram::setup(allocateMemory);
 }
 
 VibChorus::VibChorus::~VibChorus()

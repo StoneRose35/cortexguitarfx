@@ -26,7 +26,11 @@ namespace PiPicoFX {
         {
             public:
                 ShimmerVerb() : FxProgram(4,"ShimmerVerb",15104<<2,14){
-                    this->setup();
+                    this->setup(1);
+                };
+                ShimmerVerb(uint8_t discarded) : FxProgram(4,"ShimmerVerb",15104<<2,14){
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~ShimmerVerb();
                 float processSample(float);
@@ -58,7 +62,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter

@@ -17,7 +17,12 @@ namespace PiPicoFX {
             public:
                 XAmp(): FxProgram(4,"XAmp",MAX_DELAY_SINGLEBUFFER<<2,18)
                 {
-                    this->setup();
+                    this->setup(1);
+                };
+                XAmp(uint8_t discarded): FxProgram(4,"XAmp",MAX_DELAY_SINGLEBUFFER<<2,18)
+                {
+                    (void)discarded;
+                    this->setup(0);
                 };
                 ~XAmp();
                 float processSample(float);
@@ -52,7 +57,7 @@ namespace PiPicoFX {
                     .offset=0.0f
                 };
             private:
-                void setup();
+                void setup(uint8_t);
         };
 
         class Param1:  public FxProgramParameter
