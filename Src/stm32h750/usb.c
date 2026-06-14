@@ -23,6 +23,7 @@ void(*ep8OUTHandler)(void*,uint16_t)=0;
 
 //driver-specific handlers
 void(*usbDriverResetHandler)(void)=0; // if anything special needs to be done on usb reset
+void(*usbSuspendedHandler)(void)=0; // called when the usb connection is disconnected
 
 endPointHandler outHandlers[9]={0,0,0,0,0,0,0,0,0};
 void(*transferDoneHandlers[9])(void)={0,0,0,0,0,0,0,0,0};
@@ -190,6 +191,10 @@ void OTG_FS_IRQHandler(void)
         #endif
         // TODO shutdown data streams, notify user-level code that usb has been disconnected
         USB2_OTG_FS->GINTSTS |= (1 << USB_OTG_GINTSTS_USBSUSP_Pos);
+        if (usbSuspendedHandler != 0)
+        {
+            usbSuspendedHandler();   
+        }
     }
 
     // early suspend
@@ -667,4 +672,10 @@ __RAMFUNC
 void setResetHandler(void(*handler)(void))
 {
     usbDriverResetHandler = handler;
+}
+
+__RAMFUNC
+void setSuspendedHandler(void(*handler)(void))
+{
+    usbSuspendedHandler = handler;
 }

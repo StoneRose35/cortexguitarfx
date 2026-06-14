@@ -130,6 +130,7 @@ void USBVendorSpecificIFInit()
     setConfigurationHandler(&usbVendorSpecificIFSetConfiguration);
     setClassSpecificSetupHandler(&usbVendorSpecificIFHandleClassSetupRequest);
     setSetInterfaceHandler(&usbVendorSpecificIFSetInterfaceHandler);
+    setSuspendedHandler(&usbVendorSpecificIFSuspendedHandler);
 }
 
 static volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress
@@ -394,4 +395,9 @@ uint16_t readUsbVendorSpecificData(uint8_t * data,uint16_t startIndex)
 void handleUsbVendorSpecificIFVendorSetupRequest(const UsbSetupPacketType* packet)
 {
     (void)packet;
+}
+
+void usbVendorSpecificIFSuspendedHandler()
+{
+    bmUsbStatus = 0;
 }

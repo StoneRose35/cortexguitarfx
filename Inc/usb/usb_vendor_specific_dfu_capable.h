@@ -30,4 +30,5 @@ void UsbVendorSpecificIFEp0OutHandler(void* dataPtr,uint16_t len);
 uint16_t getUsbVendorSpecificReceivedDataLevel();
 uint16_t readUsbVendorSpecificData(uint8_t * data,uint16_t startIndex);
 void handleUsbVendorSpecificIFVendorSetupRequest(const UsbSetupPacketType* packet);
+void usbVendorSpecificIFSuspendedHandler();
 #endif
