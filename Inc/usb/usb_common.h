@@ -189,9 +189,8 @@ void initUSB();
 uint16_t serializeStringDescriptor(uint8_t * dataPtr, UsbStringDescriptor descr);
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet); 
 
-// driver-specific implementations
-void handleVendorSetupRequest(const UsbSetupPacketType* packet);
 
+void setVendorSpecifiSetHandler(void(*handler)(const UsbSetupPacketType* packet) );
 void setUsbConfigurationDescriptor(const uint8_t * confDescr,const uint16_t size);
 void setUsbDeviceDescriptor(const uint8_t * deviceDescr,const uint16_t size);
 void setUsbStringDescriptors(UsbStringDescriptor stringDescrs);

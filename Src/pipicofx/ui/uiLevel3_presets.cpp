@@ -30,6 +30,7 @@ extern "C" {
 }
 #include "pipicofx/FxProgramLoader.hpp"
 #include "pipicofx/MultiAudioProcessor.hpp"
+#include "pipicofx/uiLevel3_preset.hpp"
 
 
 /**
@@ -73,8 +74,6 @@ static uint8_t handleReleaseEvent = 0;
 static uint8_t channelState=0xf; // bits 0-1 HiZ, bits2-3 mic, 0: off  1: on, 3: unknown
 static void handleBankChange(uint8_t);
 static void handlePresetChange(uint8_t);
-static void setPresetNr(uint8_t);
-static void setPreset();
 static void createBankPreviewOverlay(uint8_t bankNr,BwImageType*img);
 static void limitPreviewBankRange(uint8_t increase);
 static void createPresetSelector(BwImageType*imgBuffer);
@@ -827,7 +826,7 @@ static void handlePresetChange(uint8_t increase)
     setPreset();
 }
 
-static void setPresetNr(uint8_t nr)
+void setPresetNr(uint8_t nr)
 {
     if (previewBankNr != currentBank && previewBankNr != 0xFF)
     {
@@ -839,7 +838,7 @@ static void setPresetNr(uint8_t nr)
     setPreset();
 }
 
-static void setPreset()
+void setPreset()
 {
     if (presets[currentPreset].programNrA != 0x3F && (audioProcessor.getFxProgram(0) == nullptr || 
         (audioProcessor.getFxProgram(0) != nullptr && 

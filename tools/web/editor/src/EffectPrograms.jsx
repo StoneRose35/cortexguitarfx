@@ -37,7 +37,6 @@ function EffectView(props)
                 }
             }
             props.setCurrentFxProgramIdx(props.id);
-            props.changeFxParams(fxParamsWithValue);
         
     }}></input>
     <label htmlFor={"effectView" + props.id}>{"Effect " + props.id}</label>

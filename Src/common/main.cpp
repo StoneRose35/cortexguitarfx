@@ -51,7 +51,7 @@ extern "C" {
 #include "pipicofx/fxPrograms.h"
 #include "pipicofx/pipicofxui.h"
 #include "drivers/usb.h"
-#include "usb/usb_cdc.h"
+#include "usb/usb_vendor_specific_dfu_capable.h"
 #include "usb/usb_dfu.h"
 #include "gen/version.h"
 #include "flash.h"
@@ -101,7 +101,7 @@ volatile uint8_t currentBank=0;
 volatile uint8_t currentPreset=0x0;
 volatile uint8_t programsToInitialize[3]={0xFF,0xFF,0xFF}; // 0x7f: do not change, 0x7e do not reload a program, otherwise bits 0-6: program nr to initialize, bit 7: copy parameters from preset or not
 volatile int16_t initialKnobValues[3];
-uint8_t usbReceiverbuffer[256];
+uint8_t usbReceiverbuffer[USB_VS_RR_BUFFER_SIZE+1];
 volatile uint16_t usbReceiverLevel=0;
 AudioProcessor * currentFxProgram;
 __DTCM_DATA
@@ -127,6 +127,9 @@ uint8_t switchVals[4]={0,0,0,0};
 uint16_t adcChannelOld0=0,adcChannel0=0;
 uint16_t adcChannelOld1=0,adcChannel1=0;
 uint16_t adcChannelOld2=0,adcChannel2=0;
+uint16_t currentUsbCommandNr=0xFFFF;
+uint16_t currentUsbCommandLength=0;
+uint16_t currentUsbBfrIndex=0;
 
 uint32_t tickStart, tickEnd;
 char chrbfr[16];
@@ -609,16 +612,55 @@ int main(void)
         task &= ~(1 << TASK_PREPARE_FOR_DFU);
       }
 
-      if (getUsbCdcReceivedDataLevel() > 0)
+      if (getUsbVendorSpecificReceivedDataLevel() > 0)
       {
-            usbReceiverLevel += readUsbCdcData(usbReceiverbuffer + usbReceiverLevel);
-            uint16_t * usbCmdSize = (uint16_t*)(usbReceiverbuffer + 2);
-            if (*usbCmdSize <= usbReceiverLevel)
+            uint16_t oldUsbCommandBfrIdx = currentUsbBfrIndex;
+            currentUsbBfrIndex += readUsbVendorSpecificData(usbReceiverbuffer,currentUsbBfrIndex);
+            currentUsbBfrIndex &= USB_VS_RR_BUFFER_SIZE;
+            uint8_t imDone=0;
+            while (imDone == 0)
             {
+                if (currentUsbCommandNr == 0xFFFF && ((currentUsbBfrIndex - oldUsbCommandBfrIdx) & USB_VS_RR_BUFFER_SIZE)> 3 )
+                {
+                    currentUsbCommandNr = *(usbReceiverbuffer +oldUsbCommandBfrIdx);
+                    currentUsbCommandNr |= *(usbReceiverbuffer + ((oldUsbCommandBfrIdx+1)&USB_VS_RR_BUFFER_SIZE)) << 8;
+                    currentUsbCommandLength = *(usbReceiverbuffer +((oldUsbCommandBfrIdx+2)&USB_VS_RR_BUFFER_SIZE));
+                    currentUsbCommandLength |= *(usbReceiverbuffer +((oldUsbCommandBfrIdx+3)&USB_VS_RR_BUFFER_SIZE)) << 8;
+                    if (currentUsbCommandLength > 32000)
+                    {
+                        currentUsbCommandNr = 0xFFFF;
+                        currentUsbCommandLength = 0;
+                    }
+                }
+                else
+                {
+                    imDone = 1;
+                }
+                if (currentUsbCommandNr != 0xFFFF && currentUsbCommandLength <= ((currentUsbBfrIndex - oldUsbCommandBfrIdx)&USB_VS_RR_BUFFER_SIZE))
+                {
+                    uint8_t * singleCommandBfr = (uint8_t*)malloc(currentUsbCommandLength);
+                    for (uint16_t c=0;c<currentUsbCommandLength;c++)
+                    {
+                        *(singleCommandBfr + c)=*(usbReceiverbuffer + oldUsbCommandBfrIdx++);
+                        oldUsbCommandBfrIdx &= USB_VS_RR_BUFFER_SIZE;
+                    }
+                    processUSBEditorCommand(singleCommandBfr);
+                    currentUsbCommandNr=0xFFFF;
+                    currentUsbCommandLength=0;
+                    free(singleCommandBfr);
+                }
+                if (oldUsbCommandBfrIdx == currentUsbBfrIndex)
+                {
+                    imDone = 1;
+                }                
+            }
+            //uint16_t * usbCmdSize = (uint16_t*)(usbReceiverbuffer + 2);
+            //if (*usbCmdSize <= usbReceiverLevel)
+            //{
                 // process USB command
-                processUSBEditorCommand(usbReceiverbuffer);
-            } 
-            usbReceiverLevel=0;
+            //    processUSBEditorCommand(usbReceiverbuffer);
+            //} 
+            //usbReceiverLevel=0;
       }
       #endif
 	}

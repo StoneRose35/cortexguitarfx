@@ -228,6 +228,89 @@
             <div class="reference-bytevalue">0x1</div>
         </div>        
     </div>
+    <div>
+        <div class="reference-command">
+        <h4>Set Parameter</h4>
+        <div class="reference-cmd-description">
+            Set a parameter nr N of the program at index A (0-2)
+            to a Value V. Causes a "Parameter Value" message to be returned
+            which contains the textual description of the parameter value.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 7</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 8 by default</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>program index (0-2)</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>parameter index within the program</td>
+            </tr>
+            <tr>
+                <td>6:7</td>
+                <td>the value of the parameter (0-4095)</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-cmd-description">
+            Setting the fourth parameter (parameter index 3) of effect B (program index 1) to the value 1023
+        </div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x7</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x8</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">0x3</div>
+            <div class="reference-bytevalue">0xFF</div>
+            <div class="reference-bytevalue">0x3</div>
+        </div>        
+    </div>
+    <div>
+        <div class="reference-command">
+        <h4>Load Preset</h4>
+        <div class="reference-cmd-description">
+            Load a preset of the current bank.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 9</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 5 by default</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>program index (0-2)</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x9</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x5</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x1</div>
+        </div>        
+    </div>
     <h2>Messages</h2>
     <div class="reference-command">
         <h4>About Dialog Content</h4>
@@ -535,6 +618,13 @@
                 </td>
             </tr>
             <tr>
+                <td>6</td>
+                <td>Bit 0:1: state of effect A, 0: off, 1: on, 2: frozen
+                    Bit 2:3: state of effect B
+                    Bit 4:5: state of effect C
+                </td>
+            </tr>
+            <tr>
                 <td>7:7+S</td>
                 <td>The name of the Preset as a zero-terminated string</td>
             </tr>
@@ -543,30 +633,30 @@
                 <td>Program Nr for Program A, 255 means none</td>
             </tr>
             <tr>
-                <td>N+1:N+1+2*O</td>
-                <td>All O parameter values of Program A as 2byte little endian</td>
+                <td>N+1:N+NO</td>
+                <td>All O parameter values of Program A as 2byte little endian, followed by the display Value as a zero-terminated string</td>
             </tr>
             <tr>
                 <td>M</td>
                 <td>Program Nr for Program B, 255 means none</td>
             </tr>
             <tr>
-                <td>Q:O+2*N</td>
-                <td>All N parameter values of Program B as 2byte little endian</td>
+                <td>M+1:M+1+NQ</td>
+                <td>All Q parameter values of Program B as 2byte little endian, followed by the display Value as a zero-terminated string</td>
             </tr>
             <tr>
                 <td>P</td>
                 <td>Program Nr for Program C, 255 means none</td>
             </tr>
             <tr>
-                <td>P+1:P+1+2*Q</td>
-                <td>All Q parameter values of Program C as 2byte little endian</td>
+                <td>P+1:P+1+NW</td>
+                <td>All W parameter values of Program C as 2byte little endian, followed by the display Value as a zero-terminated string</td>
             </tr>
         </table>
         <div class="reference-example-title">Example</div>
         <div class="reference-cmd-description">
             Preset at Bank Nr 4, at position 1, serial routing, named "Demo". In Slot A Program Nr 3 is loaded
-            having two parameters which have the values 0x1AC and 0x1DC. On Slot 
+            having two parameters which have the values 0x1AC, display Value "Muh" and 0x1DC, display value "Maeh". On Slot 
             B and C no programs are loaded
         </div>
         <div class="reference-bytearray">
@@ -584,10 +674,63 @@
             <div class="reference-bytevalue">0x3</div>
             <div class="reference-bytevalue">0xAC</div>
             <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">'M'</div>
+            <div class="reference-bytevalue">'u'</div>
+            <div class="reference-bytevalue">'h'</div>
+            <div class="reference-bytevalue">0x0</div>
             <div class="reference-bytevalue">0xDC</div>
             <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">'M'</div>
+            <div class="reference-bytevalue">'a'</div>
+            <div class="reference-bytevalue">'e'</div>
+            <div class="reference-bytevalue">'h'</div>
+            <div class="reference-bytevalue">0x0</div>
             <div class="reference-bytevalue">0xFF</div>
             <div class="reference-bytevalue">0xFF</div>
+        </div>
+    </div>
+    <div class="reference-command">
+        <h4>Parameter display value</h4>
+        <div class="reference-cmd-description">
+            Returns the value of parameter nr A of program at index I (0-2)
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>Position</td>
+                <td class="reference-description">Description</td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Message Nr: 7</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Message Size</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>the effect index (0-2)
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>the parameter index within the fx program.
+                </td>
+            </tr>
+            <tr>
+                <td>6:6+N</td>
+                <td>The display name as a zero-terminated string</td>
+            </tr>
+            
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0x5</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x2</div>
+            <div class="reference-bytevalue">0x1</div>                
         </div>
     </div>
 </body>

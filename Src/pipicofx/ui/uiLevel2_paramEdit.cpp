@@ -16,8 +16,10 @@ extern "C" {
 #include "pipicofx/pipicofxui.h"
 #include "stringFunctions.h"
 #include "drivers/systick.h"
+#include "usb/usb_vendor_specific_dfu_capable.h"
 }
 #include "pipicofx/MultiAudioProcessor.hpp"
+#include "usb/usb_cdc_editor_interface.hpp"
 
 
 extern FxPresetType presets[3];
@@ -486,71 +488,81 @@ static inline void knobCallback(uint16_t val,uint8_t control)
 
 static void knob0Callback(uint16_t val)
 {
-    /*
-    if (ui.enterState == 1)
-    {
-        if (((val > initialKnobValues[0] && (val - initialKnobValues[0]) >KNOB_HYSTERESIS) || (val < initialKnobValues[0] && (initialKnobValues[0]-val) >KNOB_HYSTERESIS))
-            && (currentParameterPage - 1)*3 < ui.currentProgram->getParameterCount())
-        {
-            initialKnobValues[0] = 0xFFFF;
-            ui.bypassEnterReleased = 1;
-            initialKnobValues[1]=getChannel1Value();
-            initialKnobValues[2]=getChannel2Value();
-            ui.currentProgram->getParameter((currentParameterPage - 1)*3)->parameterCallback(val);
-            ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3);
-        }
-    }
-    */
+    uint16_t stringIndex=6;
+    uint8_t responseBfr[512];
     if ((bmKnobsLockedSelected & (1 << 0))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3);
+
+
+        ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))
+            ->getParameter((currentParameterPage - 1)*3)->parameterDisplay((char*)responseBfr+6);
+        responseBfr[0]=MSG_PARAMETER_VALUE;
+        responseBfr[1]=0;
+        responseBfr[4]=ui.currentProgramPosition;
+        responseBfr[5]=(currentParameterPage - 1)*3;
+        while (*(responseBfr + stringIndex) != 0)
+        {
+            stringIndex++;
+        }
+        stringIndex++;
+        *((uint16_t*)(responseBfr+2))=stringIndex;
+        usbVendorSpecificSendData((uint8_t*)responseBfr,4,1);
+        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);
     }
 }
 
 static void knob1Callback(uint16_t val)
 {
-    /*
-    if (ui.enterState == 1)
-    {
-        if (((val > initialKnobValues[1] && (val - initialKnobValues[1]) >KNOB_HYSTERESIS) || (val < initialKnobValues[1] && (initialKnobValues[1]-val) >KNOB_HYSTERESIS))
-        && (currentParameterPage - 1)*3 + 1< ui.currentProgram->getParameterCount())
-        {
-            initialKnobValues[1] = 0xFFFF;
-            ui.bypassEnterReleased = 1;
-            initialKnobValues[0]=getChannel0Value();
-            initialKnobValues[2]=getChannel2Value();
-            ui.currentProgram->getParameter((currentParameterPage - 1)*3+1)->parameterCallback(val);
-            ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3+1);
-        }
-    }*/
+    uint16_t stringIndex=6;
+    uint8_t responseBfr[512];
+
     if ((bmKnobsLockedSelected & (1 << 1))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1);
+
+        ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))
+            ->getParameter((currentParameterPage - 1)*3 + 1)->parameterDisplay((char*)responseBfr+6);
+        responseBfr[0]=MSG_PARAMETER_VALUE;
+        responseBfr[1]=0;
+        responseBfr[4]=ui.currentProgramPosition;
+        responseBfr[5]=(currentParameterPage - 1)*3 + 1;
+        while (*(responseBfr + stringIndex) != 0)
+        {
+            stringIndex++;
+        }
+        stringIndex++;
+        *((uint16_t*)(responseBfr+2))=stringIndex;
+        usbVendorSpecificSendData((uint8_t*)responseBfr,4,1);
+        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);
     }
 }
 
 static void knob2Callback(uint16_t val)
 {
-    /*
-    if (ui.enterState == 1)
-    {
-        if (((val > initialKnobValues[2] && (val - initialKnobValues[2]) >KNOB_HYSTERESIS) || (val < initialKnobValues[2] && (initialKnobValues[2]-val) >KNOB_HYSTERESIS))
-        && (currentParameterPage - 1)*3 + 2 < ui.currentProgram->getParameterCount())
-        {
-            initialKnobValues[2] = 0xFFFF;
-            ui.bypassEnterReleased = 1;
-            initialKnobValues[0]=getChannel0Value();
-            initialKnobValues[1]=getChannel1Value();
-            ui.currentProgram->getParameter((currentParameterPage - 1)*3+2)->parameterCallback(val);
-            ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3+2);
-        }
-    }*/
+    uint16_t stringIndex=6;
+    uint8_t responseBfr[512];
     if ((bmKnobsLockedSelected & (1 << 2))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2);
+
+        ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))
+            ->getParameter((currentParameterPage - 1)*3 + 2)->parameterDisplay((char*)responseBfr+6);
+        responseBfr[0]=MSG_PARAMETER_VALUE;
+        responseBfr[1]=0;
+        responseBfr[4]=ui.currentProgramPosition;
+        responseBfr[5]=(currentParameterPage - 1)*3 + 2;
+        while (*(responseBfr + stringIndex) != 0)
+        {
+            stringIndex++;
+        }
+        stringIndex++;
+        *((uint16_t*)(responseBfr+2))=stringIndex;
+        usbVendorSpecificSendData((uint8_t*)responseBfr,4,1);
+        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);
     }
 }
 

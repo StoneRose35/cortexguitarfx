@@ -34,6 +34,8 @@ static uint8_t(*currentUsbClassSpecificSetupHandler)(const volatile UsbSetupPack
 
 static uint8_t(*currentUsbSetInterfaceHandler)(uint16_t alternateSetting,uint16_t interfaceIndex)=0;
 
+static void(*currentVendorSpecificSetupHandler)(const UsbSetupPacketType* packet);
+
 // Function to decode a USB setup packet
 __RAMFUNC
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
@@ -199,7 +201,10 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
         #ifdef USB_DBG
         sendStringBlocking("Setup Packet, vendor-type request\r\n");
         #endif
-        handleVendorSetupRequest(packet);
+        if (currentVendorSpecificSetupHandler != 0)
+        {
+            currentVendorSpecificSetupHandler(packet);
+        }
     }
 }
 
@@ -260,4 +265,10 @@ __RAMFUNC
 void setSetInterfaceHandler(uint8_t(*handler)(uint16_t,uint16_t))
 {
     currentUsbSetInterfaceHandler = handler;    
+}
+
+__RAMFUNC
+void setVendorSpecifiSetHandler(void(*handler)(const UsbSetupPacketType* packet) )
+{
+    currentVendorSpecificSetupHandler = handler;
 }

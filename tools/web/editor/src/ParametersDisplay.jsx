@@ -14,7 +14,7 @@ function ParametersDisplay(props)
                     } }/>
                     <div className="editor-vertical-label">{p}</div>
                 </div>
-                <div className="editor-paramvalue">{props.preset.programsAndParameters[props.effectIndex].parameters[id++]}</div>
+                <div className="editor-paramvalue">{props.preset.programsAndParameters[props.effectIndex].displayNames[id++]}</div>
             </div>
             );
         });

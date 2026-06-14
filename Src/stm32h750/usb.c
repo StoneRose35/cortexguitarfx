@@ -5,7 +5,7 @@
 #include "usb/usb_common.h"
 #include "usb/usb_config.h"
 #include "uart.h"
-#include "usb/usb_cdc.h"
+#include "usb/usb_vendor_specific_dfu_capable.h"
 #include "memoryRegions.h"
 #include "globalConfig.h"
 #include "stm32h750/helpers.h"
@@ -512,7 +512,7 @@ epOutDataCntrs[0]=0;
 epInDataCntrs[0]=0;
 
 // Init specific driver
-USBCDCInit();
+USBVendorSpecificIFInit();
 
 // start phy clock and stop HCLK gating
 *(volatile uint32_t*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_PCGCCTL_BASE) &= ~((1 << USB_OTG_PCGCCTL_GATECLK_Pos) | (1 << USB_OTG_PCGCCTL_STOPCLK_Pos));
@@ -546,24 +546,28 @@ void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen)
     if(dlen==0)
     {
         npackets = 1;
-        USB2_OTG_FS_DEVICE->DIEPEMPMSK &= ~(1UL << epNr);
     }
     else
     {
         npackets = ((dlen + epInMaxPacketSizes[epNr] - 1) / epInMaxPacketSizes[epNr]);
-        USB2_OTG_FS_DEVICE->DIEPEMPMSK |= (1UL << epNr);
     }
-    
+    inEndpoint->DIEPTSIZ = (npackets << USB_OTG_DIEPTSIZ_PKTCNT_Pos) | dlen;
+
     epInBuffers[epNr] = (uint8_t*)data;
     epInBytesTransferred[epNr]=0;
     epInDataCntrs[epNr] = dlen;
 
-    inEndpoint->DIEPTSIZ = (npackets << USB_OTG_DIEPTSIZ_PKTCNT_Pos) | dlen;
-
     epCtrl &= ~(1 << USB_OTG_DIEPCTL_STALL_Pos);
     epCtrl |= (1 << USB_OTG_DIEPCTL_EPENA_Pos) | (1 << USB_OTG_DIEPCTL_CNAK_Pos);
     inEndpoint->DIEPCTL = epCtrl;
-
+    if(dlen==0)
+    {
+        USB2_OTG_FS_DEVICE->DIEPEMPMSK &= ~(1UL << epNr);
+    }
+    else
+    {
+        USB2_OTG_FS_DEVICE->DIEPEMPMSK |= (1UL << epNr);
+    }
 }
 
 __RAMFUNC

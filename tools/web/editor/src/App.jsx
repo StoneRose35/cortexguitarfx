@@ -10,17 +10,25 @@ let fxProgs;
 let commandBfr=[];
 let currentCommandLength=0;
 let currentCommandNr=0xFFFF;
+let commandBfrIdx=0;
 let presetBfr=[{},{},{}];
 let currentBankBfr=0;
-let currentPresetBfr=0;
+let masterVolumeMessageState = 0;
+let parameterValueState = 0;
+let parameterValueSending = 0;
+//let currentPresetBfr=0;
+//let readCommandState = 0; // 0: read header, 1: read command
+//let readCommandRemainingSize = 0; // size of the command to read, excluding header
 
 const USB_CMD_GET_ABOUT = 0
 const USB_CMD_GET_INPUTS_AND_MASTER_VOLUME = 3
 const USB_CMD_SET_INPUTS_AND_MASTER_VOLUME = 4
 const USB_CMD_GET_CURRENT_BANK_PRESET_NR = 5
 const USB_CMD_GET_PRESET = 6
+const USB_CMD_SET_PARAMETER = 7
 const USB_CMD_GET_PROGRAMS = 8
 const USB_CMD_GET_PARAMETER_NAMES = 2
+const USB_CMD_LOAD_PRESET=9
 
 
 const MSG_ABOUT = 0
@@ -29,6 +37,7 @@ const MSG_PARAMETER_NAMES = 2
 const MSG_INPUTS_AND_MASTER_VOLUME = 3
 const MSG_BANK_AND_PRESET_NR = 5
 const MSG_PRESET = 6
+const MSG_PARAMETER_VALUE = 7
 
 export async function getParameterNames(programNr)
 {
@@ -40,13 +49,22 @@ export async function getParameterNames(programNr)
     cmd[2]=5;
     cmd[3]=0;
     cmd[4]=programNr;
-    const writer = ppfxDevice.writable.getWriter();
-    await writer.write(cmd);
-    writer.releaseLock();  
+    writeIfPossible(cmd);
 }
 
+async function writeIfPossible(cmd)
+{
+    if (ppfxDevice != "undefined")
+    {
+        if (ppfxDevice.configuration != null)
+        {
+            await ppfxDevice.transferOut(1,cmd); 
+            return 1;
+        }
+    }
+    return 0;
+}
 
-    export 
 
 function App() {
 
@@ -77,26 +95,6 @@ function App() {
         }
     ]);
 
-    const [fxParameters,setFxParameters] = useState([
-        {
-            "id": 0,
-            "displayName": "Gain",
-            "displayValue": "5754",
-            "rawValue": 2345
-        },
-        {
-            "id": 1,
-            "displayName": "Post-EQ",
-            "displayValue": "5623",
-            "rawValue": 2645
-        },
-        {
-            "id": 2,
-            "displayName": "Preset Vol",
-            "displayValue": "70.1%",
-            "rawValue": 1345
-        }
-    ]);
 
     const [presets,setPresets] = useState([
         {
@@ -108,16 +106,19 @@ function App() {
                 {
                     "programNr": 0,
                     "parameters": [50,100,150,200],
+                    "displayNames": ["50","100","150","200"],
                     "state": "on"
                 },
                 {
                     "programNr": 1,
                     "parameters": [400,500,600],
+                    "displayNames": ["400","500","600"],
                     "state": "off"
                 },
                 {
                     "programNr": 255,
                     "parameters": [700,800,900],
+                    "displayNames": ["700","800","900"],
                     "state": "on"
                 }
             ]
@@ -131,16 +132,19 @@ function App() {
                 {
                     "programNr": 0,
                     "parameters": [200,150,100,50],
+                    "displayNames": ["200","150","100","50"],
                     "state": "off"
                 },
                 {
                     "programNr": 2,
                     "parameters": [400,500,600],
+                    "displayNames": ["400","500","600"],
                     "state": "on"
                 },
                 {
                     "programNr": 255,
                     "parameters": [700,800,900],
+                    "displayNames": ["700","800","900"],
                     "state": "on"
                 }
             ]
@@ -154,16 +158,19 @@ function App() {
                 {
                     "programNr": 0,
                     "parameters": [200,150,100,50],
+                    "displayNames": ["200","150","100","50"],
                     "state": "on"
                 },
                 {
                     "programNr": 2,
                     "parameters": [400,500,600],
+                    "displayNames": ["400","500","600"],
                     "state": "on"
                 },
                 {
                     "programNr": 1,
                     "parameters": [700,800,900],
+                    "displayNames": ["700","800","900"],
                     "state": "off"
                 }
             ]
@@ -176,7 +183,9 @@ function App() {
     const [currentBank,setCurrentBank] = useState(0);
     const [currentPreset,setCurrentPreset] = useState(0);
     const [currentFxProgramIdx,setCurrentFxProgramIdx]=useState(0);
+    const [singleParamValue,setSingleParamValue]=useState(1);
   
+
 
     function aboutHandler()
     {
@@ -197,9 +206,7 @@ function App() {
         cmd[1]=0;
         cmd[2]=4;
         cmd[3]=0;
-        const writer = ppfxDevice.writable.getWriter();
-        await writer.write(cmd);
-        writer.releaseLock();    
+        await writeIfPossible(cmd); 
     }
     function getProgramsHandler()
     {
@@ -208,15 +215,14 @@ function App() {
 
     async function getPrograms()
     {
+        console.log("calling getPrograms()");
         let cmdbfr= new ArrayBuffer(4);
         let cmd = new Uint8Array(cmdbfr);
         cmd[0]=USB_CMD_GET_PROGRAMS;
         cmd[1]=0;
         cmd[2]=4;
         cmd[3]=0;
-        const writer = ppfxDevice.writable.getWriter();
-        await writer.write(cmd);
-        writer.releaseLock();  
+        await writeIfPossible(cmd);
     }
 
     async function getInputsAndMasterVolume()
@@ -227,32 +233,64 @@ function App() {
         cmd[1]=0;
         cmd[2]=4;
         cmd[3]=0;
-        const writer = ppfxDevice.writable.getWriter();
-        await writer.write(cmd);
-        writer.releaseLock();  
+        await writeIfPossible(cmd);  
     }
 
-    async function setInputsAndMasterVolume()
+    async function setInputsAndMasterVolume(mVol,hiz,mic)
     {
-        let cmdbfr= new ArrayBuffer(6);
+        if (masterVolumeMessageState === 0)
+        {
+            masterVolumeMessageState = 1;
+            let cmdbfr= new ArrayBuffer(6);
+            let cmd = new Uint8Array(cmdbfr);
+            cmd[0]=USB_CMD_SET_INPUTS_AND_MASTER_VOLUME;
+            cmd[1]=0;
+            cmd[2]=6;
+            cmd[3]=0;
+            cmd[4]=0;
+            if (hiz === true)
+            {
+                cmd[4] |= 1;
+            }
+            if (mic === true)
+            {
+                cmd[4] |= 2;
+            }
+            cmd[5]=mVol;
+            await writeIfPossible(cmd);
+        }
+
+    }
+
+    async function loadCurrentPreset(presetIdx)
+    {
+        let cmdbfr= new ArrayBuffer(5);
         let cmd = new Uint8Array(cmdbfr);
-        cmd[0]=USB_CMD_SET_INPUTS_AND_MASTER_VOLUME;
+        cmd[0]=USB_CMD_LOAD_PRESET;
         cmd[1]=0;
-        cmd[2]=6;
+        cmd[2]=5;
         cmd[3]=0;
-        cmd[4]=0;
-        if (HiZOn === true)
+        cmd[4]=presetIdx;
+        await writeIfPossible(cmd);
+    }
+
+    async function setParameter(programIdx,parameterIdx,parameterVal)
+    {
+        if (parameterValueState == 0)
         {
-            cmd[4] |= 1;
+            parameterValueState=1;
+            let cmdbfr= new ArrayBuffer(8);
+            let cmd = new Uint8Array(cmdbfr);
+            cmd[0]=USB_CMD_SET_PARAMETER;
+            cmd[1]=0;
+            cmd[2]=8;
+            cmd[3]=0;
+            cmd[4]=programIdx;
+            cmd[5]=parameterIdx;
+            cmd[6]=parameterVal & 0xFF;
+            cmd[7]=(parameterVal >> 8) &0xFF;
+            await writeIfPossible(cmd);  
         }
-        if (MicOn === true)
-        {
-            cmd[4] |= 2;
-        }
-        cmd[5]=masterVolume;
-        const writer = ppfxDevice.writable.getWriter();
-        await writer.write(cmd);
-        writer.releaseLock();  
     }
 
     async function getCurrentBankAndPresetNr()
@@ -263,9 +301,7 @@ function App() {
         cmd[1]=0;
         cmd[2]=4;
         cmd[3]=0;
-        const writer = ppfxDevice.writable.getWriter();
-        await writer.write(cmd);
-        writer.releaseLock();  
+        await writeIfPossible(cmd);
     }
 
     async function getPreset(bankNr,presetNr)
@@ -278,87 +314,107 @@ function App() {
         cmd[3]=0;
         cmd[4]=bankNr;
         cmd[5]=presetNr;
-        const writer = ppfxDevice.writable.getWriter();
-        await writer.write(cmd);
-        writer.releaseLock();  
+        await writeIfPossible(cmd); 
     } 
+
+
 
     async function readCommand()
     {
-        const reader = ppfxDevice.readable.getReader();
-        try {
-            let imDone=false;
-            while(imDone === false)
+        let transferResult;
+        let isResolved = false;
+        while (!isResolved)
+        {
+            if (currentCommandNr !== 0xFFFF)
             {
-                const { value, done } = await reader.read();
-                if (done)
+                let alignedSize = (Math.floor(currentCommandLength/64) + 1)*64;
+                transferResult = await ppfxDevice.transferIn(1,alignedSize); 
+            }
+            else
+            {
+                transferResult = await ppfxDevice.transferIn(1,64); 
+            }
+            if (transferResult.status !== "ok")
+            {
+                let data = new Uint8Array(transferResult.data.buffer);
+                console.log("readCommand(), returned unexpected status " + transferResult.status + " when reading message header");
+                parameterValueState = 0;
+                masterVolumeMessageState = 0;
+                currentCommandNr=0xFFFF;
+            }
+            else
+            {
+                commandBfr = new Uint8Array(transferResult.data.buffer);
+                if (commandBfr.length == 4)
                 {
-                    break;
+                    currentCommandNr = transferResult.data.getUint16(0,true);
+                    currentCommandLength = transferResult.data.getUint16(2,true);
                 }
-                if (currentCommandLength === 0 && currentCommandNr === 0xFFFF)
+                else if (currentCommandNr !== 0xFFFF)
                 {
-                    currentCommandNr = (value[0] | (value[1] << 8));
-                    currentCommandLength = (value[2] | (value[3] << 8));
-                    commandBfr = commandBfr.concat([].slice.call(value));
-                    console.log("msg received, currentCommandLength: " + currentCommandLength + ", commandBfr.length: " + commandBfr.length );
-                }
-                else if (currentCommandNr !== 0xFFFF || commandBfr.length < 4)
-                {
-                    commandBfr = commandBfr.concat([].slice.call(value));
-                    if (commandBfr.length >= 4)
-                    {
-                        currentCommandNr = commandBfr[0] | (commandBfr[1] << 8);
-                        currentCommandLength = commandBfr[2] | (commandBfr[3] << 8);
-                    }
-                }
-                if (commandBfr.length === currentCommandLength)
-                {
+
+                //currentCommandNr = transferResult.data.getUint16(0,true);
+                //currentCommandLength = transferResult.data.getUint16(2,true);
+                //let alignedSize = (Math.floor(currentCommandLength/64) + 1)*64;
+                //let tres = await ppfxDevice.transferIn(1,alignedSize);
+                //if (tres.status !== "ok")
+                //{
+                //    console.log("readCommand(), returned unexpected status " + transferResult.status + " when reading message body");
+                //}
+                //else
+                //{
+                //    commandBfr = new Uint8Array(tres.data.buffer);
+                //    if (commandBfr.length == currentCommandLength)
+                    //{
                     switch(currentCommandNr)
                     {
                         case MSG_ABOUT:
-                            processAboutMessage(commandBfr);
+                            commandBfrIdx = processAboutMessage(commandBfr,0,currentCommandLength)
                             console.log("handled MSG_ABOUT");
                             break;
                         case MSG_PROGRAMS:
-                            processGetPrograms(commandBfr);
+                            commandBfrIdx = processGetPrograms(commandBfr,0,currentCommandLength);
                             console.log("handled MSG_PROGRAMS");
                             break;
                         case MSG_INPUTS_AND_MASTER_VOLUME:
-                            processInputAndMasterVolume(commandBfr);
+                            commandBfrIdx = processInputAndMasterVolume(commandBfr,0,currentCommandLength);
                             console.log("handled MSG_INPUTS_AND_MASTER_VOLUME");
+                            masterVolumeMessageState = 0;
                             break;
                         case MSG_PARAMETER_NAMES:
-                            processGetParameterNames(commandBfr);
+                            commandBfrIdx = processGetParameterNames(commandBfr,0,currentCommandLength);
                             console.log("handled MSG_PARAMETER_NAMES");
                             break;
                         case MSG_BANK_AND_PRESET_NR:
-                            processCurrentBankAndPresetNr(commandBfr);
+                            commandBfrIdx = processCurrentBankAndPresetNr(commandBfr,0,currentCommandLength);
                             console.log("handled MSG_BANK_AND_PRESET_NR");
                             break;
                         case MSG_PRESET:
-                            processGetPreset(commandBfr);
+                            commandBfrIdx = processGetPreset(commandBfr,0,currentCommandLength);
                             console.log("handled MSG_PRESET");
+                            break;
+                        case MSG_PARAMETER_VALUE:
+                            commandBfrIdx = processParameterDisplayValue(commandBfr,0,currentCommandLength);
+                            console.log("handled MSG_PARAMETER_VALUE");
+                            parameterValueState = 0;
                             break;
                         default:
                             console.log("unknown command " + commandBfr[0] + " " + commandBfr[1]);
                             break;
                     }
+                    currentCommandNr = 0xFFFF;
+                    currentCommandLength = 0xFFFF;
+                    isResolved=true;
                     
-                    commandBfr=[];
-                    currentCommandLength=0;
-                    currentCommandNr=0xFFFF;
-                    imDone=true;
+                    //}
+                    //else
+                    //{
+                    //    console.log("Message length error,read " + commandBfr.length + " bytes, expected " + currentCommandLength);
+                    //    parameterValueState = 0;
+                    //    masterVolumeMessageState = 0;
+                    //}
                 }
             }
-        }
-        catch (error)
-        {
-            console.log("Error reading USB Port");
-            console.log(error);
-        }
-        finally
-        {
-            reader.releaseLock();
         }
     }
 
@@ -381,7 +437,7 @@ function App() {
         }
         await getInputsAndMasterVolume();
         await readCommand();
-        await  getCurrentBankAndPresetNr();
+        await getCurrentBankAndPresetNr();
         await readCommand();
         await getPreset(currentBankBfr,0);
         await readCommand();
@@ -394,14 +450,22 @@ function App() {
 
     }
 
-    function setParameterValue(position,value)
+    async function setParameterValue(position,value)
     {
         const updatedPresets = presets.slice();
         updatedPresets[currentPreset].programsAndParameters[currentFxProgramIdx].parameters[position]=value;
-        const updatedFxParams = fxParameters.slice();
-        updatedFxParams[position].rawValue = value;
-        setFxParameters(updatedFxParams);
         setPresets(updatedPresets);
+        if (parameterValueSending == 0)
+        {
+            parameterValueSending = 1;
+            await setParameter(currentFxProgramIdx,position,value/1);
+            parameterValueSending = 0;
+        }
+        else
+        {
+            console.log("setParameterValue(), attempted parallel call");
+        }
+        
     }
 
     function updateRouting(routingId)
@@ -425,18 +489,20 @@ function App() {
         setPresets(updatedPresets);
     }
 
-    function processAboutMessage(msg)
+    function processAboutMessage(msg,idx,size)
     {
-        appendToConsole(String.fromCharCode(...msg.slice(4,msg.length)));
+        appendToConsole(String.fromCharCode(...msg.slice(idx,idx + size)));
+        return idx+size;
     }
 
-    async function processGetPrograms(msg)
+    
+    function processGetPrograms(msg,msgIdx,size)
     {
-        let n_programs = msg[4];
+        let n_programs = msg[msgIdx + 4];
         let progCnt=0;
         fxProgs=new Array(n_programs);
-        let idx=5;
-        while (idx < msg.length)
+        let idx=msgIdx + 5;
+        while (idx < msgIdx + size)
         {
             
             let fxProg={ParameterCount: msg[idx]& 0x7F,freezable: false,name: "",id: progCnt, parameterNames: []};
@@ -446,7 +512,7 @@ function App() {
             }
             let nameArray=[];
             idx++;
-            while(msg[idx]!=0 && idx < msg.length)
+            while(msg[idx]!=0 && idx < msgIdx + size)
             {
                 nameArray.push(msg[idx++]);
             }
@@ -454,23 +520,25 @@ function App() {
             fxProgs[progCnt++] = fxProg;
             idx++;
         }
+        return msgIdx + size;
     }
 
-    function processInputAndMasterVolume(msg)
+    function processInputAndMasterVolume(msg,msgIdx,size)
     {
-        setHiZOn((msg[4] & 1) === 1);
-        setMicOn(((msg[4] & 2) >> 1) === 1);
-        setMasterVolume(msg[5]);
+        setHiZOn(((msg[msgIdx + 4] & 1)>> 0) == 1);
+        setMicOn(((msg[msgIdx + 4] & 2) >> 1) == 1);
+        setMasterVolume(msg[msgIdx + 5]);
+        return msgIdx + size;
     }
 
 
-    function processGetParameterNames(msg)
+    function processGetParameterNames(msg,msgIdx,size)
     {
 
         let parameterNamesLocal=[];
         let nameArray=[];
-        let idx=5;
-        while (idx < msg.length)
+        let idx=msgIdx + 5;
+        while (idx < msgIdx + size)
         {
             nameArray=[];
             while(msg[idx]!=0 && idx < msg.length)
@@ -480,110 +548,195 @@ function App() {
             idx++;
             parameterNamesLocal.push(String.fromCharCode(...nameArray));
         }
-        fxProgs[msg[4]].parameterNames = parameterNamesLocal;
+        fxProgs[msg[msgIdx + 4]].parameterNames = parameterNamesLocal;
+        return msgIdx + size;
     }
 
-    function processCurrentBankAndPresetNr(msg)
+    function processCurrentBankAndPresetNr(msg,msgIdx,size)
     {
-        currentBankBfr = msg[4];
-        currentPresetBfr = msg[5];
-        setCurrentBank(msg[4]);
-        setCurrentPreset(msg[5]);
+        currentBankBfr = msg[msgIdx + 4];
+        //currentPresetBfr = msg[msgIdx + 5];
+        setCurrentBank(msg[msgIdx + 4]);
+        setCurrentPreset(msg[msgIdx + 5]);
+        return msgIdx + size;
     }
 
-    function processGetPreset(msg)
+    function processGetPreset(msg,msgIdx,size)
     {
         let nameArray=[];
-        let idx=6;
+        let idx=msgIdx + 7;
         let cnt=0;
         let preset={};
-        preset["bankNr"]=msg[4];
-        preset["presetNr"] = msg[5] & 0x3;
-        preset["routing"] = (msg[5] >> 2);
+        preset["bankNr"]=msg[msgIdx + 4];
+        preset["presetNr"] = msg[msgIdx + 5] & 0x3;
+        preset["routing"] = (msg[msgIdx + 5] >> 2);
+        const effectAState = (msg[msgIdx + 6] & 3);
+        const effectBState = ((msg[msgIdx + 6] >>2) & 3);
+        const effectCState = ((msg[msgIdx + 6] >>4) & 3);        
         nameArray = [];
-        while(msg[idx]!=0 && idx < msg.length)
+        while(msg[idx]!=0 && idx < msgIdx + size)
         {
             nameArray.push(msg[idx++]);
         }
         idx++;
         preset["name"]=String.fromCharCode(...nameArray);
         preset["programsAndParameters"]=[];
-        preset["programsAndParameters"]=push({"programNr":msg[idx++],"parameters": []});
+        preset["programsAndParameters"].push({"programNr":msg[idx++],"parameters": [],"displayNames": [],  "state": "off"});
+        if (effectAState == 0)
+        {
+            preset["programsAndParameters"][0]["state"] = "off";
+        }
+        else if (effectAState == 1)
+        {
+            preset["programsAndParameters"][0]["state"] = "on";
+        }
+        else if (effectAState == 2)
+        {
+            preset["programsAndParameters"][0]["state"] = "frozen";
+        }
         if (preset["programsAndParameters"][0]["programNr"] !== 0xFF)
         {
             cnt=0;
             while (cnt < fxProgs[preset["programsAndParameters"][0]["programNr"]].parameterNames.length)
             {
-               preset["programsAndParameters"][0]["parameters"].push(msg[idx] | (msg[idx+1]<<8));
+                preset["programsAndParameters"][0]["parameters"].push(msg[idx] | (msg[idx+1]<<8));
                 idx+=2;
+                nameArray=[];
+                while(msg[idx]!=0 && idx < msg.length)
+                {
+                    nameArray.push(msg[idx++]);
+                }
+                idx++;
+                preset["programsAndParameters"][0]["displayNames"].push(String.fromCharCode(...nameArray)); 
                 cnt++;
             }
         }
 
-        preset["programsAndParameters"]=push({"programNr":msg[idx++],"parameters": []});
+        preset["programsAndParameters"].push({"programNr":msg[idx++],"parameters": [],"displayNames": [], "state": "off"});
+        if (effectBState == 0)
+        {
+            preset["programsAndParameters"][1]["state"] = "off";
+        }
+        else if (effectBState == 1)
+        {
+            preset["programsAndParameters"][1]["state"] = "on";
+        }
+        else if (effectBState == 2)
+        {
+            preset["programsAndParameters"][1]["state"] = "frozen";
+        }
         if (preset["programsAndParameters"][1]["programNr"] !== 0xFF)
         {
             cnt=0;
             while (cnt < fxProgs[preset["programsAndParameters"][1]["programNr"]].parameterNames.length)
             {
-               preset["programsAndParameters"][1]["parameters"].push(msg[idx] | (msg[idx+1]<<8));
+                preset["programsAndParameters"][1]["parameters"].push(msg[idx] | (msg[idx+1]<<8));
                 idx+=2;
+                nameArray=[];
+                while(msg[idx]!=0 && idx < msg.length)
+                {
+                    nameArray.push(msg[idx++]);
+                }
+                idx++;
+                preset["programsAndParameters"][1]["displayNames"].push(String.fromCharCode(...nameArray)); 
                 cnt++;
             }
         }
 
-        preset["programsAndParameters"]=push({"programNr":msg[idx++],"parameters": []});
+        preset["programsAndParameters"].push({"programNr":msg[idx++],"parameters": [],"displayNames": [], "state": "off"});
+        if (effectCState == 0)
+        {
+            preset["programsAndParameters"][2]["state"] = "off";
+        }
+        else if (effectCState == 1)
+        {
+            preset["programsAndParameters"][2]["state"] = "on";
+        }
+        else if (effectCState == 2)
+        {
+            preset["programsAndParameters"][2]["state"] = "frozen";
+        }
         if (preset["programsAndParameters"][2]["programNr"] !== 0xFF)
         {
             cnt=0;
             while (cnt < fxProgs[preset["programsAndParameters"][2]["programNr"]].parameterNames.length)
             {
-               preset["programsAndParameters"][2]["parameters"].push(msg[idx] | (msg[idx+1]<<8));
+                preset["programsAndParameters"][2]["parameters"].push(msg[idx] | (msg[idx+1]<<8));
+                nameArray=[];
+                while(msg[idx]!=0 && idx < msg.length)
+                {
+                    nameArray.push(msg[idx++]);
+                }
+                idx++;
+                preset["programsAndParameters"][2]["displayNames"].push(String.fromCharCode(...nameArray)); 
                 idx+=2;
                 cnt++;
             }
         }
         presetBfr[preset["presetNr"]]=preset;
+        return msgIdx + size;
     }
 
-
+    function processParameterDisplayValue(msg,msgIdx,size)
+    {
+        let idx = msgIdx + 6;
+        let nameArray=[];
+        while(msg[idx]!=0 && idx < msgIdx + size)
+        {
+            nameArray.push(msg[idx++]);
+        }
+        idx++;
+        const effectIndex = msg[msgIdx + 4];
+        const parameterIdx = msg[msgIdx + 5];
+        const updatedPresets = presetBfr.slice();
+        updatedPresets[currentPreset].programsAndParameters[effectIndex].displayNames[parameterIdx] = String.fromCharCode(...nameArray);
+        setPresets(updatedPresets);
+        return msgIdx + size;
+    }
 
     function requestDevice()
     {
         let devFound=false;
-        navigator.serial.getPorts().then( (ports) => {
-            ports.forEach(p => {
-                const portinfo = p.getInfo();
-                if (portinfo.usbVendorId == 0x4A37 && portinfo.usbProductId == 0x35D2)
+        navigator.usb.getDevices().then(async (devices) => {
+            devices.forEach( async d => {
+                if (d.vendorId == 0x4A37 && d.productId == 0x35D2)
                 {
+                    ppfxDevice = d;
                     devFound = true;
-                    p.open({baudRate: 115200}).then(async () => {
-                        appendToConsole("PiPicoFX VCom Port Opened");
-                        ppfxDevice = p;
-                        await initialSync();
-                        readFromPort();
-                    });
-
+                    await ppfxDevice.open();
+                    if (ppfxDevice.configuration == null)
+                    {
+                        await ppfxDevice.selectConfiguration(0);
+                    }
+                    await ppfxDevice.claimInterface(1);
+                    await initialSync();
+                    readFromPort();
                 }
             });
             if (devFound === false)
             {
-                navigator.serial.requestPort({ filters: [{ usbVendorId: 0x4A37,usbProductId: 0x35D2 }] }).then((p) =>
+                navigator.usb.requestDevice({ filters: [{ vendorId: 0x4A37, productId: 0x35D2 }] }).then( async (usbDevice) =>
                 {
-                    p.open({baudRate: 115200}).then(async () => {
-                        appendToConsole("PiPicoFX VCom Port Opened");
-                        ppfxDevice = p;
-                        await initialSync();
-                        readFromPort();
-                    }).catch(() =>{
-                        appendToConsole("Failed to Open VCom Port");
-                    });
-                }).catch(() => {
-                    appendToConsole("No Device Found or selected");
+                    
+                    ppfxDevice = usbDevice;
+                    await ppfxDevice.open();
+                    if (ppfxDevice.configuration == null)
+                    {
+                        await ppfxDevice.selectConfiguration(0);
+                    }
+                    await ppfxDevice.claimInterface(1);
+                    await initialSync();
+                    readFromPort();
+                    appendToConsole("PiPicoFX USB Device Opened");
+
+                }).catch((error) => {
+                    appendToConsole("Error: " + error + ", No Device Found or selected");
                 });
             }
         });
     }
+
+
 
     function previousBankHandler()
     {
@@ -597,23 +750,20 @@ function App() {
 
     function handleMasterVolumeChange(value)
     {
-        setMasterVolume(value);
         console.log("setting current volume " + masterVolume);
-        setInputsAndMasterVolume();
+        setInputsAndMasterVolume(value,HiZOn,MicOn);
     }
 
     function handleHiZChange(value)
     {
-        setHiZOn(value);
         console.log("setting current input state for HiZ " + value);
-        setInputsAndMasterVolume();
+        setInputsAndMasterVolume(masterVolume,value,MicOn);
     }
 
     function handleMicChange(value)
     {
-        setMicOn(value);
         console.log("setting current input state for Mic " + MicOn);
-        setInputsAndMasterVolume();
+        setInputsAndMasterVolume(masterVolume,HiZOn,value);
     }
   return (
     <>
@@ -665,11 +815,20 @@ function App() {
 		<button className="editor-button" onClick={nextBankHandler}>Next Bank</button>
 		
 		<div className="editor-vertical">
-			<input type="radio" name="presetNr" value="a" id="presetNr1" className="editor-text-selectable" defaultChecked onChange={() => setCurrentPreset(0)}></input>
+			<input type="radio" name="presetNr" value="a" id="presetNr1" className="editor-text-selectable" checked={currentPreset==0} onChange={() => {
+                setCurrentPreset(0);
+                loadCurrentPreset(0);
+                }}></input>
             <label htmlFor="presetNr1" id="presetNr1Label">{presets[0].name}</label>
-			<input type="radio" name="presetNr" value="b" id="presetNr2"  className="editor-text-selectable" onChange={() => setCurrentPreset(1)}></input>
+			<input type="radio" name="presetNr" value="b" id="presetNr2"  className="editor-text-selectable" checked={currentPreset==1} onChange={() => {
+                setCurrentPreset(1);
+                loadCurrentPreset(1);
+            }}></input>
             <label htmlFor="presetNr2" id="presetNr2Label">{presets[1].name}</label>
-			<input type="radio" name="presetNr" value="c" id="presetNr3"  className="editor-text-selectable" onChange={() => setCurrentPreset(2)}></input>
+			<input type="radio" name="presetNr" value="c" id="presetNr3"  className="editor-text-selectable" checked={currentPreset==2} onChange={() => {
+                setCurrentPreset(2);
+                loadCurrentPreset(2);
+                }}></input>
             <label htmlFor="presetNr3" id="presetNr3Label">{presets[2].name}</label>
 		</div>
 		<span className="editor-filler"></span>
@@ -681,7 +840,7 @@ function App() {
             changePresets = {setPresets}
             changeEffectState={setEffectState}
             setCurrentFxProgramIdx={setCurrentFxProgramIdx}
-            changeFxParams={setFxParameters}/>
+            />
         <EffectView 
             id="1" 
             fxPrograms={fxPrograms} 
@@ -690,7 +849,7 @@ function App() {
             changePresets = {setPresets}
             changeEffectState={setEffectState}
             setCurrentFxProgramIdx={setCurrentFxProgramIdx}
-            changeFxParams={setFxParameters}/>
+            />
         <EffectView 
             id="2" 
             fxPrograms={fxPrograms} 
@@ -699,7 +858,7 @@ function App() {
             changeEffectState={setEffectState}
             currentPreset={currentPreset} 
             setCurrentFxProgramIdx={setCurrentFxProgramIdx}
-            changeFxParams={setFxParameters}/>
+            />
         <Routing presets={presets} currentPreset={currentPreset} changeRouting={updateRouting}/>
 	</div>
     <ParametersDisplay preset={presets[currentPreset]} fxPrograms={fxPrograms} currentPreset={currentPreset} effectIndex={currentFxProgramIdx} changeParameterValue={setParameterValue}/>
@@ -710,6 +869,10 @@ function App() {
 		<button className="editor-button" onClick={getProgramsHandler}>Get Programs</button>
         <button className="editor-button" onClick={getInputsAndMasterVolume}>Get Inputs and Volume</button>
         <button className="editor-button" onClick={() => getParameterNames(1)}>Param Names of first prog</button>
+        <button className="editor-button" onClick={() => 
+            {setParameterValue(0,singleParamValue);
+                setSingleParamValue(() => singleParamValue+1);
+            }}>Set First Parameter</button>
 		<span className="editor-filler"></span> 
 	</div>
 </div> 

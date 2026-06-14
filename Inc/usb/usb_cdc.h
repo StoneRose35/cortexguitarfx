@@ -20,7 +20,7 @@
 #define USB_CDC_TransferInProgress_Pos 1
 #define USB_CDC_Configured_Pos 0
 
-
+#define USB_CDC_RR_BUFFER_SIZE 0x1FF
 
 void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking);
 
@@ -29,9 +29,10 @@ void UsbCdcEp0OutHandler(void* dataPtr,uint16_t len);
 void UsbCdcTransferDone(void);
 
 uint16_t getUsbCdcReceivedDataLevel();
-uint16_t readUsbCdcData(uint8_t *);
+uint16_t readUsbCdcData(uint8_t *,uint16_t);
 void USBCDCInit();
 uint8_t usbCdcHandleClassSetupRequest(const UsbSetupPacketType* packet);
 uint8_t usbCdcSetInterfaceHandler(uint16_t,uint16_t);
 uint8_t usbCdcSetConfiguration(uint16_t confNr);
+void handleUsbCdcVendorSetupRequest(const UsbSetupPacketType* packet);
 #endif

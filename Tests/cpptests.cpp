@@ -16,6 +16,7 @@ void zeroString(char*data,int16_t len)
     }
 }
 
+/*
 float int2float(int32_t a)
 {
     return (float)a;
@@ -30,7 +31,7 @@ float fln(float a)
 {
     return logf(a);
 }
-
+*/
 
 float convolve(const float*coeffs,float*data,uint32_t offset)
 {
@@ -123,9 +124,10 @@ class ClassWithDynamicArray
         }
 };
 
-int main(int argc,char ** argv)
+
+void dynamicArrayClassTest()
 {
-    ClassWithDynamicArray cls1=ClassWithDynamicArray(4);
+        ClassWithDynamicArray cls1=ClassWithDynamicArray(4);
     SimpleClass simpleClass = SimpleClass();
     simpleClass.a = 45.22f;
     simpleClass.b = 12.21f;
@@ -145,4 +147,25 @@ int main(int argc,char ** argv)
         }
     }
     printf("initiated dynamic object\n");
+}
+
+void examinePointerWrapping()
+{
+    uint16_t p1,p2;
+    uint16_t deltap;
+    p1 = 500;
+    p2 = 504;
+    for (uint8_t c=0;c<25;c++)
+    {
+        deltap = (p2++ - p1++)&0x1FF;
+        printf("p1: %d, p2: %d, deltap: %d\r\n",p1,p2,deltap);
+        p2 &= 0x1FF;
+        p1 &= 0x1FF;
+    }
+
+}
+
+int main(int argc,char ** argv)
+{
+    examinePointerWrapping();
 }
