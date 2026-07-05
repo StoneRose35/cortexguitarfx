@@ -16,6 +16,7 @@ let currentBankBfr=0;
 let masterVolumeMessageState = 0;
 let parameterValueState = 0;
 let parameterValueSending = 0;
+let newParameterValues=[];
 //let currentPresetBfr=0;
 //let readCommandState = 0; // 0: read header, 1: read command
 //let readCommandRemainingSize = 0; // size of the command to read, excluding header
@@ -238,28 +239,26 @@ function App() {
 
     async function setInputsAndMasterVolume(mVol,hiz,mic)
     {
-        if (masterVolumeMessageState === 0)
-        {
-            masterVolumeMessageState = 1;
-            let cmdbfr= new ArrayBuffer(6);
-            let cmd = new Uint8Array(cmdbfr);
-            cmd[0]=USB_CMD_SET_INPUTS_AND_MASTER_VOLUME;
-            cmd[1]=0;
-            cmd[2]=6;
-            cmd[3]=0;
-            cmd[4]=0;
-            if (hiz === true)
-            {
-                cmd[4] |= 1;
-            }
-            if (mic === true)
-            {
-                cmd[4] |= 2;
-            }
-            cmd[5]=mVol;
-            await writeIfPossible(cmd);
-        }
 
+        let cmdbfr= new ArrayBuffer(6);
+        let cmd = new Uint8Array(cmdbfr);
+        cmd[0]=USB_CMD_SET_INPUTS_AND_MASTER_VOLUME;
+        cmd[1]=0;
+        cmd[2]=6;
+        cmd[3]=0;
+        cmd[4]=0;
+        if (hiz === true)
+        {
+            cmd[4] |= 1;
+        }
+        if (mic === true)
+        {
+            cmd[4] |= 2;
+        }
+        cmd[5]=mVol;
+        await writeIfPossible(cmd);
+        await readCommand();
+        masterVolumeMessageState=0;
     }
 
     async function loadCurrentPreset(presetIdx)
@@ -274,23 +273,26 @@ function App() {
         await writeIfPossible(cmd);
     }
 
-    async function setParameter(programIdx,parameterIdx,parameterVal)
+    async function setParameter()
     {
-        if (parameterValueState == 0)
+        const dataset = newParameterValues.pop();
+        if (dataset != undefined)
         {
-            parameterValueState=1;
             let cmdbfr= new ArrayBuffer(8);
             let cmd = new Uint8Array(cmdbfr);
             cmd[0]=USB_CMD_SET_PARAMETER;
             cmd[1]=0;
             cmd[2]=8;
             cmd[3]=0;
-            cmd[4]=programIdx;
-            cmd[5]=parameterIdx;
-            cmd[6]=parameterVal & 0xFF;
-            cmd[7]=(parameterVal >> 8) &0xFF;
+            cmd[4]=dataset.programIdx;
+            cmd[5]=dataset.parameterIdx;
+            cmd[6]=dataset.parameterVal & 0xFF;
+            cmd[7]=(dataset.parameterVal >> 8) &0xFF;
             await writeIfPossible(cmd);  
-        }
+            console.log("sending programIdx: " + dataset.programIdx + ", parameterIdx: " + dataset.parameterIdx + ", parameterVal: " + dataset.parameterVal);
+            await readCommand();
+            parameterValueSending = 0;
+        }   
     }
 
     async function getCurrentBankAndPresetNr()
@@ -350,22 +352,8 @@ function App() {
                     currentCommandNr = transferResult.data.getUint16(0,true);
                     currentCommandLength = transferResult.data.getUint16(2,true);
                 }
-                else if (currentCommandNr !== 0xFFFF)
+                if (currentCommandNr !== 0xFFFF && commandBfr.length === currentCommandLength)
                 {
-
-                //currentCommandNr = transferResult.data.getUint16(0,true);
-                //currentCommandLength = transferResult.data.getUint16(2,true);
-                //let alignedSize = (Math.floor(currentCommandLength/64) + 1)*64;
-                //let tres = await ppfxDevice.transferIn(1,alignedSize);
-                //if (tres.status !== "ok")
-                //{
-                //    console.log("readCommand(), returned unexpected status " + transferResult.status + " when reading message body");
-                //}
-                //else
-                //{
-                //    commandBfr = new Uint8Array(tres.data.buffer);
-                //    if (commandBfr.length == currentCommandLength)
-                    //{
                     switch(currentCommandNr)
                     {
                         case MSG_ABOUT:
@@ -400,6 +388,7 @@ function App() {
                             break;
                         default:
                             console.log("unknown command " + commandBfr[0] + " " + commandBfr[1]);
+                            parameterValueState = 0;
                             break;
                     }
                     currentCommandNr = 0xFFFF;
@@ -450,22 +439,24 @@ function App() {
 
     }
 
-    async function setParameterValue(position,value)
+    function setParameterValue(position,value)
     {
         const updatedPresets = presets.slice();
         updatedPresets[currentPreset].programsAndParameters[currentFxProgramIdx].parameters[position]=value;
         setPresets(updatedPresets);
-        if (parameterValueSending == 0)
+        if (newParameterValues.length < 2)
         {
-            parameterValueSending = 1;
-            await setParameter(currentFxProgramIdx,position,value/1);
-            parameterValueSending = 0;
+            newParameterValues.push({programIdx: currentFxProgramIdx,parameterIdx:position, parameterVal: value/1});
         }
         else
         {
-            console.log("setParameterValue(), attempted parallel call");
+            newParameterValues[1] = {programIdx: currentFxProgramIdx,parameterIdx:position, parameterVal: value/1};
         }
-        
+        if (parameterValueSending === 0)
+        {
+            parameterValueSending = 1;
+            setParameter();
+        }        
     }
 
     function updateRouting(routingId)
@@ -710,7 +701,7 @@ function App() {
                     }
                     await ppfxDevice.claimInterface(1);
                     await initialSync();
-                    readFromPort();
+                    //readFromPort();
                 }
             });
             if (devFound === false)
@@ -726,7 +717,7 @@ function App() {
                     }
                     await ppfxDevice.claimInterface(1);
                     await initialSync();
-                    readFromPort();
+                    //readFromPort();
                     appendToConsole("PiPicoFX USB Device Opened");
 
                 }).catch((error) => {
@@ -750,20 +741,37 @@ function App() {
 
     function handleMasterVolumeChange(value)
     {
-        console.log("setting current volume " + masterVolume);
-        setInputsAndMasterVolume(value,HiZOn,MicOn);
+        
+        if (masterVolumeMessageState===0)
+        {
+            masterVolumeMessageState=1;
+            console.log("setting current volume " + value);
+            setInputsAndMasterVolume(value,HiZOn,MicOn);
+            //setMasterVolume(value);
+            
+        }
     }
 
     function handleHiZChange(value)
     {
-        console.log("setting current input state for HiZ " + value);
-        setInputsAndMasterVolume(masterVolume,value,MicOn);
+        if (masterVolumeMessageState===0)
+        {
+            masterVolumeMessageState=1;
+            console.log("setting current input state for HiZ " + value);
+            setInputsAndMasterVolume(masterVolume,value,MicOn);
+            //setHiZOn(value);
+        }
     }
 
     function handleMicChange(value)
     {
-        console.log("setting current input state for Mic " + MicOn);
-        setInputsAndMasterVolume(masterVolume,HiZOn,value);
+        if (masterVolumeMessageState===0)
+        {
+            masterVolumeMessageState=1;
+            console.log("setting current input state for Mic " + MicOn);
+            setInputsAndMasterVolume(masterVolume,HiZOn,value);
+            //setMicOn(value);
+        }
     }
   return (
     <>

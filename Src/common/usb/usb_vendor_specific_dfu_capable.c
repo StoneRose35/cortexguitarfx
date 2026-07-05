@@ -310,11 +310,16 @@ void usbVendorSpecificSendData(uint8_t * data,uint16_t dlen,uint8_t blocking)
                 sendDataSize = 0;
             }
             bmUsbStatus |= (1 << USB_VS_TransferInProgress_Pos);
-            if (blocking != 0 || bytesSent < dlen)
+            if (bytesSent < dlen)
             {
                 while((bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) != 0);
             }
         }
+    }
+    
+    if (blocking != 0 )
+    {
+        while((bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) != 0);
     }
 }
 

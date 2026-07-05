@@ -235,6 +235,7 @@ uint16_t I2CsendMultiple(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uin
 {
     uint32_t regbfr;
     uint16_t sCnt=0;
+    while((i2cBlk->ISR & (1 << I2C_ISR_BUSY_Pos))!= 0);
     while ((i2cBlk->ISR & (1 << I2C_ISR_TXE_Pos))==0);
     i2cBlk->CR1 &= ~((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos) | (1 << I2C_CR1_ADDRIE_Pos) | (1 << I2C_CR1_TXDMAEN_Pos)); 
     i2cBlk->OAR1 &= ~(1 << I2C_OAR1_OA1EN_Pos);
@@ -247,13 +248,19 @@ uint16_t I2CsendMultiple(I2C_TypeDef * i2cBlk,uint8_t * data, uint16_t nSend,uin
     {
         i2cBlk->TXDR = data[sCnt];
         sCnt++;
+        uint32_t txe_cnt = 0;
         while ((i2cBlk->ISR & I2C_ISR_TXE)==0)
         {
-
+            txe_cnt++;
+            if (txe_cnt > 0xFFFFFF)
+            {
+                
+                i2cBlk->ISR = (1 << I2C_ISR_TXE_Pos);
+            }
         }
     }
     nSend=0;
-    while((i2cBlk->ISR & (1 << I2C_ISR_BUSY_Pos))!= 0);
+    //while((i2cBlk->ISR & (1 << I2C_ISR_BUSY_Pos))!= 0);
     while ((bmI2CStatus & (1 << I2C_AWAIT_SLAVE_TRANSACTION))!= 0); // block if a slave transaction is awaited
     i2cBlk->ICR = (1 << I2C_ICR_STOPCF_Pos);
     i2cBlk->CR1 |= ((1 << I2C_CR1_RXIE_Pos) | (1 << I2C_CR1_STOPIE_Pos)| (1 << I2C_CR1_ADDRIE_Pos)); 

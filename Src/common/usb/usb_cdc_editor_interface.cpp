@@ -8,6 +8,7 @@ extern "C" {
 #include "memoryRegions.h"
 #include "pcm3060.h"
 #include "drivers/24lc128.h"
+#include "timer.h"
 }
 
 #include "usb/usb_cdc_editor_interface.hpp"
@@ -75,6 +76,7 @@ void processGetAboutCmd()
     idx += appendToString(strbfr + idx,"\r\n      ");     
     idx += appendToString(strbfr + idx,PI_PICO_FX_BUILD_TIME);    
     *((uint16_t*)(strbfr+2))=idx;
+    usbVendorSpecificSendData((uint8_t*)strbfr,4,1);
     usbVendorSpecificSendData((uint8_t*)strbfr,idx,0);
 }
 
