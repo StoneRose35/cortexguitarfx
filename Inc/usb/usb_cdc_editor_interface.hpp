@@ -18,6 +18,7 @@ typedef struct
 #define USB_CMD_SET_PARAMETER 7
 #define USB_CMD_GET_PROGRAMS 8
 #define USB_CMD_LOAD_PRESET 9
+#define USB_CMD_SET_FX_PROGRAM 10
 
 
 #define MSG_ABOUT 0
@@ -38,4 +39,5 @@ void processGetCurrentBankAndPresetNr();
 void processGetPreset(uint8_t*);
 void processSetParameter(uint8_t*);
 void processLoadPreset(uint8_t);
+void processSetFxProgram(uint8_t*data);
 #endif

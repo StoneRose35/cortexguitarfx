@@ -30,6 +30,7 @@ const USB_CMD_SET_PARAMETER = 7
 const USB_CMD_GET_PROGRAMS = 8
 const USB_CMD_GET_PARAMETER_NAMES = 2
 const USB_CMD_LOAD_PRESET=9
+const USB_CMD_SET_FX_PROGRAM=10
 
 
 const MSG_ABOUT = 0
@@ -55,7 +56,7 @@ export async function getParameterNames(programNr)
 
 async function writeIfPossible(cmd)
 {
-    if (ppfxDevice != "undefined")
+    if (ppfxDevice != null)
     {
         if (ppfxDevice.configuration != null)
         {
@@ -275,8 +276,8 @@ function App() {
 
     async function setParameter()
     {
-        const dataset = newParameterValues.pop();
-        if (dataset != undefined)
+        let dataset = newParameterValues.pop();
+        while (dataset != undefined)
         {
             let cmdbfr= new ArrayBuffer(8);
             let cmd = new Uint8Array(cmdbfr);
@@ -291,8 +292,9 @@ function App() {
             await writeIfPossible(cmd);  
             console.log("sending programIdx: " + dataset.programIdx + ", parameterIdx: " + dataset.parameterIdx + ", parameterVal: " + dataset.parameterVal);
             await readCommand();
-            parameterValueSending = 0;
+            dataset = newParameterValues.pop();
         }   
+        parameterValueSending = 0;
     }
 
     async function getCurrentBankAndPresetNr()
@@ -319,7 +321,18 @@ function App() {
         await writeIfPossible(cmd); 
     } 
 
-
+    async function setFxProgram(position,programNr)
+    {
+        let cmdbfr = new ArrayBuffer(6);
+        let cmd = new Uint8Array(cmdbfr);
+        cmd[0]=USB_CMD_SET_FX_PROGRAM;
+        cmd[1]=0;
+        cmd[2]=6;
+        cmd[3]=0;
+        cmd[4]=position;
+        cmd[5]=programNr;
+        await writeIfPossible(cmd);
+    }
 
     async function readCommand()
     {
@@ -653,6 +666,7 @@ function App() {
             while (cnt < fxProgs[preset["programsAndParameters"][2]["programNr"]].parameterNames.length)
             {
                 preset["programsAndParameters"][2]["parameters"].push(msg[idx] | (msg[idx+1]<<8));
+                idx+=2;
                 nameArray=[];
                 while(msg[idx]!=0 && idx < msg.length)
                 {
@@ -660,7 +674,6 @@ function App() {
                 }
                 idx++;
                 preset["programsAndParameters"][2]["displayNames"].push(String.fromCharCode(...nameArray)); 
-                idx+=2;
                 cnt++;
             }
         }
@@ -773,6 +786,16 @@ function App() {
             //setMicOn(value);
         }
     }
+
+    async function handleFxProgramChange(id,fxProgram,preset)
+    {
+        setPresets(preset);
+        await setFxProgram(id,fxProgram);
+        await getPreset(currentBank,currentPreset);
+        await readCommand();
+        setPresets(presetBfr);
+        //setCurrentFxProgramIdx(fxProgram/1);
+    }
   return (
     <>
 <div className="editor-main" id="editor_app">
@@ -822,10 +845,11 @@ function App() {
 		<button className="editor-button" onClick={previousBankHandler}>Previous Bank</button>
 		<button className="editor-button" onClick={nextBankHandler}>Next Bank</button>
 		
-		<div className="editor-vertical">
+		<div className="editor-vertical-flex">
 			<input type="radio" name="presetNr" value="a" id="presetNr1" className="editor-text-selectable" checked={currentPreset==0} onChange={() => {
                 setCurrentPreset(0);
                 loadCurrentPreset(0);
+                
                 }}></input>
             <label htmlFor="presetNr1" id="presetNr1Label">{presets[0].name}</label>
 			<input type="radio" name="presetNr" value="b" id="presetNr2"  className="editor-text-selectable" checked={currentPreset==1} onChange={() => {
@@ -845,7 +869,7 @@ function App() {
             fxPrograms={fxPrograms} 
             presets={presets} 
             currentPreset={currentPreset} 
-            changePresets = {setPresets}
+            changePresets = {handleFxProgramChange}
             changeEffectState={setEffectState}
             setCurrentFxProgramIdx={setCurrentFxProgramIdx}
             />
@@ -854,22 +878,22 @@ function App() {
             fxPrograms={fxPrograms} 
             presets={presets} 
             currentPreset={currentPreset}  
-            changePresets = {setPresets}
+            changePresets = {handleFxProgramChange}
             changeEffectState={setEffectState}
             setCurrentFxProgramIdx={setCurrentFxProgramIdx}
             />
         <EffectView 
             id="2" 
-            fxPrograms={fxPrograms} 
-            presets={presets} 
-            changePresets = {setPresets}
-            changeEffectState={setEffectState}
-            currentPreset={currentPreset} 
-            setCurrentFxProgramIdx={setCurrentFxProgramIdx}
+            fxPrograms = {fxPrograms} 
+            presets = {presets} 
+            changePresets = {handleFxProgramChange}
+            changeEffectState = {setEffectState}
+            currentPreset = {currentPreset} 
+            setCurrentFxProgramIdx = {setCurrentFxProgramIdx}
             />
         <Routing presets={presets} currentPreset={currentPreset} changeRouting={updateRouting}/>
 	</div>
-    <ParametersDisplay preset={presets[currentPreset]} fxPrograms={fxPrograms} currentPreset={currentPreset} effectIndex={currentFxProgramIdx} changeParameterValue={setParameterValue}/>
+    <ParametersDisplay preset={presets[currentPreset]} fxPrograms={fxPrograms} effectIndex={currentFxProgramIdx} changeParameterValue={setParameterValue}/>
 	<span className="editor-filler-vertical"></span>
     <Console content={consoleText} />
 	<div className="editor-panel">

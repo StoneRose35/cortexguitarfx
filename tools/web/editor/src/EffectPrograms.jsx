@@ -18,24 +18,6 @@ function EffectView(props)
     return (
     <div className="editor-effect-group">
     <input type="radio" name="effectInFocus" value={"fx"+props.id} id={"effectView" + props.id} className="editor-text-selectable" onChange={(e) => {
-            let c=0;
-            let fxParamsWithValue=[];
-            if (props.presets[props.currentPreset].programsAndParameters[props.id/1].programNr !== 0xff)
-            {
-                for (const paramName of props.fxPrograms[props.presets[props.currentPreset].programsAndParameters[props.id/1].programNr].parameterNames)
-                {
-                    if (c < props.presets[props.currentPreset].programsAndParameters[props.id/1].parameters.length)
-                    {
-                        fxParamsWithValue.push({
-                            "id": c,
-                            "displayName": paramName,
-                            "displayValue": "",
-                            "rawValue": props.presets[props.currentPreset].programsAndParameters[props.id/1].parameters[c] 
-                        });
-                        c++;
-                    }
-                }
-            }
             props.setCurrentFxProgramIdx(props.id);
         
     }}></input>
@@ -70,24 +52,9 @@ function EffectPrograms(props)
         <>
 			<select id={"fxSelector" + props.id}  value={props.presets[props.currentPreset].programsAndParameters[props.id/1].programNr}
              onChange={(e) => {
-                let c=0;
-                let fxParamsWithValue=[];
-                for (const paramName of props.content[e.target.value].parameterNames)
-                {
-                    if (c < props.presets[props.currentPreset].programsAndParameters[props.id/1].length)
-                    {   
-                        fxParamsWithValue.push({
-                            "id": c,
-                            "displayName": paramName,
-                            "displayValue": "",
-                            "rawValue": props.presets[props.currentPreset].programsAndParameters[props.id/1].parameters[c]
-                        });
-                        c++;
-                    }
-                }
                 const updatedPresets = props.presets.slice();
-                updatedPresets[props.currentPreset].programsAndParameters[props.id/1].programNr = e.target.value;
-                props.changePresets(updatedPresets);
+                updatedPresets[props.currentPreset].programsAndParameters[props.id/1].programNr = e.target.value/1;
+                props.changePresets(props.id,e.target.value,updatedPresets);
             }}>
                 {fxProgramContent}
 			</select>

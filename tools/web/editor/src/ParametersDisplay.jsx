@@ -7,15 +7,15 @@ function ParametersDisplay(props)
         parametersContent=props.fxPrograms[props.preset.programsAndParameters[props.effectIndex].programNr].parameterNames.map(p => {
             const internalId=id;
             return (
-            <div key={id} className="editor-horizontal">
-                <div className="editor-vertical editor-effectparam">
-                    <input type="range" name={p} min="0" max="4095" value={props.preset.programsAndParameters[props.effectIndex].parameters[id]} onChange={(e) => {
+            <tr key={id} className="editor-horizontal">
+                <td className="editor-vertical editor-effectparam">
+                    <input type="range" name={p} min="0" max="4095" className="editor-param-slider" value={props.preset.programsAndParameters[props.effectIndex].parameters[id]} onChange={(e) => {
                         props.changeParameterValue(internalId,e.target.value);
                     } }/>
                     <div className="editor-vertical-label">{p}</div>
-                </div>
-                <div className="editor-paramvalue">{props.preset.programsAndParameters[props.effectIndex].displayNames[id++]}</div>
-            </div>
+                </td>
+                <td className="editor-paramvalue">{props.preset.programsAndParameters[props.effectIndex].displayNames[id++]}</td>
+            </tr>
             );
         });
     }
@@ -24,9 +24,9 @@ function ParametersDisplay(props)
         parametersContent="";
     }
     return (
-        <div className="editor-vertical" id="parametersDisplay">
+        <table className="editor-vertical" id="parametersDisplay">
             {parametersContent}
-        </div>
+        </table>
     );
 }
 

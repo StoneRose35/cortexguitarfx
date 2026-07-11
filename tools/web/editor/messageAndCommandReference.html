@@ -194,7 +194,7 @@
         <div class="reference-command">
         <h4>Get Preset</h4>
         <div class="reference-cmd-description">
-            Get the preset given a Bank and Preset Number.
+            Get the preset given a Bank and Preset Number. Causes the message "Preset" to be sent.
         </div>
         <table>
             <tr class="reference-theader">
@@ -310,6 +310,72 @@
             <div class="reference-bytevalue">0x0</div>
             <div class="reference-bytevalue">0x1</div>
         </div>        
+    </div>
+    <div>
+        <div class="reference-command">
+        <h4>Set FX Program</h4>
+        <div class="reference-cmd-description">
+            Set the FX Program at the given position.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>
+                    Position
+                </td>
+                <td class="reference-description">
+                    Description
+                </td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 10</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 6 by default</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Position within the preset (0-2)</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>FX Program nr 0 up to the number of different fx programs, 0xFF/255: bypass/no program </td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <div class="reference-command">
+        <h4>Switch On/Off FX Program</h4>
+        <div class="reference-cmd-description">
+            Switches the FX Program on or off.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>
+                    Position
+                </td>
+                <td class="reference-description">
+                    Description
+                </td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 11</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 6 by default</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Position within the preset (0-2)</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>0: Switch Off, 1: Switch On. Note: this command si ignored when no program is loaded at the given position </td>
+            </tr>
+        </table>
     </div>
     <h2>Messages</h2>
     <div class="reference-command">

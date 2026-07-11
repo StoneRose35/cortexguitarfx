@@ -21,6 +21,8 @@ extern PiPicoFXUiType ui;
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
 extern MultiAudioProcessor audioProcessor;
+extern volatile uint8_t programChangeState;
+extern volatile uint8_t programsToInitialize[3];
 __QSPI_CODE
 void processUSBEditorCommand(uint8_t * cmd)
 {
@@ -53,6 +55,9 @@ void processUSBEditorCommand(uint8_t * cmd)
             break;
         case USB_CMD_LOAD_PRESET:
             processLoadPreset(*(cmd+4));
+            break;
+        case USB_CMD_SET_FX_PROGRAM:
+            processSetFxProgram(cmd+4);
             break;
         default:
             break;
@@ -378,6 +383,18 @@ void processSetParameter(uint8_t*data)
 __QSPI_CODE
 void processLoadPreset(uint8_t data)
 {
-    setPresetNr(data);
+    currentPreset = data; 
+    setPreset();
     
+}
+
+__QSPI_CODE
+void processSetFxProgram(uint8_t*data)
+{
+    if (programChangeState == 0)
+    {
+        programsToInitialize[*data]=*(data+1) | 0x80; // set fx program at defined position, reload values from preset
+        programChangeState=1;
+    }
+
 }
