@@ -488,10 +488,7 @@ void piPicoFxUiSetup(void)
     programsToInitialize[1] = (presets+currentPreset)->programNrB | 0x80;
     programsToInitialize[2] = (presets+currentPreset)->programNrC | 0x80;
     ui.currentProgramPosition = 0;
-    //ui.currentProgram=PiPicoFX::loadProgram(2);
-    //audioProcessor.addFxProgram(ui.currentProgram,0);
     ui.currentProgramIdx=presets->programNrA;
-    //ui.currentParameter=ui.currentProgram->getParameter(0);
     ui.currentParameterIdx=0;
     ui.locked=0;
     ui.editViaRotary =0;

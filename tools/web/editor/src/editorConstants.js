@@ -1,0 +1,19 @@
+export const USB_CMD_GET_ABOUT = 0
+export const USB_CMD_GET_INPUTS_AND_MASTER_VOLUME = 3
+export const USB_CMD_SET_INPUTS_AND_MASTER_VOLUME = 4
+export const USB_CMD_GET_CURRENT_BANK_PRESET_NR = 5
+export const USB_CMD_GET_PRESET = 6
+export const USB_CMD_SET_PARAMETER = 7
+export const USB_CMD_GET_PROGRAMS = 8
+export const USB_CMD_GET_PARAMETER_NAMES = 2
+export const USB_CMD_LOAD_PRESET = 9
+export const USB_CMD_SET_FX_PROGRAM = 10
+export const USB_CMD_FXPROGRAM_ON_OFF = 11
+
+export const MSG_ABOUT = 0
+export const MSG_PROGRAMS = 1
+export const MSG_PARAMETER_NAMES = 2
+export const MSG_INPUTS_AND_MASTER_VOLUME = 3
+export const MSG_BANK_AND_PRESET_NR = 5
+export const MSG_PRESET = 6
+export const MSG_PARAMETER_VALUE = 7

@@ -54,10 +54,13 @@ void processUSBEditorCommand(uint8_t * cmd)
             processSetParameter(cmd+4);
             break;
         case USB_CMD_LOAD_PRESET:
-            processLoadPreset(*(cmd+4));
+            processLoadPreset((cmd+4));
             break;
         case USB_CMD_SET_FX_PROGRAM:
             processSetFxProgram(cmd+4);
+            break;
+        case USB_CMD_FXPROGRAM_ON_OFF:
+           processFxProgramOnOff(cmd+4);
             break;
         default:
             break;
@@ -381,10 +384,10 @@ void processSetParameter(uint8_t*data)
 }
 
 __QSPI_CODE
-void processLoadPreset(uint8_t data)
+void processLoadPreset(uint8_t * data)
 {
-    currentPreset = data; 
-    setPreset();
+    currentPreset = *(data+1); 
+    setPresetAtBank(*data,currentPreset);
     
 }
 
@@ -397,4 +400,18 @@ void processSetFxProgram(uint8_t*data)
         programChangeState=1;
     }
 
+}
+
+
+__QSPI_CODE
+void processFxProgramOnOff(uint8_t*data)
+{
+    if (*(data+1))
+    {
+        ((FxProgram*)audioProcessor.getFxProgram(*data))->switchOn();
+    }
+    else
+    {
+        ((FxProgram*)audioProcessor.getFxProgram(*data))->switchOff();
+    }
 }

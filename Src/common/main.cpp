@@ -273,7 +273,7 @@ int main(void)
     clearReleasedStickyBit(0);
 
     #ifndef FORCE_TEST_MODE
-		enterLevel0();
+		enterLevel3();
 	#else
 	    // switch on program "off"
 		//piPicoUiController.currentProgramIdx = 2;

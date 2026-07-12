@@ -826,6 +826,12 @@ static void handlePresetChange(uint8_t increase)
     setPreset();
 }
 
+void setPresetAtBank(uint8_t bankNr,uint8_t presetNr)
+{
+    previewBankNr = bankNr;
+    setPresetNr(presetNr);
+}
+
 void setPresetNr(uint8_t nr)
 {
     if (previewBankNr != currentBank && previewBankNr != 0xFF)
