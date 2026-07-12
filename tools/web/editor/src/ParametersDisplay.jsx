@@ -2,7 +2,7 @@ function ParametersDisplay(props)
 {
     let id=0;
     let parametersContent;
-    if (props.preset.programsAndParameters[props.effectIndex].programNr !== 0xff)
+    if (props.preset.programsAndParameters[props.effectIndex].programNr < 63)
     { 
         parametersContent=props.fxPrograms[props.preset.programsAndParameters[props.effectIndex].programNr].parameterNames.map(p => {
             const internalId=id;
@@ -25,7 +25,9 @@ function ParametersDisplay(props)
     }
     return (
         <table className="editor-vertical" id="parametersDisplay">
+            <tbody>
             {parametersContent}
+            </tbody>
         </table>
     );
 }

@@ -429,8 +429,11 @@ function App() {
         await getPrograms();
         await readCommand();
         for (const fxp of fxProgs) {
-            await getParameterNames(fxp.id);
-            await readCommand();
+            if (fxp.id < 63)
+            {
+                await getParameterNames(fxp.id);
+                await readCommand();
+            }
         }
         await getInputsAndMasterVolume();
         await readCommand();
@@ -468,14 +471,17 @@ function App() {
     }
 
     function setEffectState(position, state) {
-        const updatedPresets = presets.slice();
-        if (state === 1) {
-            updatedPresets[currentPreset].programsAndParameters[position].state = 'on';
-        } else {
-            updatedPresets[currentPreset].programsAndParameters[position].state = 'off';
+        if (presets[currentPreset].programsAndParameters[position].programNr < 63)
+        {
+            const updatedPresets = presets.slice();
+            if (state === true) {
+                updatedPresets[currentPreset].programsAndParameters[position].state = 'on';
+            } else {
+                updatedPresets[currentPreset].programsAndParameters[position].state = 'off';
+            }
+            setPresets(updatedPresets);
+            switchFxProgramOnOff(position, state);
         }
-        setPresets(updatedPresets);
-        switchFxProgramOnOff(position, state);
     }
 
     async function writeIfPossible(cmd) {

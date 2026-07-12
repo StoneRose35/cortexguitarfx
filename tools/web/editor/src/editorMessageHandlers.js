@@ -32,6 +32,15 @@ export function processGetPrograms(msg, msgIdx, size) {
         idx += 1;
     }
 
+    const fxProg = {
+            ParameterCount: 0,
+            freezable: false,
+            name: '<None>',
+            id: 63,
+            parameterNames: []
+        };
+    fxProgs[progCnt++] = fxProg;
+
     return { fxProgs, nextIdx: msgIdx + size };
 }
 

@@ -174,6 +174,10 @@ void parametersToPreset(FxPresetType* preset,MultiAudioProcessor * audioProcesso
             preset->parametersA[c] = ((FxProgram*)audioProcessor->getFxProgram(0))->getParameter(c)->rawValue;
         }   
     }
+    else
+    {
+        preset->programNrA = 63;
+    }
     if (audioProcessor->getFxProgram(1) != nullptr)
     {
         preset->programNrB = ((FxProgram*)audioProcessor->getFxProgram(1))->getIndex();
@@ -183,6 +187,10 @@ void parametersToPreset(FxPresetType* preset,MultiAudioProcessor * audioProcesso
             preset->parametersB[c] = ((FxProgram*)audioProcessor->getFxProgram(1))->getParameter(c)->rawValue;
         } 
     }
+    else
+    {
+        preset->programNrB = 63;
+    }
     if (audioProcessor->getFxProgram(2) != nullptr)
     {
         preset->programNrC = ((FxProgram*)audioProcessor->getFxProgram(2))->getIndex();
@@ -191,6 +199,10 @@ void parametersToPreset(FxPresetType* preset,MultiAudioProcessor * audioProcesso
         {
             preset->parametersC[c] = ((FxProgram*)audioProcessor->getFxProgram(2))->getParameter(c)->rawValue;
         } 
+    }
+    else
+    {
+        preset->programNrC = 63;
     }
     preset->routing = audioProcessor->getRouting();
  
