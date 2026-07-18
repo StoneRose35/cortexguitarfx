@@ -192,7 +192,7 @@
     </div>
     <div>
         <div class="reference-command">
-        <h4>Get Preset</h4>
+        <h4>Get Preset from EEPROM</h4>
         <div class="reference-cmd-description">
             Get the preset given a Bank and Preset Number. Causes the message "Preset" to be sent.
         </div>
@@ -347,9 +347,18 @@
                 <td>FX Program nr 0 up to the number of different fx programs, 0xFF/255: bypass/no program </td>
             </tr>
         </table>
+        <div class="reference-example-title">Example</div>
+            <div class="reference-bytearray">
+            <div class="reference-bytevalue">0xA</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">0xB</div>
+        </div>      
     </div>
     <div>
-        <div class="reference-command">
+    <div class="reference-command">
         <h4>Switch On/Off FX Program</h4>
         <div class="reference-cmd-description">
             Switches the FX Program on or off.
@@ -377,10 +386,242 @@
             </tr>
             <tr>
                 <td>5</td>
-                <td>0: Switch Off, 1: Switch On. Note: this command si ignored when no program is loaded at the given position </td>
+                <td>0: Switch Off, 1: Switch On. Note: this command is ignored when no program is loaded at the given position </td>
             </tr>
         </table>
+        <div class="reference-example-title">Example</div>
+            <div class="reference-bytearray">
+            <div class="reference-bytevalue">0xB</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x6</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">0x1</div>
+        </div>  
     </div>
+    <div>
+        <div class="reference-command">
+        <h4>Set Routing</h4>
+        <div class="reference-cmd-description">
+            Defines the routinng of the preset currently active.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>
+                    Position
+                </td>
+                <td class="reference-description">
+                    Description
+                </td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 12</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, 5 by default</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td  style=" white-space: pre-line;">The effect routing
+                    <div style="display: flex; align-items: center;">
+                        <div>0:</div>
+                        <img src="assets/rt_serial_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>1:</div>
+                        <img src="assets/rt_parallel_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>2:</div>
+                        <img src="assets/rt_s_2p_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>3:</div>
+                        <img src="assets/rt_2p_sl_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>4:</div>
+                        <img src="assets/rt_2s_p_16x16.png" style="height: 40px; "/>
+                    </div>
+                </td>
+            </tr>
+        </table>
+            <div class="reference-example-title">Example</div>
+            <div class="reference-bytearray">
+            <div class="reference-bytevalue">0xC</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x5</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x1</div>
+        </div>  
+    </div>   
+    <div class="reference-command">
+        <h4>Set Preset Name</h4>
+        <div class="reference-cmd-description">
+            Sets the name of the preset, must be less than 17 Characters.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>
+                    Position
+                </td>
+                <td class="reference-description">
+                    Description
+                </td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 13</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length</td>
+            </tr>
+            <tr>
+                <td>4:N</td>
+                <td>Preset Name as  a zero terminated string</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+            <div class="reference-bytearray">
+            <div class="reference-bytevalue">0xD</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x9</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">'L'</div>
+            <div class="reference-bytevalue">'u'</div>
+            <div class="reference-bytevalue">'s'</div>
+            <div class="reference-bytevalue">'h'</div>
+            <div class="reference-bytevalue">0x0</div>            
+        </div>  
+    </div> 
+    <div class="reference-command">
+        <h4>Save Preset in EEPROM</h4>
+        <div class="reference-cmd-description">
+            Save the preset a a given location in eeprom. This doesn't need to be the bank and position currently loaded.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>
+                    Position
+                </td>
+                <td class="reference-description">
+                    Description
+                </td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 14</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>the Bank Number
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td style=" white-space: pre-line;">bits 0:1: the Preset Number on the range 0-2
+                    bits 2:7: The Effect Routing
+                    <div style="display: flex; align-items: center;">
+                        <div>0:</div>
+                        <img src="assets/rt_serial_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>1:</div>
+                        <img src="assets/rt_parallel_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>2:</div>
+                        <img src="assets/rt_s_2p_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>3:</div>
+                        <img src="assets/rt_2p_sl_16x16.png" style="height: 40px; "/>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div>4:</div>
+                        <img src="assets/rt_2s_p_16x16.png" style="height: 40px; "/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Bit 0:1: state of effect A, 0: off, 1: on, 2: frozen
+                    Bit 2:3: state of effect B
+                    Bit 4:5: state of effect C
+                </td>
+            </tr>
+            <tr>
+                <td>7:7+S</td>
+                <td>The name of the Preset as a zero-terminated string</td>
+            </tr>
+            <tr>
+                <td> N</td>
+                <td>Program Nr for Program A, 255 means none</td>
+            </tr>
+            <tr>
+                <td>N+1:N+NO</td>
+                <td>All O parameter values of Program A as 2byte little endian, followed by the display Value as a zero-terminated string</td>
+            </tr>
+            <tr>
+                <td>M</td>
+                <td>Program Nr for Program B, 255 means none</td>
+            </tr>
+            <tr>
+                <td>M+1:M+1+NQ</td>
+                <td>All Q parameter values of Program B as 2byte little endian, followed by the display Value as a zero-terminated string</td>
+            </tr>
+            <tr>
+                <td>P</td>
+                <td>Program Nr for Program C, 255 means none</td>
+            </tr>
+            <tr>
+                <td>P+1:P+1+NW</td>
+                <td>All W parameter values of Program C as 2byte little endian, followed by the display Value as a zero-terminated string</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+        <div class="reference-cmd-description">
+            Store preset at Bank Nr 4, at position 1, serial routing, named "Demo". In Slot A Program Nr 3 is loaded
+            having two parameters which have the values 0x1AC, display Value "Muh" and 0x1DC, display value "Maeh". On Slot 
+            B and C no programs are loaded
+        </div>
+        <div class="reference-bytearray">
+            <div class="reference-bytevalue">0xE</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x1B</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x4</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">'D'</div>
+            <div class="reference-bytevalue">'e'</div>
+            <div class="reference-bytevalue">'m'</div>
+            <div class="reference-bytevalue">'o'</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x3</div>
+            <div class="reference-bytevalue">0xAC</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">'M'</div>
+            <div class="reference-bytevalue">'u'</div>
+            <div class="reference-bytevalue">'h'</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0xDC</div>
+            <div class="reference-bytevalue">0x1</div>
+            <div class="reference-bytevalue">'M'</div>
+            <div class="reference-bytevalue">'a'</div>
+            <div class="reference-bytevalue">'e'</div>
+            <div class="reference-bytevalue">'h'</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0xFF</div>
+            <div class="reference-bytevalue">0xFF</div>
+        </div> 
+    </div> 
     <h2>Messages</h2>
     <div class="reference-command">
         <h4>About Dialog Content</h4>
@@ -732,7 +973,7 @@
         <div class="reference-bytearray">
             <div class="reference-bytevalue">0x6</div>
             <div class="reference-bytevalue">0x0</div>
-            <div class="reference-bytevalue">0x12</div>
+            <div class="reference-bytevalue">0x1B</div>
             <div class="reference-bytevalue">0x0</div>
             <div class="reference-bytevalue">0x4</div>
             <div class="reference-bytevalue">0x1</div>

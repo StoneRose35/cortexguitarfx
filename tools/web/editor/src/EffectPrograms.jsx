@@ -15,13 +15,30 @@ function EffectView(props)
         }
     }
 
+    function convertIdTLetter(id)
+    {
+        if (id == 0)
+        {
+            return "A";
+        }
+        else if (id == 1)
+        {
+            return "B";
+        }
+        else if (id == 2)
+        {
+            return "C";
+        }
+        return id;
+    }
+
     return (
     <div className="editor-effect-group">
     <input type="radio" name="effectInFocus" value={"fx"+props.id} id={"effectView" + props.id} className="editor-text-selectable" onChange={(e) => {
             props.setCurrentFxProgramIdx(props.id);
         
     }}></input>
-    <label htmlFor={"effectView" + props.id}>{"Effect " + props.id}</label>
+    <label htmlFor={"effectView" + props.id}>{"Effect " + convertIdTLetter(props.id)}</label>
     <label className="editor-switch">
         <input type="checkbox" checked={getValue(props.presets[props.currentPreset].programsAndParameters[props.id/1].state)} onChange={(e) => props.changeEffectState(props.id/1,e.target.checked)}/>
         <span className="editor-slider round"></span>

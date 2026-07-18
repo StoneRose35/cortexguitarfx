@@ -16,13 +16,15 @@ import {
     USB_CMD_LOAD_PRESET,
     USB_CMD_SET_FX_PROGRAM,
     USB_CMD_FXPROGRAM_ON_OFF,
+    USB_CMD_SET_PRESET_NAME,
     MSG_ABOUT,
     MSG_PROGRAMS,
     MSG_PARAMETER_NAMES,
     MSG_INPUTS_AND_MASTER_VOLUME,
     MSG_BANK_AND_PRESET_NR,
     MSG_PRESET,
-    MSG_PARAMETER_VALUE
+    MSG_PARAMETER_VALUE,
+    USB_CMD_SET_ROUTING
 } from './editorConstants';
 import { createInitialFxPrograms, createInitialPresets } from './editorData';
 import {
@@ -43,8 +45,8 @@ let commandBfrIdx = 0;
 let presetBfr = [{}, {}, {}];
 let currentBankBfr = 0;
 let masterVolumeMessageState = 0;
-let parameterValueState = 0;
 let parameterValueSending = 0;
+let presetNameChanging = 0;
 let newParameterValues = [];
 //let currentPresetBfr=0;
 //let readCommandState = 0; // 0: read header, 1: read command
@@ -209,6 +211,36 @@ function App() {
         await writeIfPossible(cmd);
     }
 
+    async function setPresetName(presetName)
+    {
+        const cmdbfr = new ArrayBuffer(presetName.length + 4);
+        const cmd = new Uint8Array(cmdbfr);
+        const encoder = new TextEncoder();
+        const presetNameUint8 = encoder.encode(presetName);
+        cmd[0] = USB_CMD_SET_PRESET_NAME;
+        cmd[1] = 0;
+        cmd[2] = presetName.length + 4;
+        cmd[3] = 0;
+        for (let c=0;c<presetNameUint8.length;c++)
+        {
+            cmd[c+4] = presetNameUint8[c];
+        }
+        await writeIfPossible(cmd);
+        presetNameChanging = 0;
+    }
+
+    async function setRouting(routing)
+    {
+        const cmdbfr = new ArrayBuffer(5);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_SET_ROUTING;
+        cmd[1] = 0;
+        cmd[2] = 5;
+        cmd[3] = 0;
+        cmd[4] = routing;
+        await writeIfPossible(cmd);
+    }
+
     function processGetPreset(msg, msgIdx, size, fxProgs) {
         let idx = msgIdx + 7;
         const preset = {};
@@ -342,7 +374,6 @@ function App() {
             if (transferResult.status !== 'ok') {
                 const data = new Uint8Array(transferResult.data.buffer);
                 console.log(`readCommand(), returned unexpected status ${transferResult.status} when reading message header`);
-                parameterValueState = 0;
                 masterVolumeMessageState = 0;
                 currentCommandNr = 0xFFFF;
             } else {
@@ -403,12 +434,10 @@ function App() {
                             setPresets(presetBfr);
                             commandBfrIdx = displayValueResult.nextIdx;
                             console.log('handled MSG_PARAMETER_VALUE');
-                            parameterValueState = 0;
                             break;
                         }
                         default:
                             console.log(`unknown command ${commandBfr[0]} ${commandBfr[1]}`);
-                            parameterValueState = 0;
                             break;
                     }
                     currentCommandNr = 0xFFFF;
@@ -468,6 +497,7 @@ function App() {
         const updatedPresets = presets.slice();
         updatedPresets[currentPreset].routing = routingId;
         setPresets(updatedPresets);
+        setRouting(routingId);
     }
 
     function setEffectState(position, state) {
@@ -607,6 +637,18 @@ function App() {
         //setCurrentFxProgramIdx(fxProgram/1);
     }
 
+    function handlePresetNameChange(presetname)
+    {
+        if (presetNameChanging === 0)
+        {
+            presetNameChanging = 1;
+            const newpresets = presets.slice()
+            newpresets[currentPreset].name = presetname;
+            setPresets(newpresets);
+            setPresetName(presetname);
+        }
+    }
+
     return (
         <>
             <div className="editor-main" id="editor_app">
@@ -639,7 +681,13 @@ function App() {
                 </div>
                 <div className="editor-panel">
                     <div className="editor-vertical">
-                        <div id="currentPreset" className="editor-textfield">{presets[currentPreset].name}</div>
+                        <input 
+                            id="currentPreset" 
+                            className="editor-input" 
+                            type="text" 
+                            value={presets[currentPreset].name}
+                            onChange={(e) => handlePresetNameChange(e.target.value) }
+                        />
                         <div className="editor-vertical-label">Preset</div>
                     </div>
                     <div className="editor-vertical">
@@ -708,21 +756,11 @@ function App() {
                 </div>
                 <ParametersDisplay preset={presets[currentPreset]} fxPrograms={fxPrograms} effectIndex={currentFxProgramIdx} changeParameterValue={setParameterValue} />
                 <span className="editor-filler-vertical"></span>
-                <Console content={consoleText} />
-                <div className="editor-panel">
-                    <button className="editor-button" onClick={aboutHandler}>Get About</button>
-                    <button className="editor-button" onClick={getProgramsHandler}>Get Programs</button>
-                    <button className="editor-button" onClick={getInputsAndMasterVolume}>Get Inputs and Volume</button>
-                    <button className="editor-button" onClick={() => getParameterNames(1)}>Param Names of first prog</button>
-                    <button className="editor-button" onClick={() => {
-                        setParameterValue(0, singleParamValue);
-                        setSingleParamValue(() => singleParamValue + 1);
-                    }}>Set First Parameter</button>
-                    <span className="editor-filler"></span>
-                </div>
             </div>
         </>
     );
 }
 
 export default App;
+
+

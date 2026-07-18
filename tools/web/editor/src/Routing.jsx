@@ -1,15 +1,15 @@
-import rt_serial_16x16 from './../assets/rt_serial_16x16.png';
-import rt_parallel_16x16 from './../assets/rt_parallel_16x16.png';
-import rt_s_2p_16x16 from './../assets/rt_s_2p_16x16.png';
-import rt_2p_sl_16x16 from './../assets/rt_2p_sl_16x16.png';
-import rt_2s_p_16x16 from './../assets/rt_2s_p_16x16.png';
+import rt_serial_256x256 from './../assets/rt_serial_256x256.png';
+import rt_parallel_256x256 from './../assets/rt_parallel_256x256.png';
+import rt_s_2p_256x256 from './../assets/rt_s_2p_256x256.png';
+import rt_2p_sl_256x256 from './../assets/rt_2p_sl_256x256.png';
+import rt_2s_p_256x256 from './../assets/rt_2s_p_256x256.png';
 import './App.css'
 import { useState } from 'react';
 
 function Routing(props)
 {
     const [routingId,setRoutingId] = useState(props.presets[props.currentPreset].routing);
-    const routingImages=[rt_serial_16x16,rt_parallel_16x16,rt_s_2p_16x16,rt_2p_sl_16x16,rt_2s_p_16x16];
+    const routingImages=[rt_serial_256x256,rt_parallel_256x256,rt_s_2p_256x256,rt_2p_sl_256x256,rt_2s_p_256x256];
     function updateRoutingId()
     {
         if (routingId == 4)
