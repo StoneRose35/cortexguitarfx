@@ -34,6 +34,9 @@ export function createInitialPresets() {
             presetNr: 0,
             routing: 0,
             name: 'B0 P0',
+            ledColorA: 1,
+            ledColorB: 2,
+            ledColorC: 3,
             programsAndParameters: [
                 {
                     programNr: 0,
@@ -60,6 +63,9 @@ export function createInitialPresets() {
             presetNr: 1,
             routing: 0,
             name: 'B0 P1',
+            ledColorA: 2,
+            ledColorB: 1,
+            ledColorC: 3,
             programsAndParameters: [
                 {
                     programNr: 0,
@@ -86,6 +92,9 @@ export function createInitialPresets() {
             presetNr: 2,
             routing: 0,
             name: 'B0 P2',
+            ledColorA: 3,
+            ledColorB: 2,
+            ledColorC: 1,
             programsAndParameters: [
                 {
                     programNr: 0,

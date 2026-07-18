@@ -6,7 +6,7 @@ let isclicked=false;
 function ParameterSlider(props)
 {
     let [paramName,setParamName]=useState("Volume");
-    const [value,setValue]=useState(props.initialValue);
+    const [value,setValue]=useState(props.initialValue/40.96 + "%");
     const clickPos=useRef(0);
     const containerElement=useRef(null);
     const currentWidth=useRef(0);
@@ -14,9 +14,10 @@ function ParameterSlider(props)
     //setValue(props.initialValue);
     return (
         <div className="parameter-slider-container" >
+            <div className='parameter-slider-container-inner'>
+                <div className="parameter-slider-bar" style={{ width: props.preset.programsAndParameters[props.effectIndex].parameters[props.id]/40.96 + "%"}} >
 
-            <div className="parameter-slider-bar" style={{ width: value}} >
-
+                </div>
             </div>
             <div className="parameter-slider-name" >
                 {props.parameterName}

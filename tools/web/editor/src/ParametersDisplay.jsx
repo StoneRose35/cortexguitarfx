@@ -12,7 +12,14 @@ function ParametersDisplay(props)
                 <>
             <tr key={id} className="editor-horizontal">
                 <td className="editor-vertical editor-effectparam">
-                    <ParameterSlider id={id} preset={props.preset} parameterName={p} parameterValue={props.preset.programsAndParameters[props.effectIndex].displayNames[id++]} onChange={(v) => props.changeParameterValue(internalId,v)}/>
+                    <ParameterSlider 
+                        id={id} 
+                        preset={props.preset} 
+                        effectIndex={props.effectIndex}
+                        parameterName={p} 
+                        initialValue={props.preset.programsAndParameters[props.effectIndex].parameters[id]}
+                        parameterValue={props.preset.programsAndParameters[props.effectIndex].displayNames[id++]} 
+                        onChange={(v) => props.changeParameterValue(internalId,v)}/>
                 </td>
             </tr>
             

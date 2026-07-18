@@ -2,10 +2,11 @@
 div, select,option,input {
 font-family: 'Courier New', Courier, monospace;
 font-size: 14px;
+color: #1e404f;
 }
 
 select {
-    background-color: beige;
+    background-color: #e9bd96;
     border-radius: 4px;
     scrollbar-width: thin;
     overflow-y: auto;
@@ -26,6 +27,10 @@ table {
     border-spacing: 0px;
 }
 
+label {
+    background-color: #e9bd96;
+}
+
 .editor-title {
     margin-left: auto;
     margin-right: auto;
@@ -33,7 +38,7 @@ table {
     text-align: center;
     font-size: 48px;
     padding: 10px;
-    color: rgb(13, 15, 37);
+    color: #1e404f;
 }	
 
 .editor-toppanel {
@@ -56,10 +61,10 @@ table {
     min-width: 64px;
     width: auto;
     padding: 4px;
-    background-color: beige;
-    border-width: 2px;
+    background-color: #e9bd96;
+    border-width: 1px;
     border-style: solid;
-    border-color: rgb(24, 22, 19);
+    border-color: #1e404f;
     border-radius: 4px;
     text-align: start;
     height: 25px;
@@ -69,10 +74,10 @@ table {
     min-width: 164px;
     width: auto;
     padding: 4px;
-    background-color: beige;
-    border-width: 2px;
+    background-color: #e9bd96;
+    border-width: 1px;
     border-style: solid;
-    border-color: rgb(24, 22, 19);
+    border-color: #1e404f;
     border-radius: 4px;
     text-align: start;
     height: 25px;
@@ -122,11 +127,23 @@ div .editor-effect-group {
     justify-self:right;
     flex-direction: column;
     border-style: solid;
-    border-color: #c2c2c2;
+    border-color: #1e404f;
+    background-color: #e9bd96;
     border-radius: 4px;
-    border-width: 2px;
+    border-width: 3px;
     margin: 4px;
     padding: 4px;
+}
+
+div .editor-effect-group-led
+{
+    width: 32px;
+    height: 32;
+    border-radius: 16px;
+    min-width: 32px;
+    min-height: 32px;
+    margin-top: 6px;
+    margin-bottom: 6px;
 }
 
 div .editor-vertical-label
@@ -162,16 +179,16 @@ div .editor-vertical-label
 }
 .editor-button {
     border-style:solid;
-    border-color: rgba(0, 0, 0, 0);
+    border-color: #1e404f;
     border-width: 3px;
     padding: 4px;
     margin: 6px;
     font-family: sans-serif;
     font-size: 14px;
-    color: rgb(12,23,111);
+    color: #1e404f;
     border-radius: 4px;
     width: fit-content;
-    background-color: rgb(198,24,56);
+    background-color: #e9bd96;
 }
 
 .editor-button:active
@@ -187,14 +204,14 @@ div .editor-vertical-label
     margin: 6px;
     font-family: sans-serif;
     font-size: 14px;
-    color: rgb(67, 73, 117);
+    color: #34685c;
     border-radius: 4px;
     width: fit-content;
-    background-color: rgb(197, 141, 151);
+    background-color: #34685c;
 }
 
 .editor-fxprogram-freezable {
-    background-color: rgb(175, 235, 235);
+    background-color: #e6692a;
 }
 
 .editor-main {
@@ -206,7 +223,7 @@ div .editor-vertical-label
     display:flex;
     flex-grow: 1;
     flex-direction: column;
-    background-color: rgb(132, 185, 159);
+    background-color: #ed9530;
 }
 
 .editor-switch {
@@ -229,7 +246,7 @@ div .editor-vertical-label
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #34685C;
   -webkit-transition: .2s;
   transition: .2s;
 }
@@ -253,7 +270,7 @@ div .editor-vertical-label
 
 .editor-text-selectable:checked+label
 {
-    color: #d52b36;
+    color: #e6692a;
 }
 
 .editor-text-selectable
@@ -262,11 +279,11 @@ div .editor-vertical-label
 }
 
 input:checked + .editor-slider {
-  background-color:rgb(198,24,56);
+  background-color: #cc2132;
 }
 
 input:focus + .editor-slider {
-  box-shadow: 0 0 1px #28a539;
+  box-shadow: 0 0 1px #988a20;
 }
 
 input:checked + .editor-slider:before {
@@ -311,9 +328,18 @@ img.editor-routing {
     min-height: 56px;
     border-width: 2px;
     border: solid;
-    border-color: #c2c2c2;
+    background-color: #e9bd96;
+    border-color: #1e404f;
     border-radius: 4px;
-    padding: 4px;
+    padding: 0px;
+}
+
+.parameter-slider-container-inner
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0px;
 }
 
 .parameter-slider-overlay {
@@ -346,11 +372,15 @@ img.editor-routing {
 .parameter-slider-bar
 {
     position: absolute;
-    top: 4px;
-    left: 4px;
+    top: 0px;
+    left: 0px;
     height: stretch;
     width: 100%;
-    margin-bottom: 4px;
+    margin-bottom: 0px;
     border-radius: 4px;
-background-color: rgb(8, 16, 246);
+background-color: #34685C;
+}
+
+#volume {
+    accent-color: #34685c;
 }

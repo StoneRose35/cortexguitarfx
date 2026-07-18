@@ -12,6 +12,7 @@ export const USB_CMD_FXPROGRAM_ON_OFF = 11
 export const USB_CMD_SET_ROUTING = 12
 export const USB_CMD_SET_PRESET_NAME = 13
 export const USB_CMD_SAVE_PRESET = 14
+export const USB_CMD_SET_LED_COLOR = 15
 
 export const MSG_ABOUT = 0
 export const MSG_PROGRAMS = 1

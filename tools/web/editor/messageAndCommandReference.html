@@ -558,7 +558,14 @@
                 </td>
             </tr>
             <tr>
-                <td>7:7+S</td>
+                <td>7</td>
+                <td>Bit 0:1: led color A, 
+                    Bit 2:3: led color B
+                    Bit 4:5: led color C
+                </td>
+            </tr>
+            <tr>
+                <td>8:8+S</td>
                 <td>The name of the Preset as a zero-terminated string</td>
             </tr>
             <tr>
@@ -621,6 +628,46 @@
             <div class="reference-bytevalue">0xFF</div>
             <div class="reference-bytevalue">0xFF</div>
         </div> 
+    </div> 
+        <div class="reference-command">
+        <h4>Set LED Color</h4>
+        <div class="reference-cmd-description">
+            Sets the color which the led should show when in pedalboard mode.
+        </div>
+        <table>
+            <tr class="reference-theader">
+                <td>
+                    Position
+                </td>
+                <td class="reference-description">
+                    Description
+                </td>
+            </tr>
+            <tr>
+                <td>0:1</td>
+                <td>Command Nr: 15</td>
+            </tr>
+            <tr>
+                <td>2:3</td>
+                <td>Command Length, defaults to 5</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>bits 0:1 : position, bits 2:3 : LED color</td>
+            </tr>
+        </table>
+        <div class="reference-example-title">Example</div>
+            <div class="reference-bytearray">
+            <div class="reference-bytevalue">0xD</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">0x9</div>
+            <div class="reference-bytevalue">0x0</div>
+            <div class="reference-bytevalue">'L'</div>
+            <div class="reference-bytevalue">'u'</div>
+            <div class="reference-bytevalue">'s'</div>
+            <div class="reference-bytevalue">'h'</div>
+            <div class="reference-bytevalue">0x0</div>            
+        </div>  
     </div> 
     <h2>Messages</h2>
     <div class="reference-command">
@@ -936,7 +983,14 @@
                 </td>
             </tr>
             <tr>
-                <td>7:7+S</td>
+                <td>7</td>
+                <td>Bit 0:1: led color A, 
+                    Bit 2:3: led color B
+                    Bit 4:5: led color C
+                </td>
+            </tr>
+            <tr>
+                <td>8:8+S</td>
                 <td>The name of the Preset as a zero-terminated string</td>
             </tr>
             <tr>

@@ -64,9 +64,6 @@ function App() {
     const [currentPreset, setCurrentPreset] = useState(0);
     const [currentFxProgramIdx, setCurrentFxProgramIdx] = useState(0);
     const [singleParamValue, setSingleParamValue] = useState(1);
-    const [preset0Name,setPreset0Name] = useState("");
-    const [preset1Name,setPreset1Name] = useState("");
-    const [preset2Name,setPreset2Name] = useState("");
     const [presetSelected,setPresetSelected] = useState(true);
 
     function aboutHandler() {
@@ -213,18 +210,19 @@ function App() {
 
     async function setPresetName(presetName)
     {
-        const cmdbfr = new ArrayBuffer(presetName.length + 4);
+        const cmdbfr = new ArrayBuffer(presetName.length + 5);
         const cmd = new Uint8Array(cmdbfr);
         const encoder = new TextEncoder();
         const presetNameUint8 = encoder.encode(presetName);
         cmd[0] = USB_CMD_SET_PRESET_NAME;
         cmd[1] = 0;
-        cmd[2] = presetName.length + 4;
+        cmd[2] = presetName.length + 5;
         cmd[3] = 0;
         for (let c=0;c<presetNameUint8.length;c++)
         {
             cmd[c+4] = presetNameUint8[c];
         }
+        cmd[presetName.length+4]=0;
         await writeIfPossible(cmd);
         presetNameChanging = 0;
     }
@@ -242,15 +240,17 @@ function App() {
     }
 
     function processGetPreset(msg, msgIdx, size, fxProgs) {
-        let idx = msgIdx + 7;
+        let idx = msgIdx + 8;
         const preset = {};
         preset.bankNr = msg[msgIdx + 4];
         preset.presetNr = msg[msgIdx + 5] & 0x3;
         preset.routing = msg[msgIdx + 5] >> 2;
-
-        const effectAState = msg[msgIdx + 6] & 3;
-        const effectBState = (msg[msgIdx + 6] >> 2) & 3;
-        const effectCState = (msg[msgIdx + 6] >> 4) & 3;
+        preset.ledColorA = msg[msgIdx + 6] & 0x3;
+        preset.ledColorB = (msg[msgIdx + 6] >> 2) & 0x3;
+        preset.ledColorC = (msg[msgIdx + 6] >> 4) & 0x3;
+        const effectAState = msg[msgIdx + 7] & 3;
+        const effectBState = (msg[msgIdx + 7] >> 2) & 3;
+        const effectCState = (msg[msgIdx + 7] >> 4) & 3;
 
         let nameArray = [];
         while (msg[idx] !== 0 && idx < msgIdx + size) {
@@ -345,18 +345,6 @@ function App() {
                 preset.programsAndParameters[2].displayNames.push(String.fromCharCode(...nameArray));
                 cnt += 1;
             }
-        }
-        if (preset.presetNr === 0)
-        {
-            setPreset0Name(preset.name);
-        }
-        else if (preset.presetNr === 1)
-        {
-            setPreset1Name(preset.name);
-        }
-        else
-        {
-            setPreset2Name(preset.name);
         }
 
         return { preset, nextIdx: msgIdx + size };
@@ -643,10 +631,28 @@ function App() {
         {
             presetNameChanging = 1;
             const newpresets = presets.slice()
-            newpresets[currentPreset].name = presetname;
+            newpresets[currentPreset].name = presetname; 
             setPresets(newpresets);
             setPresetName(presetname);
         }
+    }
+    
+    function setLEDColor(ledcolor,position)
+    {
+        const newpresets = presets.slice();
+        if (position == 0)
+        {
+            newpresets[currentPreset].ledColorA = ledcolor;
+        }
+        else if (position == 1)
+        {
+            newpresets[currentPreset].ledColorB = ledcolor;
+        }
+        else if (position == 2)
+        {
+            newpresets[currentPreset].ledColorC = ledcolor;
+        }
+        setPresets(newpresets);
     }
 
     return (
@@ -710,19 +716,19 @@ function App() {
                             setCurrentPreset(0);
                             loadPreset(0);
                         }}></input>
-                        <label htmlFor="presetNr1" id="presetNr1Label">{preset0Name}</label>
+                        <label htmlFor="presetNr1" id="presetNr1Label">{presets[0].name}</label>
                         <input type="radio" name="presetNr" value="b" id="presetNr2" className="editor-text-selectable" checked={currentPreset === 1 && presetSelected} onChange={() => {
                             setPresetSelected(true);
                             setCurrentPreset(1);
                             loadPreset(1);
                         }}></input>
-                        <label htmlFor="presetNr2" id="presetNr2Label">{preset1Name}</label>
+                        <label htmlFor="presetNr2" id="presetNr2Label">{presets[1].name}</label>
                         <input type="radio" name="presetNr" value="c" id="presetNr3" className="editor-text-selectable" checked={currentPreset === 2 && presetSelected} onChange={() => {
                             setPresetSelected(true);
                             setCurrentPreset(2);
                             loadPreset(2);
                         }}></input>
-                        <label htmlFor="presetNr3" id="presetNr3Label">{preset2Name}</label>
+                        <label htmlFor="presetNr3" id="presetNr3Label">{presets[2].name}</label>
                     </div>
                     <span className="editor-filler"></span>
                     <EffectView
@@ -733,6 +739,7 @@ function App() {
                         changePresets={handleFxProgramChange}
                         changeEffectState={setEffectState}
                         setCurrentFxProgramIdx={setCurrentFxProgramIdx}
+                        changeLEDColor={setLEDColor}
                     />
                     <EffectView
                         id="1"
@@ -742,6 +749,7 @@ function App() {
                         changePresets={handleFxProgramChange}
                         changeEffectState={setEffectState}
                         setCurrentFxProgramIdx={setCurrentFxProgramIdx}
+                        changeLEDColor={setLEDColor}
                     />
                     <EffectView
                         id="2"
@@ -751,6 +759,7 @@ function App() {
                         changeEffectState={setEffectState}
                         currentPreset={currentPreset}
                         setCurrentFxProgramIdx={setCurrentFxProgramIdx}
+                        changeLEDColor={setLEDColor}
                     />
                     <Routing presets={presets} currentPreset={currentPreset} changeRouting={updateRouting} />
                 </div>
