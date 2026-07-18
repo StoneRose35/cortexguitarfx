@@ -20,6 +20,7 @@ using namespace PiPicoFX;
 extern PiPicoFXUiType ui;
 extern uint8_t currentBank;
 extern uint8_t currentPreset;
+extern FxPresetType presets[3];
 extern MultiAudioProcessor audioProcessor;
 extern volatile uint8_t programChangeState;
 extern volatile uint8_t programsToInitialize[3];
@@ -61,6 +62,12 @@ void processUSBEditorCommand(uint8_t * cmd)
             break;
         case USB_CMD_FXPROGRAM_ON_OFF:
            processFxProgramOnOff(cmd+4);
+            break;
+        case USB_CMD_SET_PRESET_NAME:
+            processSetPresetName(cmd+4);
+            break;
+        case USB_CMD_SET_ROUTING:
+            processSetRouting(*(cmd+4));
             break;
         default:
             break;
@@ -279,7 +286,8 @@ void processGetPreset(uint8_t*data)
     responseBfr[1]=0;
     responseBfr[idx++]=*data;
     responseBfr[idx++]=*(data+1) | (preset.routing << 2);
-    if (preset.programNrA != 0x3F)
+    //if (preset.programNrA != 0x3F)
+    responseBfr[idx++]= preset.ledColorA | (preset.ledColorB << 2) | (preset.ledColorC << 4);
     responseBfr[idx++] = programsStati;
     while(*(preset.name + stringIndex)!=0)
     {
@@ -414,4 +422,91 @@ void processFxProgramOnOff(uint8_t*data)
     {
         ((FxProgram*)audioProcessor.getFxProgram(*data))->switchOff();
     }
+}
+
+__QSPI_CODE
+void processSetPresetName(uint8_t*data)
+{
+    uint8_t c=0;
+    while(*(data+c) != 0 && c < 15)
+    {
+        presets[currentPreset].name[c] = data[c];
+        c++;
+    }
+    presets[currentPreset].name[c] = 0;
+}
+
+__QSPI_CODE
+void processSetRouting(uint8_t data)
+{
+    audioProcessor.setRouting(data);
+}
+
+__QSPI_CODE
+void processSavePreset(uint8_t* data)
+{
+    uint16_t cnt = 8;
+    uint8_t c=0;
+    FxPresetType preset;
+    FxProgram * prog;
+    preset.bankNr = *(data+4);
+    preset.bankPos = *(data + 5) & 0x3;
+    preset.ledColorA = *(data+6) & 0x3;
+    preset.ledColorB = (*(data+6)>>2) & 0x3;
+    preset.ledColorC = (*(data+6)>>2) & 0x3;
+    preset.ledColorPreset = 0;
+    while (*(data+cnt) != 0)
+    {
+        preset.name[c++] = *(data+cnt++);
+    }
+    preset.name[c]=0;
+    preset.programNrA = *(data+cnt++);
+    prog = loadProgramWithoutSetup(preset.programNrA);
+    c=0;
+    if (prog != nullptr)
+    {
+        while(c < prog->getParameterCount())
+        {
+            preset.parametersA[c] = *((uint16_t*)(data + cnt++));
+            while (*(data+cnt) != 0)
+            {
+                cnt++;
+            }
+        }
+        cnt++;
+    }
+    delete prog;
+    preset.programNrB = *(data+cnt++);
+    prog = loadProgramWithoutSetup(preset.programNrB);
+    c=0;
+    if (prog != nullptr)
+    {
+        while(c < prog->getParameterCount())
+        {
+            preset.parametersB[c] = *((uint16_t*)(data + cnt++));
+            while (*(data+cnt) != 0)
+            {
+                cnt++;
+            }
+        } 
+        cnt++;
+    }
+    delete prog;
+    preset.programNrC = *(data+cnt++);
+    prog = loadProgramWithoutSetup(preset.programNrC);
+    c=0;
+    if (prog != nullptr)
+    {
+        while(c < prog->getParameterCount())
+        {
+            preset.parametersC[c] = *((uint16_t*)(data + cnt++));
+            while (*(data+cnt) != 0)
+            {
+                cnt++;
+            }
+        } 
+        cnt++;
+    }
+    delete prog;
+    savePreset(&preset,preset.bankNr*3 + preset.bankPos);
 }

@@ -20,7 +20,10 @@ typedef struct
 #define USB_CMD_LOAD_PRESET 9
 #define USB_CMD_SET_FX_PROGRAM 10
 #define USB_CMD_FXPROGRAM_ON_OFF 11
-
+#define USB_CMD_SET_ROUTING 12
+#define USB_CMD_SET_PRESET_NAME 13
+#define USB_CMD_SAVE_PRESET 14
+#define USB_CMD_SET_LED_COLOR 15
 
 #define MSG_ABOUT 0
 #define MSG_PROGRAMS 1
@@ -42,4 +45,7 @@ void processSetParameter(uint8_t*);
 void processLoadPreset(uint8_t*);
 void processSetFxProgram(uint8_t*data);
 void processFxProgramOnOff(uint8_t*data);
+void processSetPresetName(uint8_t*);
+void processSetRouting(uint8_t);
+void processSavePreset(uint8_t*);
 #endif
