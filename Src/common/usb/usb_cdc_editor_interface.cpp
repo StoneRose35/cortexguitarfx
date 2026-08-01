@@ -8,13 +8,14 @@ extern "C" {
 #include "memoryRegions.h"
 #include "pcm3060.h"
 #include "drivers/24lc128.h"
+#include "drivers/stompswitches.h"
 #include "timer.h"
 }
 
 #include "usb/usb_cdc_editor_interface.hpp"
 #include "pipicofx/FxProgramLoader.hpp"
 #include "pipicofx/FxProgram.hpp"
-#include "pipicofx/uiLevel3_preset.hpp"
+#include "pipicofx/Presets.hpp"
 
 using namespace PiPicoFX;
 extern PiPicoFXUiType ui;
@@ -68,6 +69,12 @@ void processUSBEditorCommand(uint8_t * cmd)
             break;
         case USB_CMD_SET_ROUTING:
             processSetRouting(*(cmd+4));
+            break;
+        case USB_CMD_SET_LED_COLOR:
+            processSetLEDColor(*(cmd+4));
+            break;
+        case USB_CMD_SAVE_PRESET:
+            processSavePreset(cmd+4);
             break;
         default:
             break;
@@ -287,7 +294,7 @@ void processGetPreset(uint8_t*data)
     responseBfr[idx++]=*data;
     responseBfr[idx++]=*(data+1) | (preset.routing << 2);
     //if (preset.programNrA != 0x3F)
-    responseBfr[idx++]= preset.ledColorA | (preset.ledColorB << 2) | (preset.ledColorC << 4);
+    responseBfr[idx++]= preset.ledColorA | (preset.ledColorB << 2) | (preset.ledColorC << 4) | (preset.ledColorPreset << 6);
     responseBfr[idx++] = programsStati;
     while(*(preset.name + stringIndex)!=0)
     {
@@ -417,10 +424,26 @@ void processFxProgramOnOff(uint8_t*data)
     if (*(data+1))
     {
         ((FxProgram*)audioProcessor.getFxProgram(*data))->switchOn();
+        if (ui.mode == PPFX_MODE_PEDALBOARD)
+        {
+            setStompswitchColor(*data,2);
+        }
+        else if (ui.mode == PPFX_MODE_STOMPBOX)
+        {
+            setStompswitchColorRaw(2 << 2);
+        }
     }
     else
     {
         ((FxProgram*)audioProcessor.getFxProgram(*data))->switchOff();
+        if (ui.mode == PPFX_MODE_PEDALBOARD)
+        {
+            setStompswitchColor(*data,0);
+        }
+        else if (ui.mode == PPFX_MODE_STOMPBOX)
+        {
+            setStompswitchColorRaw(2 << 0);
+        }
     }
 }
 
@@ -449,12 +472,12 @@ void processSavePreset(uint8_t* data)
     uint8_t c=0;
     FxPresetType preset;
     FxProgram * prog;
-    preset.bankNr = *(data+4);
-    preset.bankPos = *(data + 5) & 0x3;
+    preset.bankNr    = *(data+4);
+    preset.bankPos   = *(data+5) & 0x3;
     preset.ledColorA = *(data+6) & 0x3;
     preset.ledColorB = (*(data+6)>>2) & 0x3;
-    preset.ledColorC = (*(data+6)>>2) & 0x3;
-    preset.ledColorPreset = 0;
+    preset.ledColorC = (*(data+6)>>4) & 0x3;
+    preset.ledColorPreset = (*(data+6)>>6) & 0x3;
     while (*(data+cnt) != 0)
     {
         preset.name[c++] = *(data+cnt++);
@@ -509,4 +532,14 @@ void processSavePreset(uint8_t* data)
     }
     delete prog;
     savePreset(&preset,preset.bankNr*3 + preset.bankPos);
+}
+
+__QSPI_CODE
+void processSetLEDColor(uint8_t data)
+{
+    presets[currentPreset].ledColorPreset=data;
+    if (ui.mode==PPFX_MODE_PRESETS)
+    {
+        setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
+    }
 }

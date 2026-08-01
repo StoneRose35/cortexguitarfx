@@ -48,4 +48,5 @@ void processFxProgramOnOff(uint8_t*data);
 void processSetPresetName(uint8_t*);
 void processSetRouting(uint8_t);
 void processSavePreset(uint8_t*);
+void processSetLEDColor(uint8_t);
 #endif
