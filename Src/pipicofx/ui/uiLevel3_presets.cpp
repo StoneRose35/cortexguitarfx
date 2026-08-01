@@ -30,7 +30,7 @@ extern "C" {
 }
 #include "pipicofx/FxProgramLoader.hpp"
 #include "pipicofx/MultiAudioProcessor.hpp"
-#include "pipicofx/uiLevel3_preset.hpp"
+#include "pipicofx/Presets.hpp"
 
 
 /**
@@ -68,7 +68,7 @@ extern volatile uint8_t programChangeState;
 
 static uint8_t presetChangeLock = 0; // used to prohibit action when the second stomp switch is released
 static uint8_t currentVolume;
-static uint8_t previewBankNr=0xFF;
+extern uint8_t previewBankNr;
 static uint32_t longPressTickStart = 0;
 static uint8_t handleReleaseEvent = 0;
 static uint8_t channelState=0xf; // bits 0-1 HiZ, bits2-3 mic, 0: off  1: on, 3: unknown
@@ -80,7 +80,6 @@ static void createPresetSelector(BwImageType*imgBuffer);
 //static void drawParameterDisplay(FxProgram*prog,BwImageStruct*imgBuffer);
 static void drawBankAndPreset(BwImageStruct*imgBuffer);
 //static void drawPrograms(BwImageType* imgBuffer);
-static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk);
 
 #define BANK_PRESET_CHANGE_NONE 2
 #define BANK_PRESET_CHANGE_INCREASE 1
@@ -780,6 +779,8 @@ void enterLevel3()
     setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
 }
 
+
+
 static void handleBankChange(uint8_t increase)
 {
     // display preset overlay if not there already
@@ -824,76 +825,6 @@ static void handlePresetChange(uint8_t increase)
     }
 
     setPreset();
-}
-
-void setPresetAtBank(uint8_t bankNr,uint8_t presetNr)
-{
-    previewBankNr = bankNr;
-    setPresetNr(presetNr);
-}
-
-void setPresetNr(uint8_t nr)
-{
-    if (previewBankNr != currentBank && previewBankNr != 0xFF)
-    {
-        currentBank = previewBankNr;
-        previewBankNr = 0xFF;
-        reloadPresetsFromEeprom(presets,currentBank);
-    }
-    currentPreset = nr;
-    setPreset();
-}
-
-void setPreset()
-{
-    if (presets[currentPreset].programNrA != 0x3F && (audioProcessor.getFxProgram(0) == nullptr || 
-        (audioProcessor.getFxProgram(0) != nullptr && 
-        ((FxProgram*)audioProcessor.getFxProgram(0))->getIndex() != presets[currentPreset].programNrA)))
-    {
-        programsToInitialize[0] = presets[currentPreset].programNrA | 0x80;
-    }
-    else if (presets[currentPreset].programNrA == 0x3F) // no effect should be set
-    {
-        programsToInitialize[0]=0x7e;
-    }
-    else // effect program remains unchanged, only apply parameters
-    {
-        programsToInitialize[0]=0x7f | 0x80;
-    }
-
-    if (presets[currentPreset].programNrB != 0x3F && (audioProcessor.getFxProgram(1) == nullptr || 
-        (audioProcessor.getFxProgram(1) != nullptr && 
-        ((FxProgram*)audioProcessor.getFxProgram(1))->getIndex() != presets[currentPreset].programNrB)))
-    {
-        programsToInitialize[1] = presets[currentPreset].programNrB | 0x80;
-    }
-    else if (presets[currentPreset].programNrB == 0x3F)
-    {
-        programsToInitialize[1]=0x7e;
-    }
-    else
-    {
-        programsToInitialize[0]=0x7f | 0x80;
-    }
-
-    if (presets[currentPreset].programNrC != 0x3F && (audioProcessor.getFxProgram(2) == nullptr || 
-        (audioProcessor.getFxProgram(2) != nullptr && 
-        ((FxProgram*)audioProcessor.getFxProgram(2))->getIndex() != presets[currentPreset].programNrC)))
-    {
-        programsToInitialize[2] = presets[currentPreset].programNrC | 0x80;
-    }
-    else if (presets[currentPreset].programNrC == 0x3F)
-    {
-        programsToInitialize[2]=0x7e;
-    }
-    else
-    {
-        programsToInitialize[2]=0x7f | 0x80;
-    }
-
-    programChangeState = 1;
-    setStompswitchColorRaw(presets[currentPreset].ledColorPreset << (currentPreset << 1));
-    //create();
 }
 
 
@@ -991,21 +922,6 @@ static void drawBankAndPreset(BwImageStruct*imgBuffer)
 }
 
 
-static void reloadPresetsFromEeprom(FxPresetType*priis,uint8_t bnk)
-{
-    if (loadPreset(priis,bnk*3)!=0)
-    {
-        generateEmptyPreset(priis,bnk,0);
-    }
-    if (loadPreset(priis+1,bnk*3+1)!=0)
-    {
-        generateEmptyPreset(priis+1,bnk,1);
-    }
-    if (loadPreset(priis+2, bnk*3+2)!=0)
-    {
-        generateEmptyPreset(priis+2,bnk,2);
-    }
-}
 
 static void limitPreviewBankRange(uint8_t increase)
 {
