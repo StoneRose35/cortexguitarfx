@@ -26,16 +26,17 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="0.50119543"
-     inkscape:cx="1324.8325"
-     inkscape:cy="971.67686"
-     inkscape:window-width="1247"
-     inkscape:window-height="991"
-     inkscape:window-x="26"
-     inkscape:window-y="23"
-     inkscape:window-maximized="0"
+     inkscape:zoom="0.35439869"
+     inkscape:cx="750.56711"
+     inkscape:cy="617.94811"
+     inkscape:window-width="1854"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
-     inkscape:export-bgcolor="#ffffff00" />
+     inkscape:export-bgcolor="#ffffff00"
+     showguides="false" />
   <defs
      id="defs1">
     <rect
@@ -230,7 +231,7 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#c7d6ea;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1"
+       style="fill:#e9bd96;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
        id="rect4-9-0-1-9"
        width="125.75378"
        height="125.75378"
@@ -240,7 +241,7 @@
        inkscape:export-xdpi="51.299458"
        inkscape:export-ydpi="51.299458" />
     <rect
-       style="fill:#c7d6ea;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1"
+       style="fill:#e9bd96;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
        id="rect4-9-0-1"
        width="125.75378"
        height="125.75378"
@@ -250,7 +251,7 @@
        inkscape:export-xdpi="51.299458"
        inkscape:export-ydpi="51.299458" />
     <rect
-       style="fill:#c7d6ea;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1"
+       style="fill:#e9bd96;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
        id="rect4-9-0"
        width="125.75378"
        height="125.75378"
@@ -260,7 +261,7 @@
        inkscape:export-xdpi="51.299458"
        inkscape:export-ydpi="51.299458" />
     <rect
-       style="fill:#c7d6ea;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1"
+       style="fill:#e9bd96;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
        id="rect4-9"
        width="125.75378"
        height="125.75378"
@@ -270,7 +271,7 @@
        inkscape:export-xdpi="51.299454"
        inkscape:export-ydpi="51.299454" />
     <rect
-       style="fill:#c7d6ea;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1"
+       style="fill:#e9bd96;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
        id="rect4"
        width="125.75378"
        height="125.75378"
@@ -280,14 +281,15 @@
        inkscape:export-xdpi="51.299458"
        inkscape:export-ydpi="51.299458" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 5.8747152,65.892239 125.8522948,0"
        id="path9"
        sodipodi:nodetypes="cc" />
     <g
-       id="g7">
+       id="g7"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;stroke:#000000;stroke-width:1;fill-opacity:1"
+         style="fill:#cc2132;stroke:#1e404f;stroke-width:1;fill-opacity:1;stroke-opacity:1"
          id="rect1"
          width="22.956522"
          height="20.804348"
@@ -298,18 +300,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,-31.260754,10.026857)"
          id="text1"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan15"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan14">A</tspan></tspan></text>
+           id="tspan2"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan1">A</tspan></tspan></text>
     </g>
     <g
        id="g8"
-       transform="translate(0.48773193,-0.16930008)">
+       transform="translate(0.48773193,-0.16930008)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-8"
          width="22.956522"
          height="20.804348"
@@ -320,53 +323,31 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,6.700568,10.174988)"
          id="text1-5"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan17"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan16">B</tspan></tspan></text>
-    </g>
-    <g
-       id="g9"
-       transform="translate(0,-0.79956818)">
-      <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
-         id="rect1-2"
-         width="22.956522"
-         height="20.804348"
-         x="95.582054"
-         y="56.187706"
-         ry="3.1410191" />
-      <text
-         xml:space="preserve"
-         transform="matrix(0.26458333,0,0,0.26458333,46.244132,10.805254)"
-         id="text1-58"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
-           x="212.20312"
-           y="229.87952"
-           id="tspan19"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan18">C</tspan></tspan></text>
+           id="tspan4"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan3">B</tspan></tspan></text>
     </g>
     <text
        xml:space="preserve"
        transform="scale(0.26458333)"
        id="text9"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9);display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9);display:inline;fill:#1e404f;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan21"><tspan
-           style="fill:#000000;stroke:none"
-           id="tspan20">In</tspan></tspan></text>
+         id="tspan6"><tspan
+           style="stroke:none"
+           id="tspan5">In</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,93.241261,-0.26974232)"
        id="text9-2"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0);display:inline;fill:#1e404f;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan22">Out</tspan></text>
+         id="tspan7">Out</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,143.67924,-5.7965416)"
@@ -374,7 +355,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-2);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="337.98961"
-         id="tspan23">0</tspan></text>
+         id="tspan8">0</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,160.03743,64.193139)"
@@ -382,7 +363,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-2-7);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="337.98961"
-         id="tspan24">1</tspan></text>
+         id="tspan9">1</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,172.51833,240.14106)"
@@ -390,7 +371,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-2-7-3);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="337.98961"
-         id="tspan25">2</tspan></text>
+         id="tspan10">2</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,383.53898,-53.006649)"
@@ -398,7 +379,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-2-7-3-9);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="337.98961"
-         id="tspan26">3</tspan></text>
+         id="tspan11">3</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,379.814,99.051248)"
@@ -406,22 +387,23 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-2-7-3-9-5);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="337.98961"
-         id="tspan27">4</tspan></text>
+         id="tspan12">4</tspan></text>
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 23.177803,206.37372 H 149.03009"
        id="path9-3"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 135.74232,365.6166 7.59835,0"
        id="path9-3-4"
        sodipodi:nodetypes="cc" />
     <g
        id="g7-1"
-       transform="translate(56.972936,104.21191)">
+       transform="translate(56.972936,104.21191)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-9"
          width="22.956522"
          height="20.804348"
@@ -432,18 +414,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,-31.260754,10.026857)"
          id="text1-6"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-13);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-13);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan29"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan28">A</tspan></tspan></text>
+           id="tspan14"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan13">A</tspan></tspan></text>
     </g>
     <g
        id="g8-9"
-       transform="translate(18.623559,140.12328)">
+       transform="translate(18.623559,140.12328)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-8-3"
          width="22.956522"
          height="20.804348"
@@ -454,18 +437,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,6.700568,10.174988)"
          id="text1-5-3"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1-1);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1-1);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan31"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan30">B</tspan></tspan></text>
+           id="tspan16"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan15">B</tspan></tspan></text>
     </g>
     <g
        id="g9-8"
-       transform="translate(-20.701281,175.57368)">
+       transform="translate(-20.701281,175.57368)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-2-0"
          width="22.956522"
          height="20.804348"
@@ -476,57 +460,58 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,46.244132,10.805254)"
          id="text1-58-5"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4-1);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4-1);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan33"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan32">C</tspan></tspan></text>
+           id="tspan20"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan17">C</tspan></tspan></text>
     </g>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,17.303088,140.48148)"
        id="text9-6"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-03);display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-03);display:inline;fill:#1e404f;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan35"><tspan
-           style="fill:#000000;stroke:none"
-           id="tspan34">In</tspan></tspan></text>
+         id="tspan22"><tspan
+           style="stroke:none"
+           id="tspan21">In</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,110.54435,140.21174)"
        id="text9-2-6"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-4);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-4);display:inline;fill:#1e404f;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan36">Out</tspan></text>
+         id="tspan23">Out</tspan></text>
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 74.42819,170.39144 c -18.512596,0 -16.623556,34.75834 -34.758343,34.75834"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 74.560166,171.57923 c -18.512596,0 -16.623556,34.75834 -34.758343,34.75834"
        id="path10" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 131.79523,207.4539 c -18.5126,0 -16.62356,34.75834 -34.758347,34.75834"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 132.19116,206.53007 c -18.5126,0 -16.62356,34.75834 -34.758349,34.75834"
        id="path10-7" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 74.787871,240.99901 c -18.512596,0 -16.623556,-34.75834 -34.758343,-34.75834"
        id="path10-6" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 132.28861,205.95561 c -18.5126,0 -16.62356,-34.75834 -34.758343,-34.75834"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 132.28861,206.21956 c -18.5126,0 -16.62356,-34.75834 -34.758343,-34.75834"
        id="path10-6-5" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 17.68252,366.03186 33.66712,0"
        id="path9-3-1"
        sodipodi:nodetypes="cc" />
     <g
        id="g7-1-7"
-       transform="translate(6.5184924,300.51744)">
+       transform="translate(6.5184924,300.51744)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-9-5"
          width="22.956522"
          height="20.804348"
@@ -537,18 +522,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,-31.260754,10.026857)"
          id="text1-6-8"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-13-5);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-13-5);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan38"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan37">A</tspan></tspan></text>
+           id="tspan25"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan24">A</tspan></tspan></text>
     </g>
     <g
        id="g8-9-4"
-       transform="translate(26.351559,265.40089)">
+       transform="translate(26.351559,265.40089)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-8-3-8"
          width="22.956522"
          height="20.804348"
@@ -559,18 +545,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,6.700568,10.174988)"
          id="text1-5-3-0"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1-1-9);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1-1-9);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan40"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan39">B</tspan></tspan></text>
+           id="tspan27"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan26">B</tspan></tspan></text>
     </g>
     <g
        id="g9-8-9"
-       transform="translate(-14.106706,335.23182)">
+       transform="translate(-14.106706,335.23182)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-2-0-6"
          width="22.956522"
          height="20.804348"
@@ -581,72 +568,73 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,46.244132,10.805254)"
          id="text1-58-5-1"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4-1-9);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4-1-9);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan42"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan41">C</tspan></tspan></text>
+           id="tspan29"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan28">C</tspan></tspan></text>
     </g>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,14.074653,330.36427)"
        id="text9-6-2"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-03-1);display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-03-1);display:inline;fill:#1e404f;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan44"><tspan
-           style="fill:#000000;stroke:none"
-           id="tspan43">In</tspan></tspan></text>
+         id="tspan31"><tspan
+           style="stroke:none"
+           id="tspan30">In</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,105.80469,329.71672)"
        id="text9-2-6-0"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-4-4);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-4-4);display:inline;fill:#1e404f;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan45">Out</tspan></text>
+         id="tspan32">Out</tspan></text>
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 82.533998,330.8052 c -18.512596,0 -16.623556,34.75834 -34.758343,34.75834"
        id="path10-5" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 139.90104,366.73423 c -18.5126,0 -16.62356,34.75834 -34.75835,34.75834"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 139.43443,365.7077 c -18.5126,0 -16.62356,34.75834 -34.75835,34.75834"
        id="path10-7-2" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 81.760254,402.16838 c -18.512596,0 -16.623556,-34.75834 -34.758343,-34.75834"
        id="path10-6-9" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 140.01661,365.23594 c -18.5126,0 -16.62356,-34.75834 -34.75834,-34.75834"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 139.82997,365.60922 c -18.5126,0 -16.62356,-34.75834 -34.75834,-34.75834"
        id="path10-6-5-0" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 362.58219,76.665624 h 7.59835"
        id="path9-3-4-4"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3.9564;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:3.9564;stroke-dasharray:none;stroke-opacity:1"
        d="m 279.83509,266.84791 49.5791,0"
        id="path9-3-4-4-2"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:3.9564;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:3.9564;stroke-dasharray:none;stroke-opacity:1"
        d="m 280.73682,197.40161 h 49.5791"
        id="path9-3-4-4-2-9"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 244.52239,77.080884 5.977,0"
        id="path9-3-1-3"
        sodipodi:nodetypes="cc" />
     <g
        id="g7-1-7-4"
-       transform="translate(263.85254,-23.133816)">
+       transform="translate(263.85254,-23.133816)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-9-5-6"
          width="22.956522"
          height="20.804348"
@@ -657,18 +645,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,-31.260754,10.026857)"
          id="text1-6-8-9"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-13-5-9);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-13-5-9);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan47"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan46">A</tspan></tspan></text>
+           id="tspan34"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan33">A</tspan></tspan></text>
     </g>
     <g
        id="g8-9-4-6"
-       transform="translate(225.1508,46.200982)">
+       transform="translate(225.1508,46.200982)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-8-3-8-4"
          width="22.956522"
          height="20.804348"
@@ -679,18 +668,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,6.700568,10.174988)"
          id="text1-5-3-0-1"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1-1-9-4);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1-1-9-4);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan49"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan48">B</tspan></tspan></text>
+           id="tspan36"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan35">B</tspan></tspan></text>
     </g>
     <g
        id="g9-8-9-8"
-       transform="translate(243.57785,10.52904)">
+       transform="translate(243.57785,10.52904)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-2-0-6-9"
          width="22.956522"
          height="20.804348"
@@ -701,62 +691,63 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,46.244132,10.805254)"
          id="text1-58-5-1-2"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4-1-9-3);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4-1-9-3);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan51"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan50">C</tspan></tspan></text>
+           id="tspan38"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan37">C</tspan></tspan></text>
     </g>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,240.91452,41.413294)"
        id="text9-6-2-8"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-03-1-5);display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-03-1-5);display:inline;fill:#1e404f;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan53"><tspan
-           style="fill:#000000;stroke:none"
-           id="tspan52">In</tspan></tspan></text>
+         id="tspan40"><tspan
+           style="stroke:none"
+           id="tspan39">In</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,332.64456,40.765744)"
        id="text9-2-6-0-3"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-4-4-1);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-4-4-1);display:inline;fill:#1e404f;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan54">Out</tspan></text>
+         id="tspan41">Out</tspan></text>
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 282.03426,42.55524 c -18.5126,0 -16.62356,34.75834 -34.75835,34.75834"
        id="path10-5-3" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 338.47859,76.803785 c -18.5126,0 -16.62356,34.758335 -34.75835,34.758335"
        id="path10-5-3-6" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 281.26051,112.16588 c -18.51259,0 -16.62355,-34.75834 -34.75834,-34.75834"
        id="path10-6-9-3" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 339.53432,76.677366 c -18.51259,0 -16.62355,-34.758338 -34.75834,-34.758338"
        id="path10-6-9-3-6" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 361.71929,231.93323 h 7.59835"
        id="path9-3-4-4-8"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 243.82031,232.18767 h 5.977"
        id="path9-3-1-3-7"
        sodipodi:nodetypes="cc" />
     <g
        id="g7-1-7-4-6"
-       transform="translate(262.83129,131.65875)">
+       transform="translate(262.83129,131.65875)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-9-5-6-0"
          width="22.956522"
          height="20.804348"
@@ -767,18 +758,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,-31.260754,10.026857)"
          id="text1-6-8-9-4"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-13-5-9-2);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-13-5-9-2);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan56"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan55">A</tspan></tspan></text>
+           id="tspan43"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan42">A</tspan></tspan></text>
     </g>
     <g
        id="g8-9-4-6-8"
-       transform="translate(252.64854,131.48945)">
+       transform="translate(252.64854,131.48945)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-8-3-8-4-7"
          width="22.956522"
          height="20.804348"
@@ -789,18 +781,19 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,6.700568,10.174988)"
          id="text1-5-3-0-1-0"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1-1-9-4-6);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-1-1-9-4-6);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan58"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan57">B</tspan></tspan></text>
+           id="tspan45"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan44">B</tspan></tspan></text>
     </g>
     <g
        id="g9-8-9-8-4"
-       transform="translate(197.7842,200.46654)">
+       transform="translate(197.7842,200.46654)"
+       style="stroke:#1e404f;stroke-opacity:1;fill:#cc2132;fill-opacity:1">
       <rect
-         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1"
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
          id="rect1-2-0-6-9-7"
          width="22.956522"
          height="20.804348"
@@ -811,47 +804,70 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,46.244132,10.805254)"
          id="text1-58-5-1-2-9"
-         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4-1-9-3-5);display:inline;fill:none;stroke:#000000;stroke-width:3.77953"><tspan
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4-1-9-3-5);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
            x="212.20312"
            y="229.87952"
-           id="tspan60"><tspan
-             style="font-family:Gubbi;-inkscape-font-specification:Gubbi;fill:#000000;stroke:none"
-             id="tspan59">C</tspan></tspan></text>
+           id="tspan47"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan46">C</tspan></tspan></text>
     </g>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,240.05162,196.6809)"
        id="text9-6-2-8-2"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-03-1-5-2);display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-03-1-5-2);display:inline;fill:#1e404f;fill-opacity:1;stroke:#000000;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan62"><tspan
-           style="fill:#000000;stroke:none"
-           id="tspan61">In</tspan></tspan></text>
+         id="tspan49"><tspan
+           style="stroke:none"
+           id="tspan48">In</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,331.78166,196.03335)"
        id="text9-2-6-0-3-0"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-4-4-1-6);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;line-height:1;font-family:Gubbi;-inkscape-font-specification:Gubbi;text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9-0-4-4-1-6);display:inline;fill:#1e404f;fill-opacity:1;stroke:none;stroke-width:15.1181;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="34.707031"
          y="350.57483"
-         id="tspan63">Out</tspan></text>
+         id="tspan50">Out</tspan></text>
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 280.80857,197.42016 c -18.5126,0 -16.62356,34.75834 -34.75835,34.75834"
        id="path10-5-3-7" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 363.09983,232.0714 c -18.5126,0 -16.62356,34.75833 -34.75835,34.75833"
        id="path10-5-3-6-8" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 280.73867,266.93098 c -19.32859,-0.544 -16.66627,-34.78682 -34.75834,-34.75834"
        id="path10-6-9-3-9"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#1e404f;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 366.25217,231.86377 c -18.51259,0 -16.62355,-34.75834 -34.75834,-34.75834"
        id="path10-6-9-3-6-1" />
+    <g
+       id="g9"
+       transform="translate(0,-0.79956818)"
+       style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-opacity:1">
+      <rect
+         style="fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:1;stroke-opacity:1"
+         id="rect1-2"
+         width="22.956522"
+         height="20.804348"
+         x="95.582054"
+         y="56.187706"
+         ry="3.1410191" />
+      <text
+         xml:space="preserve"
+         transform="matrix(0.26458333,0,0,0.26458333,46.244132,10.805254)"
+         id="text1-58"
+         style="font-size:53.3333px;line-height:1;font-family:'Lohit Gurmukhi';-inkscape-font-specification:'Lohit Gurmukhi';text-align:start;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2-4);display:inline;fill:#cc2132;fill-opacity:1;stroke:#1e404f;stroke-width:3.77953;stroke-opacity:1"><tspan
+           x="212.20312"
+           y="229.87952"
+           id="tspan52"><tspan
+             style="font-family:Gubbi;-inkscape-font-specification:Gubbi"
+             id="tspan51">C</tspan></tspan></text>
+    </g>
   </g>
 </svg>

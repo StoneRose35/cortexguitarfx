@@ -35,6 +35,8 @@ import {
     processCurrentBankAndPresetNr,
     processParameterDisplayValue
 } from './editorMessageHandlers';
+import ParameterSlider from './ParameterSlider';
+import VolumeSlider from './VolumeSlider';
 
 let ppfxDevice = null;
 let fxProgs;
@@ -65,6 +67,23 @@ function App() {
     const [currentFxProgramIdx, setCurrentFxProgramIdx] = useState(0);
     const [singleParamValue, setSingleParamValue] = useState(1);
     const [presetSelected,setPresetSelected] = useState(true);
+
+    function convertIndexedLEDColor(clrIndex)
+    {
+        if (clrIndex == 1)
+        {
+            return "#df3434";
+        }
+        else if (clrIndex == 3)
+        {
+            return "#f8bc18";
+        }
+        else if (clrIndex == 2)
+        {
+            return "#00FF00";
+        }
+        return "#000000";
+    }
 
     function aboutHandler() {
         getAbout();
@@ -637,36 +656,26 @@ function App() {
         }
     }
     
-    function setLEDColor(ledcolor,position)
+    function setLEDColor(ledcolor)
     {
         const newpresets = presets.slice();
-        if (position == 0)
-        {
-            newpresets[currentPreset].ledColorA = ledcolor;
-        }
-        else if (position == 1)
-        {
-            newpresets[currentPreset].ledColorB = ledcolor;
-        }
-        else if (position == 2)
-        {
-            newpresets[currentPreset].ledColorC = ledcolor;
-        }
+        newpresets[currentPreset].ledColorPreset = ledcolor;
         setPresets(newpresets);
     }
 
     return (
         <>
             <div className="editor-main" id="editor_app">
-                <div className="editor-title">Editor</div>
+                <div className="editor-title">PiPicoFX Editor</div>
                 <div className="editor-toppanel">
-                    <div className="editor-vertical">
-                        <input type="range" id="volume" name="volume" min="0" max="255" value={masterVolume}
-                            onChange={(e) => handleMasterVolumeChange(e.target.value)} />
+                    <div className="editor-vertical leftmost" style={{flexGrow: "1"}}>
+                        <VolumeSlider onChange={(v) => handleMasterVolumeChange(v)}></VolumeSlider>
                         <div className="editor-vertical-label">Master Volume</div>
+
+                        
                     </div>
                     <div className="editor-vertical">
-                        <label className="editor-switch">
+                        <label className="editor-switch on-root">
                             <input type="checkbox" checked={HiZOn}
                                 onChange={(e) => handleHiZChange(e.target.checked)} />
                             <span className="editor-slider round"></span>
@@ -675,7 +684,7 @@ function App() {
                         <div className="editor-toggle-label">HiZ</div>
                     </div>
                     <div className="editor-vertical">
-                        <label className="editor-switch">
+                        <label className="editor-switch on-root">
                             <input type="checkbox" checked={MicOn}
                                 onChange={(e) => handleMicChange(e.target.checked)} />
                             <span className="editor-slider round"></span>
@@ -683,18 +692,36 @@ function App() {
 
                         <div className="editor-toggle-label">Mic</div>
                     </div>
-                    <button className="editor-button" onClick={requestDevice}>Detect device</button>
+                    <button className="editor-button editable" onClick={requestDevice}>Detect device</button>
                 </div>
                 <div className="editor-panel">
-                    <div className="editor-vertical">
+                    <div className="editor-vertical leftmost">
                         <input 
                             id="currentPreset" 
-                            className="editor-input" 
+                            className="editor-input editable" 
                             type="text" 
                             value={presets[currentPreset].name}
                             onChange={(e) => handlePresetNameChange(e.target.value) }
                         />
                         <div className="editor-vertical-label">Preset</div>
+                    </div>
+                    <div className="editor-vertical">
+                        <div className='editor-effect-group-led editable' 
+                            style={{ backgroundColor: convertIndexedLEDColor(presets[currentPreset].ledColorPreset)}}
+                            onClick={() => {
+                                let clridx;
+
+                                    clridx = presets[currentPreset].ledColorPreset;
+                                    clridx += 1;
+                                    if (clridx > 3)
+                                    {
+                                        clridx = 1;
+                                    }
+                                    setLEDColor(clridx);
+                                          
+                            }}> 
+                        </div>
+                        <div className="editor-vertical-label">LED Color</div>
                     </div>
                     <div className="editor-vertical">
                         <div id="currentPosition" className="editor-textfield">{currentPreset}</div>
@@ -706,29 +733,50 @@ function App() {
                     </div>
                     <span className="editor-filler"></span>
                 </div>
-                <div className="editor-panel">
-                    <button className="editor-button" onClick={previousBankHandler}>Previous Bank</button>
-                    <button className="editor-button" onClick={nextBankHandler}>Next Bank</button>
-
-                    <div className="editor-vertical-flex">
-                        <input type="radio" name="presetNr" value="a" id="presetNr1" className="editor-text-selectable" checked={currentPreset === 0 && presetSelected} onChange={() => {
-                            setPresetSelected(true);
-                            setCurrentPreset(0);
-                            loadPreset(0);
-                        }}></input>
-                        <label htmlFor="presetNr1" id="presetNr1Label">{presets[0].name}</label>
-                        <input type="radio" name="presetNr" value="b" id="presetNr2" className="editor-text-selectable" checked={currentPreset === 1 && presetSelected} onChange={() => {
-                            setPresetSelected(true);
-                            setCurrentPreset(1);
-                            loadPreset(1);
-                        }}></input>
-                        <label htmlFor="presetNr2" id="presetNr2Label">{presets[1].name}</label>
+                <div className="editor-panel" style={{maxHeight: "104px"}}>
+                    <div className="editor-vertical-flex leftmost" style={{height: "stretch", justifyContent: "space-between"}}>
+                        <button className="editor-button editable" 
+                        style={{width: "90%", margin: "0"}}
+                        onClick={previousBankHandler}>Previous Bank</button>
+                        <button className="editor-button editable leftmost" 
+                        style={{width: "90%",margin: "0"}}
+                        onClick={nextBankHandler}>Next Bank</button>
+                    </div>
+                    <div className="editor-vertical-flex editable" style={{height: "stretch",justifyContent: "space-between", borderRadius: "4px"}}>
+                        <input 
+                            type="radio"   
+                            name="presetNr" 
+                            value="a" 
+                            id="presetNr1" 
+                            className="editor-text-selectable" 
+                            checked={currentPreset === 0 && presetSelected} 
+                            
+                            onChange={() => {
+                                setPresetSelected(true);
+                                setCurrentPreset(0);
+                                loadPreset(0);
+                            }}></input>
+                        <label htmlFor="presetNr1" id="presetNr1Label" className='preset-label'>{presets[0].name}</label>
+                        <input 
+                            type="radio" 
+                            name="presetNr" 
+                            value="b" 
+                            id="presetNr2" 
+                            className="editor-text-selectable" 
+                            checked={currentPreset === 1 && presetSelected} 
+                            style={{margin: '0',padding: '0', height: 'stretch'}}
+                            onChange={() => {
+                                setPresetSelected(true);
+                                setCurrentPreset(1);
+                                loadPreset(1);
+                            }}></input>
+                        <label htmlFor="presetNr2" id="presetNr2Label" className=' preset-label'>{presets[1].name}</label>
                         <input type="radio" name="presetNr" value="c" id="presetNr3" className="editor-text-selectable" checked={currentPreset === 2 && presetSelected} onChange={() => {
                             setPresetSelected(true);
                             setCurrentPreset(2);
                             loadPreset(2);
                         }}></input>
-                        <label htmlFor="presetNr3" id="presetNr3Label">{presets[2].name}</label>
+                        <label htmlFor="presetNr3" id="presetNr3Label" className=' preset-label'>{presets[2].name}</label>
                     </div>
                     <span className="editor-filler"></span>
                     <EffectView
@@ -739,7 +787,6 @@ function App() {
                         changePresets={handleFxProgramChange}
                         changeEffectState={setEffectState}
                         setCurrentFxProgramIdx={setCurrentFxProgramIdx}
-                        changeLEDColor={setLEDColor}
                     />
                     <EffectView
                         id="1"
@@ -749,7 +796,6 @@ function App() {
                         changePresets={handleFxProgramChange}
                         changeEffectState={setEffectState}
                         setCurrentFxProgramIdx={setCurrentFxProgramIdx}
-                        changeLEDColor={setLEDColor}
                     />
                     <EffectView
                         id="2"
@@ -759,7 +805,6 @@ function App() {
                         changeEffectState={setEffectState}
                         currentPreset={currentPreset}
                         setCurrentFxProgramIdx={setCurrentFxProgramIdx}
-                        changeLEDColor={setLEDColor}
                     />
                     <Routing presets={presets} currentPreset={currentPreset} changeRouting={updateRouting} />
                 </div>

@@ -32,7 +32,7 @@ function ParametersDisplay(props)
         parametersContent="";
     }
     return (
-        <table className="editor-vertical" id="parametersDisplay">
+        <table className="editor-vertical" id="parametersDisplay" style={{padding: "0"}}>
             <tbody>
             {parametersContent}
             </tbody>

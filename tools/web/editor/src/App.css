@@ -62,9 +62,7 @@ label {
     width: auto;
     padding: 4px;
     background-color: #e9bd96;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #1e404f;
+
     border-radius: 4px;
     text-align: start;
     height: 25px;
@@ -75,9 +73,7 @@ label {
     width: auto;
     padding: 4px;
     background-color: #e9bd96;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #1e404f;
+
     border-radius: 4px;
     text-align: start;
     height: 25px;
@@ -88,11 +84,13 @@ div .editor-vertical {
     padding: 4px;
 }
 
+
 div .editor-vertical-flex {
     display: flex;
     flex-direction: column;
     text-align: left;
-    padding: 4px;
+    margin: 4px;
+    height: 100%;
 }
 
 .editor-effectparam {
@@ -126,13 +124,40 @@ div .editor-effect-group {
     display: flex;
     justify-self:right;
     flex-direction: column;
-    border-style: solid;
-    border-color: #1e404f;
     background-color: #e9bd96;
     border-radius: 4px;
-    border-width: 3px;
     margin: 4px;
     padding: 4px;
+    height: stretch;
+}
+
+.editable {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #1e404f;
+}
+
+.on-root {
+    background-color: #ed9530;
+}
+
+div .leftmost {
+    margin-left: 14px;
+    padding-left: 0px;
+}
+
+.rightmost {
+    margin-right: 14px;
+    padding-right: 0px;
+}
+.preset-label {
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
+    padding-right: 4px;
+    height: stretch;
+    min-width: 120px;
+    border-radius: 4px;
 }
 
 div .editor-effect-group-led
@@ -178,9 +203,6 @@ div .editor-vertical-label
     white-space: pre-line;
 }
 .editor-button {
-    border-style:solid;
-    border-color: #1e404f;
-    border-width: 3px;
     padding: 4px;
     margin: 6px;
     font-family: sans-serif;
@@ -193,9 +215,8 @@ div .editor-vertical-label
 
 .editor-button:active
 {
-    border-style: solid;
+    background-color: #cc2132;
     border-color: rgba(0, 0, 0, 255);
-    border-width: 3px;
 }
 
 .editor-button[disabled] {
@@ -204,10 +225,10 @@ div .editor-vertical-label
     margin: 6px;
     font-family: sans-serif;
     font-size: 14px;
-    color: #34685c;
+    color: #1e404f;
     border-radius: 4px;
     width: fit-content;
-    background-color: #34685c;
+    background-color: #1e404f;
 }
 
 .editor-fxprogram-freezable {
@@ -246,7 +267,7 @@ div .editor-vertical-label
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #34685C;
+  background-color: #1e404f;
   -webkit-transition: .2s;
   transition: .2s;
 }
@@ -263,7 +284,7 @@ div .editor-vertical-label
   width: 16px;
   left: 4px;
   bottom: 4px;
-  background-color: white;
+  background-color: #e9bd96;
   -webkit-transition: .2s;
   transition: .2s;
 }
@@ -310,10 +331,12 @@ input:checked + .editor-slider:before {
 }
 
 img.editor-routing {
-    width: 80px;
-    height: 80px;
-    padding: 4px;
-    margin: 4px;
+    width: 96px;
+    height: 96px;
+    padding-right: 14px;
+    margin-left: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
     align-self: center;
 }
 
@@ -326,10 +349,7 @@ img.editor-routing {
     margin-top: 10px;
     margin-bottom: 10px;
     min-height: 56px;
-    border-width: 2px;
-    border: solid;
     background-color: #e9bd96;
-    border-color: #1e404f;
     border-radius: 4px;
     padding: 0px;
 }
@@ -378,9 +398,25 @@ img.editor-routing {
     width: 100%;
     margin-bottom: 0px;
     border-radius: 4px;
-background-color: #34685C;
+    background-color: #cc2132;
 }
 
 #volume {
-    accent-color: #34685c;
+    accent-color: #1e404f;
+    background-color: #e9bd96;
+}
+
+progress::-moz-progress-bar { 
+   background-color: rosybrown;
+   border-radius: 15px;
+}
+
+progress::-webkit-progress-bar {
+   background-color: #efefef;
+   border-radius: 15px;
+}
+
+progress::-webkit-progress-value {
+   background-color: rosybrown;
+   border-radius: 15px;
 }

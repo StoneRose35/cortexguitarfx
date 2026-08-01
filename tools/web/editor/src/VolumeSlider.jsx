@@ -3,19 +3,19 @@ import { useState,useRef } from 'react';
 
 let isclicked=false;
 
-function ParameterSlider(props)
+function VolumeSlider(props)
 {
-    let [paramName,setParamName]=useState("Volume");
-    const [value,setValue]=useState(props.initialValue/40.96 + "%");
+    let [paramName,setParamName]=useState("Master Volume");
+    const [value,setValue]=useState(props.initialValue/2.55 + "%");
     const clickPos=useRef(0);
     const containerElement=useRef(null);
     const currentWidth=useRef(0);
 
     //setValue(props.initialValue);
     return (
-        <div className="parameter-slider-container editable" >
+        <div className="parameter-slider-container editable" style={{ minHeight: '24px', marginBottom: '0', marginLeft: '0', paddingLeft: '0'}} >
             <div className='parameter-slider-container-inner'>
-                <div className="parameter-slider-bar" style={{ width: props.preset.programsAndParameters[props.effectIndex].parameters[props.id]/40.96 + "%"}} >
+                <div className="parameter-slider-bar" style={{ width: value }} >
 
                 </div>
             </div>
@@ -53,4 +53,4 @@ function ParameterSlider(props)
     )
 }
 
-export default ParameterSlider;
+export default VolumeSlider;

@@ -25,7 +25,10 @@ function Routing(props)
     }
 
     return (
-        <img src={routingImages[props.presets[props.currentPreset].routing]} className='editor-routing' onClick={() => updateRoutingId()}></img>
+        <img 
+        src={routingImages[props.presets[props.currentPreset].routing]} 
+        className='editor-routing' 
+        onClick={() => updateRoutingId()}></img>
     );
 
 }
