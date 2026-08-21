@@ -468,20 +468,22 @@ void processSetRouting(uint8_t data)
 __QSPI_CODE
 void processSavePreset(uint8_t* data)
 {
-    uint16_t cnt = 8;
+    uint16_t cnt = 4;
     uint8_t c=0;
     FxPresetType preset;
     FxProgram * prog;
-    preset.bankNr    = *(data+4);
-    preset.bankPos   = *(data+5) & 0x3;
-    preset.ledColorA = *(data+6) & 0x3;
-    preset.ledColorB = (*(data+6)>>2) & 0x3;
-    preset.ledColorC = (*(data+6)>>4) & 0x3;
-    preset.ledColorPreset = (*(data+6)>>6) & 0x3;
+    preset.bankNr    = *(data);
+    preset.bankPos   = *(data+1) & 0x3;
+    preset.routing = (*(data+1) >> 2);
+    preset.ledColorA = *(data+3) & 0x3;
+    preset.ledColorB = (*(data+3)>>2) & 0x3;
+    preset.ledColorC = (*(data+3)>>4) & 0x3;
+    preset.ledColorPreset = (*(data+3)>>6) & 0x3;
     while (*(data+cnt) != 0)
     {
         preset.name[c++] = *(data+cnt++);
     }
+    cnt++;
     preset.name[c]=0;
     preset.programNrA = *(data+cnt++);
     prog = loadProgramWithoutSetup(preset.programNrA);
@@ -491,12 +493,10 @@ void processSavePreset(uint8_t* data)
         while(c < prog->getParameterCount())
         {
             preset.parametersA[c] = *((uint16_t*)(data + cnt++));
-            while (*(data+cnt) != 0)
-            {
-                cnt++;
-            }
+            cnt++;
+            c++;
         }
-        cnt++;
+        
     }
     delete prog;
     preset.programNrB = *(data+cnt++);
@@ -507,12 +507,10 @@ void processSavePreset(uint8_t* data)
         while(c < prog->getParameterCount())
         {
             preset.parametersB[c] = *((uint16_t*)(data + cnt++));
-            while (*(data+cnt) != 0)
-            {
-                cnt++;
-            }
+            cnt++;
+            c++;
         } 
-        cnt++;
+        
     }
     delete prog;
     preset.programNrC = *(data+cnt++);
@@ -523,12 +521,9 @@ void processSavePreset(uint8_t* data)
         while(c < prog->getParameterCount())
         {
             preset.parametersC[c] = *((uint16_t*)(data + cnt++));
-            while (*(data+cnt) != 0)
-            {
-                cnt++;
-            }
+            cnt++;
+            c++;
         } 
-        cnt++;
     }
     delete prog;
     savePreset(&preset,preset.bankNr*3 + preset.bankPos);

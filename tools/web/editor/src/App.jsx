@@ -24,7 +24,8 @@ import {
     MSG_BANK_AND_PRESET_NR,
     MSG_PRESET,
     MSG_PARAMETER_VALUE,
-    USB_CMD_SET_ROUTING
+    USB_CMD_SET_ROUTING,
+    USB_CMD_SAVE_PRESET
 } from './editorConstants';
 import { createInitialFxPrograms, createInitialPresets } from './editorData';
 import {
@@ -255,6 +256,113 @@ function App() {
         cmd[2] = 5;
         cmd[3] = 0;
         cmd[4] = routing;
+        await writeIfPossible(cmd);
+    }
+
+    async function savePreset(fxProgs,preset)
+    {
+        let scnt=0;
+        const bfr1 = new ArrayBuffer(512);
+        const cbfr1 = new Uint8Array(bfr1);
+        cbfr1[scnt++] = USB_CMD_SAVE_PRESET;
+        cbfr1[scnt++] = 0;
+        scnt+=2;
+        cbfr1[scnt++] = preset.bankNr;
+        cbfr1[scnt++] = preset.presetNr | (preset.routing << 2);
+        let allstates = 0;
+        
+        if (preset.programsAndParameters[0].state == 'on')
+        {
+            allstates |= 1 << 0;
+        }
+        else if (preset.programsAndParameters[0].state == 'frozen')
+        {
+            allstates |= 2 << 0;
+        }
+        if (preset.programsAndParameters[1].state == 'on')
+        {
+            allstates |= 1 << 2;
+        }
+        else if (preset.programsAndParameters[1].state == 'frozen')
+        {
+            allstates |= 2 << 2;
+        }
+        if (preset.programsAndParameters[2].state == 'on')
+        {
+            allstates |= 1 << 4;
+        }
+        else if (preset.programsAndParameters[2].state == 'frozen')
+        {
+            allstates |= 2 << 4;
+        }
+
+        cbfr1[scnt++] = allstates; 
+        cbfr1[scnt++] = preset.ledColorA | (preset.ledColorB << 2) | (preset.ledColorC << 4) | (preset.ledColorPreset << 6);
+        const encoder = new TextEncoder();
+        const presetNameUint8 = encoder.encode(preset.name);
+        for (let c=0;c< presetNameUint8.byteLength;c++)
+        {
+            cbfr1[scnt++] = presetNameUint8[c];
+        }
+        cbfr1[scnt++] = 0;
+        cbfr1[scnt++] = preset.programsAndParameters[0].programNr;
+        if (preset.programsAndParameters[0].programNr < 63)
+        {
+            let cnt = 0;
+            while (cnt < fxProgs[preset.programsAndParameters[0].programNr].parameterNames.length) {
+                cbfr1[scnt++] = preset.programsAndParameters[0].parameters[cnt] & 0xFF;
+                cbfr1[scnt++] = (preset.programsAndParameters[0].parameters[cnt] >> 8) & 0xFF;
+                //const displayVal =  encoder.encode(preset.programsAndParameters[0].displayNames[cnt]);
+                //for (let c=0;c<displayVal.byteLength;c++)
+                //{
+                //    cbfr1[scnt++] = displayVal[c];
+                //}    
+                //cbfr1[scnt++] = 0;
+                cnt++;
+            }
+        }
+
+        cbfr1[scnt++] = preset.programsAndParameters[1].programNr;
+        if (preset.programsAndParameters[1].programNr < 63)
+        {
+            let cnt = 0;
+            while (cnt < fxProgs[preset.programsAndParameters[1].programNr].parameterNames.length) {
+                cbfr1[scnt++] = preset.programsAndParameters[1].parameters[cnt] & 0xFF;
+                cbfr1[scnt++] = (preset.programsAndParameters[1].parameters[cnt] >> 8) & 0xFF;
+                //const displayVal =  encoder.encode(preset.programsAndParameters[1].displayNames[cnt]);
+                //for (let c=0;c<displayVal.byteLength;c++)
+                //{
+                //    cbfr1[scnt++] = displayVal[c];
+                //}    
+                //cbfr1[scnt++] = 0;
+                cnt++;
+            }
+        }
+
+        cbfr1[scnt++] = preset.programsAndParameters[2].programNr;
+        if (preset.programsAndParameters[2].programNr < 63)
+        {
+            let cnt = 0;
+            while (cnt < fxProgs[preset.programsAndParameters[2].programNr].parameterNames.length) {
+                cbfr1[scnt++] = preset.programsAndParameters[2].parameters[cnt] & 0xFF;
+                cbfr1[scnt++] = (preset.programsAndParameters[2].parameters[cnt] >> 8) & 0xFF;
+                //const displayVal =  encoder.encode(preset.programsAndParameters[2].displayNames[cnt]);
+                //for (let c=0;c<displayVal.byteLength;c++)
+                //{
+                //    cbfr1[scnt++] = displayVal[c];
+                //}    
+                //cbfr1[scnt++] = 0;
+                cnt++;
+            }
+        }
+        const cmdbfr = new ArrayBuffer(scnt);
+        const cmd = new Uint8Array(cmdbfr);
+        for (let c=0;c<scnt;c++)
+        {
+            cmd[c] = cbfr1[c];
+        }
+        cmd[2] = scnt & 0xFF;
+        cmd[3] = (scnt >> 8) & 0xFF;
         await writeIfPossible(cmd);
     }
 
@@ -663,6 +771,11 @@ function App() {
         setPresets(newpresets);
     }
 
+    function savePresetHandler()
+    {
+        savePreset(fxPrograms,presets[currentPreset]);
+    }
+
     return (
         <>
             <div className="editor-main" id="editor_app">
@@ -731,6 +844,9 @@ function App() {
                         <div id="currentBank" className="editor-textfield">{currentBank}</div>
                         <div className="editor-vertical-label">Bank</div>
                     </div>
+                    <button className="editor-button editable" 
+                        style={{width: "90%", margin: "0"}}
+                        onClick={savePresetHandler}>Save</button>
                     <span className="editor-filler"></span>
                 </div>
                 <div className="editor-panel" style={{maxHeight: "104px"}}>
