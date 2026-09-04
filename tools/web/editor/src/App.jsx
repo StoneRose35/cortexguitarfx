@@ -50,7 +50,7 @@ let currentBankBfr = 0;
 let masterVolumeMessageState = 0;
 let parameterValueSending = 0;
 let presetNameChanging = 0;
-let newParameterValues = [];
+let newParameterValue = null;
 //let currentPresetBfr=0;
 //let readCommandState = 0; // 0: read header, 1: read command
 //let readCommandRemainingSize = 0; // size of the command to read, excluding header
@@ -162,22 +162,23 @@ function App() {
     }
 
     async function setParameter() {
-        let dataset = newParameterValues.pop();
-        while (dataset !== undefined) {
+        if (newParameterValue !== null) {
             const cmdbfr = new ArrayBuffer(8);
             const cmd = new Uint8Array(cmdbfr);
             cmd[0] = USB_CMD_SET_PARAMETER;
             cmd[1] = 0;
             cmd[2] = 8;
             cmd[3] = 0;
-            cmd[4] = dataset.programIdx;
-            cmd[5] = dataset.parameterIdx;
-            cmd[6] = dataset.parameterVal & 0xFF;
-            cmd[7] = (dataset.parameterVal >> 8) & 0xFF;
+            cmd[4] = newParameterValue.programIdx;
+            cmd[5] = newParameterValue.parameterIdx;
+            cmd[6] = newParameterValue.parameterVal & 0xFF;
+            cmd[7] = (newParameterValue.parameterVal >> 8) & 0xFF;
             await writeIfPossible(cmd);
-            console.log(`sending programIdx: ${dataset.programIdx}, parameterIdx: ${dataset.parameterIdx}, parameterVal: ${dataset.parameterVal}`);
+            console.log(`sending programIdx: ${newParameterValue.programIdx}, parameterIdx: ${newParameterValue.parameterIdx}, parameterVal: ${newParameterValue.parameterVal}`);
+            //await Promise.race([readCommand(),new Promise(() => setTimeout(() => console.log("timeout"),5000))]);
             await readCommand();
-            dataset = newParameterValues.pop();
+            console.log("got response");
+            newParameterValue = null;
         }
         parameterValueSending = 0;
     }
@@ -481,7 +482,7 @@ function App() {
         let isResolved = false;
         while (!isResolved) {
             if (currentCommandNr !== 0xFFFF) {
-                const alignedSize = (Math.floor(currentCommandLength / 64) + 1) * 64;
+                const alignedSize = (Math.floor((currentCommandLength-1) / 64) + 1) * 64;
                 transferResult = await ppfxDevice.transferIn(1, alignedSize);
             } else {
                 transferResult = await ppfxDevice.transferIn(1, 64);
@@ -539,6 +540,7 @@ function App() {
                         case MSG_PRESET: {
                             const presetResult = processGetPreset(commandBfr, 0, currentCommandLength, fxProgs);
                             presetBfr[presetResult.preset.presetNr] = presetResult.preset;
+                            setPresets(presetBfr);
                             commandBfrIdx = presetResult.nextIdx;
                             console.log('handled MSG_PRESET');
                             break;
@@ -597,11 +599,9 @@ function App() {
         const updatedPresets = presets.slice();
         updatedPresets[currentPreset].programsAndParameters[currentFxProgramIdx].parameters[position] = value;
         setPresets(updatedPresets);
-        if (newParameterValues.length < 2) {
-            newParameterValues.push({ programIdx: currentFxProgramIdx, parameterIdx: position, parameterVal: value / 1 });
-        } else {
-            newParameterValues[1] = { programIdx: currentFxProgramIdx, parameterIdx: position, parameterVal: value / 1 };
-        }
+        if (newParameterValue == null) {
+            newParameterValue ={ programIdx: currentFxProgramIdx, parameterIdx: position, parameterVal: value / 1 };
+        } 
         if (parameterValueSending === 0) {
             parameterValueSending = 1;
             setParameter();
@@ -653,6 +653,7 @@ function App() {
 
     function requestDevice() {
         let devFound = false;
+        parameterValueSending = 0;
         navigator.usb.getDevices().then(async (devices) => {
             devices.forEach(async (d) => {
                 if (d.vendorId === 0x4A37 && d.productId === 0x35D2) {
@@ -748,7 +749,7 @@ function App() {
         await setFxProgram(id, fxProgram);
         await getPreset(currentBank, currentPreset);
         await readCommand();
-        setPresets(presetBfr);
+        //setPresets(presetBfr);
         //setCurrentFxProgramIdx(fxProgram/1);
     }
 

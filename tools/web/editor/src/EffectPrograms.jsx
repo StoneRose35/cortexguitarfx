@@ -72,6 +72,16 @@ function EffectPrograms(props)
              onChange={(e) => {
                 const updatedPresets = props.presets.slice();
                 updatedPresets[props.currentPreset].programsAndParameters[props.id/1].programNr = e.target.value/1;
+                let cnt=0;
+                while (cnt < props.content[updatedPresets[props.currentPreset].programsAndParameters[props.id/1].programNr].ParameterCount)
+                {
+                    if (cnt >= updatedPresets[props.currentPreset].programsAndParameters[props.id/1].parameters.length)
+                    {
+                        updatedPresets[props.currentPreset].programsAndParameters[props.id/1].parameters.push(1024);
+                        updatedPresets[props.currentPreset].programsAndParameters[props.id/1].displayNames.push("1024");
+                    }
+                    cnt++;
+                }
                 props.changePresets(props.id,e.target.value,updatedPresets);
             }}>
                 {fxProgramContent}
