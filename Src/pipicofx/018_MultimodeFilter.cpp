@@ -62,6 +62,7 @@ void MultimodeFilter::Param1::parameterCallback(uint16_t val)
         this->pData->newCutoff =val;
         this->pData->interpCnt = 0;
     }
+    //this->rawValue = val;
 }
 
 void MultimodeFilter::Param1::parameterDisplay(char*res)

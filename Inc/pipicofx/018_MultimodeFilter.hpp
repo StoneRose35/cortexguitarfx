@@ -6,6 +6,7 @@ extern "C" {
 #include "audio/gainstage.h"
 #include "audio/multimodefilter.h"
 #include "picofxCore.hpp"
+#include "globalConfig.h"
 
 }
 
@@ -38,9 +39,9 @@ namespace PiPicoFX {
                     .gain=1.0f,
                     .offset=0.0f
                 };
-                uint16_t newCutoff;
-                uint16_t newResonance;
-                uint16_t interpCnt=0;
+                uint16_t newCutoff=0.97f;
+                uint16_t newResonance=0.0f;
+                uint16_t interpCnt=UI_LATENCY_IN_SAMPLES;
             private:
                 void setup(uint8_t);
 
