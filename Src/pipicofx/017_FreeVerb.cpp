@@ -126,8 +126,8 @@ void FreeVerb::Param2::parameterCallback(uint16_t val)
 
 void FreeVerb::Param2::parameterDisplay(char*res)
 {
-    int16_t damping = this->pData->feedbackFilters[0].alpha;
-    Int16ToChar(damping/328,res);
+    uint16_t damping = (uint16_t)(this->pData->feedbackFilters[0].alpha*100.0f);
+    Int16ToChar(damping,res);
     appendToString(res,"%");
 }
 
