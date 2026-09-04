@@ -488,16 +488,17 @@ static inline void knobCallback(uint16_t val,uint8_t control)
 
 static void knob0Callback(uint16_t val)
 {
-    uint16_t stringIndex=6;
-    uint8_t responseBfr[512];
+    //uint16_t stringIndex=6;
+    //uint8_t responseBfr[512];
     if ((bmKnobsLockedSelected & (1 << 0))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3);
 
-
+        /*
         ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))
             ->getParameter((currentParameterPage - 1)*3)->parameterDisplay((char*)responseBfr+6);
+        
         responseBfr[0]=MSG_PARAMETER_VALUE;
         responseBfr[1]=0;
         responseBfr[4]=ui.currentProgramPosition;
@@ -509,20 +510,21 @@ static void knob0Callback(uint16_t val)
         stringIndex++;
         *((uint16_t*)(responseBfr+2))=stringIndex;
         usbVendorSpecificSendData((uint8_t*)responseBfr,4,1);
-        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);
+        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);*/
     }
 }
 
 static void knob1Callback(uint16_t val)
 {
-    uint16_t stringIndex=6;
-    uint8_t responseBfr[512];
+    //uint16_t stringIndex=6;
+    //uint8_t responseBfr[512];
 
     if ((bmKnobsLockedSelected & (1 << 1))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 1);
-
+        
+        /*
         ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))
             ->getParameter((currentParameterPage - 1)*3 + 1)->parameterDisplay((char*)responseBfr+6);
         responseBfr[0]=MSG_PARAMETER_VALUE;
@@ -536,19 +538,19 @@ static void knob1Callback(uint16_t val)
         stringIndex++;
         *((uint16_t*)(responseBfr+2))=stringIndex;
         usbVendorSpecificSendData((uint8_t*)responseBfr,4,1);
-        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);
+        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);*/
     }
 }
 
 static void knob2Callback(uint16_t val)
 {
-    uint16_t stringIndex=6;
-    uint8_t responseBfr[512];
+    //uint16_t stringIndex=6;
+    //uint8_t responseBfr[512];
     if ((bmKnobsLockedSelected & (1 << 2))==0)
     {
         ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2)->parameterCallback(val);
         ui.currentParameter = ui.currentProgram->getParameter((currentParameterPage - 1)*3 + 2);
-
+        /*
         ((FxProgram*)audioProcessor.getFxProgram(ui.currentProgramPosition))
             ->getParameter((currentParameterPage - 1)*3 + 2)->parameterDisplay((char*)responseBfr+6);
         responseBfr[0]=MSG_PARAMETER_VALUE;
@@ -562,7 +564,7 @@ static void knob2Callback(uint16_t val)
         stringIndex++;
         *((uint16_t*)(responseBfr+2))=stringIndex;
         usbVendorSpecificSendData((uint8_t*)responseBfr,4,1);
-        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);
+        usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);*/
     }
 }
 
