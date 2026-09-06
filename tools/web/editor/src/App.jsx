@@ -2,7 +2,7 @@ import './App.css'
 import EffectView from './EffectPrograms';
 import ParametersDisplay from './ParametersDisplay';
 import Routing from './Routing';
-import Console from './Console';
+import SaveDialog from './SaveDialog';
 import { useState } from 'react';
 import {
     USB_CMD_GET_ABOUT,
@@ -25,7 +25,8 @@ import {
     MSG_PRESET,
     MSG_PARAMETER_VALUE,
     USB_CMD_SET_ROUTING,
-    USB_CMD_SAVE_PRESET
+    USB_CMD_SAVE_PRESET,
+    USB_CMD_SET_LED_COLOR
 } from './editorConstants';
 import { createInitialFxPrograms, createInitialPresets } from './editorData';
 import {
@@ -46,6 +47,7 @@ let currentCommandLength = 0;
 let currentCommandNr = 0xFFFF;
 let commandBfrIdx = 0;
 let presetBfr = [{}, {}, {}];
+let savePresetBfr = [{}, {}, {}];
 let currentBankBfr = 0;
 let masterVolumeMessageState = 0;
 let parameterValueSending = 0;
@@ -55,212 +57,40 @@ let newParameterValue = null;
 //let readCommandState = 0; // 0: read header, 1: read command
 //let readCommandRemainingSize = 0; // size of the command to read, excluding header
 
-function App() {
-
-    const [fxPrograms, setFxPrograms] = useState(createInitialFxPrograms());
-    const [presets, setPresets] = useState(createInitialPresets());
-    const [consoleText, setConsoleTest] = useState('');
-    const [HiZOn, setHiZOn] = useState(false);
-    const [MicOn, setMicOn] = useState(true);
-    const [masterVolume, setMasterVolume] = useState(200);
-    const [currentBank, setCurrentBank] = useState(0);
-    const [currentPreset, setCurrentPreset] = useState(0);
-    const [currentFxProgramIdx, setCurrentFxProgramIdx] = useState(0);
-    const [singleParamValue, setSingleParamValue] = useState(1);
-    const [presetSelected,setPresetSelected] = useState(true);
-
-    function convertIndexedLEDColor(clrIndex)
-    {
-        if (clrIndex == 1)
-        {
-            return "#df3434";
+async function writeIfPossible(cmd) {
+    if (ppfxDevice !== null) {
+        if (ppfxDevice.configuration !== null) {
+            await ppfxDevice.transferOut(1, cmd);
+            return 1;
         }
-        else if (clrIndex == 3)
-        {
-            return "#f8bc18";
-        }
-        else if (clrIndex == 2)
-        {
-            return "#00FF00";
-        }
-        return "#000000";
     }
+    return 0;
+}
 
-    function aboutHandler() {
-        getAbout();
-    }
+async function getPreset(bankNr, presetNr) {
+    const cmdbfr = new ArrayBuffer(6);
+    const cmd = new Uint8Array(cmdbfr);
+    cmd[0] = USB_CMD_GET_PRESET;
+    cmd[1] = 0;
+    cmd[2] = 6;
+    cmd[3] = 0;
+    cmd[4] = bankNr;
+    cmd[5] = presetNr;
+    await writeIfPossible(cmd);
+}
 
-    function appendToConsole(msg) {
-        setConsoleTest((previousText) => previousText + msg);
-    }
+export async function getBankContent(bankNr) {
 
-    async function getAbout() {
-        const cmdbfr = new ArrayBuffer(4);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_GET_ABOUT;
-        cmd[1] = 0;
-        cmd[2] = 4;
-        cmd[3] = 0;
-        await writeIfPossible(cmd);
-    }
+    await getPreset(bankNr, 0);
+    await readPreset();
+    await getPreset(bankNr, 1);
+    await readPreset();
+    await getPreset(bankNr, 2);
+    await readPreset();
+    return savePresetBfr;
+}
 
-    function getProgramsHandler() {
-        getPrograms();
-    }
-
-    async function getPrograms() {
-        console.log('calling getPrograms()');
-        const cmdbfr = new ArrayBuffer(4);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_GET_PROGRAMS;
-        cmd[1] = 0;
-        cmd[2] = 4;
-        cmd[3] = 0;
-        await writeIfPossible(cmd);
-    }
-
-    async function getInputsAndMasterVolume() {
-        const cmdbfr = new ArrayBuffer(4);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_GET_INPUTS_AND_MASTER_VOLUME;
-        cmd[1] = 0;
-        cmd[2] = 4;
-        cmd[3] = 0;
-        await writeIfPossible(cmd);
-    }
-
-    async function setInputsAndMasterVolume(mVol, hiz, mic) {
-        const cmdbfr = new ArrayBuffer(6);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_SET_INPUTS_AND_MASTER_VOLUME;
-        cmd[1] = 0;
-        cmd[2] = 6;
-        cmd[3] = 0;
-        cmd[4] = 0;
-        if (hiz === true) {
-            cmd[4] |= 1;
-        }
-        if (mic === true) {
-            cmd[4] |= 2;
-        }
-        cmd[5] = mVol;
-        await writeIfPossible(cmd);
-        await readCommand();
-        masterVolumeMessageState = 0;
-    }
-
-    async function loadPreset(presetIdx) {
-        const cmdbfr = new ArrayBuffer(6);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_LOAD_PRESET;
-        cmd[1] = 0;
-        cmd[2] = 6;
-        cmd[3] = 0;
-        cmd[4] = currentBank;
-        cmd[5] = presetIdx;
-        await writeIfPossible(cmd);
-    }
-
-    async function setParameter() {
-        if (newParameterValue !== null) {
-            const cmdbfr = new ArrayBuffer(8);
-            const cmd = new Uint8Array(cmdbfr);
-            cmd[0] = USB_CMD_SET_PARAMETER;
-            cmd[1] = 0;
-            cmd[2] = 8;
-            cmd[3] = 0;
-            cmd[4] = newParameterValue.programIdx;
-            cmd[5] = newParameterValue.parameterIdx;
-            cmd[6] = newParameterValue.parameterVal & 0xFF;
-            cmd[7] = (newParameterValue.parameterVal >> 8) & 0xFF;
-            await writeIfPossible(cmd);
-            console.log(`sending programIdx: ${newParameterValue.programIdx}, parameterIdx: ${newParameterValue.parameterIdx}, parameterVal: ${newParameterValue.parameterVal}`);
-            //await Promise.race([readCommand(),new Promise(() => setTimeout(() => console.log("timeout"),5000))]);
-            await readCommand();
-            console.log("got response");
-            newParameterValue = null;
-        }
-        parameterValueSending = 0;
-    }
-
-    async function getCurrentBankAndPresetNr() {
-        const cmdbfr = new ArrayBuffer(4);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_GET_CURRENT_BANK_PRESET_NR;
-        cmd[1] = 0;
-        cmd[2] = 4;
-        cmd[3] = 0;
-        await writeIfPossible(cmd);
-    }
-
-    async function getPreset(bankNr, presetNr) {
-        const cmdbfr = new ArrayBuffer(6);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_GET_PRESET;
-        cmd[1] = 0;
-        cmd[2] = 6;
-        cmd[3] = 0;
-        cmd[4] = bankNr;
-        cmd[5] = presetNr;
-        await writeIfPossible(cmd);
-    }
-
-    async function setFxProgram(position, programNr) {
-        const cmdbfr = new ArrayBuffer(6);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_SET_FX_PROGRAM;
-        cmd[1] = 0;
-        cmd[2] = 6;
-        cmd[3] = 0;
-        cmd[4] = position;
-        cmd[5] = programNr;
-        await writeIfPossible(cmd);
-    }
-
-    async function switchFxProgramOnOff(position, value) {
-        const cmdbfr = new ArrayBuffer(6);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_FXPROGRAM_ON_OFF;
-        cmd[1] = 0;
-        cmd[2] = 6;
-        cmd[3] = 0;
-        cmd[4] = position;
-        cmd[5] = value;
-        await writeIfPossible(cmd);
-    }
-
-    async function setPresetName(presetName)
-    {
-        const cmdbfr = new ArrayBuffer(presetName.length + 5);
-        const cmd = new Uint8Array(cmdbfr);
-        const encoder = new TextEncoder();
-        const presetNameUint8 = encoder.encode(presetName);
-        cmd[0] = USB_CMD_SET_PRESET_NAME;
-        cmd[1] = 0;
-        cmd[2] = presetName.length + 5;
-        cmd[3] = 0;
-        for (let c=0;c<presetNameUint8.length;c++)
-        {
-            cmd[c+4] = presetNameUint8[c];
-        }
-        cmd[presetName.length+4]=0;
-        await writeIfPossible(cmd);
-        presetNameChanging = 0;
-    }
-
-    async function setRouting(routing)
-    {
-        const cmdbfr = new ArrayBuffer(5);
-        const cmd = new Uint8Array(cmdbfr);
-        cmd[0] = USB_CMD_SET_ROUTING;
-        cmd[1] = 0;
-        cmd[2] = 5;
-        cmd[3] = 0;
-        cmd[4] = routing;
-        await writeIfPossible(cmd);
-    }
-
-    async function savePreset(fxProgs,preset)
+   export async function savePreset(preset)
     {
         let scnt=0;
         const bfr1 = new ArrayBuffer(512);
@@ -367,6 +197,49 @@ function App() {
         await writeIfPossible(cmd);
     }
 
+async function readPreset() {
+        let transferResult;
+        let isResolved = false;
+        while (!isResolved) {
+            if (currentCommandNr !== 0xFFFF) {
+                const alignedSize = (Math.floor((currentCommandLength-1) / 64) + 1) * 64;
+                transferResult = await ppfxDevice.transferIn(1, alignedSize);
+            } else {
+                transferResult = await ppfxDevice.transferIn(1, 64);
+            }
+            if (transferResult.status !== 'ok') {
+                const data = new Uint8Array(transferResult.data.buffer);
+                console.log(`readCommand(), returned unexpected status ${transferResult.status} when reading message header`);
+                masterVolumeMessageState = 0;
+                currentCommandNr = 0xFFFF;
+            } else {
+                commandBfr = new Uint8Array(transferResult.data.buffer);
+                if (commandBfr.length === 4) {
+                    currentCommandNr = transferResult.data.getUint16(0, true);
+                    currentCommandLength = transferResult.data.getUint16(2, true);
+                }
+                if (currentCommandNr !== 0xFFFF && commandBfr.length === currentCommandLength) {
+                    switch (currentCommandNr) {
+                        case MSG_PRESET: {
+                            const presetResult = processGetPreset(commandBfr, 0, currentCommandLength, fxProgs);
+                            savePresetBfr[presetResult.preset.presetNr] = presetResult.preset;
+                            commandBfrIdx = presetResult.nextIdx;
+                            console.log('handled MSG_PRESET in readPreset');
+                            break;
+                        }
+                        default:
+                            console.log(`unknown or unexpected command ${commandBfr[0]} ${commandBfr[1]} in readPreset`);
+                            break;
+                    }
+                    currentCommandNr = 0xFFFF;
+                    currentCommandLength = 0xFFFF;
+                    isResolved = true;
+                }
+            }
+        }
+    }
+
+
     function processGetPreset(msg, msgIdx, size, fxProgs) {
         let idx = msgIdx + 8;
         const preset = {};
@@ -376,6 +249,7 @@ function App() {
         preset.ledColorA = msg[msgIdx + 6] & 0x3;
         preset.ledColorB = (msg[msgIdx + 6] >> 2) & 0x3;
         preset.ledColorC = (msg[msgIdx + 6] >> 4) & 0x3;
+        preset.ledColorPreset = (msg[msgIdx + 6] >> 6) & 0x3;
         const effectAState = msg[msgIdx + 7] & 3;
         const effectBState = (msg[msgIdx + 7] >> 2) & 3;
         const effectCState = (msg[msgIdx + 7] >> 4) & 3;
@@ -477,6 +351,209 @@ function App() {
 
         return { preset, nextIdx: msgIdx + size };
     }
+
+function App() {
+
+    const [fxPrograms, setFxPrograms] = useState(createInitialFxPrograms());
+    const [presets, setPresets] = useState(createInitialPresets());
+    const [HiZOn, setHiZOn] = useState(false);
+    const [MicOn, setMicOn] = useState(true);
+    const [masterVolume, setMasterVolume] = useState(200);
+    const [currentBank, setCurrentBank] = useState(0);
+    const [currentPreset, setCurrentPreset] = useState(0);
+    const [currentFxProgramIdx, setCurrentFxProgramIdx] = useState(0);
+    const [presetSelected,setPresetSelected] = useState(true);
+    const [showSaveDialog,setShowSaveDialog] = useState(false);
+
+    function convertIndexedLEDColor(clrIndex)
+    {
+        if (clrIndex == 2)
+        {
+            return "#df3434";
+        }
+        else if (clrIndex == 3)
+        {
+            return "#f8bc18";
+        }
+        else if (clrIndex == 1)
+        {
+            return "#00FF00";
+        }
+        return "#000000";
+    }
+
+    function aboutHandler() {
+        getAbout();
+    }
+
+    async function getAbout() {
+        const cmdbfr = new ArrayBuffer(4);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_GET_ABOUT;
+        cmd[1] = 0;
+        cmd[2] = 4;
+        cmd[3] = 0;
+        await writeIfPossible(cmd);
+    }
+
+    function getProgramsHandler() {
+        getPrograms();
+    }
+
+    async function getPrograms() {
+        console.log('calling getPrograms()');
+        const cmdbfr = new ArrayBuffer(4);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_GET_PROGRAMS;
+        cmd[1] = 0;
+        cmd[2] = 4;
+        cmd[3] = 0;
+        await writeIfPossible(cmd);
+    }
+
+    async function getInputsAndMasterVolume() {
+        const cmdbfr = new ArrayBuffer(4);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_GET_INPUTS_AND_MASTER_VOLUME;
+        cmd[1] = 0;
+        cmd[2] = 4;
+        cmd[3] = 0;
+        await writeIfPossible(cmd);
+    }
+
+    async function setInputsAndMasterVolume(mVol, hiz, mic) {
+        const cmdbfr = new ArrayBuffer(6);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_SET_INPUTS_AND_MASTER_VOLUME;
+        cmd[1] = 0;
+        cmd[2] = 6;
+        cmd[3] = 0;
+        cmd[4] = 0;
+        if (hiz === true) {
+            cmd[4] |= 1;
+        }
+        if (mic === true) {
+            cmd[4] |= 2;
+        }
+        cmd[5] = mVol;
+        await writeIfPossible(cmd);
+        await readCommand();
+        masterVolumeMessageState = 0;
+    }
+
+    async function loadPreset(presetIdx) {
+        const cmdbfr = new ArrayBuffer(6);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_LOAD_PRESET;
+        cmd[1] = 0;
+        cmd[2] = 6;
+        cmd[3] = 0;
+        cmd[4] = currentBank;
+        cmd[5] = presetIdx;
+        await writeIfPossible(cmd);
+    }
+
+    async function setParameter() {
+        if (newParameterValue !== null) {
+            const cmdbfr = new ArrayBuffer(8);
+            const cmd = new Uint8Array(cmdbfr);
+            cmd[0] = USB_CMD_SET_PARAMETER;
+            cmd[1] = 0;
+            cmd[2] = 8;
+            cmd[3] = 0;
+            cmd[4] = newParameterValue.programIdx;
+            cmd[5] = newParameterValue.parameterIdx;
+            cmd[6] = newParameterValue.parameterVal & 0xFF;
+            cmd[7] = (newParameterValue.parameterVal >> 8) & 0xFF;
+            await writeIfPossible(cmd);
+            console.log(`sending programIdx: ${newParameterValue.programIdx}, parameterIdx: ${newParameterValue.parameterIdx}, parameterVal: ${newParameterValue.parameterVal}`);
+            //await Promise.race([readCommand(),new Promise(() => setTimeout(() => console.log("timeout"),5000))]);
+            await readCommand();
+            console.log("got response");
+            newParameterValue = null;
+        }
+        parameterValueSending = 0;
+    }
+
+    async function getCurrentBankAndPresetNr() {
+        const cmdbfr = new ArrayBuffer(4);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_GET_CURRENT_BANK_PRESET_NR;
+        cmd[1] = 0;
+        cmd[2] = 4;
+        cmd[3] = 0;
+        await writeIfPossible(cmd);
+    }
+
+
+    async function setFxProgram(position, programNr) {
+        const cmdbfr = new ArrayBuffer(6);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_SET_FX_PROGRAM;
+        cmd[1] = 0;
+        cmd[2] = 6;
+        cmd[3] = 0;
+        cmd[4] = position;
+        cmd[5] = programNr;
+        await writeIfPossible(cmd);
+    }
+
+    async function switchFxProgramOnOff(position, value) {
+        const cmdbfr = new ArrayBuffer(6);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_FXPROGRAM_ON_OFF;
+        cmd[1] = 0;
+        cmd[2] = 6;
+        cmd[3] = 0;
+        cmd[4] = position;
+        cmd[5] = value;
+        await writeIfPossible(cmd);
+    }
+
+    async function setPresetName(presetName)
+    {
+        const cmdbfr = new ArrayBuffer(presetName.length + 5);
+        const cmd = new Uint8Array(cmdbfr);
+        const encoder = new TextEncoder();
+        const presetNameUint8 = encoder.encode(presetName);
+        cmd[0] = USB_CMD_SET_PRESET_NAME;
+        cmd[1] = 0;
+        cmd[2] = presetName.length + 5;
+        cmd[3] = 0;
+        for (let c=0;c<presetNameUint8.length;c++)
+        {
+            cmd[c+4] = presetNameUint8[c];
+        }
+        cmd[presetName.length+4]=0;
+        await writeIfPossible(cmd);
+        presetNameChanging = 0;
+    }
+
+    async function setRouting(routing)
+    {
+        const cmdbfr = new ArrayBuffer(5);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_SET_ROUTING;
+        cmd[1] = 0;
+        cmd[2] = 5;
+        cmd[3] = 0;
+        cmd[4] = routing;
+        await writeIfPossible(cmd);
+    }
+
+    async function setLedColor(clr)
+    {
+        const cmdbfr = new ArrayBuffer(5);
+        const cmd = new Uint8Array(cmdbfr);
+        cmd[0] = USB_CMD_SET_LED_COLOR;
+        cmd[1] = 0;
+        cmd[2] = 5;
+        cmd[3] = 0;
+        cmd[4] = clr;
+        await writeIfPossible(cmd);
+    }
+
+
     async function readCommand() {
         let transferResult;
         let isResolved = false;
@@ -540,7 +617,7 @@ function App() {
                         case MSG_PRESET: {
                             const presetResult = processGetPreset(commandBfr, 0, currentCommandLength, fxProgs);
                             presetBfr[presetResult.preset.presetNr] = presetResult.preset;
-                            setPresets(presetBfr);
+                            //setPresets(presetBfr);
                             commandBfrIdx = presetResult.nextIdx;
                             console.log('handled MSG_PRESET');
                             break;
@@ -629,15 +706,7 @@ function App() {
         }
     }
 
-    async function writeIfPossible(cmd) {
-        if (ppfxDevice !== null) {
-            if (ppfxDevice.configuration !== null) {
-                await ppfxDevice.transferOut(1, cmd);
-                return 1;
-            }
-        }
-        return 0;
-    }
+
 
     async function getParameterNames(programNr) {
         console.log(`getParameterNames(${programNr})`);
@@ -678,9 +747,9 @@ function App() {
                     await ppfxDevice.claimInterface(1);
                     await initialSync();
                     //readFromPort();
-                    appendToConsole('PiPicoFX USB Device Opened');
+                    
                 }).catch((error) => {
-                    appendToConsole(`Error: ${error}, No Device Found or selected`);
+                    console.log(`Error: ${error}, No Device Found or selected`);
                 });
             }
         });
@@ -749,8 +818,7 @@ function App() {
         await setFxProgram(id, fxProgram);
         await getPreset(currentBank, currentPreset);
         await readCommand();
-        //setPresets(presetBfr);
-        //setCurrentFxProgramIdx(fxProgram/1);
+        setPresets(presetBfr);
     }
 
     function handlePresetNameChange(presetname)
@@ -765,16 +833,18 @@ function App() {
         }
     }
     
-    function setLEDColor(ledcolor)
+    function changeLEDColor(ledcolor)
     {
         const newpresets = presets.slice();
         newpresets[currentPreset].ledColorPreset = ledcolor;
+        setLedColor(ledcolor);
         setPresets(newpresets);
     }
 
     function savePresetHandler()
-    {
-        savePreset(fxPrograms,presets[currentPreset]);
+    {   
+        setShowSaveDialog(true);
+        //savePreset(fxPrograms,presets[currentPreset]);
     }
 
     return (
@@ -785,8 +855,6 @@ function App() {
                     <div className="editor-vertical leftmost" style={{flexGrow: "1"}}>
                         <VolumeSlider onChange={(v) => handleMasterVolumeChange(v)}></VolumeSlider>
                         <div className="editor-vertical-label">Master Volume</div>
-
-                        
                     </div>
                     <div className="editor-vertical">
                         <label className="editor-switch on-root">
@@ -794,7 +862,6 @@ function App() {
                                 onChange={(e) => handleHiZChange(e.target.checked)} />
                             <span className="editor-slider round"></span>
                         </label>
-
                         <div className="editor-toggle-label">HiZ</div>
                     </div>
                     <div className="editor-vertical">
@@ -803,7 +870,6 @@ function App() {
                                 onChange={(e) => handleMicChange(e.target.checked)} />
                             <span className="editor-slider round"></span>
                         </label>
-
                         <div className="editor-toggle-label">Mic</div>
                     </div>
                     <button className="editor-button editable" onClick={requestDevice}>Detect device</button>
@@ -831,7 +897,7 @@ function App() {
                                     {
                                         clridx = 1;
                                     }
-                                    setLEDColor(clridx);
+                                    changeLEDColor(clridx);
                                           
                             }}> 
                         </div>
@@ -846,7 +912,7 @@ function App() {
                         <div className="editor-vertical-label">Bank</div>
                     </div>
                     <button className="editor-button editable" 
-                        style={{width: "90%", margin: "0"}}
+                        style={{width: "90%", padding: "10px", margin: "14px"}}
                         onClick={savePresetHandler}>Save</button>
                     <span className="editor-filler"></span>
                 </div>
@@ -927,6 +993,12 @@ function App() {
                 </div>
                 <ParametersDisplay preset={presets[currentPreset]} fxPrograms={fxPrograms} effectIndex={currentFxProgramIdx} changeParameterValue={setParameterValue} />
                 <span className="editor-filler-vertical"></span>
+            { showSaveDialog ? <SaveDialog 
+                presets={presets} 
+                bankNr={currentBank} 
+                presetNr={currentPreset} 
+                presetToSave={presets[currentPreset]}
+                onCancel={() => setShowSaveDialog(false)}/> : null }
             </div>
         </>
     );

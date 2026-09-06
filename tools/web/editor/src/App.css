@@ -247,6 +247,34 @@ div .editor-vertical-label
     background-color: #ed9530;
 }
 
+.editor-save-dialog-outer {
+    display:block;
+    position: absolute;
+
+    height:fit-content;
+    width: fit-content;
+    left: 50%;
+    top: 25%;
+    
+}
+
+.editor-save-dialog-inner {
+    position: relative;
+    display:flex;      
+    flex-direction: row;
+    left: -50%;
+    top: -50%;
+    background-color: #cc2132;
+    height:fit-content;
+    width: fit-content;
+    border-radius: 4px;
+    border-style: solid;
+    border-color: #1e404f;
+    border-width: 2px;
+    box-shadow: 0px 0px 5px 5px black;
+
+}
+
 .editor-switch {
   position: relative;
   display: inline-block;
