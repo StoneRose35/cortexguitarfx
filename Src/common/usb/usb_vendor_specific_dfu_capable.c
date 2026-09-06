@@ -14,7 +14,7 @@ static const uint8_t usbDeviceDescriptorFull[] = {
     0x12, // bLength
     0x01, // device descriptor type
     0x10,
-    0x01, //bcdUSB
+    0x02, //bcdUSB: 2.1.0
     0xFF, // device class
     0x01, // device subclass
     0x00, // device protocol
@@ -38,7 +38,7 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     // ------------------------------------
     0x09, // bLength
     SETUP_PACKET_DESCR_TYPE_CONFIGURATION, // descriptor type configuration
-    50, // configation descriptor size, lsb
+    79, // configation descriptor size, lsb
     0x00, // configurator descriptor size, msb
     0x03, // bNumInterfaces
     0x01, // bConfigurationValue
@@ -106,8 +106,87 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     0x40, //wTransferSize, lsb
     0x00, //wTransferSize, msb
     0x00, // bcdDFUVersion
-    0x01  // bcdDFUVersion
+    0x01,  // bcdDFUVersion
     };
+
+static const uint8_t bosDescriptor[]={
+    //---------------------------------------
+    // Binary device Object Store descriptor
+    //---------------------------------------
+    //---------------------------------------
+    0x05, //bLength
+    0x0f, //bDescriptorType: Binary device Object Store descriptor
+    0x1D, //wTotalLength, lsb: total length of this series of descriptors
+    0x00, // wTotalLength, msb
+    0x01, //bNumDeviceCaps, number of device capability descriptors on the BOS
+    //---------------------------------------
+    // WebUSB platform capability descriptor
+    //---------------------------------------
+    //---------------------------------------
+    0x18, // bLength
+    0x10, // bDescriptorType, device capability descriptor
+    0x05, //bDevCapabilityType, platform capability descriptor
+    0x00, //bReserved
+    0x38, //PlatformCapabilityUUID
+    0xB6,
+    0x08,
+    0x34,
+    0xA9,
+    0x09,
+    0xA0,
+    0x47,
+    0x8B,
+    0xFD,
+    0xA0,
+    0x76,
+    0x88,
+    0x15,
+    0xB6,
+    0x65,
+    0x00, //bcdVersion, WebUSB descriptor version 1.0
+    0x01, //bcdVersion
+    0x01, //bVendorCode, bRequest value for WebUSB
+    0x01,  //iLandingPage
+};
+
+static const uint8_t landingPageDescriptor[]={
+    36, // bLength
+    0x03, // bDescriptorType, URL Descriptor
+    0x01, //bScheme, https://
+    's',
+    't',
+    'o',
+    'n',
+    'e',
+    'r',
+    'o',
+    's',
+    'e',
+    '3',
+    '5',
+    '.',
+    'c',
+    'h',
+    '/',
+    'd',
+    'u',
+    'n',
+    'g',
+    'e',
+    'o',
+    'n',
+    '/',
+    'w',
+    'e',
+    'b',
+    'e',
+    'd',
+    'i',
+    't',
+    'o',
+    'r',
+    '/'    
+};
     
 static const uint16_t usbConfigurationDescriptorFullSize = sizeof(usbConfigurationDescriptorFull);
 
@@ -127,8 +206,10 @@ void USBVendorSpecificIFInit()
     setUsbConfigurationDescriptor(usbConfigurationDescriptorFull,usbConfigurationDescriptorFullSize);
     setUsbDeviceDescriptor(usbDeviceDescriptorFull,usbDeviceDescriptorFullSize);
     setUsbStringDescriptors(stringDescriptors);
+    setBOSDescriptor(bosDescriptor,*((uint16_t*)(bosDescriptor+2)));
     setConfigurationHandler(&usbVendorSpecificIFSetConfiguration);
     setClassSpecificSetupHandler(&usbVendorSpecificIFHandleClassSetupRequest);
+    setVendorSpecificSetupHandler(&handleUsbVendorSpecificIFVendorSetupRequest);
     setSetInterfaceHandler(&usbVendorSpecificIFSetInterfaceHandler);
     setSuspendedHandler(&usbVendorSpecificIFSuspendedHandler);
 }
@@ -399,7 +480,13 @@ uint16_t readUsbVendorSpecificData(uint8_t * data,uint16_t startIndex)
 
 void handleUsbVendorSpecificIFVendorSetupRequest(const UsbSetupPacketType* packet)
 {
-    (void)packet;
+    if (packet->bRequest == 0x01 // vendor code: WebUSB
+        && packet->wValue == 0x01  // iLandingPage
+        && packet->wIndex == 0x02) // GET_URL
+    {
+        
+        prepareUSBTransfer(0,landingPageDescriptor,(uint16_t)*landingPageDescriptor);
+    }
 }
 
 void usbVendorSpecificIFSuspendedHandler()

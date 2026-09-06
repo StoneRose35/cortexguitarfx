@@ -24,6 +24,9 @@ const uint8_t  string0Descriptor[] = {
 static const uint8_t * currentConfigurationDescriptor;
 static volatile uint16_t currentConfigurationDescriptorSize;
 
+static const uint8_t * currentBOSDescriptor;
+static volatile uint16_t currentBOSDescriptorSize;
+
 static const volatile uint8_t * currentDeviceDescriptor;
 static volatile uint16_t currentDeviceDescriptorSize;
 
@@ -157,6 +160,11 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                         descrLength = string0Descriptor[0];
                     }
                 }
+                else if ((packet->wValue >> 8)==0x0F) // BOS Descriptor
+                {
+                    dataPtr = (uint8_t*)currentBOSDescriptor;
+                    descrLength = currentBOSDescriptorSize;
+                } 
                 else
                 {
                     stallInEndpoint(0);
@@ -268,7 +276,14 @@ void setSetInterfaceHandler(uint8_t(*handler)(uint16_t,uint16_t))
 }
 
 __RAMFUNC
-void setVendorSpecifiSetHandler(void(*handler)(const UsbSetupPacketType* packet) )
+void setVendorSpecificSetupHandler(void(*handler)(const UsbSetupPacketType* packet) )
 {
     currentVendorSpecificSetupHandler = handler;
+}
+
+__RAMFUNC
+void setBOSDescriptor(const uint8_t * descr,uint16_t descrSize)
+{
+    currentBOSDescriptor = descr;
+    currentBOSDescriptorSize = descrSize;
 }

@@ -240,6 +240,7 @@ div .editor-vertical-label
     margin-right: auto;
     text-align: center;
     max-width: 860px;
+    min-width: 860px;
     height: 100%;
     display:flex;
     flex-grow: 1;

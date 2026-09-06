@@ -364,6 +364,7 @@ function App() {
     const [currentFxProgramIdx, setCurrentFxProgramIdx] = useState(0);
     const [presetSelected,setPresetSelected] = useState(true);
     const [showSaveDialog,setShowSaveDialog] = useState(false);
+    const [deviceConnected,setDeviceConnected] = useState(false);
 
     function convertIndexedLEDColor(clrIndex)
     {
@@ -734,7 +735,7 @@ function App() {
                     }
                     await ppfxDevice.claimInterface(1);
                     await initialSync();
-                    //readFromPort();
+                    setDeviceConnected(true);
                 }
             });
             if (devFound === false) {
@@ -746,7 +747,7 @@ function App() {
                     }
                     await ppfxDevice.claimInterface(1);
                     await initialSync();
-                    //readFromPort();
+                    setDeviceConnected(true);
                     
                 }).catch((error) => {
                     console.log(`Error: ${error}, No Device Found or selected`);
@@ -847,11 +848,10 @@ function App() {
         //savePreset(fxPrograms,presets[currentPreset]);
     }
 
-    return (
-        <>
-            <div className="editor-main" id="editor_app">
-                <div className="editor-title">PiPicoFX Editor</div>
-                <div className="editor-toppanel">
+    function showApplicationContent() {
+        return (
+            <>
+                            <div className="editor-toppanel">
                     <div className="editor-vertical leftmost" style={{flexGrow: "1"}}>
                         <VolumeSlider onChange={(v) => handleMasterVolumeChange(v)}></VolumeSlider>
                         <div className="editor-vertical-label">Master Volume</div>
@@ -872,7 +872,7 @@ function App() {
                         </label>
                         <div className="editor-toggle-label">Mic</div>
                     </div>
-                    <button className="editor-button editable" onClick={requestDevice}>Detect device</button>
+                    
                 </div>
                 <div className="editor-panel">
                     <div className="editor-vertical leftmost">
@@ -993,6 +993,17 @@ function App() {
                 </div>
                 <ParametersDisplay preset={presets[currentPreset]} fxPrograms={fxPrograms} effectIndex={currentFxProgramIdx} changeParameterValue={setParameterValue} />
                 <span className="editor-filler-vertical"></span>
+            </>
+        );
+    }
+
+    return (
+        <>
+            <div className="editor-main" id="editor_app">
+                <div className="editor-title">PiPicoFX Editor</div>
+            
+                
+            { deviceConnected ? showApplicationContent() : <button className="editor-button editable" onClick={requestDevice}>Connect device</button> }
             { showSaveDialog ? <SaveDialog 
                 presets={presets} 
                 bankNr={currentBank} 

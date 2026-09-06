@@ -190,11 +190,12 @@ uint16_t serializeStringDescriptor(uint8_t * dataPtr, UsbStringDescriptor descr)
 void ProcessUsbSetupPackage(const UsbSetupPacketType *packet); 
 
 
-void setVendorSpecifiSetHandler(void(*handler)(const UsbSetupPacketType* packet) );
+void setVendorSpecificSetupHandler(void(*handler)(const UsbSetupPacketType* packet) );
 void setUsbConfigurationDescriptor(const uint8_t * confDescr,const uint16_t size);
 void setUsbDeviceDescriptor(const uint8_t * deviceDescr,const uint16_t size);
 void setUsbStringDescriptors(UsbStringDescriptor stringDescrs);
 void setConfigurationHandler(uint8_t(*confHandler)(uint16_t));
 void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*));
 void setSetInterfaceHandler(uint8_t(*handler)(uint16_t,uint16_t));
+void setBOSDescriptor(const uint8_t * descr,uint16_t descrSize);
 #endif
