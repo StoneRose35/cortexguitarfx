@@ -46,3 +46,13 @@ void firstOrderIirDualCoeffLPReset(FirstOrderIirDualCoeffLPType*data)
     data->oldXVal=0.0f;
 }
 
+__QSPI_CODE
+float firstOrderIirAllpassProcessSample(float sampleIn,FirstOrderIirAllpassType*data)
+{
+    float res;
+    res = data->alpha * (sampleIn - data->oldYVal) + data->oldVal;
+    data->oldVal = sampleIn;
+    data->oldYVal = res;
+    return res;
+}
+

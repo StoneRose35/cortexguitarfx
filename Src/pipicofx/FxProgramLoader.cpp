@@ -20,6 +20,7 @@
 #include "pipicofx/017_FreeVerb.hpp"
 #include "pipicofx/018_MultimodeFilter.hpp"
 #include "pipicofx/019_XAmp.hpp"
+#include "pipicofx/020_Phaser.hpp"
 #include <new>
 namespace PiPicoFX {
     __QSPI_CODE
@@ -84,6 +85,10 @@ namespace PiPicoFX {
                 break;
             case 18:
                 res = new(std::nothrow) PiPicoFX::XAmp::XAmp();
+                break;
+            case 19:
+                res = new(std::nothrow) PiPicoFX::Phaser::Phaser();
+                break;
             default:
                 break;
 
@@ -153,6 +158,9 @@ namespace PiPicoFX {
                 break;
             case 18:
                 res = new(std::nothrow) PiPicoFX::XAmp::XAmp(1);
+                break;
+            case 19:
+                res = new(std::nothrow) PiPicoFX::Phaser::Phaser(1);
                 break;
             default:
                 break;

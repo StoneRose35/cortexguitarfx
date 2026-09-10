@@ -25,6 +25,7 @@ void zeroString(char*data,int16_t len)
     }
 }
 
+/*
 float int2float(int32_t a)
 {
     return (float)a;
@@ -39,7 +40,7 @@ float fln(float a)
 {
     return logf(a);
 }
-
+*/
 
 float convolve(const float*coeffs,float*data,uint32_t offset)
 {

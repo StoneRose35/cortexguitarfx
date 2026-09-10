@@ -18,10 +18,18 @@ typedef struct
     float alphaFalling;
 } FirstOrderIirDualCoeffLPType;
 
+typedef struct 
+{
+    float oldVal;
+    float oldYVal;
+    float alpha;
+} FirstOrderIirAllpassType;
+
+
 float firstOrderIirLowpassProcessSample(float sampleIn,FirstOrderIirType*data);
 float firstOrderIirHighpassProcessSample(float sampleIn,FirstOrderIirType*data);
 float firstOrderIirDualCoeffLPProcessSample(float sampleIn,FirstOrderIirDualCoeffLPType*data);
-
+float firstOrderIirAllpassProcessSample(float sampleIn,FirstOrderIirAllpassType*data);
 void firstOrderIirReset(FirstOrderIirType*data);
 void firstOrderIirDualCoeffLPReset(FirstOrderIirDualCoeffLPType*data);
 
