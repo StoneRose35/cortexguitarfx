@@ -116,9 +116,9 @@ static const uint8_t bosDescriptor[]={
     //---------------------------------------
     0x05, //bLength
     0x0f, //bDescriptorType: Binary device Object Store descriptor
-    0x1D, //wTotalLength, lsb: total length of this series of descriptors
+    57, //wTotalLength, lsb: total length of this series of descriptors
     0x00, // wTotalLength, msb
-    0x01, //bNumDeviceCaps, number of device capability descriptors on the BOS
+    0x02, //bNumDeviceCaps, number of device capability descriptors on the BOS
     //---------------------------------------
     // WebUSB platform capability descriptor
     //---------------------------------------
@@ -147,6 +147,39 @@ static const uint8_t bosDescriptor[]={
     0x01, //bcdVersion
     0x01, //bVendorCode, bRequest value for WebUSB
     0x01,  //iLandingPage
+    //--------------------------------------------------
+    // Microsoft OS 2.0 platform capability descriptor
+    //--------------------------------------------------
+    //--------------------------------------------------
+    0x1c, //bLength
+    0x10, //bDescriptorType
+    0x05, //bDevCapabilityType
+    0x00, // bReserved
+    0xdf, // PlatformCapabilityUUID Microsoft OS 2.0 platform compatibility descriptor
+    0x60,
+    0xdd,
+    0xd8,
+    0x89,
+    0x45,
+    0xc7,
+    0x4c,
+    0x9c,
+    0xd2,
+    0x65,
+    0x9d,
+    0x9e,
+    0x64,
+    0x8a,
+    0x9f,
+    0x00, // dwWindowsVersion, lsb encoded
+    0x00,
+    0x03,
+    0x06,
+    0xB2, //wMSODODescriptorTotalLength
+    0x00,
+    0x02, // bMS_VendorCode
+    0x00 //bAltEnumCode, no alternate enumeration
+
 };
 
 static const uint8_t landingPageDescriptor[]={
@@ -186,6 +219,116 @@ static const uint8_t landingPageDescriptor[]={
     'o',
     'r',
     '/'    
+};
+
+static const uint8_t msOS20Descriptor[] = {
+    // Microsoft OS 2.0 descriptor set header
+    0x0A, //wLength
+    0x00,
+    0x00, //wDescriptorType
+    0x00,
+    0x00, // dwWindowsVersion
+    0x00,
+    0x03,
+    0x06,
+    0xB2, //wTotalLength
+    0x00,
+    // Microsoft OS 2.0 configuration subset header
+    0x08, //wLength
+    0x00,
+    0x01, // wDescriptorType
+    0x00,
+    0x00, //bConfigurationValue, applies to configuration 1
+    0x00, //bReserved
+    0xA8, // wTotalLength
+    0x00,
+    // Microsoft OS 2.0 function subset header
+    0x08, //wLength
+    0x00,
+    0x02, //wDescriptorType
+    0x00,
+    0x01, //bFirstInterface
+    0x00, //bReserved
+    0xA0, //wSubsetLength
+    0x00,
+    // Microsoft OS 2.0 compatible ID descriptor
+    0x14, //wLength
+    0x00,
+    0x03, //wDescriptorLength
+    0x00, 
+    'W',//CompatibleID
+    'I',
+    'N',
+    'U',
+    'S',
+    'B',
+    0x00,
+    0x00,
+    0x00, //SubCompatibleID
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    // Microsoft OS 2.0 registry property descriptor
+    0x84, //wLength
+    0x00,
+    0x04, // wDescriptorType
+    0x00,
+    0x07, // wPropertyDataType: REG_MULTI_SZ
+    0x00, 
+    0x2a, // wPropertyNameLength
+    0x00,
+    // bPropertyName: DeviceInterfaceGUID in UTF16-LE
+    'D', 0x00, 'e', 0x00, 'v', 0x00, 'i', 0x00, 'c', 0x00, 'e', 0x00, 'I', 0x00, 'n', 0x00, 't', 0x00, 'e', 0x00, 
+    'r', 0x00, 'f', 0x00, 'a', 0x00, 'c', 0x00, 'e', 0x00, 'G', 0x00, 'U', 0x00, 'I', 0x00, 'D', 0x00, 's', 0x00, 
+    0x00, 0x00,
+    0x50, // wPropertyDataLength
+    0x00, 
+    // wPropertyData: just a random UUID propertly encoded: "{f202c9de-e6a6-44d8-8159-3053c3b10d21}" as UTF16-LE
+    // padded with 0 zeros for a total size of 80
+    '{', 0x00,
+    'f', 0x00,
+    '2', 0x00,
+    '0', 0x00,
+    '2', 0x00,
+    'c', 0x00,
+    '9', 0x00,
+    'd', 0x00,
+    'e', 0x00,
+    '-', 0x00,
+    'e', 0x00,
+    '6', 0x00,
+    'a', 0x00,
+    '6', 0x00,
+    '-', 0x00,
+    '4', 0x00,
+    '4', 0x00,
+    'd', 0x00,
+    '8', 0x00,
+    '-', 0x00,
+    '8', 0x00,
+    '1', 0x00,
+    '5', 0x00,
+    '9', 0x00,
+    '-', 0x00,
+    '3', 0x00,
+    '0', 0x00,
+    '5', 0x00,
+    '3', 0x00,
+    'c', 0x00,
+    '3', 0x00,
+    'b', 0x00,
+    '1', 0x00,
+    '0', 0x00,
+    'd', 0x00,
+    '2', 0x00,
+    '1', 0x00,
+    '}', 0x00,
+    0x00,0x00,
+    0x00,0x00
 };
     
 static const uint16_t usbConfigurationDescriptorFullSize = sizeof(usbConfigurationDescriptorFull);
@@ -486,6 +629,13 @@ void handleUsbVendorSpecificIFVendorSetupRequest(const UsbSetupPacketType* packe
     {
         
         prepareUSBTransfer(0,landingPageDescriptor,(uint16_t)*landingPageDescriptor);
+    }
+    else if (packet->bRequest == 0x02 // vendor code: MS OS 2.0 Descriptors
+        && packet->wValue == 0x00 
+        && packet->wIndex == 0x07 // get MS OS 2.0 Descriptors
+    )
+    {
+        prepareUSBTransfer(0,msOS20Descriptor,(uint16_t)*((uint16_t*)(msOS20Descriptor+8)));
     }
 }
 
