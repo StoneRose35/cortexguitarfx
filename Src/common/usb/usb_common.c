@@ -30,6 +30,9 @@ static volatile uint16_t currentBOSDescriptorSize;
 static const volatile uint8_t * currentDeviceDescriptor;
 static volatile uint16_t currentDeviceDescriptorSize;
 
+static const uint8_t * currentDeviceQualifierDescriptor;
+static volatile uint16_t currentDeviceQualifierDescriptorSize;
+
 static volatile UsbStringDescriptor currentStringDescriptors;
 static uint8_t(*currentConfigurationHandler)(uint16_t);
 
@@ -165,6 +168,11 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                     dataPtr = (uint8_t*)currentBOSDescriptor;
                     descrLength = currentBOSDescriptorSize;
                 } 
+                else if ((packet->wValue >> 8)==0x06) // Device Qualifier
+                {
+                    dataPtr = (uint8_t*)currentDeviceQualifierDescriptor;
+                    descrLength=currentDeviceQualifierDescriptorSize;
+                }
                 else
                 {
                     stallInEndpoint(0);
@@ -184,7 +192,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                 }
                 break;
             case 0x0B: // SET_INTERFACE
-                if (packet->wValue == 0 && packet->wIndex == 2) // acknowledge when switching to interface 2 (usb dfu)
+                if (packet->wValue == 0 && packet->wIndex == 0) // acknowledge when switching to interface 0 (usb dfu)
                 {
                     setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest);
                 }
@@ -286,4 +294,11 @@ void setBOSDescriptor(const uint8_t * descr,uint16_t descrSize)
 {
     currentBOSDescriptor = descr;
     currentBOSDescriptorSize = descrSize;
+}
+
+__RAMFUNC
+void setDeviceQualifierDescriptor(const uint8_t * descr,uint16_t descrSize)
+{
+    currentDeviceQualifierDescriptor = descr;
+    currentDeviceQualifierDescriptorSize = descrSize;
 }

@@ -156,7 +156,10 @@ int main(void)
     configureAndEnableMPU();
     SCB_EnableICache();
     SCB_EnableDCache();
-	//initUart(2000000);
+
+    #if defined USB_DBG || defined ENCODER_TUNE
+    initUart(115200);
+    #endif
 	initDMA();
     initFmcSdram();
     initDelayMemoryHandler();
@@ -281,9 +284,7 @@ int main(void)
 	    enterLevel7(&piPicoUiController);
 	#endif
 
-    #if defined USB_DBG || defined ENCODER_TUNE
-    initUart(115200);
-    #endif
+
     /* Loop forever */
 	for(;;)
 	{

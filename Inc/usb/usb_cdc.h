@@ -26,7 +26,7 @@ void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking);
 
 void UsbCdcDataReceived(void* dtaPtr,uint16_t len);
 void UsbCdcEp0OutHandler(void* dataPtr,uint16_t len);
-void UsbCdcTransferDone(void);
+uint8_t UsbCdcTransferDone(void);
 
 uint16_t getUsbCdcReceivedDataLevel();
 uint16_t readUsbCdcData(uint8_t *,uint16_t);

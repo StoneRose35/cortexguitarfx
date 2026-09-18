@@ -29,7 +29,7 @@ void prepareUSBReception(uint8_t epNr,uint16_t dataSize);
 void prepareEP0Rception(void);
 void setAddress(uint8_t address);
 void setEndpointOutHandler(endPointHandler handler,uint8_t epNr);
-void setTransferDoneHandler(void(*handler)(void),uint8_t epNr);
+void setTransferDoneHandler(uint8_t(*handler)(void),uint8_t epNr);
 void setResetHandler(void(*)(void));
 void setSuspendedHandler(void(*)(void));
 void getSetupPacket(UsbSetupPacketType*setupPacket, uint8_t*buffer);

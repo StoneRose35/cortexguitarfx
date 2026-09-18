@@ -387,7 +387,7 @@ void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking)
 
 
 __QSPI_CODE
-void UsbCdcTransferDone(void)
+uint8_t UsbCdcTransferDone(void)
 {
     chunksSent += 1;
     if (sendDataSize > 64)
@@ -404,6 +404,7 @@ void UsbCdcTransferDone(void)
     {
         bmUsbStatus &= ~(1 << USB_CDC_TransferInProgress_Pos);
     }
+    return 0;
 }
 
 __QSPI_CODE

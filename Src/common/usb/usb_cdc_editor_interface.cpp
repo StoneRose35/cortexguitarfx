@@ -98,8 +98,8 @@ void processGetAboutCmd()
     idx += appendToString(strbfr + idx,"\r\n      ");     
     idx += appendToString(strbfr + idx,PI_PICO_FX_BUILD_TIME);    
     *((uint16_t*)(strbfr+2))=idx;
-    usbVendorSpecificSendData((uint8_t*)strbfr,4,1);
-    usbVendorSpecificSendData((uint8_t*)strbfr,idx,0);
+    usbVendorSpecificSendData(1,(uint8_t*)strbfr,4,1);
+    usbVendorSpecificSendData(1,(uint8_t*)strbfr,idx,0);
 }
 
 __QSPI_CODE
@@ -130,8 +130,8 @@ void processGetProgramsCmd()
     }
     *((uint16_t*)(strbfr+2))=idx;
     // double package, header first, then full message for the client to understand
-    usbVendorSpecificSendData((uint8_t*)strbfr,4,1);
-    usbVendorSpecificSendData((uint8_t*)strbfr,idx,0);
+    usbVendorSpecificSendData(1,(uint8_t*)strbfr,4,1);
+    usbVendorSpecificSendData(1,(uint8_t*)strbfr,idx,0);
 }
 
 
@@ -160,8 +160,8 @@ void processGetParameterNamesCmd(uint8_t programIdx)
     }
     delete prog;
     *((uint16_t*)(response+2))=idx;
-    usbVendorSpecificSendData((uint8_t*)response,4,1);
-    usbVendorSpecificSendData((uint8_t*)response,idx,0);
+    usbVendorSpecificSendData(1,(uint8_t*)response,4,1);
+    usbVendorSpecificSendData(1,(uint8_t*)response,idx,0);
 }
 
 __QSPI_CODE
@@ -177,8 +177,8 @@ void processInputStateAndMasterVolume()
     responseBfr[3]=0;
     responseBfr[4]= (regbfr & 0x3);
     responseBfr[5] = vol & 0xFF;
-    usbVendorSpecificSendData(responseBfr,4,1);
-    usbVendorSpecificSendData(responseBfr,6,0);
+    usbVendorSpecificSendData(1,responseBfr,4,1);
+    usbVendorSpecificSendData(1,responseBfr,6,0);
 }
 
 __QSPI_CODE
@@ -194,8 +194,8 @@ void processSetInputStateAndMasterVolume(uint8_t* data)
     responseBfr[3]=0;
     responseBfr[4]= (data[0] & 0x3);
     responseBfr[5] = data[1] & 0xFF;
-    usbVendorSpecificSendData(responseBfr,4,1);
-    usbVendorSpecificSendData(responseBfr,6,0);
+    usbVendorSpecificSendData(1,responseBfr,4,1);
+    usbVendorSpecificSendData(1,responseBfr,6,0);
 }
 
 __QSPI_CODE
@@ -208,8 +208,8 @@ void processGetCurrentBankAndPresetNr()
     responseBfr[3]=0;
     responseBfr[4]=currentBank;
     responseBfr[5]=currentPreset;
-    usbVendorSpecificSendData(responseBfr,4,1);
-    usbVendorSpecificSendData(responseBfr,6,0);
+    usbVendorSpecificSendData(1,responseBfr,4,1);
+    usbVendorSpecificSendData(1,responseBfr,6,0);
 }
 
 __QSPI_CODE
@@ -362,8 +362,8 @@ void processGetPreset(uint8_t*data)
         delete prog;
     }
     *((uint16_t*)(responseBfr+2))=idx;
-    usbVendorSpecificSendData((uint8_t*)responseBfr,4,1);
-    usbVendorSpecificSendData((uint8_t*)responseBfr,idx,0);
+    usbVendorSpecificSendData(1,(uint8_t*)responseBfr,4,1);
+    usbVendorSpecificSendData(1,(uint8_t*)responseBfr,idx,0);
 
 }
 
@@ -394,8 +394,8 @@ void processSetParameter(uint8_t*data)
     }
     stringIndex++;
     *((uint16_t*)(responseBfr+2))=stringIndex;
-    usbVendorSpecificSendData((uint8_t*)responseBfr,4,1);
-    usbVendorSpecificSendData((uint8_t*)responseBfr,stringIndex,0);
+    usbVendorSpecificSendData(1,(uint8_t*)responseBfr,4,1);
+    usbVendorSpecificSendData(1,(uint8_t*)responseBfr,stringIndex,0);
 }
 
 __QSPI_CODE

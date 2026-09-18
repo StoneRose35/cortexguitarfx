@@ -14,23 +14,38 @@ static const uint8_t usbDeviceDescriptorFull[] = {
     0x12, // bLength
     0x01, // device descriptor type
     0x10,
-    0x02, //bcdUSB: 2.1.0
-    0xFF, // device class
-    0x01, // device subclass
-    0x00, // device protocol
+    0x02, //bcdUSB: 2.10
+    0xEF, // device class
+    0x02, // device subclass
+    0x01, // device protocol
     0x40, // max endpoint0 size
     __LOBYTE(USB_VENDOR_ID), // vendor id, lsb
     __HIBYTE(USB_VENDOR_ID), // vendor id, msb
     __LOBYTE(USB_PRODUCT_ID), // product id, lsb
     __HIBYTE(USB_PRODUCT_ID), // product id, msb
     0x04,
-    0x00, //bcdDevice
+    0x00, // bcdDevice
     0x01, // manufacturer string id
     0x02, // product string id
     0x03, // serial string id
     0x01, // max number of configurations
     };
 static const uint16_t usbDeviceDescriptorFullSize = sizeof(usbDeviceDescriptorFull);
+
+static const uint8_t deviceQualifierDescriptor[] = {
+    0x0a, // bLength: 10
+    0x06, // bDescriptorType: device qualifier
+    0x10,
+    0x02, // bcdUSB: USB Version 2.10
+    0xEF, // bDeviceClass
+    0x02, // bDeviceSubclass
+    0x01, // bDeviceProtocol
+    0x40, // bMaxPacketSize0
+    0x01, // bNumConfigurations
+    0x00 // bReserved: 0
+};
+
+static const uint16_t deviceQualifierDescriptorSize = sizeof(deviceQualifierDescriptor);
     
 static const uint8_t usbConfigurationDescriptorFull[] = {
     // ------------------------------------
@@ -38,15 +53,39 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     // ------------------------------------
     0x09, // bLength
     SETUP_PACKET_DESCR_TYPE_CONFIGURATION, // descriptor type configuration
-    79, // configation descriptor size, lsb
+    50, // configation descriptor size, lsb
     0x00, // configurator descriptor size, msb
-    0x03, // bNumInterfaces
+    0x02, // bNumInterfaces
     0x01, // bConfigurationValue
     0x07, // configuration string id
-    0xC0, // bmAttributes, 0xC0 self powered, 0x80 bus powered
+    0x80, // bmAttributes, 0xC0 self powered, 0x80 bus powered
     0xFA, // bus power
     //-------------------------------------
-
+    // Interface Descriptor: USB DFU
+    // -----------------------------------
+    0x09, //bLength
+    SETUP_PACKET_DESCR_TYPE_INTERFACE, 
+    0x00, //bInterfaceNumber
+    0x00, //bAlternateSetting
+    0x00, //bNumEndpoints
+    0xFE, //bInterfaceClass
+    0x01, //bInterfaceSubClass
+    0x01, //bInterfaceProtocol
+    0x06, //iInterface
+    //------------------------------------
+    //------------------------------------
+    // Interface functional descriptor
+    //------------------------------------
+    0x09, //bLength
+    0x21, //bDescriptorType
+    (uint8_t)((0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0)), //bmAttributes:will not automatically detach and reattach, not manifestation tolerant, can download and upload 
+    0xF0, //wDetachTimeOut, lsb
+    0x00, //wDetachTimeOut, msb
+    0x40, //wTransferSize, lsb
+    0x00, //wTransferSize, msb
+    0x00, // bcdDFUVersion
+    0x01,  // bcdDFUVersion
+    //------------------------------------
     //-------------------------------------
     // Interface Descriptor: Data Interface
     //-------------------------------------
@@ -82,31 +121,7 @@ static const uint8_t usbConfigurationDescriptorFull[] = {
     0x00, // packet size, msb
     0x00, // bInterval
     //------------------------------------
-    //------------------------------------
-    // Interface Descriptor: USB DFU
-    // -----------------------------------
-    0x09, //bLength
-    SETUP_PACKET_DESCR_TYPE_INTERFACE, 
-    0x02, //bInterfaceNumber
-    0x00, //bAlternateSetting
-    0x00, //bNumEndpoints
-    0xFE, //bInterfaceClass
-    0x01, //bInterfaceSubClass
-    0x01, //bInterfaceProtocol
-    0x06, //iInterface
-    //------------------------------------
-    // Interfacce functional descriptor
-    //------------------------------------
-    //------------------------------------
-    0x09, //bLength
-    0x21, //bDescriptorType
-    (uint8_t)((0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0)), //bmAttributes:will not automatically detach and reattach, not manifestation tolerant, can download and upload 
-    0xF0, //wDetachTimeOut, lsb
-    0x00, //wDetachTimeOut, msb
-    0x40, //wTransferSize, lsb
-    0x00, //wTransferSize, msb
-    0x00, // bcdDFUVersion
-    0x01,  // bcdDFUVersion
+    
     };
 
 static const uint8_t bosDescriptor[]={
@@ -254,7 +269,7 @@ static const uint8_t msOS20Descriptor[] = {
     // Microsoft OS 2.0 compatible ID descriptor
     0x14, //wLength
     0x00,
-    0x03, //wDescriptorLength
+    0x03, //wDescriptorType
     0x00, 
     'W',//CompatibleID
     'I',
@@ -287,48 +302,20 @@ static const uint8_t msOS20Descriptor[] = {
     0x00, 0x00,
     0x50, // wPropertyDataLength
     0x00, 
-    // wPropertyData: just a random UUID propertly encoded: "{f202c9de-e6a6-44d8-8159-3053c3b10d21}" as UTF16-LE
+    // wPropertyData: just a random UUID propertly encoded: "{F202C9DE-E6A6-44D8-8159-3053C3B10D21}" as UTF16-LE
     // padded with 0 zeros for a total size of 80
-    '{', 0x00,
-    'f', 0x00,
-    '2', 0x00,
-    '0', 0x00,
-    '2', 0x00,
-    'c', 0x00,
-    '9', 0x00,
-    'd', 0x00,
-    'e', 0x00,
-    '-', 0x00,
-    'e', 0x00,
-    '6', 0x00,
-    'a', 0x00,
-    '6', 0x00,
-    '-', 0x00,
-    '4', 0x00,
-    '4', 0x00,
-    'd', 0x00,
-    '8', 0x00,
-    '-', 0x00,
-    '8', 0x00,
-    '1', 0x00,
-    '5', 0x00,
-    '9', 0x00,
-    '-', 0x00,
-    '3', 0x00,
-    '0', 0x00,
-    '5', 0x00,
-    '3', 0x00,
-    'c', 0x00,
-    '3', 0x00,
-    'b', 0x00,
-    '1', 0x00,
-    '0', 0x00,
-    'd', 0x00,
-    '2', 0x00,
-    '1', 0x00,
-    '}', 0x00,
-    0x00,0x00,
-    0x00,0x00
+    '{', 0x00, 'F', 0x00, '2', 0x00, '0', 0x00, '2', 0x00, 'C', 0x00, '9', 0x00, 'D', 0x00, 'E', 0x00, '-', 0x00,
+    'E', 0x00, '6', 0x00, 'A', 0x00, '6', 0x00, '-', 0x00, '4', 0x00, '4', 0x00, 'D', 0x00, '8', 0x00, '-', 0x00,
+    '8', 0x00, '1', 0x00, '5', 0x00, '9', 0x00, '-', 0x00, '3', 0x00, '0', 0x00, '5', 0x00, '3', 0x00, 'C', 0x00,
+    '3', 0x00, 'B', 0x00, '1', 0x00, '0', 0x00, 'D', 0x00, '2', 0x00, '1', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00
+
+    /* descriptor taken from arduino, might try this as last resort
+    //bPropertyData: “{975F44D9-0D08-43FD-8B3E-127CA8AFFF9D}”.
+    '{', 0x00, '9', 0x00, '7', 0x00, '5', 0x00, 'F', 0x00, '4', 0x00, '4', 0x00, 'D', 0x00, '9', 0x00, '-', 0x00, 
+    '0', 0x00, 'D', 0x00, '0', 0x00, '8', 0x00, '-', 0x00, '4', 0x00, '3', 0x00, 'F', 0x00, 'D', 0x00, '-', 0x00, 
+    '8', 0x00, 'B', 0x00, '3', 0x00, 'E', 0x00, '-', 0x00, '1', 0x00, '2', 0x00, '7', 0x00, 'C', 0x00, 'A', 0x00, 
+    '8', 0x00, 'A', 0x00, 'F', 0x00, 'F', 0x00, 'F', 0x00, '9', 0x00, 'D', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00  
+    */
 };
     
 static const uint16_t usbConfigurationDescriptorFullSize = sizeof(usbConfigurationDescriptorFull);
@@ -350,14 +337,16 @@ void USBVendorSpecificIFInit()
     setUsbDeviceDescriptor(usbDeviceDescriptorFull,usbDeviceDescriptorFullSize);
     setUsbStringDescriptors(stringDescriptors);
     setBOSDescriptor(bosDescriptor,*((uint16_t*)(bosDescriptor+2)));
+    setDeviceQualifierDescriptor(deviceQualifierDescriptor,deviceQualifierDescriptorSize);
     setConfigurationHandler(&usbVendorSpecificIFSetConfiguration);
     setClassSpecificSetupHandler(&usbVendorSpecificIFHandleClassSetupRequest);
     setVendorSpecificSetupHandler(&handleUsbVendorSpecificIFVendorSetupRequest);
     setSetInterfaceHandler(&usbVendorSpecificIFSetInterfaceHandler);
     setSuspendedHandler(&usbVendorSpecificIFSuspendedHandler);
+    setTransferDoneHandler(&UsbVendorSpecificIFTransferDone,0);   
 }
 
-static volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress
+static volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress on ep1 or 0, bit 2-4: current ep in use for sending data (0 to 7)
 static volatile uint8_t  receivedDataBfr[512];
 static volatile uint16_t receivedDataLevel=0;
 static volatile uint16_t receivedDataLevelSnapshot=0;
@@ -462,7 +451,7 @@ uint8_t usbVendorSpecificIFSetConfiguration(uint16_t confNr)
     setTransferDoneHandler(&UsbVendorSpecificIFTransferDone,1);
     // enable reception of data at endpoint 1
     prepareUSBReception(1,USB_VS_DATA_OUT_PACKETSIZE);
-    bmUsbStatus |= 1;
+    bmUsbStatus |= (1 << USB_VS_Configured_Pos);
     
     return 0;
 }
@@ -483,7 +472,7 @@ uint8_t usbVendorSpecificIFHandleClassSetupRequest(const UsbSetupPacketType* pac
 
 uint8_t usbVendorSpecificIFSetInterfaceHandler(uint16_t alternateSetting,uint16_t interfaceIndex)
 {
-    if (alternateSetting==0 && interfaceIndex == 2) // match dfu interface with alternate setting 0
+    if (alternateSetting==0 && interfaceIndex == 0) // match dfu interface with alternate setting 0
     {
         setClassSpecificSetupHandler(usbDfuHandleClassSetupRequest); // switch over to dfu mode (required for dfu-util)
         prepareUSBTransfer(0,0,0);
@@ -505,7 +494,7 @@ uint8_t usbVendorSpecificIFSetInterfaceHandler(uint16_t alternateSetting,uint16_
  * note: blocks if the dlen is larger than the internal buffer size (512)
  */
 __QSPI_CODE
-void usbVendorSpecificSendData(uint8_t * data,uint16_t dlen,uint8_t blocking)
+void usbVendorSpecificSendData(uint8_t epNr,const uint8_t * data,uint16_t dlen,uint8_t blocking)
 {
     uint16_t bytesSent=0;
     chunksSent = 0;
@@ -514,6 +503,8 @@ void usbVendorSpecificSendData(uint8_t * data,uint16_t dlen,uint8_t blocking)
     {
         while((bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) != 0);
     }
+    bmUsbStatus &= ~(7 << USB_VS_Endpoint_Pos);
+    bmUsbStatus |= (epNr << USB_VS_Endpoint_Pos);
     while (bytesSent < dlen)
     {
         for (uint16_t c=0;c<dlen && c < 512;c++)
@@ -521,16 +512,16 @@ void usbVendorSpecificSendData(uint8_t * data,uint16_t dlen,uint8_t blocking)
             *(sendDataBfr + c) = *(data + c);
             bytesSent++;
         }
-        if ((bmUsbStatus & (1 << USB_VS_Configured_Pos)) != 0 && (bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) == 0)
+        if (((bmUsbStatus & (1 << USB_VS_Configured_Pos)) || epNr == 0) != 0 && (bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) == 0)
         {
             if (sendDataSize > 64)
             {
-                prepareUSBTransfer(1,sendDataBfr,64);
+                prepareUSBTransfer(epNr,sendDataBfr,64);
                 sendDataSize -= 64;
             }
             else
             {
-                prepareUSBTransfer(1,sendDataBfr,dlen);
+                prepareUSBTransfer(epNr,sendDataBfr,dlen);
                 sendDataSize = 0;
             }
             bmUsbStatus |= (1 << USB_VS_TransferInProgress_Pos);
@@ -548,24 +539,28 @@ void usbVendorSpecificSendData(uint8_t * data,uint16_t dlen,uint8_t blocking)
 }
 
 
+
+
 __QSPI_CODE
-void UsbVendorSpecificIFTransferDone(void)
+// returns 1 if the transfer is still in progress, 0 if done
+uint8_t UsbVendorSpecificIFTransferDone(void)
 {
     chunksSent += 1;
     if (sendDataSize > 64)
     {
-        prepareUSBTransfer(1,sendDataBfr+(chunksSent << 6),64);   
+        prepareUSBTransfer((bmUsbStatus >> USB_VS_Endpoint_Pos)&0x7,sendDataBfr+(chunksSent << 6),64);   
         sendDataSize -=64;
     }
     else if (sendDataSize > 0)
     {
-        prepareUSBTransfer(1,sendDataBfr+(chunksSent << 6),sendDataSize);
+        prepareUSBTransfer((bmUsbStatus >> USB_VS_Endpoint_Pos)&0x7,sendDataBfr+(chunksSent << 6),sendDataSize);
         sendDataSize = 0;
     }
     else
     {
         bmUsbStatus &= ~(1 << USB_VS_TransferInProgress_Pos);
     }
+    return (bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) >> USB_VS_TransferInProgress_Pos;
 }
 
 __QSPI_CODE
@@ -631,11 +626,11 @@ void handleUsbVendorSpecificIFVendorSetupRequest(const UsbSetupPacketType* packe
         prepareUSBTransfer(0,landingPageDescriptor,(uint16_t)*landingPageDescriptor);
     }
     else if (packet->bRequest == 0x02 // vendor code: MS OS 2.0 Descriptors
-        && packet->wValue == 0x00 
+        //&& packet->wValue == 0x00 
         && packet->wIndex == 0x07 // get MS OS 2.0 Descriptors
     )
     {
-        prepareUSBTransfer(0,msOS20Descriptor,(uint16_t)*((uint16_t*)(msOS20Descriptor+8)));
+        usbVendorSpecificSendData(0,msOS20Descriptor,packet->wLength,0); 
     }
 }
 

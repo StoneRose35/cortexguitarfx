@@ -198,4 +198,5 @@ void setConfigurationHandler(uint8_t(*confHandler)(uint16_t));
 void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*));
 void setSetInterfaceHandler(uint8_t(*handler)(uint16_t,uint16_t));
 void setBOSDescriptor(const uint8_t * descr,uint16_t descrSize);
+void setDeviceQualifierDescriptor(const uint8_t * descr,uint16_t descrSize);
 #endif

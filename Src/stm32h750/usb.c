@@ -26,7 +26,7 @@ void(*usbDriverResetHandler)(void)=0; // if anything special needs to be done on
 void(*usbSuspendedHandler)(void)=0; // called when the usb connection is disconnected
 
 endPointHandler outHandlers[9]={0,0,0,0,0,0,0,0,0};
-void(*transferDoneHandlers[9])(void)={0,0,0,0,0,0,0,0,0};
+uint8_t(*transferDoneHandlers[9])(void)={0,0,0,0,0,0,0,0,0};
 uint8_t * epOutBuffers[9]={0,0,0,0,0,0,0,0,0};
 uint8_t * epInBuffers[9]={0,0,0,0,0,0,0,0,0};
 volatile uint16_t epOutDataCntrs[9]={0,0,0,0,0,0,0,0,0};
@@ -306,16 +306,20 @@ void OTG_FS_IRQHandler(void)
                     
                     if (epNr==0)
                     {
+                        uint8_t transferDoneResult = 0;
+                        if (transferDoneHandlers[0] != 0)
+                        {
+                            transferDoneResult = transferDoneHandlers[0]();
+                        }
                         if (epInDataCntrs[epNr] == epInBytesTransferred[epNr] 
                             && (epInBytesTransferred[epNr] % epInMaxPacketSizes[epNr])==0 
-                            && epInBytesTransferred[epNr] > 0)
+                            && epInBytesTransferred[epNr] > 0
+                            && transferDoneResult == 0
+                        )
                         { // send a zerol length package when total length is a multiple of the maximum package size
                             prepareUSBTransfer(0,0,0);
                         }
-                        else
-                        {
-                            prepareEP0Rception();
-                        }
+                        prepareEP0Rception();
                     }
                     else if (transferDoneHandlers[epNr] != 0)
                     {
@@ -459,13 +463,13 @@ for (uint8_t c = 0; c < 9; c++)
 {
   ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + 0x20*c))->DIEPCTL = 0;
   ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + 0x20*c))->DIEPTSIZ = 0;
-  ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + 0x20*c))->DIEPINT  = 0x2B7F; // according to dataset //0xFB7F;
+  ((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + 0x20*c))->DIEPINT  = 0x2B7F; // according to datasheet //0xFB7F;
 }
 for (uint8_t c=0; c < 9 ; c++)
 {
     ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*c))->DOEPCTL = 0;
     ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*c))->DOEPTSIZ = 0;
-    ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*c))->DOEPINT  = 0x2B7F; // according to dataset //0xFB7F;
+    ((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + 0x20*c))->DOEPINT  = 0x2B7F; // according to datasheet //0xFB7F;
 }
 
 USB2_OTG_FS->GINTMSK = 0; // mask all usb interrupts
@@ -611,7 +615,7 @@ void setEndpointOutHandler(endPointHandler handler,uint8_t epNr)
 }
 
 __RAMFUNC
-void setTransferDoneHandler(void(*handler)(void),uint8_t epNr)
+void setTransferDoneHandler(uint8_t(*handler)(void),uint8_t epNr)
 {
     transferDoneHandlers[epNr] = handler;
 }
