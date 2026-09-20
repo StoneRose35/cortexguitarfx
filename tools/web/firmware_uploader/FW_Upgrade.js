@@ -599,10 +599,10 @@ async function firmwareUpgradeStepPPFX()
                 await firmwareUpgradeState.device.selectConfiguration(0);
             }
             firmwareUpgradeState.stateNr += 1;
-            mainConsole.innerText += "\nClaiming Interface 2";
-            await firmwareUpgradeState.device.claimInterface(2);
+            mainConsole.innerText += "\nClaiming Interface 0";
+            await firmwareUpgradeState.device.claimInterface(0);
             firmwareUpgradeState.stateNr += 1;
-            mainConsole.innerText += "\nSetting Interface 2";
+            mainConsole.innerText += "\nSetting Interface 0";
             
             await firmwareUpgradeState.device.controlTransferOut({requestType: "standard", 
                 recipient: "device",
