@@ -21,6 +21,7 @@
 #include "pipicofx/018_MultimodeFilter.hpp"
 #include "pipicofx/019_XAmp.hpp"
 #include "pipicofx/020_Phaser.hpp"
+#include "pipicofx/021_PitchShifterExp.hpp"
 #include <new>
 namespace PiPicoFX {
     __QSPI_CODE
@@ -88,6 +89,9 @@ namespace PiPicoFX {
                 break;
             case 19:
                 res = new(std::nothrow) PiPicoFX::Phaser::Phaser();
+                break;
+            case 20:
+                res = new(std::nothrow) PiPicoFX::PitchShifterExp::PitchShifterExp();
                 break;
             default:
                 break;
@@ -161,6 +165,9 @@ namespace PiPicoFX {
                 break;
             case 19:
                 res = new(std::nothrow) PiPicoFX::Phaser::Phaser(1);
+                break;
+            case 20:
+                res = new(std::nothrow) PiPicoFX::PitchShifterExp::PitchShifterExp(1);
                 break;
             default:
                 break;

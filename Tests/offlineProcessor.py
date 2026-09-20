@@ -1,4 +1,5 @@
 
+#!/usr/bin/env python
 import tkinter as tk
 from tkinter import ttk, font
 import os
@@ -12,6 +13,7 @@ import wave
 import threading
 import time
 import queue
+import scipy.signal
 
 
 class OfflineProcessorGui:
@@ -25,14 +27,22 @@ class OfflineProcessorGui:
         #bigfont = font.Font(family="helvetica", size=10)
         #self.w.option_add("*Font", bigfont)
         self.w.title("PiPicoFX Offline Processor")
-        self.w.geometry("760x1000")
+        self.w.geometry("760x700")
         self.w["bg"] = "#9bb0d1"
 
-        self.w.grid_columnconfigure(0, weight=1)
-        self.w.grid_columnconfigure(1, weight=1)
-        self.w.grid_columnconfigure(2, weight=1)
+
+        self.canvas = tk.Canvas(self.w,width=740,height=1200)
+        self.canvas.pack(side="left",fill="both",expand=True)
+        scrollbar =tk.Scrollbar(self.w,orient="vertical",command=self.canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.innerFrame = tk.Frame(self.canvas)
+        
+        self.innerFrame.grid_columnconfigure(0, weight=1)
+        self.innerFrame.grid_columnconfigure(1, weight=1)
+        self.innerFrame.grid_columnconfigure(2, weight=1)
         # look for all audio samples and put them in a combobox
-        self.cbSamples = ttk.Combobox(self.w)
+        self.cbSamples = ttk.Combobox(self.innerFrame)
         sample_vals = []
         for el in os.listdir("./audiosamples"):
             if not el.endswith("_proc.wav"):
@@ -43,36 +53,43 @@ class OfflineProcessorGui:
 
         # list all fx programs and put them into a combobox
         fx_programs = call_backed(["-o"])
-        cb_programs = ttk.Combobox(self.w)
+        cb_programs = ttk.Combobox(self.innerFrame)
         cb_programs["values"] = fx_programs["programs"]
         cb_programs.grid(pady=10, padx=10, sticky="ew", columnspan=3)
         cb_programs.bind("<<ComboboxSelected>>", self.fxprogram_changed)
         self.program_values = []
-        self.param_frame = tk.Frame(self.w)
+        self.param_frame = tk.Frame(self.innerFrame)
         self.param_frame.columnconfigure(0, weight=1, minsize=120)
         self.param_frame.columnconfigure(1, weight=3)
         self.param_frame.grid(sticky="ew", columnspan=3)
         self.param_frame["bg"] = "#bacce8"
 
-        self.btnProcessSample = tk.Button(self.w, text="Process & Play", command=self.process_sample)
+        self.btnProcessSample = tk.Button(self.innerFrame, text="Process & Play", command=self.process_sample)
         self.btnProcessSample.grid(column=0, row=3, columnspan=1, sticky="ew", padx=15, pady=15)
 
-        self.btnStopSample = tk.Button(self.w, text="Stop Audio", command=self.stop_audio)
+        self.btnStopSample = tk.Button(self.innerFrame, text="Stop Audio", command=self.stop_audio)
         self.btnStopSample.grid(column=1, row=3, columnspan=1, sticky="ew", padx=15, pady=15)
 
-        self.btnShowWaveform = tk.Button(self.w, text="Waveform Window", command=self.show_waveform)
+        self.btnShowWaveform = tk.Button(self.innerFrame, text="Waveform Window", command=self.show_waveform)
         self.btnShowWaveform.grid(column=2, row=3, columnspan=1, sticky="ew", padx=15, pady=15)
+
+        self.btnShowSpectrogram = tk.Button(self.innerFrame, text="Spectrogram Window", command=self.show_spectrogram)
+        self.btnShowSpectrogram.grid(column=2,row=4, columnspan=1, sticky="ew", padx=15, pady=15)
         self.p = pyaudio.PyAudio()
         self.audioplayer_thread = threading.Thread(target=self.play_wav_file)
         self.audio_playing = False
 
-        self.lblSampleTimeText = tk.StringVar(self.w)
-        self.lblSampleTime = tk.Label(self.w, textvariable=self.lblSampleTimeText)
+        self.lblSampleTimeText = tk.StringVar(self.innerFrame)
+        self.lblSampleTime = tk.Label(self.innerFrame, textvariable=self.lblSampleTimeText)
         self.lblSampleTime.grid(column=0, row=6, padx=15, pady=15, sticky="w")
 
-        self.entCommandLineText = tk.StringVar(self.w)
-        self.entCommandLine = ttk.Entry(self.w, textvariable=self.entCommandLineText)
-        self.entCommandLine.grid(column=0, row=4, padx=15, pady=15, sticky="ew", columnspan=3)
+        self.entCommandLineText = tk.StringVar(self.innerFrame)
+        self.entCommandLine = ttk.Entry(self.innerFrame, textvariable=self.entCommandLineText)
+        self.entCommandLine.grid(column=0, row=5, padx=15, pady=15, sticky="ew", columnspan=3)
+
+        self.innerFrame.pack()
+        self.canvas.create_window((0,0), window=self.innerFrame, anchor="nw")
+        self.innerFrame.bind("<Configure>",lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
         self.the_queue = queue.Queue()
         self.listen_for_playback_update()
@@ -139,18 +156,22 @@ class OfflineProcessorGui:
         self.entCommandLineText.set("{}".format(args).replace("'", "\""))
         call_backed(args)
         wf = wave.open(self.currentSample, "rb")
-        waveform = wf.readframes(-1)
-        waveform = np.frombuffer(waveform, np.int16)
+        #waveform = wf.readframes(-1)
+        #waveform = np.frombuffer(waveform, np.int16)
+        
+        #figure = plt.Figure()
+        #ax = figure.add_subplot(211)
+        #ax.plot(waveform)
+        #ax.set_xticks([])
+        #ax.set_yticks([-32768, 0, 32767])
+        #ax.yaxis.grid(True, which="major")
+        #ax.set_frame_on(False)
 
-        figure = plt.Figure()
-        ax = figure.add_subplot(111)
-        ax.plot(waveform)
-        ax.set_xticks([])
-        ax.set_yticks([-32768, 0, 32767])
-        ax.yaxis.grid(True, which="major")
-        ax.set_frame_on(False)
-        chart_type = FigureCanvasTkAgg(figure, self.w)
-        chart_type.get_tk_widget().grid(sticky="we", columnspan=3, row=5, padx=15, pady=15)
+        #freqs,times,Sxx = scipy.signal.spectrogram(waveform,wf.getframerate(),window="tukey",nperseg=1024,noverlap=32)
+        #ax2=figure.add_subplot(212)
+        #ax2.pcolormesh(times, freqs,Sxx, shading='gouraud')
+        #chart_type = FigureCanvasTkAgg(figure, self.innerFrame)
+        #chart_type.get_tk_widget().grid(sticky="we", columnspan=3, row=5, padx=15, pady=15)
         if os.path.exists(self.currentSample):
             if self.audioplayer_thread.is_alive():
                 self.audio_playing = False
@@ -202,6 +223,24 @@ class OfflineProcessorGui:
         plt.show()
         wf.close()
 
+    def show_spectrogram(self):
+        if self.currentSample is None:
+            return 
+        wf = wave.open(self.currentSample, "rb")
+        waveform = wf.readframes(-1)
+        waveform = np.frombuffer(waveform, np.int16)
+        freqs,times,Sxx = scipy.signal.spectrogram(waveform,wf.getframerate(),window="blackman",nperseg=1024,noverlap=8)
+        for c in range(len(Sxx[1,:])):
+            mx = np.max(Sxx[:,c])
+            if mx > 0.000001:
+                Sxx[:,c] = Sxx[:,c]/mx
+        #for c in range(len(Sxx[:,1])):
+        #    mx = np.max(Sxx[c,:])
+        #    if mx > 0.000001:
+        #        Sxx[c,:] = Sxx[c,:] / mx
+        plt.pcolormesh(times, freqs,Sxx, shading='gouraud')
+        plt.show()
+        wf.close()
 
 def call_backed(arguments):
     cmd = ["./processThroughFxProgram"]
