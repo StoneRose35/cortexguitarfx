@@ -42,7 +42,7 @@ float Phaser::Phaser::processSample(float sampleIn)
         aps[c].alpha = newalpha;
     }
     newIn = newIn + mix*(proc - newIn); 
-
+    newIn = gainStageProcessSample(newIn,&this->presetVolume);
     if (!this->isOn())
     {
         return (sampleIn + newIn);
