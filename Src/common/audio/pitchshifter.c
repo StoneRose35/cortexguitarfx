@@ -4,63 +4,72 @@
 #include "audio/audiotools.h"
 #include "memoryRegions.h"
 #include "pipicofx/delayMemoryHandler.h"
-
+#include "stdlib.h"
 #ifdef PS3_DBG_PRINT
 #include "stdio.h"
+FILE * fid;
 #endif
 
 __ITCM_CODE
-float pitchShifterProcessSample(float sampleIn,PitchshifterDataType*data)
+float pitchShifterProcessSample(float sampleIn,GrainsDataType*data)
 {
-    float sampleOut=0;
-    int16_t deltaIndex;
-    float envelopeVal;
-    deltaIndex = (data->currentDelayPosition - (data->delayLength1>>2)) &(data->buffersize-1);
-    if (data->delayLength1 <(data->buffersize<<1))
+    float sampleOut=0.0f;
+    for (uint8_t c=0;c<data->readPointerCount;c++)
     {
-        envelopeVal = (float)data->delayLength1/(float)((data->buffersize<<1)-1);
+        sampleOut += (data->delayBufferPtr[data->readPointers[c] >> 2] + 
+            ((data->delayBufferPtr[((data->readPointers[c] >> 2) + 1) & (data->bufferSize - 1)] - data->delayBufferPtr[data->readPointers[c] >> 2])
+            *((float)(data->readPointers[c] & (4-1))))/(4.0f))*grainEnvelopeValue(data,c)/((float)data->readPointerCount); 
     }
-    else
-    {
-        envelopeVal = ((data->buffersize<<2) - data->delayLength1)/(float)((data->buffersize<<1)-1);
-    }
-    sampleOut += (*(data->delayBufferPtr + deltaIndex)*envelopeVal);
-
-    deltaIndex = (data->currentDelayPosition - (data->delayLength2>>2))&(data->buffersize-1);
-    if (data->delayLength2 <(data->buffersize<<1))
-    {
-        envelopeVal = data->delayLength2/(float)((data->buffersize<<1)-1);
-    }
-    else
-    {
-        envelopeVal = ((data->buffersize<<2) - data->delayLength2)/(float)((data->buffersize<<1)-1);
-    }
-    sampleOut += (*(data->delayBufferPtr + deltaIndex)*envelopeVal);
-    data->currentDelayPosition++;
-    data->currentDelayPosition &= (data->buffersize-1);
-    data->delayLength1 += data->delayIncrement;
-    if ((data->delayLength1>>2) < 0)
-    {
-        data->delayLength1 = ((data->buffersize<<2) - 1);
-    }
-    else if ((data->delayLength1>>2) > (data->buffersize - 1))
-    {
-        data->delayLength1 = 0;
-    }
-
-    data->delayLength2 += data->delayIncrement;
-    if ((data->delayLength2>>2) < 0)
-    {
-        data->delayLength2 = ((data->buffersize<<2) - 1);
-    }
-    else if ((data->delayLength2>>2) > (data->buffersize - 1))
-    {
-        data->delayLength2 = 0;
-    }
-
-    *(data->delayBufferPtr + data->currentDelayPosition) = sampleIn;
+    *(data->delayBufferPtr + data->writePointer) = sampleIn;
+    updatePointers(data);
     return sampleOut;
 }
+
+__ITCM_CODE
+uint16_t distanceFromGrainEdge(GrainsDataType*data,uint8_t readPointerNr)
+{
+    return (data->writePointer - (data->readPointers[readPointerNr] >> 2)) & (data->bufferSize - 1);
+}
+
+__ITCM_CODE
+float grainEnvelopeValue(GrainsDataType*data,uint8_t readPointerNr)
+{
+    uint16_t currentDistance = distanceFromGrainEdge(data,readPointerNr);
+    float relDistance = ((float)currentDistance)/((float)data->grainSize);
+    if (relDistance < 0.5f)
+    {
+        return 2.0f*relDistance;
+    }
+    else
+    {
+        return 2.0f - 2.0f*relDistance;
+    }
+}
+
+__ITCM_CODE
+void updatePointers(GrainsDataType* data)
+{
+    uint16_t distanceOld;
+    data->writePointer++;
+    data->writePointer &= (data->bufferSize-1);
+    for (uint8_t c=0;c<data->readPointerCount;c++)
+    {
+        distanceOld = distanceFromGrainEdge(data,c);
+        data->readPointers[c] += data->pointerIncrement;
+        data->readPointers[c] &= ((data->bufferSize << 2)-1);
+        if (data->pointerIncrement < 4 && distanceFromGrainEdge(data,c) > data->grainSize)
+        {
+            data->readPointers[c] += (data->grainSize << 2);
+            data->readPointers[c] &= ((data->bufferSize<<2)-1);
+        }
+        else if (data -> pointerIncrement > 4 && distanceFromGrainEdge(data,c) > data->grainSize)
+        {
+            data->readPointers[c] -= (data->grainSize << 2);
+            data->readPointers[c] &= ((data->bufferSize<<2)-1);
+        }
+    }
+}
+
 
 __ITCM_CODE
 float pitchShifter2ProcessSample(float sampleIn,Pitchshifter2DataType * data)
@@ -173,17 +182,23 @@ float pitchShifter2ProcessSample(float sampleIn,Pitchshifter2DataType * data)
 }
 
 __QSPI_CODE
-void initPitchshifter(PitchshifterDataType*data)
+void initPitchshifter(GrainsDataType*data)
 {
-    data->buffersize = 1 << data->buffersizePowerTwo;
-    data->delayBufferPtr = mallocDelayMemory(data->buffersize<<2);
-    for (uint16_t c=0;c<data->buffersize;c++)
+    data->bufferSize=8192;
+    //data->readPointerCount = 3;
+    //data->grainSize = 192;
+    data->writePointer = 0;
+    data->delayBufferPtr = mallocDelayMemory(data->bufferSize<<2);
+    data->readPointers = malloc(data->readPointerCount*sizeof(uint16_t));
+    for (uint8_t c=0;c<data->readPointerCount;c++)
+    {
+        data->readPointers[c] = (-((c*(data->grainSize/data->readPointerCount)) << 2)) & ((data->bufferSize << 2)-1);
+    }
+    for (uint16_t c=0;c<data->bufferSize;c++)
     {
         *(data->delayBufferPtr + c) = 0.0f;
     }
 
-    data->delayLength1 = 0; 
-    data->delayLength2 = (data->buffersize<<2)/2;
 }
 
 __QSPI_CODE
@@ -200,9 +215,10 @@ void initPitchshifter2(Pitchshifter2DataType*data)
 }
 
 __QSPI_CODE
-void deinitPitchshifter(PitchshifterDataType*data)
+void deinitPitchshifter(GrainsDataType*data)
 {
     freeDelayMemory(data->delayBufferPtr);
+    free(data->readPointers);
 }
 
 __QSPI_CODE
@@ -212,15 +228,12 @@ void deinitPitchshifter2(Pitchshifter2DataType*data)
 }
 
 __ITCM_CODE
-float ps3SummedDifferenceAbs(float * data,uint32_t idxa, uint32_t idxb)
+float ps3SummedDifferenceAbs(float * data,uint32_t idxa, uint32_t idxb,uint16_t windowSize)
 {
 	float res=0.0f;
     float diff;
-	for (uint16_t c = 0;c<PS3_ANALYSIS_WINDOW_SIZE;c++)
+	for (uint16_t c = 0;c<windowSize;c++)
 	{
-        #ifdef PS3_DBG_PRINT
-        //printf("val a: %f, val b: %f, summed diff: %f\r\n",*(data+idxa),*(data+idxb),res);
-        #endif
         diff = *(data+idxa) - *(data+idxb);
         if (diff > 0.0f)
         {
@@ -291,8 +304,7 @@ float pitchShifter3ProcessSample(float newSample,Pitchshifter3DataType*cb)
     uint32_t currentDistance;
     uint32_t zeroCrossingDataIndex;
     float res;
-    //uint8_t exception=0; 
-    float newSampleLowpassed;
+    float newSampleLowpassed=newSample;
 	float currentSample = cb->delayMemoryPtr[(cb->writePointer-1) & (PS3_MAX_BUFFER_SIZE-1)];
 	if ((currentSample > 0.0f && newSampleLowpassed < 0.0f) || (currentSample < 0.0f && newSampleLowpassed > 0.0f))
 	{
@@ -306,29 +318,22 @@ float pitchShifter3ProcessSample(float newSample,Pitchshifter3DataType*cb)
     cb->delayMemoryPtr[cb->writePointer] = newSample;
 
 	currentDistance = ps3DistanceFromWritePointer(cb);
+    // SHIFT DOWN
 	if (cb->pointerIncrement < (1 << PS3_READ_POINTER_FRACT) && currentDistance > PS3_DISTANCE_THRESHOLD && zeroCrossed) // read pointer moving slower and away from the write pointer, zero cross on read anticipated
 	{
         zcp = cb->zeroCrossingPtr;
 		// check the newest zero crossings written into the buffer for the best candidate according to the summed difference and move the pointer to the best value
         candidatesFound = 0;
-        #ifdef PS3_DBG_PRINT
-        printf("----------------check pointer jump ----------------\r\n");
-        #endif
+
 		while (jumpCheckDone == 0)
 		{
 			zeroCrossingDataIndex = cb->zeroCrossings[zcp];
             distance =  ((zeroCrossingDataIndex - (cb->readPointer >> PS3_READ_POINTER_FRACT)) & (PS3_MAX_BUFFER_SIZE - 1)) ;
-			if (oldDistance > distance && cb->zeroCrossings[zcp] != 0xFFFFFFFF && candidatesFound < (PS3_MIN_ZC_CANDIDATES + 4) && distance > PS3_ANALYSIS_WINDOW_SIZE)
+			if (oldDistance > distance && cb->zeroCrossings[zcp] != 0xFFFFFFFF && candidatesFound < (PS3_MIN_ZC_CANDIDATES + 1) && distance > PS3_ANALYSIS_WINDOW_SIZE_DOWNSHIFT)
 			{
-                #ifdef PS3_DBG_PRINT
-                printf("computing summed differences for zero crossing at %u\r\n",zeroCrossingDataIndex);
-                #endif
-				summedDifferences[candidatesFound++] = ps3SummedDifferenceAbs(cb->delayMemoryPtr,zeroCrossingDataIndex,cb->readPointer>>PS3_READ_POINTER_FRACT);
+				summedDifferences[candidatesFound++] = ps3SummedDifferenceAbs(cb->delayMemoryPtr,zeroCrossingDataIndex,cb->readPointer>>PS3_READ_POINTER_FRACT,PS3_ANALYSIS_WINDOW_SIZE_DOWNSHIFT);
 				zcp--;
 				zcp &= (PS3_ZERO_CROSSINGS_SIZE -1);
-                #ifdef PS3_DBG_PRINT
-                printf("summed difference value %f\r\n",summedDifferences[candidatesFound-1]);
-                #endif
                 oldDistance = distance;
 			}
 			else
@@ -342,7 +347,7 @@ float pitchShifter3ProcessSample(float newSample,Pitchshifter3DataType*cb)
 			currentMin = 99999999.9f;
 			
             cb->zeroCrossingsAddedSinceLastJump = 0;
-			for (uint8_t c=0;c < candidatesFound;c++)
+			for (uint16_t c=0;c < candidatesFound;c++)
 			{
 				if (summedDifferences[c] < currentMin)
 				{
@@ -351,13 +356,14 @@ float pitchShifter3ProcessSample(float newSample,Pitchshifter3DataType*cb)
 				}
 			}
             #ifdef PS3_DBG_PRINT
-			printf("pointer jump from %d to %d at sample # %d\r\n",cb->readPointer,minIdx << PS3_READ_POINTER_FRACT,cb->sampleCnt);
+            fprintf(fid,"%u, %u, %u, %u\r\n",cb->sampleCnt,cb->readPointer>>PS3_READ_POINTER_FRACT,minIdx,(minIdx-(cb->readPointer>>PS3_READ_POINTER_FRACT)) & (PS3_MAX_BUFFER_SIZE - 1) );
             #endif
 			cb->readPointer = (minIdx << PS3_READ_POINTER_FRACT); 
 		}
 
 	}
-	else if (zeroCrossed) // read pointer moving faster and getting out of sight of the write pointer, zero crossing on read anticipated
+    // SHIFT UP
+	else if ((cb->pointerIncrement > (1 << PS3_READ_POINTER_FRACT)) && zeroCrossed) // read pointer moving faster and getting out of sight of the write pointer, zero crossing on read anticipated
 	{        
         candidatesFound = 0;
         // count zero crossing ahead of the read counter
@@ -374,12 +380,12 @@ float pitchShifter3ProcessSample(float newSample,Pitchshifter3DataType*cb)
             distance =  ((zeroCrossingDataIndex - (cb->readPointer >> PS3_READ_POINTER_FRACT)) & (PS3_MAX_BUFFER_SIZE - 1)) ;
         }
 
-        if (candidatesFound < 3)
+        if (candidatesFound < PS3_ZERO_CROSSINGS_AHEAD)
         {
             candidatesFound = 0;
             uint32_t zcp_beyond_readptr = zcp;
             // only a few possibilities left to jump backwards, search the best option for the next zeros crossing past the read pointer
-            while (candidatesFound < 4 && zeroCrossingDataIndex != 0xFFFFFFFF)
+            while (candidatesFound < PS3_ZERO_CROSSINGS_AHEAD+1 && zeroCrossingDataIndex != 0xFFFFFFFF)
             {
                 distance =  (((cb->readPointer >> PS3_READ_POINTER_FRACT) - zeroCrossingDataIndex) & (PS3_MAX_BUFFER_SIZE - 1)) ;
                 if (distance > PS3_DISTANCE_THRESHOLD)
@@ -388,7 +394,7 @@ float pitchShifter3ProcessSample(float newSample,Pitchshifter3DataType*cb)
                     {
                         zcp_beyond_readptr = zcp;
                     }
-                    summedDifferences[candidatesFound++] = ps3SummedDifferenceAbs(cb->delayMemoryPtr,zeroCrossingDataIndex,cb->readPointer>>PS3_READ_POINTER_FRACT);
+                    summedDifferences[candidatesFound++] = ps3SummedDifferenceAbs(cb->delayMemoryPtr,zeroCrossingDataIndex,cb->readPointer>>PS3_READ_POINTER_FRACT,PS3_ANALYSIS_WINDOW_SIZE_UPSHIFT);
                 }
                 zcp--;
                 zcp &= (PS3_ZERO_CROSSINGS_SIZE -1);
@@ -405,7 +411,9 @@ float pitchShifter3ProcessSample(float newSample,Pitchshifter3DataType*cb)
 					currentMin = summedDifferences[c];
 				}
 			}
-
+            #ifdef PS3_DBG_PRINT
+            fprintf(fid,"%u, %u, %u, %u\r\n",cb->sampleCnt,cb->readPointer>>PS3_READ_POINTER_FRACT,minIdx,((cb->readPointer>>PS3_READ_POINTER_FRACT)-minIdx) & (PS3_MAX_BUFFER_SIZE - 1) );
+            #endif
             cb->readPointer = minIdx << PS3_READ_POINTER_FRACT;
         }
     }
@@ -439,5 +447,17 @@ void iniPitchShifter3(Pitchshifter3DataType*data)
 	{
 		data->zeroCrossings[c]=0xFFFFFFFF;
 	}
+    #ifdef PS3_DBG_PRINT
+    fid =fopen("ps3.csv","wt");
+    fprintf(fid,"'sampleCnt','jump from', 'jump to', 'distance'\r\n");
+    #endif
 }
 
+__QSPI_CODE
+void deinitPitchShifter3(Pitchshifter3DataType*data)
+{
+    (void*)data;
+    #ifdef PS3_DBG_PRINT
+    fclose(fid);
+    #endif
+}

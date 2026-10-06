@@ -19,7 +19,7 @@ float PitchShifter::PitchShifter::processSample(float sampleIn)
     {
         newIn = sampleIn;
     }
-    float processedSample = pitchShifter2ProcessSample(newIn,&this->pitchShifter);
+    float processedSample = pitchShifterProcessSample(newIn,&this->pitchShifter);
     float sampleOut= (newIn*(1.0f - this->mix)) + (processedSample*this->mix);
     sampleOut = gainStageProcessSample(sampleOut,&this->presetVolume);
     if (!this->isOn())
@@ -31,14 +31,14 @@ float PitchShifter::PitchShifter::processSample(float sampleIn)
 
 void PitchShifter::Param1::parameterCallback(uint16_t val) // low
 {
-    pData->pitchShifter.delayIncrement = (val >> 9) + 1;
+    pData->pitchShifter.pointerIncrement = (val >> 9) + 1;
     rawValue = val;
 }
 
 void PitchShifter::Param1::parameterDisplay(char*res)
 {
     *res=0;
-    switch (this->pData->pitchShifter.delayIncrement)
+    switch (this->pData->pitchShifter.pointerIncrement)
     {
     case 1:
         appendToString(res,"2OctDown");
@@ -84,32 +84,43 @@ void PitchShifter::Param2::parameterDisplay(char*res)
 
 void PitchShifter::Param3::parameterCallback(uint16_t val) // BufferSize
 {
-    uint16_t newVal = (val >> 10)+9;
-    if (newVal != pData->pitchShifter.buffersizePowerTwo)
+    uint16_t newVal = 2880 + val;
+    this->pData->pitchShifter.grainSize = newVal;
+    for (uint8_t c=0;c<this->pData->pitchShifter.readPointerCount;c++)
     {
-        this->pData->pitchShifter.buffersizePowerTwo=newVal;
-        this->pData->pitchShifter.crossFadeWidthPwr2 = newVal-2;
-        pData->pitchShifter.buffersizePowerTwo=newVal;
-        freeDelayMemory(pData->pitchShifter.delayMemoryPtr);
-        initPitchshifter2(&pData->pitchShifter);
+        this->pData->pitchShifter.readPointers[c] = (-((c*(this->pData->pitchShifter.grainSize/this->pData->pitchShifter.readPointerCount)) << 2))  & ((this->pData->pitchShifter.bufferSize << 2)-1);;
     }
     rawValue = val;
 }
 
 void PitchShifter::Param3::parameterDisplay(char*res)
 {
-    int16_t avgDelayMs=((pData->pitchShifter.buffersize >> 1) / (AUDIO_SAMPLING_RATE/1000));
+    int16_t avgDelayMs=((pData->pitchShifter.grainSize) / (AUDIO_SAMPLING_RATE/1000));
     Int16ToChar(avgDelayMs,res);
     appendToString(res, "ms");
 }
 
 void PitchShifter::Param4::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    pData->pitchShifter.readPointerCount = (val >> 10) + 1;
+    deinitPitchshifter(&pData->pitchShifter);
+    initPitchshifter(&pData->pitchShifter);
     rawValue = val;
 }
 
 void PitchShifter::Param4::parameterDisplay(char*res)
+{
+    *res  = pData->pitchShifter.readPointerCount + 0x30;
+    *(res+1) = 0;
+}
+
+void PitchShifter::Param5::parameterCallback(uint16_t val)
+{
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
+}
+
+void PitchShifter::Param5::parameterDisplay(char*res)
 {
     uint16_t dVal;
     dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);
@@ -121,16 +132,17 @@ void PitchShifter::PitchShifter::setup(uint8_t allocateMemory)
 {
     if (allocateMemory)
     {
-        initPitchshifter2(&this->pitchShifter);
+        initPitchshifter(&this->pitchShifter);
     }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
+    this->addParameter(new Param5(this));
     FxProgram::setup(allocateMemory);
 }
 
 PitchShifter::PitchShifter::~PitchShifter()
 {
-    freeDelayMemory(this->pitchShifter.delayMemoryPtr);
+    deinitPitchshifter(&this->pitchShifter);
 }

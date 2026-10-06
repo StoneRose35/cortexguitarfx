@@ -14,10 +14,10 @@ namespace PiPicoFX {
         class PitchShifter : public FxProgram
         {
             public:
-                PitchShifter() : FxProgram(4,"Pitchshifter",8192<<3,13){
+                PitchShifter() : FxProgram(5,"Pitchshifter",8192<<2,13){
                     this->setup(1);
                 };
-                PitchShifter(uint8_t discarded) : FxProgram(4,"Pitchshifter",8192<<3,13){
+                PitchShifter(uint8_t discarded) : FxProgram(4,"Pitchshifter",8192<<2,13){
                     (void)discarded;
                     this->setup(0);
                 };
@@ -27,16 +27,8 @@ namespace PiPicoFX {
                     .gain=1.0f,
                     .offset=0.0f
                 };
-                Pitchshifter2DataType  pitchShifter={
-                    .delayMemoryPtr=0,
-                    .delayPointer1=0,
-                    .delayPointer2=0,
-                    .currentDelayPosition=0,
-                    .delayIncrement=0x4,
-                    .buffersizePowerTwo=13,
-                    .buffersize=0,
-                    .crossFadeWidth=0,
-                    .crossFadeWidthPwr2=11,
+                GrainsDataType pitchShifter={
+
                 };
                 float mix;
 
@@ -78,7 +70,7 @@ namespace PiPicoFX {
                 Param3(PitchShifter* p) :FxProgramParameter(2,"AvgDelay")
                 {
                     rawValue = 0;
-                    increment = 512;
+                    increment = 1;
                     pData=p;
                 };
                 void parameterCallback(uint16_t val);
@@ -86,10 +78,24 @@ namespace PiPicoFX {
             private:
                 PitchShifter * pData;
         };
-        class Param4:  public FxProgramParameter
+        class Param4: public FxProgramParameter
         {
             public:
-                Param4(PitchShifter* p) :FxProgramParameter(255,"Volume")
+                Param4(PitchShifter* p) :FxProgramParameter(255,"Interp")
+                {
+                    rawValue = 0;
+                    increment = 1024;
+                    pData=p;
+                };
+                void parameterCallback(uint16_t val);
+                void parameterDisplay(char* chrbfr);
+            private:
+                PitchShifter * pData;
+        };
+        class Param5:  public FxProgramParameter
+        {
+            public:
+                Param5(PitchShifter* p) :FxProgramParameter(255,"Volume")
                 {
                     rawValue = 1023;
                     increment = 1;

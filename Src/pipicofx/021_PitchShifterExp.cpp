@@ -111,4 +111,5 @@ void PitchShifterExp::PitchShifterExp::setup(uint8_t allocateMemory)
 PitchShifterExp::PitchShifterExp::~PitchShifterExp()
 {
     freeDelayMemory(this->pitchShifter3.delayMemoryPtr);
+    deinitPitchShifter3(&this->pitchShifter3);
 }
