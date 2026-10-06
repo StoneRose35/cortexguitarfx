@@ -44,6 +44,7 @@
             "args": [
                 "-I./Inc",
                 "-I./Tests/inc",
+                "-DPS3_DBG_PRINT",
                 "-fdiagnostics-color=always",
                 "-g",
                 "./Src/pipicofx/FxProgram.cpp",
@@ -208,6 +209,7 @@
             "args": [
                 "-I./../Inc",
                 "-fdiagnostics-color=always",
+                "-DPS3_DBG_PRINT",
                 "-g",
                 "-c",
                 "./../Src/common/audio/*.c",

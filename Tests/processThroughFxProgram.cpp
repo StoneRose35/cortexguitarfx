@@ -161,6 +161,7 @@ uint32_t byteCnt=0;
             wavFileOut.data[byteCnt++]=(int16_t)(dataOut*32767.0);
         }
     }
+    delete currentProgram;
     writeWavFile(&wavFileOut);
     fclose(wavFileIn.filePointer);
     fclose(wavFileOut.filePointer);
