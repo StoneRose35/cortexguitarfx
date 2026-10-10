@@ -1,6 +1,7 @@
 
 #include "pipicofx/015_ShimmerVerb.hpp"
 extern "C" {
+#include "drivers/adc.h"
 #include "stringFunctions.h"
 #include "pipicofx/delayMemoryHandler.h"
 #include "audio/gainstage.h"
@@ -13,7 +14,7 @@ __ITCM_CODE
 float unicornGlitter(float sampleIn,void*data)
 {
     UnicornGlitterDataType* pData=(UnicornGlitterDataType*)data;
-    sampleIn = pitchShifter2ProcessSample(sampleIn,&pData->pitchShifter);
+    sampleIn = pitchShifterProcessSample(sampleIn,&pData->pitchShifter);
     return firstOrderIirLowpassProcessSample(sampleIn,&pData->glitterTamer);
 }
 }
@@ -51,7 +52,7 @@ void ShimmerVerb::ShimmerVerb::setup(uint8_t allocateMemory)
     if (allocateMemory)
     {
         float * delayMemoryPointer = mallocDelayMemory(11008<<2); 
-        initPitchshifter2(&this->unicornGlitterData.pitchShifter);
+        initPitchshifter(&this->unicornGlitterData.pitchShifter);
 
         initDelay(this->delays,delayMemoryPointer,256);
         this->delays[0].delayInSamples = 149;
@@ -94,25 +95,26 @@ void ShimmerVerb::ShimmerVerb::setup(uint8_t allocateMemory)
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
+    this->addParameter(new Param5(this));
     FxProgram::setup(allocateMemory);
 }
 
 ShimmerVerb::ShimmerVerb::~ShimmerVerb()
 {
-    freeDelayMemory(this->unicornGlitterData.pitchShifter.delayMemoryPtr);
+    deinitPitchshifter(&unicornGlitterData.pitchShifter);
     freeDelayMemory(this->delays->delayLine);
 }
 
 void ShimmerVerb::Param1::parameterCallback(uint16_t val)
 {
-    this->pData->unicornGlitterData.pitchShifter.delayIncrement = (val >> 9) + 1;
+    this->pData->unicornGlitterData.pitchShifter.pointerIncrement = (val >> 9) + 1;
     this->rawValue = val; 
 }
 
 void ShimmerVerb::Param1::parameterDisplay(char*res)
 {
     *res=0;
-    switch (pData->unicornGlitterData.pitchShifter.delayIncrement)
+    switch (pData->unicornGlitterData.pitchShifter.pointerIncrement)
     {
         case 1:
         appendToString(res,"2OctDown");
@@ -183,13 +185,32 @@ void ShimmerVerb::Param3::parameterDisplay(char*res)
     Int16ToChar(mixpercent,res);
     appendToString(res,"%");
 }
+
 void ShimmerVerb::Param4::parameterCallback(uint16_t val)
+{
+    uint16_t newVal = 196 + (uint16_t)(((float)val)*1.5f);
+    this->pData->unicornGlitterData.pitchShifter.grainSize = newVal;
+    for (uint8_t c=0;c<this->pData->unicornGlitterData.pitchShifter.readPointerCount;c++)
+    {
+        this->pData->unicornGlitterData.pitchShifter.readPointers[c] = (-((c*(this->pData->unicornGlitterData.pitchShifter.grainSize/this->pData->unicornGlitterData.pitchShifter.readPointerCount)) << 2))  & ((this->pData->unicornGlitterData.pitchShifter.bufferSize << 2)-1);;
+    }
+    rawValue = val;
+}
+
+void ShimmerVerb::Param4::parameterDisplay(char*res)
+{
+    int16_t avgDelayMs=((pData->unicornGlitterData.pitchShifter.grainSize) / (AUDIO_SAMPLING_RATE/1000));
+    Int16ToChar(avgDelayMs,res);
+    appendToString(res, "ms");
+}
+
+void ShimmerVerb::Param5::parameterCallback(uint16_t val)
 {
     pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
     rawValue = val;
 }
 
-void ShimmerVerb::Param4::parameterDisplay(char*res)
+void ShimmerVerb::Param5::parameterDisplay(char*res)
 {
     uint16_t dVal;
     dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);

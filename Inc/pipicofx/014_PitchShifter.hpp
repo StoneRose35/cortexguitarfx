@@ -14,7 +14,7 @@ namespace PiPicoFX {
         class PitchShifter : public FxProgram
         {
             public:
-                PitchShifter() : FxProgram(5,"Pitchshifter",8192<<2,13){
+                PitchShifter() : FxProgram(6,"Pitchshifter",8192<<2,13){
                     this->setup(1);
                 };
                 PitchShifter(uint8_t discarded) : FxProgram(4,"Pitchshifter",8192<<2,13){
@@ -92,10 +92,24 @@ namespace PiPicoFX {
             private:
                 PitchShifter * pData;
         };
-        class Param5:  public FxProgramParameter
+        class Param5: public FxProgramParameter
         {
             public:
-                Param5(PitchShifter* p) :FxProgramParameter(255,"Volume")
+                Param5(PitchShifter* p) :FxProgramParameter(255,"EnvStp")
+                {
+                    rawValue = 0;
+                    increment = 1024;
+                    pData=p;
+                };
+                void parameterCallback(uint16_t val);
+                void parameterDisplay(char* chrbfr);
+            private:
+                PitchShifter * pData;
+        };
+        class Param6:  public FxProgramParameter
+        {
+            public:
+                Param6(PitchShifter* p) :FxProgramParameter(255,"Volume")
                 {
                     rawValue = 1023;
                     increment = 1;

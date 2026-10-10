@@ -14,15 +14,6 @@
 #define PS3_ZERO_CROSSINGS_AHEAD 4 // the number of zero crossing ahead that must existing before backtracking the pointer when shifting up
 #define ZERO_PUSH_MIN_DIST 2 // the minimum distance in samples between two zero crossings
 
-typedef struct 
-{
-    float * delayBufferPtr;
-    int16_t delayLength1, delayLength2;
-    uint16_t currentDelayPosition;
-    int16_t delayIncrement; // fixed point decimal 1=1/4, decimal point after bis position 1, position 0 being lsb
-    uint16_t buffersizePowerTwo;
-    uint16_t buffersize;
-} PitchshifterDataType;
 
 typedef struct 
 {
@@ -31,6 +22,7 @@ typedef struct
     uint8_t readPointerCount; // number of readpointers
     uint16_t writePointer;
     uint16_t * readPointers;
+    float envelopeSteepness; // defines the stepness of the envelop slopes, triangle when 2.0, range ist from 2.0 up to infinity theoretically
     uint16_t bufferSize; // the total size of the delay buffers
     uint16_t grainSize; // in samples, musn't be larger that bufferSize
 } GrainsDataType;
@@ -72,7 +64,7 @@ void initPitchshifter2(Pitchshifter2DataType*data);
 void deinitPitchshifter2(Pitchshifter2DataType*data);
 
 
-void iniPitchShifter3(Pitchshifter3DataType*data);
+void initPitchShifter3(Pitchshifter3DataType*data);
 void deinitPitchShifter3(Pitchshifter3DataType*data);
 float ps3SummedDifferenceAbs(float * data,uint32_t idxa, uint32_t idxb,uint16_t windowSize);
 uint32_t ps3DistanceFromWritePointer(Pitchshifter3DataType * cb);

@@ -28,7 +28,24 @@ namespace PiPicoFX {
                     .alpha = 0.98f
                 };
                 float mix;
-                Pitchshifter3DataType pitchShifter3;
+                Pitchshifter3DataType pitchShifter3={
+                    .readPointer = 0,
+                    .writePointer = 0,
+                    .delayMemoryPtr = 0,
+                    .pointerIncrement = 4,
+                    .lpFilter = {
+                        .oldVal = 0.0f,
+                        .oldXVal = 0.0f,
+                        .alpha = 0.0f
+                    },
+                    .zeroCrossings = {
+
+                    },
+                    .zeroCrossingPtr = 0,
+                    .zeroCrossingsAddedSinceLastJump = 0,
+                    .sampleCnt = 0
+
+                };
                 float processSample(float);
                 GainStageDataType presetVolume={
                     .gain=1.0f,

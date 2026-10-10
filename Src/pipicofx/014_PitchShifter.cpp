@@ -116,17 +116,31 @@ void PitchShifter::Param4::parameterDisplay(char*res)
 
 void PitchShifter::Param5::parameterCallback(uint16_t val)
 {
-    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    pData->pitchShifter.envelopeSteepness = 2.0f + ((float)(val >> 4));
     rawValue = val;
 }
 
 void PitchShifter::Param5::parameterDisplay(char*res)
+{
+    uint16_t dval = (uint16_t)(pData->pitchShifter.envelopeSteepness*10.0f);
+    decimalUInt16ToChar(dval,res,1);
+}
+
+void PitchShifter::Param6::parameterCallback(uint16_t val)
+{
+    pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
+    rawValue = val;
+}
+
+void PitchShifter::Param6::parameterDisplay(char*res)
 {
     uint16_t dVal;
     dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);
     decimalUInt16ToChar(dVal,res,2);
     appendToString(res,"%");
 }
+
+
 
 void PitchShifter::PitchShifter::setup(uint8_t allocateMemory)
 {
@@ -139,6 +153,7 @@ void PitchShifter::PitchShifter::setup(uint8_t allocateMemory)
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
     this->addParameter(new Param5(this));
+    this->addParameter(new Param6(this));
     FxProgram::setup(allocateMemory);
 }
 

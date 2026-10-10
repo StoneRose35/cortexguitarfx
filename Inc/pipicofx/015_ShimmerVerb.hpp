@@ -13,7 +13,7 @@ extern "C" {
 
 typedef struct 
 {
-    Pitchshifter2DataType pitchShifter;
+    GrainsDataType pitchShifter;
     FirstOrderIirType glitterTamer;
 } UnicornGlitterDataType;
 
@@ -25,10 +25,10 @@ namespace PiPicoFX {
         class ShimmerVerb : public FxProgram
         {
             public:
-                ShimmerVerb() : FxProgram(4,"ShimmerVerb",15104<<2,14){
+                ShimmerVerb() : FxProgram(5,"ShimmerVerb",15104<<2,14){
                     this->setup(1);
                 };
-                ShimmerVerb(uint8_t discarded) : FxProgram(4,"ShimmerVerb",15104<<2,14){
+                ShimmerVerb(uint8_t discarded) : FxProgram(5,"ShimmerVerb",15104<<2,14){
                     (void)discarded;
                     this->setup(0);
                 };
@@ -36,15 +36,14 @@ namespace PiPicoFX {
                 float processSample(float);
                 UnicornGlitterDataType unicornGlitterData = {
                     .pitchShifter={
-                        .delayMemoryPtr=0,
-                        .delayPointer1=0,
-                        .delayPointer2=0,
-                        .currentDelayPosition = 0,
-                        .delayIncrement = 8,
-                        .buffersizePowerTwo = 12,
-                        .buffersize=0,
-                        .crossFadeWidth=0,
-                        .crossFadeWidthPwr2 = 10
+                        .delayBufferPtr = 0,
+                        .pointerIncrement = 8,
+                        .readPointerCount = 2,
+                        .writePointer = 0,
+                        .readPointers = 0,
+                        .envelopeSteepness = 2.0f,
+                        .bufferSize = 8192,
+                        .grainSize = 7800
                     },
                     .glitterTamer={
                         .oldVal = 0,
@@ -110,7 +109,21 @@ namespace PiPicoFX {
         class Param4:  public FxProgramParameter
         {
             public:
-                Param4(ShimmerVerb* p) :FxProgramParameter(255,"Volume")
+                Param4(ShimmerVerb* p) :FxProgramParameter(2,"GrainSz")
+                {
+                    rawValue = 0;
+                    increment = 1;
+                    pData=p;
+                };
+                void parameterCallback(uint16_t val);
+                void parameterDisplay(char* chrbfr);
+            private:
+                ShimmerVerb * pData;
+        };
+        class Param5:  public FxProgramParameter
+        {
+            public:
+                Param5(ShimmerVerb* p) :FxProgramParameter(255,"Volume")
                 {
                     rawValue = 1023;
                     increment = 1;
