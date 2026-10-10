@@ -36,25 +36,29 @@ float grainEnvelopeValue(GrainsDataType*data,uint8_t readPointerNr)
 {
     uint16_t currentDistance = distanceFromGrainEdge(data,readPointerNr);
     float relDistance = ((float)currentDistance)/((float)data->grainSize);
+    float val;
     if (relDistance < 0.5f)
     {
-        return 2.0f*relDistance;
+        val = data->envelopeSteepness*relDistance;
     }
     else
     {
-        return 2.0f - 2.0f*relDistance;
+        val = data->envelopeSteepness - data->envelopeSteepness*relDistance;
     }
+    if (val > 1.0f)
+    {
+        return 1.0f;
+    }
+    return val;
 }
 
 __ITCM_CODE
 void updatePointers(GrainsDataType* data)
 {
-    uint16_t distanceOld;
     data->writePointer++;
     data->writePointer &= (data->bufferSize-1);
     for (uint8_t c=0;c<data->readPointerCount;c++)
     {
-        distanceOld = distanceFromGrainEdge(data,c);
         data->readPointers[c] += data->pointerIncrement;
         data->readPointers[c] &= ((data->bufferSize << 2)-1);
         if (data->pointerIncrement < 4 && distanceFromGrainEdge(data,c) > data->grainSize)
@@ -185,8 +189,6 @@ __QSPI_CODE
 void initPitchshifter(GrainsDataType*data)
 {
     data->bufferSize=8192;
-    //data->readPointerCount = 3;
-    //data->grainSize = 192;
     data->writePointer = 0;
     data->delayBufferPtr = mallocDelayMemory(data->bufferSize<<2);
     data->readPointers = malloc(data->readPointerCount*sizeof(uint16_t));
@@ -425,7 +427,7 @@ float pitchShifter3ProcessSample(float newSample,Pitchshifter3DataType*cb)
 }
 
 __QSPI_CODE
-void iniPitchShifter3(Pitchshifter3DataType*data)
+void initPitchShifter3(Pitchshifter3DataType*data)
 {
 
 
@@ -456,7 +458,10 @@ void iniPitchShifter3(Pitchshifter3DataType*data)
 __QSPI_CODE
 void deinitPitchShifter3(Pitchshifter3DataType*data)
 {
-    (void*)data;
+    if (data->delayMemoryPtr != 0)
+    {
+        freeDelayMemory(data->delayMemoryPtr);
+    }
     #ifdef PS3_DBG_PRINT
     fclose(fid);
     #endif

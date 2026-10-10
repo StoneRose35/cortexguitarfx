@@ -493,7 +493,6 @@ uint8_t usbVendorSpecificIFSetInterfaceHandler(uint16_t alternateSetting,uint16_
  * 
  * note: blocks if the dlen is larger than the internal buffer size (512)
  */
-__QSPI_CODE
 void usbVendorSpecificSendData(uint8_t epNr,const uint8_t * data,uint16_t dlen,uint8_t blocking)
 {
     uint16_t bytesSent=0;
@@ -541,7 +540,6 @@ void usbVendorSpecificSendData(uint8_t epNr,const uint8_t * data,uint16_t dlen,u
 
 
 
-__QSPI_CODE
 // returns 1 if the transfer is still in progress, 0 if done
 uint8_t UsbVendorSpecificIFTransferDone(void)
 {
@@ -563,7 +561,6 @@ uint8_t UsbVendorSpecificIFTransferDone(void)
     return (bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) >> USB_VS_TransferInProgress_Pos;
 }
 
-__QSPI_CODE
 void UsbVendorSpecificIFDataReceived(void* dataPtr,uint16_t len)
 {
     uint16_t c=0;
@@ -592,13 +589,13 @@ void UsbVendorSpecificIFEp0OutHandler(void* dataPtr,uint16_t len)
     prepareUSBReception(0,64);
 }
 
-__QSPI_CODE
+
 uint16_t getUsbVendorSpecificReceivedDataLevel()
 {
     return (receivedDataLevel - receivedDataLevelSnapshot) & USB_VS_RR_BUFFER_SIZE;
 }
 
-__QSPI_CODE
+
 uint16_t readUsbVendorSpecificData(uint8_t * data,uint16_t startIndex)
 {
     uint16_t c=0;

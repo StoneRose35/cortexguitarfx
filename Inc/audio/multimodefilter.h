@@ -3,8 +3,9 @@
 #include "stdint.h"
 
 #define MM_FILTER_LOWPASS 0
-#define MM_FILTER_BANDPASS 1
-#define MM_FILTER_HIGHPASS 2
+#define MM_FILTER_HIGHPASS 1
+#define MM_FILTER_BANDPASS 2
+
 
 typedef struct 
 {

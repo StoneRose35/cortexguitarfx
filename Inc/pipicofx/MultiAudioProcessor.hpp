@@ -41,7 +41,7 @@ namespace PiPicoFX
             uint8_t addFxProgram(AudioProcessor*prg,uint8_t pos);
             AudioProcessor * removeFxProgram(uint8_t pos);
             AudioProcessor * getFxProgram(uint8_t pos);
-            void swapPrograms(uint8_t posA,uint8_t posB);
+            //void swapPrograms(uint8_t posA,uint8_t posB);
             uint8_t getProgramListLength();
             virtual ~MultiAudioProcessor();
             float processSample(float s);

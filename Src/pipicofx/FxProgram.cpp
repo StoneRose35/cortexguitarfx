@@ -27,12 +27,16 @@ PiPicoFX::FxProgram::~FxProgram()
 __QSPI_CODE
 /*
 call after all parameters are set to have consistent parameter values and behaviour
+if the program is fully loaded / memory is allocated
 */
 void FxProgram::setup(uint8_t allocateMemory){
     (void)allocateMemory;
-    for (uint8_t c=0;c<getParameterCount();c++)
+    if (allocateMemory)
     {
-        getParameter(c)->parameterCallback(getParameter(c)->rawValue);
+        for (uint8_t c=0;c<getParameterCount();c++)
+        {
+            getParameter(c)->parameterCallback(getParameter(c)->rawValue);
+        }
     }
 }
 

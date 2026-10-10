@@ -105,11 +105,13 @@ void PitchShifterExp::PitchShifterExp::setup(uint8_t allocateMemory)
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     FxProgram::setup(allocateMemory);
-    iniPitchShifter3(&pitchShifter3);
+    if (allocateMemory==1)
+    {
+        initPitchShifter3(&pitchShifter3);
+    }
 }
 
 PitchShifterExp::PitchShifterExp::~PitchShifterExp()
 {
-    freeDelayMemory(this->pitchShifter3.delayMemoryPtr);
     deinitPitchShifter3(&this->pitchShifter3);
 }

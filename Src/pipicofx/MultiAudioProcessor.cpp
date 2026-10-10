@@ -42,7 +42,7 @@ AudioProcessor * MultiAudioProcessor::getFxProgram(uint8_t pos)
     }
     return nullptr;
 }
-
+/*
 void MultiAudioProcessor::swapPrograms(uint8_t posA,uint8_t posB)
 {
     AudioProcessor * swapBfr;
@@ -53,6 +53,7 @@ void MultiAudioProcessor::swapPrograms(uint8_t posA,uint8_t posB)
         *(this->processors + posB) = swapBfr;
     }
 }
+    */
 
 uint8_t MultiAudioProcessor::getProgramListLength()
 {
