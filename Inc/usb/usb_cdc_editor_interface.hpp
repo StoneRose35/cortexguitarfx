@@ -32,6 +32,7 @@ typedef struct
 #define MSG_BANK_AND_PRESET_NR 5
 #define MSG_PRESET 6
 #define MSG_PARAMETER_VALUE 7
+#define MSG_FX_PROGRAM_CHANGED 8
 
 void processUSBEditorCommand(uint8_t * cmd);
 void processGetAboutCmd();

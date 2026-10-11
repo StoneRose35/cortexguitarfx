@@ -635,3 +635,8 @@ void usbVendorSpecificIFSuspendedHandler()
 {
     bmUsbStatus = 0;
 }
+
+uint8_t usbVendorSpecifiIFIsConfigured()
+{
+    return (bmUsbStatus & (1 << USB_VS_Configured_Pos)) >> USB_VS_Configured_Pos;
+}

@@ -594,12 +594,24 @@ int main(void)
                     }
                 }
             }
-            if ((programsToInitialize[0] & 0x80) || (programsToInitialize[0] & 0x80) || (programsToInitialize[0] & 0x80))
+            if ((programsToInitialize[0] & 0x80) || (programsToInitialize[1] & 0x80) || (programsToInitialize[2] & 0x80))
             {
                 audioProcessor.setRouting((presets+currentPreset)->routing);
             }
-            //applyPreset(presets+currentPreset,&audioProcessor);
+            
             programChangeState = 4;
+            if (usbVendorSpecifiIFIsConfigured())
+            {
+                uint8_t responseBfr[6];
+                responseBfr[0]=MSG_FX_PROGRAM_CHANGED;
+                responseBfr[1]=0;
+                responseBfr[2]=6;
+                responseBfr[3]=0;
+                responseBfr[4]= 0;
+                responseBfr[5] = programsToInitialize[0] & 0x7F;
+                usbVendorSpecificSendData(1,responseBfr,4,1);
+                usbVendorSpecificSendData(1,responseBfr,6,0);
+            }
         }
       if ((task & (1 << TASK_I2C_DATA_RECEIVED))!=0)
       {
@@ -655,13 +667,6 @@ int main(void)
                     imDone = 1;
                 }                
             }
-            //uint16_t * usbCmdSize = (uint16_t*)(usbReceiverbuffer + 2);
-            //if (*usbCmdSize <= usbReceiverLevel)
-            //{
-                // process USB command
-            //    processUSBEditorCommand(usbReceiverbuffer);
-            //} 
-            //usbReceiverLevel=0;
       }
       #endif
 	}

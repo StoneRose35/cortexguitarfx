@@ -26,7 +26,8 @@ import {
     MSG_PARAMETER_VALUE,
     USB_CMD_SET_ROUTING,
     USB_CMD_SAVE_PRESET,
-    USB_CMD_SET_LED_COLOR
+    USB_CMD_SET_LED_COLOR,
+    MSG_FX_PROGRAM_CHANGED
 } from './editorConstants';
 import { createInitialFxPrograms, createInitialPresets } from './editorData';
 import {
@@ -452,6 +453,7 @@ function App() {
         cmd[4] = currentBank;
         cmd[5] = presetIdx;
         await writeIfPossible(cmd);
+        await readCommand();
     }
 
     async function setParameter() {
@@ -582,14 +584,14 @@ function App() {
                             commandBfrIdx = processAboutMessage(commandBfr, 0, currentCommandLength, appendToConsole);
                             console.log('handled MSG_ABOUT');
                             break;
-                        case MSG_PROGRAMS: {
+                        case MSG_PROGRAMS: 
                             const programResult = processGetPrograms(commandBfr, 0, currentCommandLength);
                             fxProgs = programResult.fxProgs;
                             commandBfrIdx = programResult.nextIdx;
                             console.log('handled MSG_PROGRAMS');
                             break;
-                        }
-                        case MSG_INPUTS_AND_MASTER_VOLUME: {
+                        
+                        case MSG_INPUTS_AND_MASTER_VOLUME: 
                             const volumeResult = processInputAndMasterVolume(commandBfr, 0, currentCommandLength);
                             setHiZOn(volumeResult.hiZOn);
                             setMicOn(volumeResult.micOn);
@@ -598,15 +600,15 @@ function App() {
                             console.log('handled MSG_INPUTS_AND_MASTER_VOLUME');
                             masterVolumeMessageState = 0;
                             break;
-                        }
-                        case MSG_PARAMETER_NAMES: {
+                        
+                        case MSG_PARAMETER_NAMES: 
                             const parameterResult = processGetParameterNames(commandBfr, 0, currentCommandLength, fxProgs);
                             fxProgs = parameterResult.fxProgs;
                             commandBfrIdx = parameterResult.nextIdx;
                             console.log('handled MSG_PARAMETER_NAMES');
                             break;
-                        }
-                        case MSG_BANK_AND_PRESET_NR: {
+                        
+                        case MSG_BANK_AND_PRESET_NR: 
                             const bankResult = processCurrentBankAndPresetNr(commandBfr, 0, currentCommandLength);
                             currentBankBfr = bankResult.bank;
                             setCurrentBank(bankResult.bank);
@@ -614,23 +616,26 @@ function App() {
                             commandBfrIdx = bankResult.nextIdx;
                             console.log('handled MSG_BANK_AND_PRESET_NR');
                             break;
-                        }
-                        case MSG_PRESET: {
+                        
+                        case MSG_PRESET: 
                             const presetResult = processGetPreset(commandBfr, 0, currentCommandLength, fxProgs);
                             presetBfr[presetResult.preset.presetNr] = presetResult.preset;
                             //setPresets(presetBfr);
                             commandBfrIdx = presetResult.nextIdx;
                             console.log('handled MSG_PRESET');
                             break;
-                        }
-                        case MSG_PARAMETER_VALUE: {
+                        
+                        case MSG_PARAMETER_VALUE: 
                             const displayValueResult = processParameterDisplayValue(commandBfr, 0, currentCommandLength, presetBfr, currentPreset);
                             presetBfr = displayValueResult.presetBfr;
                             setPresets(presetBfr);
                             commandBfrIdx = displayValueResult.nextIdx;
                             console.log('handled MSG_PARAMETER_VALUE');
                             break;
-                        }
+                        
+                        case MSG_FX_PROGRAM_CHANGED: 
+                            console.log('handled MSG_FX_PROGRAM_CHANGED');
+                            break;
                         default:
                             console.log(`unknown command ${commandBfr[0]} ${commandBfr[1]}`);
                             break;
@@ -817,6 +822,7 @@ function App() {
     async function handleFxProgramChange(id, fxProgram, preset) {
         setPresets(preset);
         await setFxProgram(id, fxProgram);
+        await readCommand();
         await getPreset(currentBank, currentPreset);
         await readCommand();
         setPresets(presetBfr);

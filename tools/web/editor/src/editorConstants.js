@@ -21,3 +21,4 @@ export const MSG_INPUTS_AND_MASTER_VOLUME = 3
 export const MSG_BANK_AND_PRESET_NR = 5
 export const MSG_PRESET = 6
 export const MSG_PARAMETER_VALUE = 7
+export const MSG_FX_PROGRAM_CHANGED = 8
