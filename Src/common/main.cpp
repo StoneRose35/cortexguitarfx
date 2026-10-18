@@ -534,16 +534,14 @@ int main(void)
       // updates the currently edited parameter of the ui structure
         if (programChangeState == 3)
         {         
-            for (uint8_t q = 0;q < 3;q++)
+            for (uint8_t l = 0;l < 3;l++)
             {   
-
-
-                if ((programsToInitialize[q] & 0x7F) != 0x7F)
+                if ((programsToInitialize[l] & 0x7F) != 0x7F)
                 {
-                    currentFxProgram = audioProcessor.removeFxProgram(q);
+                    currentFxProgram = audioProcessor.removeFxProgram(l);
                     if (currentFxProgram != nullptr)
                     {
-                        if (q == ui.currentProgramPosition)
+                        if (l == ui.currentProgramPosition)
                         {
                             ui.currentProgram = 0;
                             ui.currentParameter = 0;
@@ -552,7 +550,12 @@ int main(void)
                         delete currentFxProgram; 
                         currentFxProgram = nullptr;
                     }
-
+                }
+            }
+            for (uint8_t q = 0;q < 3;q++)
+            {
+                if ((programsToInitialize[q] & 0x7F) != 0x7F)
+                {
                     currentFxProgram = loadProgram(programsToInitialize[q]&0x7F);
                     audioProcessor.addFxProgram(currentFxProgram,q);
                     if (currentFxProgram != nullptr)
@@ -600,7 +603,7 @@ int main(void)
             }
             
             programChangeState = 4;
-            if (usbVendorSpecifiIFIsConfigured())
+            if (usbVendorSpecificGetEditorHandshake()) // transmit program change if Handshake is done
             {
                 uint8_t responseBfr[6];
                 responseBfr[0]=MSG_FX_PROGRAM_CHANGED;

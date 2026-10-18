@@ -309,13 +309,6 @@ static const uint8_t msOS20Descriptor[] = {
     '8', 0x00, '1', 0x00, '5', 0x00, '9', 0x00, '-', 0x00, '3', 0x00, '0', 0x00, '5', 0x00, '3', 0x00, 'C', 0x00,
     '3', 0x00, 'B', 0x00, '1', 0x00, '0', 0x00, 'D', 0x00, '2', 0x00, '1', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00
 
-    /* descriptor taken from arduino, might try this as last resort
-    //bPropertyData: “{975F44D9-0D08-43FD-8B3E-127CA8AFFF9D}”.
-    '{', 0x00, '9', 0x00, '7', 0x00, '5', 0x00, 'F', 0x00, '4', 0x00, '4', 0x00, 'D', 0x00, '9', 0x00, '-', 0x00, 
-    '0', 0x00, 'D', 0x00, '0', 0x00, '8', 0x00, '-', 0x00, '4', 0x00, '3', 0x00, 'F', 0x00, 'D', 0x00, '-', 0x00, 
-    '8', 0x00, 'B', 0x00, '3', 0x00, 'E', 0x00, '-', 0x00, '1', 0x00, '2', 0x00, '7', 0x00, 'C', 0x00, 'A', 0x00, 
-    '8', 0x00, 'A', 0x00, 'F', 0x00, 'F', 0x00, 'F', 0x00, '9', 0x00, 'D', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00  
-    */
 };
     
 static const uint16_t usbConfigurationDescriptorFullSize = sizeof(usbConfigurationDescriptorFull);
@@ -346,7 +339,7 @@ void USBVendorSpecificIFInit()
     setTransferDoneHandler(&UsbVendorSpecificIFTransferDone,0);   
 }
 
-static volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress on ep1 or 0, bit 2-4: current ep in use for sending data (0 to 7)
+static volatile uint8_t bmUsbStatus=0; 
 static volatile uint8_t  receivedDataBfr[512];
 static volatile uint16_t receivedDataLevel=0;
 static volatile uint16_t receivedDataLevelSnapshot=0;
@@ -634,6 +627,24 @@ void handleUsbVendorSpecificIFVendorSetupRequest(const UsbSetupPacketType* packe
 void usbVendorSpecificIFSuspendedHandler()
 {
     bmUsbStatus = 0;
+}
+
+
+void usbVendorSpecificSetEditorHandshake(uint8_t val)
+{
+    if (val)
+    {
+        bmUsbStatus |= (1 << USB_VS_Editor_Handshake_Pos);
+    }
+    else
+    {
+        bmUsbStatus &= ~(1 << USB_VS_Editor_Handshake_Pos);
+    }
+}
+
+uint8_t usbVendorSpecificGetEditorHandshake()
+{
+    return (bmUsbStatus & (1 << USB_VS_Editor_Handshake_Pos)) >> USB_VS_Editor_Handshake_Pos;
 }
 
 uint8_t usbVendorSpecifiIFIsConfigured()

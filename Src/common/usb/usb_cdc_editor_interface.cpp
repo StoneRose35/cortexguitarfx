@@ -29,6 +29,7 @@ __QSPI_CODE
 void processUSBEditorCommand(uint8_t * cmd)
 {
     UsbEditorCommandHeaderType* header = (UsbEditorCommandHeaderType*)cmd;
+    uint8_t recognized = 1;
     switch(header->commandNr)
     {
         case USB_CMD_GET_ABOUT:
@@ -77,8 +78,10 @@ void processUSBEditorCommand(uint8_t * cmd)
             processSavePreset(cmd+4);
             break;
         default:
+            recognized = 0;
             break;
     }
+    usbVendorSpecificSetEditorHandshake(recognized);
 }
 
 __QSPI_CODE

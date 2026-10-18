@@ -13,6 +13,7 @@
 
 #define USB_CDC_FLUSH_TIMEOUT 100
 
+#define USB_VS_Editor_Handshake_Pos 7 // set to one if the webeditor initiated transfer
 #define USB_VS_Endpoint_Pos 2
 #define USB_VS_TransferInProgress_Pos 1
 #define USB_VS_Configured_Pos 0
@@ -33,4 +34,6 @@ uint16_t readUsbVendorSpecificData(uint8_t * data,uint16_t startIndex);
 void handleUsbVendorSpecificIFVendorSetupRequest(const UsbSetupPacketType* packet);
 void usbVendorSpecificIFSuspendedHandler();
 uint8_t usbVendorSpecifiIFIsConfigured();
+void usbVendorSpecificSetEditorHandshake(uint8_t val);
+uint8_t usbVendorSpecificGetEditorHandshake();
 #endif
