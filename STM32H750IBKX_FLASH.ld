@@ -155,7 +155,7 @@ _siqspicode = LOADADDR(.qspi_code);
     PROVIDE(__itcm_code_start = _sitcm_code);
     *(.qspi_itcm_code)
     *(.qspi_itcm_code*)
-
+    *libm*.o(.text*)
     .  = ALIGN(4);
     _eitcm_code = .;
     PROVIDE(__itcm_code_end = _eitcm_code);
