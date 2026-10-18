@@ -23,10 +23,10 @@ namespace PiPicoFX {
         class AmpModelHighGain : public FxProgram
         {
             public:
-                AmpModelHighGain() : FxProgram(6,"Amp High Gain",MAX_DELAY_SINGLEBUFFER<<2,6){
+                AmpModelHighGain() : FxProgram(4,"Amp High Gain",MAX_DELAY_SINGLEBUFFER<<2,6){
                     this->setup(1);
                 };
-                AmpModelHighGain(uint8_t discarded) : FxProgram(6,"Amp High Gain",MAX_DELAY_SINGLEBUFFER<<2,6){
+                AmpModelHighGain(uint8_t discarded) : FxProgram(4,"Amp High Gain",MAX_DELAY_SINGLEBUFFER<<2,6){
                     (void)discarded;
                     this->setup(0);
                 };
@@ -47,30 +47,8 @@ namespace PiPicoFX {
                     "Vox AC15        (I)",
                     "Off                " 
                 };
-                uint8_t modType=0;
                 uint8_t cabSimType=0;
                 MultiWaveShaperDataType waveshaper1;
-                DelayDataType delay={
-                    .delayLine = 0,
-                    .delayLinePtr = 0,
-                    .delayInSamples = 10,
-                    .feedback = 0.0f,
-                    .delayBufferLength = 0xff,
-                    .mix = 0.0f,
-                    .gainIn = 1.0f,
-                    .feedbackFunction=0,
-                    .feebackData = 0,
-                    .frozen=0};
-                ReverbType reverb={
-                    .allpasses={},
-                    .delayPointer = 0,
-                    .feedbackValues = {},
-                    .delayPointers = {},
-                    .mix=0.5f,
-                    .gainIn = 1.0f,
-                    .paramNr=0,
-                    .frozen = 0
-                };
                 FirFilterType customCabFir={
                     .coefficients = {((int16_t)0x62c)/32768.0f, ((int16_t)0x674)/32768.0f, ((int16_t)0x7d6)/32768.0f, ((int16_t)0xbc4)/32768.0f, ((int16_t)0x1312)/32768.0f, ((int16_t)0x1ea7)/32768.0f,
          ((int16_t)0x2e33)/32768.0f, ((int16_t)0x3b3a)/32768.0f, ((int16_t)0x3a9e)/32768.0f, ((int16_t)0x29bf)/32768.0f, ((int16_t)0x15f5)/32768.0f,
@@ -278,35 +256,7 @@ namespace PiPicoFX {
         class Param3:  public FxProgramParameter
         {
             public:
-                Param3(AmpModelHighGain* p) :FxProgramParameter(2,"Mod Intensity")
-                {
-                    rawValue = 0;
-                    increment = 1;
-                    pData=p;
-                };
-                void parameterCallback(uint16_t val);
-                void parameterDisplay(char* chrbfr);
-            private:
-                AmpModelHighGain * pData;
-        };
-        class Param4:  public FxProgramParameter
-        {
-            public:
-                Param4(AmpModelHighGain* p) :FxProgramParameter(255,"Mod Type")
-                {
-                    rawValue = 0;
-                    increment = 2048;
-                    pData=p;
-                };
-                void parameterCallback(uint16_t val);
-                void parameterDisplay(char* chrbfr);
-            private:
-                AmpModelHighGain * pData;
-        };
-        class Param5:  public FxProgramParameter
-        {
-            public:
-                Param5(AmpModelHighGain* p) :FxProgramParameter(255,"Cab Type")
+                Param3(AmpModelHighGain* p) :FxProgramParameter(2,"Cab Type")
                 {
                     rawValue = 0;
                     increment = 256;
@@ -317,10 +267,10 @@ namespace PiPicoFX {
             private:
                 AmpModelHighGain * pData;
         };
-        class Param6:  public FxProgramParameter
+        class Param4:  public FxProgramParameter
         {
             public:
-                Param6(AmpModelHighGain* p) :FxProgramParameter(255,"Volume")
+                Param4(AmpModelHighGain* p) :FxProgramParameter(255,"Volume")
                 {
                     rawValue = 1023;
                     increment = 1;

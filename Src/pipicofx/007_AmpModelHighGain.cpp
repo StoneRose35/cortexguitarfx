@@ -4,6 +4,7 @@ extern "C" {
 #include "stringFunctions.h"
 #include "pipicofx/delayMemoryHandler.h"
 #include "memoryRegions.h"
+#include "math.h"
 }
 
 #define FXPROGRAM_HIGHCUT_VAL1 0.61035f
@@ -78,14 +79,7 @@ switch (this->cabSimType)
         default:
             break;
     }
-    if (this->modType==0)
-    {
-        out = delayLineProcessSample(out, &this->delay);
-    }
-    else
-    {
-        out = reverbProcessSample(out,&this->reverb);
-    }
+
     out = gainStageProcessSample(out,&this->presetVolume);
     if (!this->isOn())
     {
@@ -123,45 +117,8 @@ switch (this->cabSimType)
     UInt8ToChar(pData->waveshaper1.functionIndex,res);
 }
 
- void AmpModelHighGain::Param3::parameterCallback(uint16_t val) // delay/reverb intensity
-{
-    pData->delay.delayInSamples = 2400 + (val << 3);
-    pData->delay.mix = ((float)val)/8192.0f; // up to 100%
-    pData->delay.feedback = 0.25f;
 
-    setReverbTime(0.5f + (float)val/4000.0f,&pData->reverb);
-    pData->reverb.mix = ((float)val)/8192.0f; // up to 100%
-    rawValue = val;
-}
-
- void AmpModelHighGain::Param3::parameterDisplay(char*res)
-{
-    int16_t dVal;
-    dVal=rawValue/41;
-    Int16ToChar(dVal,res);
-    appendToString(res,"%");
-}
-
- void AmpModelHighGain::Param4::parameterCallback(uint16_t val) // modulation type
-{
-    pData->modType = val >> 11;
-    rawValue = val;
-}
-
- void AmpModelHighGain::Param4::parameterDisplay(char*res) // modulation type
-{
-    *res=0;
-    if (pData->modType==0)
-    {
-        appendToString(res,"Delay");
-    }
-    else
-    {
-        appendToString(res,"Reverb");
-    }
-}
-
- void AmpModelHighGain::Param5::parameterCallback(uint16_t val) // cab type
+ void AmpModelHighGain::Param3::parameterCallback(uint16_t val) // cab type
 {
     pData->cabSimType = val >> 8;
     if (pData->cabSimType > 8)
@@ -171,7 +128,7 @@ switch (this->cabSimType)
     rawValue = val;
 }
 
- void AmpModelHighGain::Param5::parameterDisplay(char*res) // cab type
+ void AmpModelHighGain::Param3::parameterDisplay(char*res) // cab type
 {
 
     for(uint8_t c=0;c<24;c++)
@@ -189,26 +146,22 @@ switch (this->cabSimType)
         initfirFilter(&this->hiwattFir);
         initfirFilter(&this->voxAC15Fir);
         initMultiWaveShaper(&this->waveshaper1,&multiWaveshaper1);
-        initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<2),MAX_DELAY_SINGLEBUFFER);
-        initReverb(&this->reverb,500,this->delay.delayLine); // putting delay and reverb onto the same memory since they are used mutually exclusively
     }
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
     this->addParameter(new Param3(this));
     this->addParameter(new Param4(this));
-    this->addParameter(new Param5(this));
-    this->addParameter(new Param6(this));
     FxProgram::setup(allocateMemory);
 
 }
 
-void AmpModelHighGain::Param6::parameterCallback(uint16_t val)
+void AmpModelHighGain::Param4::parameterCallback(uint16_t val)
 {
     pData->presetVolume.gain = ((float)val)/1024.0f; // 0.0f up to 4.0f
     rawValue = val;
 }
 
-void AmpModelHighGain::Param6::parameterDisplay(char*res)
+void AmpModelHighGain::Param4::parameterDisplay(char*res)
 {
     uint16_t dVal;
     dVal=(uint16_t)(pData->presetVolume.gain*10000.0f);
@@ -218,5 +171,4 @@ void AmpModelHighGain::Param6::parameterDisplay(char*res)
 
 AmpModelHighGain::AmpModelHighGain::~AmpModelHighGain()
 {
-    freeDelayMemory(this->delay.delayLine);
 }
