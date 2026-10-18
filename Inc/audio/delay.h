@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "preprocessorHelpers.h"
 #include "memoryRegions.h"
-#define MAX_DELAY_SINGLEBUFFER 32768
+#define MAX_DELAY_SINGLEBUFFER 65536
 
 
 

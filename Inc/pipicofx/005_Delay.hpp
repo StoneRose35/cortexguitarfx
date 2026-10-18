@@ -46,7 +46,7 @@ namespace PiPicoFX {
                 void onFreeze() override;
                 void onMelt() override;
                 int32_t delayInSamplesTargetValue;
-                uint16_t interpCnt;
+                uint32_t interpCnt;
             private:
                 void setup(uint8_t);
                 float meltedFeedbackValue;

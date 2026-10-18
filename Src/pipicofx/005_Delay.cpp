@@ -16,22 +16,17 @@ float Delay::Delay::processSample(float sampleIn)
     {
         newIn = sampleIn;
     }
-    if (this->interpCnt < UI_LATENCY_IN_SAMPLES)
-    {
-        int32_t interpValue = ((((this->delayInSamplesTargetValue<< 4) - (this->getParameter(0)->rawValue << 4))*interpCnt) >> 12) + (this->getParameter(0)->rawValue << 4);
-        this->delay.delayInSamples = interpValue;
-        this->interpCnt++;
-        if (this->interpCnt >= UI_LATENCY_IN_SAMPLES)
-        {
-            this->getParameter(0)->rawValue = this->delayInSamplesTargetValue;
-        }
-    }
+    //if ((this->interpCnt & (UI_LATENCY_IN_SAMPLES -1)) == 0)
+    //{
+    this->delay.delayInSamples= this->delayInSamplesTargetValue + (((this->delay.delayInSamples - this->delayInSamplesTargetValue)*4095) >> 12) ; 
+    //}    
     FxProgram::processSample(sampleIn);
     if (this->getFreezeState()==FXP_FREEZE_STATE_FREEZING || this->getFreezeState() == FXP_FREEZE_STATE_MELTING)
     {
         this->delay.feedback = (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1)) + (1.0f - ((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1))*this->meltedFeedbackValue;
         this->delay.gainIn = 1.0f - (((float)freezeCnt)/(float)(FXP_FREEZE_DURATION_IN_SAMPLES-1));
     }
+    //this->interpCnt++;
     //this->delay.delayInSamples = this->delay.delayInSamples + ((FXPROGRAM_DELAY_DELAY_TIME_LOWPASS_T*(delayInSamplesTargetValue - this->delay.delayInSamples)) >> 8);
     newIn = delayLineProcessSample(newIn, &this->delay);
     newIn = gainStageProcessSample(newIn,&this->presetVolume);
@@ -45,17 +40,17 @@ float Delay::Delay::processSample(float sampleIn)
 void Delay::Param1::parameterCallback(uint16_t val) // Delay Time
 {
 
-    if (val != this->rawValue && this->pData->interpCnt>=UI_LATENCY_IN_SAMPLES)
-    {
-        this->pData->delayInSamplesTargetValue = val;
-        this->pData->interpCnt=0;
-    }
+    //if (val != this->rawValue)
+    //{
+    this->pData->delayInSamplesTargetValue = ((int32_t)val)<<4;
+    //}
+    rawValue = val;
 }
 
 void Delay::Param1::parameterDisplay(char*res)
 {
     int16_t dval;
-    dval = pData->delay.delayInSamples/48; // in ms
+    dval = (rawValue << 3)/48; // in ms
     Int16ToChar(dval,res);
     for (uint8_t c=0;c<PARAMETER_NAME_MAXLEN-2;c++)
     {
@@ -133,6 +128,7 @@ void Delay::Delay::setup(uint8_t allocateMemory)
     {
         initDelay(&this->delay,mallocDelayMemory(MAX_DELAY_SINGLEBUFFER<<2),MAX_DELAY_SINGLEBUFFER);
     }
+    this->delay.delayInSamples = 100;
     this->interpCnt = 0;
     this->addParameter(new Param1(this));
     this->addParameter(new Param2(this));
