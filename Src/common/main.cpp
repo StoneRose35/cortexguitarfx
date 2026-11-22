@@ -612,8 +612,8 @@ int main(void)
                 responseBfr[3]=0;
                 responseBfr[4]= 0;
                 responseBfr[5] = programsToInitialize[0] & 0x7F;
-                usbVendorSpecificSendData(1,responseBfr,4,1);
-                usbVendorSpecificSendData(1,responseBfr,6,0);
+                usbSendData(1,responseBfr,4,1);
+                usbSendData(1,responseBfr,6,0);
             }
         }
       if ((task & (1 << TASK_I2C_DATA_RECEIVED))!=0)

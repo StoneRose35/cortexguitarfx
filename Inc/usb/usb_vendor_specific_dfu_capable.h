@@ -14,19 +14,16 @@
 #define USB_CDC_FLUSH_TIMEOUT 100
 
 #define USB_VS_Editor_Handshake_Pos 7 // set to one if the webeditor initiated transfer
-#define USB_VS_Endpoint_Pos 2
-#define USB_VS_TransferInProgress_Pos 1
-#define USB_VS_Configured_Pos 0
+
 
 #define USB_VS_RR_BUFFER_SIZE 0x1FF
 
-void usbVendorSpecificSendData(uint8_t epNr,const uint8_t * data,uint16_t dlen,uint8_t blocking);
 
 void USBVendorSpecificIFInit();
 uint8_t usbVendorSpecificIFSetConfiguration(uint16_t confNr);
 uint8_t usbVendorSpecificIFHandleClassSetupRequest(const UsbSetupPacketType* packet);
-uint8_t usbVendorSpecificIFSetInterfaceHandler(uint16_t alternateSetting,uint16_t interfaceIndex);
-uint8_t UsbVendorSpecificIFTransferDone(void);
+uint8_t usbVendorSpecificIFSetInterfaceHandlerDfu(uint16_t alternateSetting);
+uint8_t usbVendorSpecificIFSetInterfaceHandlerVS(uint16_t alternateSetting);
 void UsbVendorSpecificIFDataReceived(void* dataPtr,uint16_t len);
 void UsbVendorSpecificIFEp0OutHandler(void* dataPtr,uint16_t len);
 uint16_t getUsbVendorSpecificReceivedDataLevel();
@@ -36,4 +33,5 @@ void usbVendorSpecificIFSuspendedHandler();
 uint8_t usbVendorSpecifiIFIsConfigured();
 void usbVendorSpecificSetEditorHandshake(uint8_t val);
 uint8_t usbVendorSpecificGetEditorHandshake();
+void usbVendorSpecificDeactive(void);
 #endif

@@ -70,6 +70,10 @@
 #define BM_ATTRIBUTES_SELF_POWERED 0xC0
 #define BM_ATTRIBUTES_BUS_POWERED 0x80
 
+#define USB_Configured_Pos 0
+#define USB_TransferInProgress_Pos 1 // bits 1:3 indicate in for which endpoints a transfer is in progress
+#define USB_Endpoint_Pos 4
+
 typedef volatile struct __attribute__((__packed__))
 {
     uint8_t bmRequestType;
@@ -194,9 +198,12 @@ void setVendorSpecificSetupHandler(void(*handler)(const UsbSetupPacketType* pack
 void setUsbConfigurationDescriptor(const uint8_t * confDescr,const uint16_t size);
 void setUsbDeviceDescriptor(const uint8_t * deviceDescr,const uint16_t size);
 void setUsbStringDescriptors(UsbStringDescriptor stringDescrs);
-void setConfigurationHandler(uint8_t(*confHandler)(uint16_t));
-void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*));
-void setSetInterfaceHandler(uint8_t(*handler)(uint16_t,uint16_t));
+void addConfigurationHandler(uint8_t(*confHandler)(uint16_t));
+void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*),uint8_t interfaceNr);
+void setSetInterfaceHandler(uint8_t(*handler)(uint16_t),uint8_t);
 void setBOSDescriptor(const uint8_t * descr,uint16_t descrSize);
 void setDeviceQualifierDescriptor(const uint8_t * descr,uint16_t descrSize);
+
+uint8_t UsbTransferDone(uint8_t epNr);
+void usbSendData(uint8_t epNr,const uint8_t * data,uint16_t dlen,uint8_t blocking);
 #endif

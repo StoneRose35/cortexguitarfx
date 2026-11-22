@@ -8,11 +8,11 @@
 #include "globalConfig.h"
 #include "memoryRegions.h"
 #include "system.h"
-#include "uart.h"
 #include "flash.h"
-#include "stringFunctions.h"
 #include "globalConfig.h"
 #include "gen/versionDef.h"
+#include "usb/usb_vendor_specific_dfu_capable.h"
+#include "usb/usb_audio.h"
 
 
 extern volatile uint32_t task;
@@ -142,11 +142,11 @@ uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet)
     switch (packet->bRequest)
     {
     case SETUP_REQUEST_DFU_DETACH:
-        prepareUSBTransfer(0,0,0); 
+        prepareUSBTransfer(0,0,0,0); 
         setUsbDeviceDescriptor(usbDeviceDescriptorDfu,usbDeviceDescriptorDfuSize);
         setUsbConfigurationDescriptor(usbConfigurationDescriptorDfu,usbConfigurationDescriptorDfuSize);
         setUsbStringDescriptors(stringDescriptorsDfu);
-        setConfigurationHandler(&setUsbConfigurationDfu);
+        addConfigurationHandler(&setUsbConfigurationDfu);
         setResetHandler(&usbDfuResetHandler);
         task |= (1 << TASK_PREPARE_FOR_DFU);
         usbDfuState = USB_DFU_APP_DETACH;
@@ -157,7 +157,7 @@ uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet)
         firmwareSize = packet->wLength;
         usbDfuState = USB_DFU_UPLOAD_IDLE;
         setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,0xFF,255);
-        prepareUSBTransfer(0,(uint8_t*)(0x08000000),firmwareSize); 
+        prepareUSBTransfer(0,(uint8_t*)(0x08000000),firmwareSize,0); 
         break;
     case SETUP_REQUEST_DFU_DNLOAD: // from host to device
         firmwareSize = packet->wLength;
@@ -177,7 +177,7 @@ uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet)
             }
             else if (packet->wLength==0 && usbDfuState == USB_DFU_DNLOAD_IDLE)
             {
-                prepareUSBTransfer(0,0,0);
+                prepareUSBTransfer(0,0,0,0);
                 usbDfuState = USB_DFU_MANIFEST_SYNC;
                 task |= (1 << TASK_MANIFEST_DFU);
                 setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,USB_DFU_MANIFEST,20);
@@ -187,18 +187,18 @@ uint8_t usbDfuHandleClassSetupRequest(const UsbSetupPacketType* packet)
         break;
     case SETUP_REQUEST_DFU_GETSTATUS:
         setUsbDfuStatus(&usbDfuStatus,USB_DFU_STATUS_OK,0xff,10);
-        prepareUSBTransfer(0,(uint8_t*)(&usbDfuStatus),sizeof(usbDfuStatus));
+        prepareUSBTransfer(0,(uint8_t*)(&usbDfuStatus),sizeof(usbDfuStatus),0);
         break; 
     case SETUP_REQUEST_DFU_GETSTATE:
-        prepareUSBTransfer(0,(uint8_t*)(&usbDfuState),1);
+        prepareUSBTransfer(0,(uint8_t*)(&usbDfuState),1,0);
         break;
     case SETUP_REQUEST_DFU_CLRSTATUS:
         usbDfuState = USB_DFU_IDLE;
         currentFirmwareBlockNr = 0;
-        prepareUSBTransfer(0,0,0); 
+        prepareUSBTransfer(0,0,0,0); 
         break;
     case SETUP_REQUEST_DFU_ABORT:
-        prepareUSBTransfer(0,0,0); 
+        prepareUSBTransfer(0,0,0,0); 
         break;
     default:
         break;
@@ -236,7 +236,18 @@ void prepareSystemForDFU()
         task &= ~((1 << TASK_UPDATE_AUDIO_UI) | (1 << TASK_DISPLAY_NEXT_LINE) | (1 << TASK_I2C_DATA_RECEIVED));
         programChangeState = 0;
 
-        setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest);
+        // unload / disable the audio an class-specific usb driver
+        usbAudioReset();
+        usbVendorSpecificDeactive();
+        setTransferDoneHandler(0, USB_AUDIO_CAPTURE_IN_EP);
+        setTransferDoneHandler(0, USB_AUDIO_FEEDBACK_IN_EP);
+        setTransferDoneHandler(0,USB_AUDIO_VENDOR_IN_EP);
+        deactivateInEndpoint(USB_AUDIO_VENDOR_IN_EP);
+        deactivateInEndpoint(USB_AUDIO_CAPTURE_IN_EP);
+        deactivateOutEndpoint(USB_AUDIO_PLAYBACK_OUT_EP);
+
+        // respond to usb dfu setup requests
+        setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest,0);
 
         usbDfuState = USB_DFU_IDLE;
         while(1)
@@ -285,7 +296,7 @@ void endPoint0DfuHandler(void*data,uint16_t dataSize)
     }
     if (firmwareSize==0 && dataSize > 0)
     {
-        prepareUSBTransfer(0,0,0);
+        prepareUSBTransfer(0,0,0,0);
         if (dfuFileValid == 0xFF)
         {
             if (*((uint32_t*)data) == 0x4168b18f)

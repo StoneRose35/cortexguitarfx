@@ -9,6 +9,7 @@ extern "C" {
 #include "globalConfig.h"
 #include "memoryRegions.h"
 #include "audio/audiotools.h"
+#include "usb/usb_audio.h"
 #include "audio/looper.h"
 #include "pipicofx/pipicofxui.h"
 
@@ -31,7 +32,7 @@ void initAudioEngine(void)
 __ITCM_CODE
 void processAudioBuffers(void)
 {
-    int32_t inputSampleInt,outputSampleInt;
+    int32_t inputSampleInt,outputSampleInt,leftOutputSample,rightOutputSample;
     uint32_t ticStart,ticEnd;
     int32_t* audioBufferPtr,*audioBufferInputPtr;
     float inputSample,outputSample,avgIn,avgOut;
@@ -119,20 +120,18 @@ void processAudioBuffers(void)
             programChangeState = 2;
         }
 
-        if (outputSample < 0.0f)
-        {
-            avgOut = -outputSample;
-        }
-        else
-        {
-            avgOut = outputSample;
-        }
-        avgOutOld = avgOutOld + AVERAGING_LOWPASS_CUTOFF*(avgOut - avgOutOld);// AVERAGING_LOWPASS_CUTOFF*avgOut + ((1.0f-AVERAGING_LOWPASS_CUTOFF)*avgOutOld);
         outputSample=clip(outputSample,getAudioStatePtr());
         outputSampleInt=((int32_t)(outputSample*8388607.0f));
-        //inputSampleInt = (((inputSampleInt << 8) & 0xFFFF) << 16) | (((inputSampleInt << 8) & 0xFFFF0000L) >> 16);
-        *(audioBufferPtr+c) = outputSampleInt;  
-        *(audioBufferPtr+c+1) = outputSampleInt;
+        if (USBAudioMixSample(outputSampleInt, &leftOutputSample, &rightOutputSample) != 0U)
+        {
+            *getAudioStatePtr() |= (1U << AUDIO_STATE_OUTPUT_CLIPPED);
+        }
+        float leftMagnitude = (leftOutputSample < 0) ? -(float)leftOutputSample : (float)leftOutputSample;
+        float rightMagnitude = (rightOutputSample < 0) ? -(float)rightOutputSample : (float)rightOutputSample;
+        avgOut = (leftMagnitude + rightMagnitude) / 16777216.0f;
+        avgOutOld = avgOutOld + AVERAGING_LOWPASS_CUTOFF*(avgOut - avgOutOld);
+        *(audioBufferPtr+c) = leftOutputSample;
+        *(audioBufferPtr+c+1) = rightOutputSample;
     }
     task &= ~((1 << TASK_PROCESS_AUDIO) | (1 << TASK_PROCESS_AUDIO_INPUT));
     bufferCnt++;

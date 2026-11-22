@@ -10,6 +10,19 @@
 #include "memoryRegions.h"
 #include "gen/versionDef.h"
 
+#define USB_AUDIO_DFU_INTERFACE 0
+#define USB_AUDIO_VENDOR_INTERFACE 1
+#define USB_AUDIO_CONTROL_INTERFACE 2
+#define USB_AUDIO_PLAYBACK_INTERFACE 3
+#define USB_AUDIO_CAPTURE_INTERFACE 4
+
+#define USB_AUDIO_VENDOR_OUT_EP 1
+#define USB_AUDIO_VENDOR_IN_EP 1
+#define USB_AUDIO_PLAYBACK_OUT_EP 3
+#define USB_AUDIO_CAPTURE_IN_EP 4
+#define USB_AUDIO_FEEDBACK_IN_EP 5
+extern volatile uint8_t bmUsbStatus; 
+
 static const uint8_t usbDeviceDescriptorFull[] = {
     0x12, // bLength
     0x01, // device descriptor type
@@ -46,83 +59,7 @@ static const uint8_t deviceQualifierDescriptor[] = {
 };
 
 static const uint16_t deviceQualifierDescriptorSize = sizeof(deviceQualifierDescriptor);
-    
-static const uint8_t usbConfigurationDescriptorFull[] = {
-    // ------------------------------------
-    // configuration header
-    // ------------------------------------
-    0x09, // bLength
-    SETUP_PACKET_DESCR_TYPE_CONFIGURATION, // descriptor type configuration
-    50, // configation descriptor size, lsb
-    0x00, // configurator descriptor size, msb
-    0x02, // bNumInterfaces
-    0x01, // bConfigurationValue
-    0x07, // configuration string id
-    0x80, // bmAttributes, 0xC0 self powered, 0x80 bus powered
-    0xFA, // bus power
-    //-------------------------------------
-    // Interface Descriptor: USB DFU
-    // -----------------------------------
-    0x09, //bLength
-    SETUP_PACKET_DESCR_TYPE_INTERFACE, 
-    0x00, //bInterfaceNumber
-    0x00, //bAlternateSetting
-    0x00, //bNumEndpoints
-    0xFE, //bInterfaceClass
-    0x01, //bInterfaceSubClass
-    0x01, //bInterfaceProtocol
-    0x06, //iInterface
-    //------------------------------------
-    //------------------------------------
-    // Interface functional descriptor
-    //------------------------------------
-    0x09, //bLength
-    0x21, //bDescriptorType
-    (uint8_t)((0 << 3) | (0 << 2) | (1 << 1 ) | ( 1 << 0)), //bmAttributes:will not automatically detach and reattach, not manifestation tolerant, can download and upload 
-    0xF0, //wDetachTimeOut, lsb
-    0x00, //wDetachTimeOut, msb
-    0x40, //wTransferSize, lsb
-    0x00, //wTransferSize, msb
-    0x00, // bcdDFUVersion
-    0x01,  // bcdDFUVersion
-    //------------------------------------
-    //-------------------------------------
-    // Interface Descriptor: Data Interface
-    //-------------------------------------
-    0x09, //bLength
-    SETUP_PACKET_DESCR_TYPE_INTERFACE,
-    0x01, // bInterfaceNumber: interface nr
-    0x00, // bAlternateSetting: alternate setting
-    0x02, // bNumEndpoints: two (out and in)
-    0xFF, // Interface class: vendor-specific
-    0x00, // interface subclass
-    0x00, // interface protocol
-    0x05, // interface description string id
-    //-------------------------------------
-    //-------------------------------------
-    // Endpoint OUT descriptor
-    //-------------------------------------
-    0x07, // bLength
-    SETUP_PACKET_DESCR_TYPE_ENDPOINT, 
-    (ENDPOINT_DIR_OUT << ENDPOINT_DIR_POS) | 0x01, // endpoint address: 1 OUT,
-    0x02, // bmAttributes: Bulk
-    USB_VS_DATA_OUT_PACKETSIZE, // packet size, lsb
-    0x00, // packet size, msb
-    0x00, // bInterval
-    //-------------------------------------
-    //-------------------------------------
-    // Endpoint IN descriptor
-    //-------------------------------------
-    0x07, // bLength
-    SETUP_PACKET_DESCR_TYPE_ENDPOINT, 
-    (ENDPOINT_DIR_IN << ENDPOINT_DIR_POS) | 0x01, // endpoint address: 1 IN,
-    0x02, // bmAttributes: Bulk
-    USB_VS_DATA_IN_PACKETSIZE, // packet size, lsb
-    0x00, // packet size, msb
-    0x00, // bInterval
-    //------------------------------------
-    
-    };
+
 
 static const uint8_t bosDescriptor[]={
     //---------------------------------------
@@ -311,7 +248,7 @@ static const uint8_t msOS20Descriptor[] = {
 
 };
     
-static const uint16_t usbConfigurationDescriptorFullSize = sizeof(usbConfigurationDescriptorFull);
+//static const uint16_t usbConfigurationDescriptorFullSize = sizeof(usbConfigurationDescriptorFull);
 
 static UsbStringDescriptorType stringDescriptors[] = {
     {.bLength = (11*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "StoneRose35"},
@@ -320,32 +257,41 @@ static UsbStringDescriptorType stringDescriptors[] = {
     {.bLength = (17*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "Control Interface"},
     {.bLength = (14*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "Data Interface"},
     {.bLength = (25*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "DFU Programming Interface"},
-    {.bLength = (12*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "Default Conf"}
+    {.bLength = (12*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "Default Conf"},
+    {.bLength = (18*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Audio Control"},
+    {.bLength = (19*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Input Channels"},
+    {.bLength = (19*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Software Input"},   
+    {.bLength = (16*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Speaker Out"}, 
+    {.bLength = (22*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Hiz and Mic Input"},  
+    {.bLength = (19*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Physical Input"},  
+    {.bLength = (20*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Software Output"},   
+    {.bLength = (37*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Streaming IF, Aternate Setting 0"},  
+    {.bLength = (37*2)+2, .bDescriptorType = SETUP_PACKET_DESCR_TYPE_STRING, .bString = "PPFX Streaming IF, Aternate Setting 1"},   
+     
 };
 
 
 void USBVendorSpecificIFInit()
 {
-    setUsbConfigurationDescriptor(usbConfigurationDescriptorFull,usbConfigurationDescriptorFullSize);
+    //setUsbConfigurationDescriptor(usbAudioConfigurationDescriptor,usbConfigurationDescriptorFullSize);
     setUsbDeviceDescriptor(usbDeviceDescriptorFull,usbDeviceDescriptorFullSize);
     setUsbStringDescriptors(stringDescriptors);
     setBOSDescriptor(bosDescriptor,*((uint16_t*)(bosDescriptor+2)));
     setDeviceQualifierDescriptor(deviceQualifierDescriptor,deviceQualifierDescriptorSize);
-    setConfigurationHandler(&usbVendorSpecificIFSetConfiguration);
-    setClassSpecificSetupHandler(&usbVendorSpecificIFHandleClassSetupRequest);
+    addConfigurationHandler(&usbVendorSpecificIFSetConfiguration);
+    setClassSpecificSetupHandler(&usbVendorSpecificIFHandleClassSetupRequest,USB_AUDIO_VENDOR_INTERFACE);
     setVendorSpecificSetupHandler(&handleUsbVendorSpecificIFVendorSetupRequest);
-    setSetInterfaceHandler(&usbVendorSpecificIFSetInterfaceHandler);
+    setSetInterfaceHandler(&usbVendorSpecificIFSetInterfaceHandlerDfu,2);
+    setSetInterfaceHandler(&usbVendorSpecificIFSetInterfaceHandlerVS,1);
     setSuspendedHandler(&usbVendorSpecificIFSuspendedHandler);
-    setTransferDoneHandler(&UsbVendorSpecificIFTransferDone,0);   
+    setTransferDoneHandler(&UsbTransferDone,0);   
 }
 
-static volatile uint8_t bmUsbStatus=0; 
+
 static volatile uint8_t  receivedDataBfr[512];
 static volatile uint16_t receivedDataLevel=0;
 static volatile uint16_t receivedDataLevelSnapshot=0;
-static volatile uint16_t sendDataSize=0;
-static uint8_t  sendDataBfr[512];
-static volatile uint8_t chunksSent=0;
+static volatile uint8_t isActive = 0;
 static volatile uint8_t rearmCdcReceiver=0;
 
 uint8_t usbVendorSpecificIFSetConfiguration(uint16_t confNr)
@@ -435,16 +381,15 @@ uint8_t usbVendorSpecificIFSetConfiguration(uint16_t confNr)
                             | (USB_VS_CONTROL_EP_PACKETSIZE  << (USB_OTG_DIEPCTL_MPSIZ_Pos));
     USB2_OTG_FS_DEVICE->DAINTMSK |= (1 << (USB_OTG_DAINTMSK_IEPM_Pos+2));
 
+
+    isActive = 1;
     // wire up endpoint reception handler
     setEndpointOutHandler(&UsbVendorSpecificIFDataReceived,1);
-
-
-
     // wire up transfer done handler (used for blocking transfer)
-    setTransferDoneHandler(&UsbVendorSpecificIFTransferDone,1);
+    setTransferDoneHandler(&UsbTransferDone,1);
     // enable reception of data at endpoint 1
     prepareUSBReception(1,USB_VS_DATA_OUT_PACKETSIZE);
-    bmUsbStatus |= (1 << USB_VS_Configured_Pos);
+
     
     return 0;
 }
@@ -463,96 +408,26 @@ uint8_t usbVendorSpecificIFHandleClassSetupRequest(const UsbSetupPacketType* pac
     return 0;
 }
 
-uint8_t usbVendorSpecificIFSetInterfaceHandler(uint16_t alternateSetting,uint16_t interfaceIndex)
+uint8_t usbVendorSpecificIFSetInterfaceHandlerDfu(uint16_t alternateSetting)
 {
-    if (alternateSetting==0 && interfaceIndex == 0) // match dfu interface with alternate setting 0
+    if (alternateSetting==0) // match dfu interface with alternate setting 0
     {
-        setClassSpecificSetupHandler(usbDfuHandleClassSetupRequest); // switch over to dfu mode (required for dfu-util)
-        prepareUSBTransfer(0,0,0);
+        setClassSpecificSetupHandler(usbDfuHandleClassSetupRequest,0); // switch over to dfu mode (required for dfu-util)
+        prepareUSBTransfer(0,0,0,0);
     }
-    else if (alternateSetting==0 && interfaceIndex == 1) // usb vendor speific interface, acknowledge
+    return 0;
+}
+
+uint8_t usbVendorSpecificIFSetInterfaceHandlerVS(uint16_t alternateSetting)
+{
+    if (alternateSetting==0) // usb vendor speific interface, acknowledge
     {
-        prepareUSBTransfer(0,0,0);
+        prepareUSBTransfer(0,0,0,0);
     }
     return 0;
 }
 
 
-/**
- * send data over usb vendor specific interface, 
- * data: pointer to the data to be sent
- * dlen: total length in bytes to send
- * blocking: doesn't return until data has been sent of blocking is 1
- * 
- * note: blocks if the dlen is larger than the internal buffer size (512)
- */
-void usbVendorSpecificSendData(uint8_t epNr,const uint8_t * data,uint16_t dlen,uint8_t blocking)
-{
-    uint16_t bytesSent=0;
-    chunksSent = 0;
-    sendDataSize =dlen;
-    if ((bmUsbStatus & (1 << USB_VS_Configured_Pos)) != 0 )
-    {
-        while((bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) != 0);
-    }
-    bmUsbStatus &= ~(7 << USB_VS_Endpoint_Pos);
-    bmUsbStatus |= (epNr << USB_VS_Endpoint_Pos);
-    while (bytesSent < dlen)
-    {
-        for (uint16_t c=0;c<dlen && c < 512;c++)
-        {
-            *(sendDataBfr + c) = *(data + c);
-            bytesSent++;
-        }
-        if (((bmUsbStatus & (1 << USB_VS_Configured_Pos)) || epNr == 0) != 0 && (bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) == 0)
-        {
-            if (sendDataSize > 64)
-            {
-                prepareUSBTransfer(epNr,sendDataBfr,64);
-                sendDataSize -= 64;
-            }
-            else
-            {
-                prepareUSBTransfer(epNr,sendDataBfr,dlen);
-                sendDataSize = 0;
-            }
-            bmUsbStatus |= (1 << USB_VS_TransferInProgress_Pos);
-            if (bytesSent < dlen)
-            {
-                while((bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) != 0);
-            }
-        }
-    }
-    
-    if (blocking != 0 )
-    {
-        while((bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) != 0);
-    }
-}
-
-
-
-
-// returns 1 if the transfer is still in progress, 0 if done
-uint8_t UsbVendorSpecificIFTransferDone(void)
-{
-    chunksSent += 1;
-    if (sendDataSize > 64)
-    {
-        prepareUSBTransfer((bmUsbStatus >> USB_VS_Endpoint_Pos)&0x7,sendDataBfr+(chunksSent << 6),64);   
-        sendDataSize -=64;
-    }
-    else if (sendDataSize > 0)
-    {
-        prepareUSBTransfer((bmUsbStatus >> USB_VS_Endpoint_Pos)&0x7,sendDataBfr+(chunksSent << 6),sendDataSize);
-        sendDataSize = 0;
-    }
-    else
-    {
-        bmUsbStatus &= ~(1 << USB_VS_TransferInProgress_Pos);
-    }
-    return (bmUsbStatus & (1 << USB_VS_TransferInProgress_Pos)) >> USB_VS_TransferInProgress_Pos;
-}
 
 void UsbVendorSpecificIFDataReceived(void* dataPtr,uint16_t len)
 {
@@ -592,6 +467,10 @@ uint16_t getUsbVendorSpecificReceivedDataLevel()
 uint16_t readUsbVendorSpecificData(uint8_t * data,uint16_t startIndex)
 {
     uint16_t c=0;
+    if (!isActive)
+    {
+        return 0;
+    }
     while(receivedDataLevelSnapshot != receivedDataLevel)
     {
         *(data + ((c+startIndex) & USB_VS_RR_BUFFER_SIZE)) = *(receivedDataBfr + receivedDataLevelSnapshot++);
@@ -613,14 +492,14 @@ void handleUsbVendorSpecificIFVendorSetupRequest(const UsbSetupPacketType* packe
         && packet->wIndex == 0x02) // GET_URL
     {
         
-        prepareUSBTransfer(0,landingPageDescriptor,(uint16_t)*landingPageDescriptor);
+        prepareUSBTransfer(0,landingPageDescriptor,(uint16_t)*landingPageDescriptor,0);
     }
     else if (packet->bRequest == 0x02 // vendor code: MS OS 2.0 Descriptors
         //&& packet->wValue == 0x00 
         && packet->wIndex == 0x07 // get MS OS 2.0 Descriptors
     )
     {
-        usbVendorSpecificSendData(0,msOS20Descriptor,packet->wLength,0); 
+        usbSendData(0,msOS20Descriptor,packet->wLength,0); 
     }
 }
 
@@ -642,6 +521,11 @@ void usbVendorSpecificSetEditorHandshake(uint8_t val)
     }
 }
 
+void usbVendorSpecificDeactive(void)
+{
+    isActive = 0;
+}
+
 uint8_t usbVendorSpecificGetEditorHandshake()
 {
     return (bmUsbStatus & (1 << USB_VS_Editor_Handshake_Pos)) >> USB_VS_Editor_Handshake_Pos;
@@ -649,5 +533,5 @@ uint8_t usbVendorSpecificGetEditorHandshake()
 
 uint8_t usbVendorSpecifiIFIsConfigured()
 {
-    return (bmUsbStatus & (1 << USB_VS_Configured_Pos)) >> USB_VS_Configured_Pos;
+    return (bmUsbStatus & (1 << USB_Configured_Pos)) >> USB_Configured_Pos;
 }

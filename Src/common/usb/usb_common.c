@@ -12,7 +12,6 @@
 #include "memoryRegions.h"
 #include "usb/usb_dfu.h"
 
-
     
 const uint8_t  string0Descriptor[] = {
     (uint8_t)0x04, //bLength
@@ -34,13 +33,21 @@ static const uint8_t * currentDeviceQualifierDescriptor;
 static volatile uint16_t currentDeviceQualifierDescriptorSize;
 
 static volatile UsbStringDescriptor currentStringDescriptors;
-static uint8_t(*currentConfigurationHandler)(uint16_t);
+static uint8_t configurationHandlersCount = 0;
+static uint8_t(*currentConfigurationHandler[8])(uint16_t) = {0,0,0,0,0,0,0,0};
 
-static uint8_t(*currentUsbClassSpecificSetupHandler)(const volatile UsbSetupPacketType*)=0;
-
-static uint8_t(*currentUsbSetInterfaceHandler)(uint16_t alternateSetting,uint16_t interfaceIndex)=0;
+// array index is the interface index
+static uint8_t(*currentUsbClassSpecificSetupHandler[8])(const volatile UsbSetupPacketType*)={0,0,0,0,0,0,0,0};
+// array index is the interface index
+static uint8_t(*currentUsbSetInterfaceHandler[8])(uint16_t alternateSetting)={0,0,0,0,0,0,0,0};
 
 static void(*currentVendorSpecificSetupHandler)(const UsbSetupPacketType* packet);
+
+volatile uint8_t bmUsbStatus=0; 
+volatile uint8_t bmTransferProgress=0;
+static volatile uint16_t sendDataSize=0;
+static uint8_t  sendDataBfr[512];
+static volatile uint8_t chunksSent=0;
 
 // Function to decode a USB setup packet
 __RAMFUNC
@@ -54,6 +61,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
     uint8_t getDescriptorStalled=0;
     uint16_t effLength;
     uint8_t recipient = packet->bmRequestType & 0x1F;
+    uint8_t retval=0;
     if (requestType == SETUP_PACKET_REQTYPE_STD) 
     {
         switch (packet->bRequest) {
@@ -65,14 +73,14 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                         #ifdef USB_DBG
                         sendStringBlocking("GET_STATUS, device\r\n");
                         #endif
-                        prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength);
+                        prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength,0);
                         break;
                     case REQUEST_TYPE_RECIPIENT_INTERFACE:
                         data = 0;
                         #ifdef USB_DBG
                         sendStringBlocking("GET_STATUS, interface\r\n");
                         #endif
-                        prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength);
+                        prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength,0);
                         break;
                     case REQUEST_TYPE_RECIPIENT_ENDPOINT:
                         if ((endpointNr & 0x80)== 0x80) // OUT endpoints
@@ -83,7 +91,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                             data = ((((USB_OTG_OUTEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE 
                                 + USB_OTG_OUT_ENDPOINT_BASE
                                 + 0x20*(endpointNr & 0x7F)))->DOEPCTL >> USB_OTG_DOEPCTL_USBAEP_Pos) & 0x1) ^ 0x1;
-                                prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength);
+                                prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength,0);
                         }
                         else
                         {
@@ -93,7 +101,7 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                             data = ((((USB_OTG_INEndpointTypeDef*)(USB2_OTG_FS_PERIPH_BASE 
                                 + USB_OTG_IN_ENDPOINT_BASE
                                 + 0x20*(endpointNr & 0x7F)))->DIEPCTL >> USB_OTG_DIEPCTL_USBAEP_Pos) & 0x1) ^ 0x1;
-                            prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength);
+                            prepareUSBTransfer(0,(uint8_t*)&data,packet->wLength,0);
                         }
                         break;
 
@@ -103,28 +111,34 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                 #ifdef USB_DBG
                 sendStringBlocking("CLEAR_FEATURE\r\n");
                 #endif
-                prepareUSBTransfer(0,0,packet->wLength); // status package
+                prepareUSBTransfer(0,0,packet->wLength,0); // status package
                 break;
             case 0x03: // SET_FEATURE
                 #ifdef USB_DBG
                 sendStringBlocking("SET_FEATURE\r\n");
                 #endif
-                prepareUSBTransfer(0,0,packet->wLength); // status package
+                prepareUSBTransfer(0,0,packet->wLength,0); // status package
                 break;
             case 0x05: // SET_ADDRESS
                 #ifdef USB_DBG
                 sendStringBlocking("SET_ADDRESS\r\n");
                 #endif
                 setAddress((uint8_t)packet->wValue);
-                prepareUSBTransfer(0,0,packet->wLength);
+                prepareUSBTransfer(0,0,packet->wLength,0);
                 break;
             case 0x09: // SET_CONFIGURATION
                 #ifdef USB_DBG
                 sendStringBlocking("SET_CONFIGURATION\r\n");        
                 #endif
-                if (currentConfigurationHandler(packet->wValue) == 0)
+
+                for (uint8_t c=0;c<configurationHandlersCount;c++)
                 {
-                    prepareUSBTransfer(0,0,packet->wLength); // status package
+                    retval += currentConfigurationHandler[c](packet->wValue);
+                }
+                if (retval == 0)
+                {
+                    bmUsbStatus |= (1 << USB_Configured_Pos);
+                    prepareUSBTransfer(0,0,packet->wLength,0); // status package
                 }
                 break;
             case 0x06: // GET_DESCRIPTOR
@@ -188,15 +202,36 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
                     {
                         effLength = descrLength;
                     }
-                    prepareUSBTransfer(0,dataPtr,effLength); // sends out data if effLength > 0, an empty/status package otherwise
+                    usbSendData(0,dataPtr,effLength,0); // sends out data if effLength > 0, an empty/status package otherwise
                 }
                 break;
-            case 0x0B: // SET_INTERFACE
-                if (packet->wValue == 0 && packet->wIndex == 0) // acknowledge when switching to interface 0 (usb dfu)
+            case 0x08: // GET_CONFIGURATION
+                if (bmUsbStatus & (1 << USB_Configured_Pos))
                 {
-                    setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest);
+                    retval = 1;
                 }
-                prepareUSBTransfer(0,0,0);
+                else
+                {
+                    retval = 0;
+                }
+                usbSendData(0,&retval,1,0);
+                break;
+            case 0x0B: // SET_INTERFACE
+                if (currentUsbSetInterfaceHandler[packet->wIndex] != 0)
+                {
+                    if (currentUsbSetInterfaceHandler[packet->wIndex](packet->wValue) != 0U)
+                    {
+                        stallInEndpoint(0);
+                    }
+                }
+                else
+                {
+                    if (packet->wValue == 0 && packet->wIndex == 0)
+                    {
+                        setClassSpecificSetupHandler(&usbDfuHandleClassSetupRequest,0);
+                    }
+                    prepareUSBTransfer(0,0,0,0);
+                }
                 break;
             default:
                 break;
@@ -207,9 +242,16 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
         #ifdef USB_DBG
         sendStringBlocking("Setup Packet, class-type request\r\n");
         #endif
-        if (currentUsbClassSpecificSetupHandler != 0)
+        if (currentUsbClassSpecificSetupHandler[packet->wIndex] != 0)
         {
-            currentUsbClassSpecificSetupHandler(packet);
+            if (currentUsbClassSpecificSetupHandler[packet->wIndex](packet) != 0U)
+            {
+                stallInEndpoint(0);
+            }
+        }
+        else
+        {
+            stallInEndpoint(0);
         }
     }
     else if (requestType == SETUP_PACKET_REQTYPE_VENDOR)
@@ -222,6 +264,84 @@ void ProcessUsbSetupPackage(const UsbSetupPacketType *packet) {
             currentVendorSpecificSetupHandler(packet);
         }
     }
+}
+
+
+
+/**
+ * send data over usb 
+ * data: pointer to the data to be sent
+ * dlen: total length in bytes to send
+ * blocking: doesn't return until data has been sent of blocking is 1
+ * 
+ * note: blocks if the dlen is larger than the internal buffer size (512)
+ */
+__RAMFUNC
+void usbSendData(uint8_t epNr,const uint8_t * data,uint16_t dlen,uint8_t blocking)
+{
+    uint16_t bytesSent=0;
+    chunksSent = 0;
+    sendDataSize =dlen;
+    if ((bmTransferProgress & (1 << epNr)) != 0 )
+    {
+        while((bmTransferProgress & (1 << epNr)) != 0);
+    }
+    bmUsbStatus &= ~(7 << USB_Endpoint_Pos);
+    bmUsbStatus |= (epNr << USB_Endpoint_Pos);
+    while (bytesSent < dlen)
+    {
+        for (uint16_t c=0;c<dlen && c < 512;c++)
+        {
+            *(sendDataBfr + c) = *(data + c);
+            bytesSent++;
+        }
+        if (((bmUsbStatus & (1 << USB_Configured_Pos)) || epNr == 0) != 0 && (bmTransferProgress & (1 << epNr)) == 0)
+        {
+            if (sendDataSize > 64)
+            {
+                prepareUSBTransfer(epNr,sendDataBfr,64,0);
+                sendDataSize -= 64;
+            }
+            else
+            {
+                prepareUSBTransfer(epNr,sendDataBfr,dlen,0);
+                sendDataSize = 0;
+            }
+            bmTransferProgress |= (1 << epNr);
+            if (bytesSent < dlen)
+            {
+                while((bmTransferProgress & (1 << epNr)) != 0);
+            }
+        }
+    }
+    
+    if (blocking != 0 )
+    {
+        while((bmTransferProgress & (1 << epNr)) != 0);
+    }
+}
+
+
+// returns 1 if the transfer is still in progress, 0 if done
+__RAMFUNC
+uint8_t UsbTransferDone(uint8_t epNr)
+{
+    chunksSent += 1;
+    if (sendDataSize > 64)
+    {
+        prepareUSBTransfer(epNr,sendDataBfr+(chunksSent << 6),64,0);   
+        sendDataSize -=64;
+    }
+    else if (sendDataSize > 0)
+    {
+        prepareUSBTransfer(epNr,sendDataBfr+(chunksSent << 6),sendDataSize,0);
+        sendDataSize = 0;
+    }
+    else
+    {
+        bmTransferProgress &= ~(1 << epNr);
+    }
+    return (bmTransferProgress & (1 << epNr)) >> epNr;
 }
 
 /**
@@ -266,21 +386,21 @@ void setUsbStringDescriptors(UsbStringDescriptor stringDescrs)
 }
 
 __RAMFUNC
-void setConfigurationHandler(uint8_t(*confHandler)(uint16_t))
+void addConfigurationHandler(uint8_t(*confHandler)(uint16_t))
 {
-    currentConfigurationHandler = confHandler;
+    currentConfigurationHandler[configurationHandlersCount++] = confHandler;
 }
 
 __RAMFUNC
-void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*))
+void setClassSpecificSetupHandler(uint8_t(*handler)(const UsbSetupPacketType*),uint8_t interfaceNr)
 {
-    currentUsbClassSpecificSetupHandler = handler;
+    currentUsbClassSpecificSetupHandler[interfaceNr] = handler;
 }
 
 __RAMFUNC
-void setSetInterfaceHandler(uint8_t(*handler)(uint16_t,uint16_t))
+void setSetInterfaceHandler(uint8_t(*handler)(uint16_t),uint8_t interfaceIdx)
 {
-    currentUsbSetInterfaceHandler = handler;    
+    currentUsbSetInterfaceHandler[interfaceIdx] = handler;    
 }
 
 __RAMFUNC

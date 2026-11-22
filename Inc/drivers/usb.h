@@ -18,22 +18,29 @@
 #define EP_DIRECTION_OUT 0
 #define EP_DIRECTION_IN 1
 
+#define PS_FORCE_FIFO_FILL 1
+#define PS_ISOC_TRANSFER 2
+
 typedef  void(*endPointHandler)(void*,uint16_t) ;
 // initializes the hardware part for usb communication
 void initUSB();
 
 
 uint8_t const* getEp0InDataBfr();
-void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen);
+void prepareUSBTransfer(uint8_t epNr,const uint8_t*data,uint16_t dlen,uint8_t forceFifoFill);
 void prepareUSBReception(uint8_t epNr,uint16_t dataSize);
 void prepareEP0Rception(void);
 void setAddress(uint8_t address);
 void setEndpointOutHandler(endPointHandler handler,uint8_t epNr);
-void setTransferDoneHandler(uint8_t(*handler)(void),uint8_t epNr);
+void setTransferDoneHandler(uint8_t(*handler)(uint8_t),uint8_t epNr);
 void setResetHandler(void(*)(void));
 void setSuspendedHandler(void(*)(void));
 void getSetupPacket(UsbSetupPacketType*setupPacket, uint8_t*buffer);
 void stallInEndpoint(uint8_t epNr);
 // sets the software buffers, doens't affect the hardware
 void setupEndpoint(uint8_t epNr,uint8_t direction,uint16_t maxPacketSize);
+void resetOutEndpointBuffer(uint8_t epNr);
+void fillInFifo(uint8_t epNr);
+void deactivateInEndpoint(uint8_t epNr);
+void deactivateOutEndpoint(uint8_t epNr);
 #endif

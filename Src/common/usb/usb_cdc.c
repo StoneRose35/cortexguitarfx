@@ -186,9 +186,10 @@ void USBCDCInit()
     setUsbConfigurationDescriptor(usbConfigurationDescriptorFull,usbConfigurationDescriptorFullSize);
     setUsbDeviceDescriptor(usbDeviceDescriptorFull,usbDeviceDescriptorFullSize);
     setUsbStringDescriptors(stringDescriptors);
-    setConfigurationHandler(&usbCdcSetConfiguration);
-    setClassSpecificSetupHandler(&usbCdcHandleClassSetupRequest);
-    setSetInterfaceHandler(&usbCdcSetInterfaceHandler);
+    addConfigurationHandler(&usbCdcSetConfiguration);
+    setClassSpecificSetupHandler(&usbCdcHandleClassSetupRequest,0);
+    setSetInterfaceHandler(&usbCdcSetInterfaceHandlerDfu,2);
+    setSetInterfaceHandler(&usbCdcSetInterfaceHandlerCdcData,1);
 }
 
 static volatile uint8_t bmUsbStatus=0; // bit 0: usb cdc configured, bit 1: transfer in progress
@@ -306,13 +307,13 @@ uint8_t usbCdcHandleClassSetupRequest(const UsbSetupPacketType* packet)
     switch (packet->bRequest)
     {
     case SETUP_PACKET_REQ_CDC_GET_LINE_CODING:
-        prepareUSBTransfer(0,(uint8_t*)&getcoding,7);
+        prepareUSBTransfer(0,(uint8_t*)&getcoding,7,0);
         break;
     case SETUP_PACKET_REQ_CDC_SET_CONTROL_LINE_STATE:
-        prepareUSBTransfer(0,0,0);
+        prepareUSBTransfer(0,0,0,0);
         break;
     case SETUP_PACKET_REQ_CDC_SET_LINE_CODING:
-        prepareUSBTransfer(0,0,0);
+        prepareUSBTransfer(0,0,0,0);
         break;
     case SETUP_REQUEST_DFU_DETACH:
         usbDfuHandleClassSetupRequest(packet);
@@ -324,16 +325,22 @@ uint8_t usbCdcHandleClassSetupRequest(const UsbSetupPacketType* packet)
     return 0;
 }
 
-uint8_t usbCdcSetInterfaceHandler(uint16_t alternateSetting,uint16_t interfaceIndex)
+
+uint8_t usbCdcSetInterfaceHandlerDfu(uint16_t alternateSetting)
 {
-    if (alternateSetting==0 && interfaceIndex == 2) // match dfu interface with alternate setting 0
+    if(alternateSetting == 0)
     {
-        setClassSpecificSetupHandler(usbDfuHandleClassSetupRequest); // switch over to dfu mode (required for dfu-util)
-        prepareUSBTransfer(0,0,0);
+        setClassSpecificSetupHandler(usbDfuHandleClassSetupRequest,0); // switch over to dfu mode (required for dfu-util)
+        prepareUSBTransfer(0,0,0,0);
     }
-    else if (alternateSetting==0 && interfaceIndex == 1) // usb CDC data, acknowledge
+    return 0;
+} 
+
+uint8_t usbCdcSetInterfaceHandlerCdcData(uint16_t alternateSetting)
+{
+    if (alternateSetting == 0)
     {
-        prepareUSBTransfer(0,0,0);
+        prepareUSBTransfer(0,0,0,0);
     }
     return 0;
 }
@@ -368,12 +375,12 @@ void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking)
         {
             if (sendDataSize > 64)
             {
-                prepareUSBTransfer(1,sendDataBfr,64);
+                prepareUSBTransfer(1,sendDataBfr,64,0);
                 sendDataSize -= 64;
             }
             else
             {
-                prepareUSBTransfer(1,sendDataBfr,dlen);
+                prepareUSBTransfer(1,sendDataBfr,dlen,0);
                 sendDataSize = 0;
             }
             bmUsbStatus |= (1 << USB_CDC_TransferInProgress_Pos);
@@ -387,17 +394,17 @@ void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking)
 
 
 __QSPI_CODE
-uint8_t UsbCdcTransferDone(void)
+uint8_t UsbCdcTransferDone(uint8_t epNr)
 {
     chunksSent += 1;
     if (sendDataSize > 64)
     {
-        prepareUSBTransfer(1,sendDataBfr+(chunksSent << 6),64);   
+        prepareUSBTransfer(epNr,sendDataBfr+(chunksSent << 6),64,0);   
         sendDataSize -=64;
     }
     else if (sendDataSize > 0)
     {
-        prepareUSBTransfer(1,sendDataBfr+(chunksSent << 6),sendDataSize);
+        prepareUSBTransfer(epNr,sendDataBfr+(chunksSent << 6),sendDataSize,0);
         sendDataSize = 0;
     }
     else

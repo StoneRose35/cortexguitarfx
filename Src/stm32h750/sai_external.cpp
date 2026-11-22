@@ -1,15 +1,12 @@
 extern "C" {
-#include "sai.h"
-#include "drivers/adc.h"
+
 #include "stm32h750/stm32h750xx.h"
 #include "stm32h750/stm32h750_cfg_pins.h"
-#include "system.h"
-#include "timer.h"
+#include "sai.h"
 #include "audioEngine.h"
-#include "pipicofx/pipicofxui.h"
-#include "gpio.h"
+
 #include "audio/audiotools.h"
-#include "stm32h750/daisy_seed_pins.h"
+
 #include "memoryRegions.h"
 
 #ifdef EXTERNAL_CODEC

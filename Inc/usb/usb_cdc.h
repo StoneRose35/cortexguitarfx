@@ -26,13 +26,14 @@ void sendOverUsb(uint8_t * data,uint16_t dlen,uint8_t blocking);
 
 void UsbCdcDataReceived(void* dtaPtr,uint16_t len);
 void UsbCdcEp0OutHandler(void* dataPtr,uint16_t len);
-uint8_t UsbCdcTransferDone(void);
+uint8_t UsbCdcTransferDone(uint8_t);
 
 uint16_t getUsbCdcReceivedDataLevel();
 uint16_t readUsbCdcData(uint8_t *,uint16_t);
 void USBCDCInit();
 uint8_t usbCdcHandleClassSetupRequest(const UsbSetupPacketType* packet);
-uint8_t usbCdcSetInterfaceHandler(uint16_t,uint16_t);
+uint8_t usbCdcSetInterfaceHandlerDfu(uint16_t);
+uint8_t usbCdcSetInterfaceHandlerCdcData(uint16_t);
 uint8_t usbCdcSetConfiguration(uint16_t confNr);
 void handleUsbCdcVendorSetupRequest(const UsbSetupPacketType* packet);
 #endif
