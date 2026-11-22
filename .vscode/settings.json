@@ -61,7 +61,7 @@
         "usb_cdc.h": "c"
     },
     "cmake.configureOnOpen": false,
-    "cortex-debug.variableUseNaturalFormat": true,
+    "cortex-debug.variableUseNaturalFormat": false,
     "idf.currentSetup": "/home/philipp/esp/esp-idf",
     "cmake.sourceDirectory": "/home/philipp/Projekte/PiPicoFX/CortexGuitarFx_2nd/tools/pioasm_src"
 }
